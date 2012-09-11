@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.jfrog.hudson.generic;
 
+import hudson.EnvVars;
+import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.model.Cause;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.UserBuildDependency;
 import org.jfrog.build.api.util.Log;
@@ -29,34 +31,60 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import java.io.IOException;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
+import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.util.ExtractorUtils;
 
 /**
- * Resolves artifacts from Artifactory (published dependencies and build dependencies)
- * This class is used only in free style generic configurator.
+ * Resolves artifacts from Artifactory (published dependencies and build
+ * dependencies) This class is used only in free style generic configurator.
  *
  * @author Shay Yaakov
  */
 public class GenericArtifactsResolver {
-    private final AbstractBuild build;
-    private final ArtifactoryDependenciesClient client;
-    private String resolvePattern;
-    private Log log;
 
-    public GenericArtifactsResolver(AbstractBuild build, BuildListener listener, ArtifactoryDependenciesClient client,
-            String resolvePattern) {
+    private final AbstractBuild build;
+    private ArtifactoryGenericConfigurator configurator;
+    private final ArtifactoryDependenciesClient client;
+    private Log log;
+    private EnvVars env;
+
+    public GenericArtifactsResolver(AbstractBuild build, ArtifactoryGenericConfigurator configurator, BuildListener listener, ArtifactoryDependenciesClient client) throws IOException, InterruptedException {
         this.build = build;
         this.client = client;
-        this.resolvePattern = resolvePattern;
+        this.configurator = configurator;
+        this.env = build.getEnvironment(listener);
         log = new JenkinsBuildInfoLog(listener);
     }
 
     public List<Dependency> retrievePublishedDependencies() throws IOException, InterruptedException {
         DependenciesHelper helper = new DependenciesHelper(createDependenciesDownloader(), log);
+        Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
+        if (parent != null) {
+            env.put("BUILD_PARENTNAME", ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
+            env.put("BUILD_PARENTNUMBER", parent.getUpstreamBuild() + "");
+        } else {
+            env.put("BUILD_PARENTNUMBER", "LATEST");
+        }
+
+        String resolvePattern = Util.replaceMacro(configurator.getResolvePattern(), env);
+        //resolvePattern = StringUtils.replace(resolvePattern, "\r\n", "\n");
+        //resolvePattern = StringUtils.replace(resolvePattern, ",", "\n");
         return helper.retrievePublishedDependencies(resolvePattern);
     }
 
     public List<UserBuildDependency> retrieveBuildDependencies() throws IOException, InterruptedException {
         BuildDependenciesHelper helper = new BuildDependenciesHelper(createDependenciesDownloader(), log);
+        Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
+        if (parent != null) {
+            env.put("BUILD_PARENTNAME", ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
+            env.put("BUILD_PARENTNUMBER", parent.getUpstreamBuild() + "");
+        } else {
+            env.put("BUILD_PARENTNUMBER", "LATEST");
+        }
+        String resolvePattern = Util.replaceMacro(configurator.getResolvePattern(), env);
+        //resolvePattern = StringUtils.replace(resolvePattern, "\r\n", "\n");
+        //resolvePattern = StringUtils.replace(resolvePattern, ",", "\n");
         return helper.retrieveBuildDependencies(resolvePattern);
     }
 
