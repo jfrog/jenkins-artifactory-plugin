@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.ExtractorUtils;
 
 /**
@@ -56,20 +57,26 @@ public class GenericArtifactsResolver {
         this.client = client;
         this.configurator = configurator;
         this.env = build.getEnvironment(listener);
-        this.resolvePattern = Util.replaceMacro(resolvePattern, build.getEnvironment(listener));
+        this.resolvePattern = Util.replaceMacro(resolvePattern, env);
         log = new JenkinsBuildInfoLog(listener);
     }
 
     public List<Dependency> retrievePublishedDependencies() throws IOException, InterruptedException {
         DependenciesHelper helper = new DependenciesHelper(createDependenciesDownloader(), log);
-        Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
-        if (parent != null) {
-            env.put("BUILD_PARENTNAME", ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
-            env.put("BUILD_PARENTNUMBER", parent.getUpstreamBuild() + "");
-        } else {
-            env.put("BUILD_PARENTNUMBER", "LATEST");
+        AbstractBuild<?, ?> rootBuild = BuildUniqueIdentifierHelper.getRootBuild(build);
+        if (rootBuild != null) {
+            String identifier = BuildUniqueIdentifierHelper.getUpstreamIdentifier(rootBuild);
+            env.put("BUILD_ROOTNAME", ExtractorUtils.sanitizeBuildName(rootBuild.getParent().getName()));
+            env.put("BUILD_ROOTNUMBER", Integer.toString(rootBuild.getNumber()));
         }
-
+        
+         Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
+         if (parent != null) {
+         env.put("BUILD_PARENTNAME", ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
+         env.put("BUILD_PARENTNUMBER", parent.getUpstreamBuild() + "");
+         } else {
+         env.put("BUILD_PARENTNUMBER", "LATEST");
+         }
         String resolvePattern = Util.replaceMacro(configurator.getResolvePattern(), env);
         //resolvePattern = StringUtils.replace(resolvePattern, "\r\n", "\n");
         //resolvePattern = StringUtils.replace(resolvePattern, ",", "\n");
@@ -77,14 +84,21 @@ public class GenericArtifactsResolver {
     }
 
     public List<BuildDependency> retrieveBuildDependencies() throws IOException, InterruptedException {
-        BuildDependenciesHelper helper = new BuildDependenciesHelper(createDependenciesDownloader(), log);
-        Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
-        if (parent != null) {
-            env.put("BUILD_PARENTNAME", ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
-            env.put("BUILD_PARENTNUMBER", parent.getUpstreamBuild() + "");
-        } else {
-            env.put("BUILD_PARENTNUMBER", "LATEST");
-        }
+     BuildDependenciesHelper helper = new BuildDependenciesHelper(createDependenciesDownloader(), log);
+        AbstractBuild<?, ?> rootBuild = BuildUniqueIdentifierHelper.getRootBuild(build);
+        if (rootBuild != null) {
+            String identifier = BuildUniqueIdentifierHelper.getUpstreamIdentifier(rootBuild);
+            env.put("BUILD_ROOTNAME", ExtractorUtils.sanitizeBuildName(rootBuild.getParent().getName()));
+            env.put("BUILD_ROOTNUMBER", Integer.toString(rootBuild.getNumber()));
+        }       
+         Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
+         if (parent != null) {
+         env.put("BUILD_PARENTNAME", ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
+         env.put("BUILD_PARENTNUMBER", parent.getUpstreamBuild() + "");
+         } else {
+         env.put("BUILD_PARENTNUMBER", "LATEST");
+         }
+         
         String resolvePattern = Util.replaceMacro(configurator.getResolvePattern(), env);
         //resolvePattern = StringUtils.replace(resolvePattern, "\r\n", "\n");
         //resolvePattern = StringUtils.replace(resolvePattern, ",", "\n");

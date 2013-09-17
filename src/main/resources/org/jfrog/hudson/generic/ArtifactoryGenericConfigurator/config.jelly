@@ -55,6 +55,15 @@
         </f:block>
         <f:block>
             <table style="width:100%">
+                <f:optionalBlock field="passIdentifiedDownstream"
+                                 help="/plugin/artifactory/help/common/help-passIdentifiedDownstream.html"
+                                 title="Enable isolated resolution for downstream builds (requires Artifactory Pro)"
+                                 inline="true">
+                </f:optionalBlock>
+            </table>
+        </f:block>
+        <f:block>
+            <table style="width:100%">
                 <f:optionalBlock name="deployBuildInfo" checked="${h.defaultToTrue(instance.deployBuildInfo)}"
                                  title="Capture and publish build info"
                                  help="/plugin/artifactory/help/common/help-deployBuildInfo.html"
