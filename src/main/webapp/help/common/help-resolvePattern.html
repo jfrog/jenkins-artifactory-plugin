@@ -23,6 +23,7 @@
     For example: <b>repo-key:*.zip=>winFiles, repo-key:unix/distro.tgz=>linuxFiles</b>,
     where <b>winFiles</b> and <b>linuxFiles</b> are target directories.<br>
     Target directories can either be absolute or relative to the working directory.<br>
-    Use =!> instead of => to delete any locally found files which are not downloaded from Artifactory.<br>
-    Pattern value can take environment variables. For example: repo-key/*.xml=>${BUILD_ID}-${BUILD_NUMBER}
+    Pattern value can take environment variables.<br>
+    For chained jobs, special BUILD_PARENTNAME and BUILD_PARENTNUMBER are provided.<br>
+    For example: <b>repo-key:dir/*@${BUILD_PARENTNAME}#${BUILD_PARENTNUMBER}=>somedir</b><br>
 </div>

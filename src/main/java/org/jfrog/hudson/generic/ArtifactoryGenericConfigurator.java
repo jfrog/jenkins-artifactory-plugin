@@ -59,13 +59,14 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     private final IncludesExcludes envVarsPatterns;
     private final boolean discardOldBuilds;
     private final boolean discardBuildArtifacts;
+    private final boolean passIdentifiedDownstream;
     private transient List<Dependency> publishedDependencies;
     private transient List<BuildDependency> buildDependencies;
 
     @DataBoundConstructor
     public ArtifactoryGenericConfigurator(ServerDetails details, Credentials overridingDeployerCredentials,
             String deployPattern, String resolvePattern, String matrixParams, boolean deployBuildInfo,
-            boolean includeEnvVars, IncludesExcludes envVarsPatterns, boolean discardOldBuilds,
+            boolean includeEnvVars, IncludesExcludes envVarsPatterns, boolean discardOldBuilds, boolean passIdentifiedDownstream,
             boolean discardBuildArtifacts) {
         this.details = details;
         this.overridingDeployerCredentials = overridingDeployerCredentials;
@@ -76,6 +77,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
         this.discardOldBuilds = discardOldBuilds;
+        this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.discardBuildArtifacts = discardBuildArtifacts;
     }
 
@@ -110,7 +112,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     public String getMatrixParams() {
         return matrixParams;
     }
-
+    
     public boolean isDeployBuildInfo() {
         return deployBuildInfo;
     }
@@ -162,6 +164,10 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
     public String getAggregationBuildStatus() {
         return null;
+    }
+    
+     public boolean isPassIdentifiedDownstream() {
+        return passIdentifiedDownstream;
     }
 
     public boolean isBlackDuckRunChecks() {
@@ -247,8 +253,8 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                 preferredDeployer.getUsername(), preferredDeployer.getPassword(), proxyConfiguration,
                 listener);
         try {
-            GenericArtifactsResolver artifactsResolver = new GenericArtifactsResolver(build, listener,
-                    dependenciesClient, getResolvePattern());
+            GenericArtifactsResolver artifactsResolver = new GenericArtifactsResolver(build, ArtifactoryGenericConfigurator.this, listener,
+                    dependenciesClient,getResolvePattern());
             publishedDependencies = artifactsResolver.retrievePublishedDependencies();
             buildDependencies = artifactsResolver.retrieveBuildDependencies();
 

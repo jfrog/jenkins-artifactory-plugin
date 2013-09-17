@@ -6,6 +6,7 @@ import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.gradle.ArtifactoryGradleConfigurator;
 
 import java.util.logging.Logger;
+import org.jfrog.hudson.generic.ArtifactoryGenericConfigurator;
 
 
 /**
@@ -92,7 +93,13 @@ public class BuildUniqueIdentifierHelper {
         ArtifactoryGradleConfigurator wrapper = ActionableHelper
                 .getBuildWrapper((BuildableItemWithBuildWrappers) build.getProject(),
                         ArtifactoryGradleConfigurator.class);
-        return wrapper != null && wrapper.isPassIdentifiedDownstream();
+        if (wrapper != null) {
+            return wrapper.isPassIdentifiedDownstream();
+        }
+        ArtifactoryGenericConfigurator wrapper2 = ActionableHelper
+                .getBuildWrapper((BuildableItemWithBuildWrappers) build.getProject(),
+                        ArtifactoryGenericConfigurator.class);
+        return wrapper2 != null && wrapper2.isPassIdentifiedDownstream();
     }
 
     /**
