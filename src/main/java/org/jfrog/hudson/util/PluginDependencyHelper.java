@@ -19,9 +19,9 @@ public class PluginDependencyHelper {
             throws IOException, InterruptedException {
 
         File localDependencyDir = localDependencyFile.getParentFile();
-        if (!(Computer.currentComputer() instanceof SlaveComputer)) {
-            return new FilePath(localDependencyDir);
-        }
+//        if (!(Computer.currentComputer() instanceof SlaveComputer)) {
+//            return new FilePath(localDependencyDir);
+//        }
 
         String pluginVersion = Hudson.getInstance().getPluginManager().getPlugin("artifactory").getVersion();
         if (pluginVersion.contains(" ")) {
@@ -29,8 +29,7 @@ public class PluginDependencyHelper {
             pluginVersion = StringUtils.split(pluginVersion, " ")[0];
         }
 
-        FilePath remoteDependencyDir = new FilePath(build.getWorkspace().getParent(),
-                "artifactory-plugin/" + pluginVersion);
+        FilePath remoteDependencyDir = new FilePath(build.getBuiltOn().getRootPath(),"cache/artifactory-plugin/" + pluginVersion);
 
         if (!remoteDependencyDir.exists()) {
             remoteDependencyDir.mkdirs();
@@ -42,6 +41,10 @@ public class PluginDependencyHelper {
 
             File[] localDependencies = localDependencyDir.listFiles();
             for (File localDependency : localDependencies) {
+                if (localDependency.getName().equals("classes.jar"))
+                    // skip classes in this plugin source tree.
+                    // TODO: for a proper long term fix, see my comment in JENKINS-18401
+                    continue;
                 FilePath remoteDependencyFilePath = new FilePath(remoteDependencyDir, localDependency.getName());
                 if (!remoteDependencyFilePath.exists()) {
                     FilePath localDependencyFilePath = new FilePath(localDependency);

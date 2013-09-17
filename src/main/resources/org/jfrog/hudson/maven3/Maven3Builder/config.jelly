@@ -14,10 +14,10 @@
   ~ limitations under the License.
   -->
 
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
-         xmlns:t="/lib/hudson" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core"
+         xmlns:f="/lib/form">
 
-    <j:set var="mavens" value="${descriptor.mavenDescriptor.installations}"/>
+    <j:set var="mavens" value="${descriptor.installations}"/>
     <j:if test="${empty(mavens)}">
         <!-- no maven installation is configured. this will be an error, so warn the user now -->
         <f:entry title="${%Maven Version}">
@@ -27,7 +27,7 @@
             </div>
         </f:entry>
     </j:if>
-    <j:if test="${mavens.size() gt 1}">
+    <j:if test="${!empty(mavens)}">
         <!-- display only if there's more than one maven installation -->
         <f:entry title="${%Maven Version}">
             <select class="setting-input" name="mavenName">

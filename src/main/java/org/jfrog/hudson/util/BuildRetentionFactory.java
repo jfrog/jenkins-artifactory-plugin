@@ -31,7 +31,7 @@ public class BuildRetentionFactory {
         }
         if (rotator.getDaysToKeep() > -1) {
             Calendar calendar = Calendar.getInstance();
-            calendar.roll(Calendar.DAY_OF_MONTH, -rotator.getDaysToKeep());
+            calendar.add(Calendar.DAY_OF_YEAR, -rotator.getDaysToKeep());
             buildRetention.setMinimumBuildDate(new Date(calendar.getTimeInMillis()));
         }
         List<String> notToBeDeleted = ExtractorUtils.getBuildNumbersNotToBeDeleted(build);

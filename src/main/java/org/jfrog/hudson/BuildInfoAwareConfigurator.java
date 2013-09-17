@@ -36,4 +36,20 @@ public interface BuildInfoAwareConfigurator {
     boolean isAggregateBuildIssues();
 
     String getAggregationBuildStatus();
+
+    boolean isBlackDuckRunChecks();
+
+    String getBlackDuckAppName();
+
+    String getBlackDuckAppVersion();
+
+    String getBlackDuckReportRecipients();
+
+    String getBlackDuckScopes();
+
+    boolean isBlackDuckIncludePublishedArtifacts();
+
+    boolean isAutoCreateMissingComponentRequests();
+
+    boolean isAutoDiscardStaleComponentRequests();
 }

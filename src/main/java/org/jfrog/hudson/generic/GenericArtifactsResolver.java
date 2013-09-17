@@ -21,7 +21,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Cause;
 import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.dependency.UserBuildDependency;
+import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ArtifactoryDependenciesClient;
 import org.jfrog.build.util.BuildDependenciesHelper;
@@ -46,14 +46,17 @@ public class GenericArtifactsResolver {
     private final AbstractBuild build;
     private ArtifactoryGenericConfigurator configurator;
     private final ArtifactoryDependenciesClient client;
+    private String resolvePattern;
     private Log log;
     private EnvVars env;
 
-    public GenericArtifactsResolver(AbstractBuild build, ArtifactoryGenericConfigurator configurator, BuildListener listener, ArtifactoryDependenciesClient client) throws IOException, InterruptedException {
+
+    public GenericArtifactsResolver(AbstractBuild build, ArtifactoryGenericConfigurator configurator, BuildListener listener, ArtifactoryDependenciesClient client, String resolvePattern) throws IOException, InterruptedException {
         this.build = build;
         this.client = client;
         this.configurator = configurator;
         this.env = build.getEnvironment(listener);
+        this.resolvePattern = Util.replaceMacro(resolvePattern, build.getEnvironment(listener));
         log = new JenkinsBuildInfoLog(listener);
     }
 
@@ -73,7 +76,7 @@ public class GenericArtifactsResolver {
         return helper.retrievePublishedDependencies(resolvePattern);
     }
 
-    public List<UserBuildDependency> retrieveBuildDependencies() throws IOException, InterruptedException {
+    public List<BuildDependency> retrieveBuildDependencies() throws IOException, InterruptedException {
         BuildDependenciesHelper helper = new BuildDependenciesHelper(createDependenciesDownloader(), log);
         Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
         if (parent != null) {

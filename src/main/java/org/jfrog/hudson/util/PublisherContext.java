@@ -53,6 +53,14 @@ public class PublisherContext {
     private boolean enableIssueTrackerIntegration;
     private boolean aggregateBuildIssues;
     private String aggregationBuildStatus;
+    private boolean blackDuckRunChecks;
+    private String blackDuckAppName;
+    private String blackDuckAppVersion;
+    private String blackDuckReportRecipients; //csv
+    private String blackDuckScopes; //csv
+    private boolean blackDuckIncludePublishedArtifacts;
+    private boolean autoCreateMissingComponentRequests;
+    private boolean autoDiscardStaleComponentRequests;
 
     private PublisherContext() {
     }
@@ -163,6 +171,38 @@ public class PublisherContext {
 
     public String getAggregationBuildStatus() {
         return aggregationBuildStatus;
+    }
+
+    public boolean isBlackDuckRunChecks() {
+        return blackDuckRunChecks;
+    }
+
+    public String getBlackDuckAppName() {
+        return blackDuckAppName;
+    }
+
+    public String getBlackDuckAppVersion() {
+        return blackDuckAppVersion;
+    }
+
+    public String getBlackDuckReportRecipients() {
+        return blackDuckReportRecipients;
+    }
+
+    public String getBlackDuckScopes() {
+        return blackDuckScopes;
+    }
+
+    public boolean isBlackDuckIncludePublishedArtifacts() {
+        return blackDuckIncludePublishedArtifacts;
+    }
+
+    public boolean isAutoCreateMissingComponentRequests() {
+        return autoCreateMissingComponentRequests;
+    }
+
+    public boolean isAutoDiscardStaleComponentRequests() {
+        return autoDiscardStaleComponentRequests;
     }
 
     public static class Builder {
@@ -300,6 +340,21 @@ public class PublisherContext {
 
         public Builder aggregationBuildStatus(String aggregationBuildStatus) {
             publisher.aggregationBuildStatus = aggregationBuildStatus;
+            return this;
+        }
+
+        public Builder integrateBlackDuck(boolean runChecks, String appName, String appVersion,
+                                          String reportRecipients, String scopes, boolean includePublishedArtifacts,
+                                          boolean autoCreateMissingComponentRequests,
+                                          boolean autoDiscardStaleComponentRequests) {
+            publisher.blackDuckRunChecks = runChecks;
+            publisher.blackDuckAppName = appName;
+            publisher.blackDuckAppVersion = appVersion;
+            publisher.blackDuckReportRecipients = reportRecipients;
+            publisher.blackDuckScopes = scopes;
+            publisher.blackDuckIncludePublishedArtifacts = includePublishedArtifacts;
+            publisher.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
+            publisher.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
             return this;
         }
     }

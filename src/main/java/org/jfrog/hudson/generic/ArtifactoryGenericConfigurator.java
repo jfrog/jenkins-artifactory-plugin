@@ -16,7 +16,7 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.dependency.UserBuildDependency;
+import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.client.ArtifactoryDependenciesClient;
 import org.jfrog.build.client.ProxyConfiguration;
@@ -60,7 +60,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     private final boolean discardOldBuilds;
     private final boolean discardBuildArtifacts;
     private transient List<Dependency> publishedDependencies;
-    private transient List<UserBuildDependency> buildDependencies;
+    private transient List<BuildDependency> buildDependencies;
 
     @DataBoundConstructor
     public ArtifactoryGenericConfigurator(ServerDetails details, Credentials overridingDeployerCredentials,
@@ -81,6 +81,10 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
     public String getArtifactoryName() {
         return details != null ? details.artifactoryName : null;
+    }
+
+    public String getArtifactoryUrl() {
+        return details != null ? details.getArtifactoryUrl() : null;
     }
 
     public boolean isOverridingDefaultDeployer() {
@@ -107,6 +111,10 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         return matrixParams;
     }
     
+    public boolean isDeployBuildInfo() {
+        return deployBuildInfo;
+    }
+
     public boolean isDeployBuildInfo() {
         return deployBuildInfo;
     }
@@ -158,6 +166,38 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
     public String getAggregationBuildStatus() {
         return null;
+    }
+
+    public boolean isBlackDuckRunChecks() {
+        return false;
+    }
+
+    public String getBlackDuckAppName() {
+        return null;
+    }
+
+    public String getBlackDuckAppVersion() {
+        return null;
+    }
+
+    public String getBlackDuckReportRecipients() {
+        return null;
+    }
+
+    public String getBlackDuckScopes() {
+        return null;
+    }
+
+    public boolean isBlackDuckIncludePublishedArtifacts() {
+        return false;
+    }
+
+    public boolean isAutoCreateMissingComponentRequests() {
+        return false;
+    }
+
+    public boolean isAutoDiscardStaleComponentRequests() {
+        return false;
     }
 
     public ArtifactoryServer getArtifactoryServer() {
@@ -255,7 +295,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                         new GenericBuildInfoDeployer(ArtifactoryGenericConfigurator.this, client, build,
                                 listener, deployedArtifacts, buildDependencies, publishedDependencies).deploy();
                         // add the result action (prefer always the same index)
-                        build.getActions().add(0, new BuildInfoResultAction(getArtifactoryName(), build));
+                        build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build));
                         build.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryGenericConfigurator>(build,
                                 ArtifactoryGenericConfigurator.this));
                     }

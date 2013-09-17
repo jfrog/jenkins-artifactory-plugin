@@ -32,15 +32,28 @@ import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.gradle.plugin.artifactory.extractor.BuildInfoTask;
-import org.jfrog.hudson.*;
+import org.jfrog.gradle.plugin.artifactory.task.BuildInfoBaseTask;
+import org.jfrog.hudson.ArtifactoryBuilder;
+import org.jfrog.hudson.ArtifactoryServer;
+import org.jfrog.hudson.BuildInfoAwareConfigurator;
+import org.jfrog.hudson.BuildInfoResultAction;
+import org.jfrog.hudson.DeployerOverrider;
+import org.jfrog.hudson.PluginSettings;
+import org.jfrog.hudson.ServerDetails;
+import org.jfrog.hudson.UserPluginInfo;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.action.ArtifactoryProjectAction;
 import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.release.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.release.gradle.GradleReleaseAction;
 import org.jfrog.hudson.release.gradle.GradleReleaseWrapper;
-import org.jfrog.hudson.util.*;
+import org.jfrog.hudson.util.Credentials;
+import org.jfrog.hudson.util.ExtractorUtils;
+import org.jfrog.hudson.util.FormValidations;
+import org.jfrog.hudson.util.IncludesExcludes;
+import org.jfrog.hudson.util.OverridingDeployerCredentialsConverter;
+import org.jfrog.hudson.util.PublisherContext;
+import org.jfrog.hudson.util.ResolverContext;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -91,18 +104,29 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final String matrixParams;
     private final boolean skipInjectInitScript;
     private final boolean allowPromotionOfNonStagedBuilds;
+    private final boolean blackDuckRunChecks;
+    private final String blackDuckAppName;
+    private final String blackDuckAppVersion;
+    private String blackDuckReportRecipients; //csv
+    private String blackDuckScopes; //csv
+    private boolean blackDuckIncludePublishedArtifacts;
+    private boolean autoCreateMissingComponentRequests;
+    private boolean autoDiscardStaleComponentRequests;
 
     @DataBoundConstructor
     public ArtifactoryGradleConfigurator(ServerDetails details, Credentials overridingDeployerCredentials,
-                                         boolean deployMaven, boolean deployIvy, boolean deployArtifacts, String remotePluginLocation,
-                                         boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                         boolean deployBuildInfo, boolean runChecks, String violationRecipients,
-                                         boolean includePublishArtifacts, String scopes, boolean disableLicenseAutoDiscovery, String ivyPattern,
-                                         String artifactPattern, boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
-                                         boolean discardOldBuilds, boolean passIdentifiedDownstream, GradleReleaseWrapper releaseWrapper,
-                                         boolean discardBuildArtifacts, String matrixParams, boolean skipInjectInitScript,
-                                         boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues, String aggregationBuildStatus,
-                                         boolean allowPromotionOfNonStagedBuilds) {
+            boolean deployMaven, boolean deployIvy, boolean deployArtifacts, String remotePluginLocation,
+            boolean includeEnvVars, IncludesExcludes envVarsPatterns,
+            boolean deployBuildInfo, boolean runChecks, String violationRecipients,
+            boolean includePublishArtifacts, String scopes, boolean disableLicenseAutoDiscovery, String ivyPattern,
+            String artifactPattern, boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
+            boolean discardOldBuilds, boolean passIdentifiedDownstream, GradleReleaseWrapper releaseWrapper,
+            boolean discardBuildArtifacts, String matrixParams, boolean skipInjectInitScript,
+            boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues, String aggregationBuildStatus,
+            boolean allowPromotionOfNonStagedBuilds, boolean blackDuckRunChecks, String blackDuckAppName,
+            String blackDuckAppVersion, String blackDuckReportRecipients, String blackDuckScopes,
+            boolean blackDuckIncludePublishedArtifacts, boolean autoCreateMissingComponentRequests,
+            boolean autoDiscardStaleComponentRequests) {
         this.details = details;
         this.overridingDeployerCredentials = overridingDeployerCredentials;
         this.deployMaven = deployMaven;
@@ -132,6 +156,14 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         this.skipInjectInitScript = skipInjectInitScript;
         this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
         this.allowPromotionOfNonStagedBuilds = allowPromotionOfNonStagedBuilds;
+        this.blackDuckRunChecks = blackDuckRunChecks;
+        this.blackDuckAppName = blackDuckAppName;
+        this.blackDuckAppVersion = blackDuckAppVersion;
+        this.blackDuckReportRecipients = blackDuckReportRecipients;
+        this.blackDuckScopes = blackDuckScopes;
+        this.blackDuckIncludePublishedArtifacts = blackDuckIncludePublishedArtifacts;
+        this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
+        this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
     }
 
     public GradleReleaseWrapper getReleaseWrapper() {
@@ -270,6 +302,38 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return allowPromotionOfNonStagedBuilds;
     }
 
+    public boolean isBlackDuckRunChecks() {
+        return blackDuckRunChecks;
+    }
+
+    public String getBlackDuckAppName() {
+        return blackDuckAppName;
+    }
+
+    public String getBlackDuckAppVersion() {
+        return blackDuckAppVersion;
+    }
+
+    public String getBlackDuckReportRecipients() {
+        return blackDuckReportRecipients;
+    }
+
+    public String getBlackDuckScopes() {
+        return blackDuckScopes;
+    }
+
+    public boolean isBlackDuckIncludePublishedArtifacts() {
+        return blackDuckIncludePublishedArtifacts;
+    }
+
+    public boolean isAutoCreateMissingComponentRequests() {
+        return autoCreateMissingComponentRequests;
+    }
+
+    public boolean isAutoDiscardStaleComponentRequests() {
+        return autoDiscardStaleComponentRequests;
+    }
+
     private String cleanString(String artifactPattern) {
         return StringUtils.removeEnd(StringUtils.removeStart(artifactPattern, "\""), "\"");
     }
@@ -336,8 +400,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
             } else {
                 tasks = gradleBuild.getTasks() + "";
             }
-            if (!StringUtils.contains(tasks, BuildInfoTask.BUILD_INFO_TASK_NAME)) {
-                setTargetsField(gradleBuild, "tasks", tasks + " " + BuildInfoTask.BUILD_INFO_TASK_NAME);
+            if (!StringUtils.contains(tasks, BuildInfoBaseTask.BUILD_INFO_TASK_NAME)) {
+                setTargetsField(gradleBuild, "tasks", tasks + " " + BuildInfoBaseTask.BUILD_INFO_TASK_NAME);
             }
         } else {
             listener.getLogger().println("[Warning] No Gradle build configured");
@@ -372,7 +436,12 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                         .deployIvy(isDeployIvy()).deployMaven(isDeployMaven()).maven2Compatible(isM2Compatible())
                         .enableIssueTrackerIntegration(isEnableIssueTrackerIntegration())
                         .aggregateBuildIssues(isAggregateBuildIssues())
-                        .aggregationBuildStatus(getAggregationBuildStatus()).build();
+                        .aggregationBuildStatus(getAggregationBuildStatus())
+                        .integrateBlackDuck(isBlackDuckRunChecks(), getBlackDuckAppName(), getBlackDuckAppVersion(),
+                                getBlackDuckReportRecipients(), getBlackDuckScopes(),
+                                isBlackDuckIncludePublishedArtifacts(), isAutoCreateMissingComponentRequests(),
+                                isAutoDiscardStaleComponentRequests())
+                        .build();
 
                 ResolverContext resolverContext = null;
                 if (StringUtils.isNotBlank(serverDetails.downloadRepositoryKey)) {
@@ -411,7 +480,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 Result result = build.getResult();
                 if (result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
                     if (isDeployBuildInfo()) {
-                        build.getActions().add(new BuildInfoResultAction(getArtifactoryName(), build));
+                        build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build));
                         if (isAllowPromotionOfNonStagedBuilds()) {
                             ArtifactoryGradleConfigurator configurator = ActionableHelper.getBuildWrapper(
                                     (BuildableItemWithBuildWrappers) build.getProject(),

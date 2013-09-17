@@ -1,8 +1,11 @@
 package org.jfrog.hudson.generic;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.DownloadableArtifact;
 import org.jfrog.build.api.util.FileChecksumCalculator;
@@ -46,9 +49,15 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         return helper.downloadDependencies(downloadableArtifacts);
     }
 
-    public String getTargetDir(String targetDir, String relativeDir) {
-        FilePath targetDirFile = new FilePath(workspace, targetDir).child(relativeDir);
-        return targetDirFile.getRemote();
+    public String getTargetDir(String targetDir, String relativeDir) throws IOException {
+        try {
+            FilePath targetDirFile = new FilePath(workspace, targetDir).child(relativeDir);
+            return targetDirFile.absolutize().getRemote();
+        } catch (InterruptedException e) {
+            log.warn("Caught interrupted exception: " + e.getLocalizedMessage());
+        }
+
+        return null;
     }
 
     public Map<String, String> saveDownloadedFile(InputStream is, String filePath) throws IOException {
@@ -63,6 +72,64 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         }
 
         return null;
+    }
+
+    public boolean isFileExistsLocally(String filePath, String md5, String sha1) throws IOException {
+        try {
+            FilePath child = workspace.child(filePath);
+            if (!child.exists()) {
+                return false;
+            }
+
+            // If it's a folder return true since we don't care about it, not going to download a folder anyway
+            if (child.isDirectory()) {
+                return true;
+            }
+
+            Map<String, String> checksumsMap = child.act(new DownloadFileCallable(log));
+            return checksumsMap != null &&
+                    StringUtils.isNotBlank(md5) && StringUtils.equals(md5, checksumsMap.get("md5")) &&
+                    StringUtils.isNotBlank(sha1) && StringUtils.equals(sha1, checksumsMap.get("sha1"));
+        } catch (InterruptedException e) {
+            log.warn("Caught interrupted exception: " + e.getLocalizedMessage());
+        }
+
+        return false;
+    }
+
+    public void removeUnusedArtifactsFromLocal(Set<String> allResolvesFiles, Set<String> forDeletionFiles)
+            throws IOException {
+        try {
+            for (String resolvedFile : forDeletionFiles) {
+                FilePath resolvedFileParent = workspace.child(resolvedFile).getParent();
+                if (!resolvedFileParent.exists()) {
+                    continue;
+                }
+
+                List<FilePath> fileSiblings = resolvedFileParent.list();
+                if (fileSiblings == null || fileSiblings.isEmpty()) {
+                    continue;
+                }
+
+                for (FilePath sibling : fileSiblings) {
+                    String siblingPath = sibling.absolutize().getRemote();
+                    if (!isResolvedOrParentOfResolvedFile(allResolvesFiles, siblingPath)) {
+                        sibling.deleteRecursive();
+                        log.info("Deleted unresolved file '" + siblingPath + "'");
+                    }
+                }
+            }
+        } catch (InterruptedException e) {
+            log.warn("Caught interrupted exception: " + e.getLocalizedMessage());
+        }
+    }
+
+    private boolean isResolvedOrParentOfResolvedFile(Set<String> resolvedFiles, final String path) {
+        return Iterables.any(resolvedFiles, new Predicate<String>() {
+            public boolean apply(String filePath) {
+                return StringUtils.equals(filePath, path) || StringUtils.startsWith(filePath, path);
+            }
+        });
     }
 
     private static class DownloadFileCallable implements FilePath.FileCallable<Map<String, String>> {

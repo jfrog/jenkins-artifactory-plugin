@@ -6,7 +6,8 @@
     ? wildcards).<br/>
     <b>path_pattern</b> - An Ant-like pattern of the dependencies path within the Artifactory (may contain the * and
     the ? wildcards). <br/>
-    For example: <b>repo-key:dir/*/bob/*.zip</b> (** wilcards are not supported) <br/>
+    For example: <b>repo-key:dir/*/bob/*.zip</b> (** wilcards are supported only if you combine with matrix params)
+    <br/>
     Artifacts can be downloaded conditionally based on their property values in Artifactory. <br> For example, to
     download all zip files marked as production ready: <b>repo-key:dir/*/bob/*.zip;status+=prod</b>.<br/>
     For more details see the plug-in's <a

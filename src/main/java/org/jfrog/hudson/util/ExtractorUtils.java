@@ -22,11 +22,7 @@ import com.google.common.collect.Maps;
 import com.google.common.io.Closeables;
 import hudson.FilePath;
 import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.BuildListener;
-import hudson.model.Cause;
-import hudson.model.Computer;
-import hudson.model.Run;
+import hudson.model.*;
 import hudson.slaves.SlaveComputer;
 import hudson.tasks.LogRotator;
 import jenkins.model.Jenkins;
@@ -98,7 +94,7 @@ public class ExtractorUtils {
      * @param resolverContext  A context for resolver settings
      */
     public static ArtifactoryClientConfiguration addBuilderInfoArguments(Map<String, String> env, AbstractBuild build,
-            BuildListener listener, PublisherContext publisherContext, ResolverContext resolverContext)
+                                                                         BuildListener listener, PublisherContext publisherContext, ResolverContext resolverContext)
             throws IOException, InterruptedException {
         ArtifactoryClientConfiguration configuration = new ArtifactoryClientConfiguration(new NullLog());
         addBuildRootIfNeeded(build, configuration);
@@ -117,10 +113,9 @@ public class ExtractorUtils {
                     publisherContext.getAggregationBuildStatus()).setIssueTrackerInfo(configuration);
         }
 
-
-        IncludesExcludes envVarsPatterns = publisherContext.getEnvVarsPatterns();
-        if (envVarsPatterns == null) {
-            envVarsPatterns = new IncludesExcludes("", "");
+        IncludesExcludes envVarsPatterns = new IncludesExcludes("", "");
+        if (publisherContext != null && publisherContext.getEnvVarsPatterns() != null) {
+            envVarsPatterns = publisherContext.getEnvVarsPatterns();
         }
         addEnvVars(env, build, configuration, envVarsPatterns);
         persistConfiguration(build, configuration, env);
@@ -139,7 +134,7 @@ public class ExtractorUtils {
      * Set all the parameters relevant for publishing artifacts and build info
      */
     private static void setPublisherInfo(Map<String, String> env, AbstractBuild build,
-            PublisherContext context, ArtifactoryClientConfiguration configuration) {
+                                         PublisherContext context, ArtifactoryClientConfiguration configuration) {
         configuration.setActivateRecorder(Boolean.TRUE);
 
         String buildName = sanitizeBuildName(build.getProject().getFullName());
@@ -212,6 +207,16 @@ public class ExtractorUtils {
                 configuration.info.licenseControl.setScopes(context.getScopes());
             }
         }
+
+        configuration.info.blackDuckProperties.setRunChecks(context.isBlackDuckRunChecks());
+        configuration.info.blackDuckProperties.setAppName(context.getBlackDuckAppName());
+        configuration.info.blackDuckProperties.setAppVersion(context.getBlackDuckAppVersion());
+        configuration.info.blackDuckProperties.setReportRecipients(context.getBlackDuckReportRecipients());
+        configuration.info.blackDuckProperties.setScopes(context.getBlackDuckScopes());
+        configuration.info.blackDuckProperties.setIncludePublishedArtifacts(context.isBlackDuckIncludePublishedArtifacts());
+        configuration.info.blackDuckProperties.setAutoCreateMissingComponentRequests(context.isAutoCreateMissingComponentRequests());
+        configuration.info.blackDuckProperties.setAutoDiscardStaleComponentRequests(context.isAutoDiscardStaleComponentRequests());
+
         if (context.isDiscardOldBuilds()) {
             LogRotator rotator = build.getProject().getLogRotator();
             if (rotator != null) {
@@ -298,7 +303,7 @@ public class ExtractorUtils {
     }
 
     public static void persistConfiguration(AbstractBuild build, ArtifactoryClientConfiguration configuration,
-            Map<String, String> env) throws IOException, InterruptedException {
+                                            Map<String, String> env) throws IOException, InterruptedException {
         FilePath propertiesFile = build.getWorkspace().createTextTempFile("buildInfo", ".properties", "", false);
         configuration.setPropertiesFile(propertiesFile.getRemote());
         env.put("BUILDINFO_PROPFILE", propertiesFile.getRemote());
@@ -325,8 +330,8 @@ public class ExtractorUtils {
     }
 
     private static void addMatrixParams(PublisherContext context,
-            ArtifactoryClientConfiguration.PublisherHandler publisher,
-            Map<String, String> env) {
+                                        ArtifactoryClientConfiguration.PublisherHandler publisher,
+                                        Map<String, String> env) {
         String matrixParams = context.getMatrixParams();
         if (StringUtils.isBlank(matrixParams)) {
             return;
@@ -345,7 +350,7 @@ public class ExtractorUtils {
     }
 
     private static void addEnvVars(Map<String, String> env, AbstractBuild<?, ?> build,
-            ArtifactoryClientConfiguration configuration, IncludesExcludes envVarsPatterns) {
+                                   ArtifactoryClientConfiguration configuration, IncludesExcludes envVarsPatterns) {
         IncludeExcludePatterns patterns = new IncludeExcludePatterns(envVarsPatterns.getIncludePatterns(),
                 envVarsPatterns.getExcludePatterns());
 

@@ -28,7 +28,13 @@ import hudson.maven.MavenBuild;
 import hudson.maven.MavenModuleSet;
 import hudson.maven.MavenModuleSetBuild;
 import hudson.maven.reporters.MavenAbstractArtifactRecord;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.Action;
+import hudson.model.BuildListener;
+import hudson.model.Cause;
+import hudson.model.Hudson;
+import hudson.model.Result;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
@@ -43,7 +49,11 @@ import org.jfrog.hudson.action.ArtifactoryProjectAction;
 import org.jfrog.hudson.maven2.ArtifactsDeployer;
 import org.jfrog.hudson.maven2.MavenBuildInfoDeployer;
 import org.jfrog.hudson.release.UnifiedPromoteBuildAction;
-import org.jfrog.hudson.util.*;
+import org.jfrog.hudson.util.CredentialResolver;
+import org.jfrog.hudson.util.Credentials;
+import org.jfrog.hudson.util.ExtractorUtils;
+import org.jfrog.hudson.util.FormValidations;
+import org.jfrog.hudson.util.IncludesExcludes;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
@@ -102,15 +112,27 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     private boolean aggregateBuildIssues;
     private final boolean allowPromotionOfNonStagedBuilds;
 
+    private boolean blackDuckRunChecks;
+    private String blackDuckAppName;
+    private String blackDuckAppVersion;
+    private String blackDuckReportRecipients; //csv
+    private String blackDuckScopes; //csv
+    private boolean blackDuckIncludePublishedArtifacts;
+    private boolean autoCreateMissingComponentRequests;
+    private boolean autoDiscardStaleComponentRequests;
+
     @DataBoundConstructor
     public ArtifactoryRedeployPublisher(ServerDetails details, boolean deployArtifacts,
-                                        IncludesExcludes artifactDeploymentPatterns, Credentials overridingDeployerCredentials,
-                                        boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                        boolean deployBuildInfo, boolean evenIfUnstable, boolean runChecks,
-                                        String violationRecipients, boolean includePublishArtifacts, String scopes,
-                                        boolean disableLicenseAutoDiscovery, boolean discardOldBuilds, boolean passIdentifiedDownstream,
-                                        boolean discardBuildArtifacts, String matrixParams, boolean enableIssueTrackerIntegration,
-                                        boolean aggregateBuildIssues, String aggregationBuildStatus, boolean allowPromotionOfNonStagedBuilds) {
+            IncludesExcludes artifactDeploymentPatterns, Credentials overridingDeployerCredentials,
+            boolean includeEnvVars, IncludesExcludes envVarsPatterns,
+            boolean deployBuildInfo, boolean evenIfUnstable, boolean runChecks,
+            String violationRecipients, boolean includePublishArtifacts, String scopes,
+            boolean disableLicenseAutoDiscovery, boolean discardOldBuilds, boolean passIdentifiedDownstream,
+            boolean discardBuildArtifacts, String matrixParams, boolean enableIssueTrackerIntegration,
+            boolean aggregateBuildIssues, String aggregationBuildStatus, boolean allowPromotionOfNonStagedBuilds,
+            boolean blackDuckRunChecks, String blackDuckAppName, String blackDuckAppVersion,
+            String blackDuckReportRecipients, String blackDuckScopes, boolean blackDuckIncludePublishedArtifacts,
+            boolean autoCreateMissingComponentRequests, boolean autoDiscardStaleComponentRequests) {
         this.details = details;
         this.deployArtifacts = deployArtifacts;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
@@ -133,6 +155,14 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.allowPromotionOfNonStagedBuilds = allowPromotionOfNonStagedBuilds;
+        this.blackDuckRunChecks = blackDuckRunChecks;
+        this.blackDuckAppName = blackDuckAppName;
+        this.blackDuckAppVersion = blackDuckAppVersion;
+        this.blackDuckReportRecipients = blackDuckReportRecipients;
+        this.blackDuckScopes = blackDuckScopes;
+        this.blackDuckIncludePublishedArtifacts = blackDuckIncludePublishedArtifacts;
+        this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
+        this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
     }
 
     // NOTE: The following getters are used by jelly. Do not remove them
@@ -221,6 +251,10 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         return details != null ? details.artifactoryName : null;
     }
 
+    public String getArtifactoryUrl() {
+        return details != null ? details.getArtifactoryUrl() : null;
+    }
+
     /**
      * @return The release versions deployment repository.
      */
@@ -253,6 +287,38 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         return allowPromotionOfNonStagedBuilds;
     }
 
+    public boolean isBlackDuckRunChecks() {
+        return blackDuckRunChecks;
+    }
+
+    public String getBlackDuckAppName() {
+        return blackDuckAppName;
+    }
+
+    public String getBlackDuckAppVersion() {
+        return blackDuckAppVersion;
+    }
+
+    public String getBlackDuckReportRecipients() {
+        return blackDuckReportRecipients;
+    }
+
+    public String getBlackDuckScopes() {
+        return blackDuckScopes;
+    }
+
+    public boolean isBlackDuckIncludePublishedArtifacts() {
+        return blackDuckIncludePublishedArtifacts;
+    }
+
+    public boolean isAutoCreateMissingComponentRequests() {
+        return autoCreateMissingComponentRequests;
+    }
+
+    public boolean isAutoDiscardStaleComponentRequests() {
+        return autoDiscardStaleComponentRequests;
+    }
+
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
         return details != null ? new ArtifactoryProjectAction(details.getArtifactoryUrl(), project) : null;
@@ -271,7 +337,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
         if (isExtractorUsed(build.getEnvironment(listener))) {
             if (deployBuildInfo) {
-                build.getActions().add(0, new BuildInfoResultAction(getArtifactoryName(), build));
+                build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build));
                 if (isAllowPromotionOfNonStagedBuilds()) {
                     build.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryRedeployPublisher>(build, this));
                 }
@@ -311,7 +377,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
             if (deployBuildInfo) {
                 new MavenBuildInfoDeployer(this, client, mavenBuild, listener).deploy();
                 // add the result action (prefer always the same index)
-                build.getActions().add(0, new BuildInfoResultAction(getArtifactoryName(), build));
+                build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build));
                 if (isAllowPromotionOfNonStagedBuilds()) {
                     build.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryRedeployPublisher>(build, this));
                 }

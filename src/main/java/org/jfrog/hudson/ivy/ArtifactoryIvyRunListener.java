@@ -55,7 +55,7 @@ public class ArtifactoryIvyRunListener extends RunListener<AbstractBuild> {
                 return;
             }
             if (artifactoryIvyConfigurator.isDeployBuildInfo()) {
-                run.getActions().add(new BuildInfoResultAction(artifactoryIvyConfigurator.getArtifactoryName(), run));
+                run.getActions().add(new BuildInfoResultAction(artifactoryIvyConfigurator.getArtifactoryUrl(), run));
                 run.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryIvyConfigurator>(run,
                         artifactoryIvyConfigurator));
             }

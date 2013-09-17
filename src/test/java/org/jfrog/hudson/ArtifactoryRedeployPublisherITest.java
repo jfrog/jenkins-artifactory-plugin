@@ -35,7 +35,7 @@ public class ArtifactoryRedeployPublisherITest extends HudsonTestCase {
         ArtifactoryRedeployPublisher before = new ArtifactoryRedeployPublisher(null, true,
                 new IncludesExcludes("", ""),
                 null, false, new IncludesExcludes("", ""), true, true, false, "", false, "", true,
-                true, false, true, "", true, true, "Released", false);
+                true, false, true, "", true, true, "Released", false, false, null, null, null, null, false, false, false);
         project.getPublishersList().add(before);
 
         // submit the configuration form

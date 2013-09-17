@@ -99,6 +99,14 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private final String matrixParams;
     private final boolean enableIssueTrackerIntegration;
     private boolean aggregateBuildIssues;
+    private boolean blackDuckRunChecks;
+    private String blackDuckAppName;
+    private String blackDuckAppVersion;
+    private String blackDuckReportRecipients; //csv
+    private String blackDuckScopes; //csv
+    private boolean blackDuckIncludePublishedArtifacts;
+    private boolean autoCreateMissingComponentRequests;
+    private boolean autoDiscardStaleComponentRequests;
 
     @DataBoundConstructor
     public ArtifactoryIvyFreeStyleConfigurator(ServerDetails details, Credentials overridingDeployerCredentials,
@@ -109,7 +117,10 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
             String artifactPattern, boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
             boolean discardOldBuilds, boolean passIdentifiedDownstream, boolean discardBuildArtifacts,
             String matrixParams, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
-            String aggregationBuildStatus) {
+            String aggregationBuildStatus, boolean blackDuckRunChecks, String blackDuckAppName,
+            String blackDuckAppVersion, String blackDuckReportRecipients, String blackDuckScopes,
+            boolean blackDuckIncludePublishedArtifacts, boolean autoCreateMissingComponentRequests,
+            boolean autoDiscardStaleComponentRequests) {
         this.details = details;
         this.overridingDeployerCredentials = overridingDeployerCredentials;
         this.deployArtifacts = deployArtifacts;
@@ -134,6 +145,14 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
         this.discardBuildArtifacts = discardBuildArtifacts;
+        this.blackDuckRunChecks = blackDuckRunChecks;
+        this.blackDuckAppName = blackDuckAppName;
+        this.blackDuckAppVersion = blackDuckAppVersion;
+        this.blackDuckReportRecipients = blackDuckReportRecipients;
+        this.blackDuckScopes = blackDuckScopes;
+        this.blackDuckIncludePublishedArtifacts = blackDuckIncludePublishedArtifacts;
+        this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
+        this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
     }
 
     /**
@@ -227,6 +246,10 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         return details != null ? details.artifactoryName : null;
     }
 
+    public String getArtifactoryUrl() {
+        return details != null ? details.getArtifactoryUrl() : null;
+    }
+
     public boolean isDeployArtifacts() {
         return deployArtifacts;
     }
@@ -251,9 +274,41 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         return aggregationBuildStatus;
     }
 
+    public boolean isBlackDuckRunChecks() {
+        return blackDuckRunChecks;
+    }
+
+    public String getBlackDuckAppName() {
+        return blackDuckAppName;
+    }
+
+    public String getBlackDuckAppVersion() {
+        return blackDuckAppVersion;
+    }
+
+    public String getBlackDuckReportRecipients() {
+        return blackDuckReportRecipients;
+    }
+
+    public String getBlackDuckScopes() {
+        return blackDuckScopes;
+    }
+
+    public boolean isBlackDuckIncludePublishedArtifacts() {
+        return blackDuckIncludePublishedArtifacts;
+    }
+
+    public boolean isAutoCreateMissingComponentRequests() {
+        return autoCreateMissingComponentRequests;
+    }
+
+    public boolean isAutoDiscardStaleComponentRequests() {
+        return autoDiscardStaleComponentRequests;
+    }
+
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject project) {
-        return ActionableHelper.getArtifactoryProjectAction(details.getArtifactoryUrl(), project);
+        return ActionableHelper.getArtifactoryProjectAction(getArtifactoryUrl(), project);
     }
 
     @Override
@@ -271,8 +326,12 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                 .discardBuildArtifacts(isDiscardBuildArtifacts()).matrixParams(getMatrixParams())
                 .maven2Compatible(isM2Compatible()).artifactsPattern(getArtifactPattern())
                 .ivyPattern(getIvyPattern()).enableIssueTrackerIntegration(isEnableIssueTrackerIntegration())
-                .aggregateBuildIssues(isAggregateBuildIssues()).aggregationBuildStatus(
-                        getAggregationBuildStatus()).build();
+                .aggregateBuildIssues(isAggregateBuildIssues()).aggregationBuildStatus(getAggregationBuildStatus())
+                .integrateBlackDuck(isBlackDuckRunChecks(), getBlackDuckAppName(), getBlackDuckAppVersion(),
+                        getBlackDuckReportRecipients(), getBlackDuckScopes(), isBlackDuckIncludePublishedArtifacts(),
+                        isAutoCreateMissingComponentRequests(), isAutoDiscardStaleComponentRequests())
+                .build();
+
         File localDependencyFile = Which.jarFile(ArtifactoryBuildListener.class);
         final FilePath actualDependencyDir =
                 PluginDependencyHelper.getActualDependencyDirectory(build, localDependencyFile);
@@ -303,7 +362,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                 }
                 Result result = build.getResult();
                 if (!context.isSkipBuildInfoDeploy() && (result == null || result.isBetterOrEqualTo(Result.SUCCESS))) {
-                    build.getActions().add(0, new BuildInfoResultAction(context.getArtifactoryName(), build));
+                    build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build));
                     build.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryIvyFreeStyleConfigurator>(build,
                             ArtifactoryIvyFreeStyleConfigurator.this));
                 }

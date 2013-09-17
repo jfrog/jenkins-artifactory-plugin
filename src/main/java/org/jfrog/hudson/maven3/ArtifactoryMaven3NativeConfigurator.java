@@ -13,13 +13,20 @@ import hudson.model.Hudson;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.ArtifactoryBuilder;
+import org.jfrog.hudson.ArtifactoryRedeployPublisher;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.ResolverOverrider;
 import org.jfrog.hudson.ServerDetails;
+import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.release.ReleaseAction;
+import org.jfrog.hudson.util.CredentialResolver;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.MavenVersionHelper;
+import org.jfrog.hudson.util.PublisherContext;
+import org.jfrog.hudson.util.ResolverContext;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
@@ -90,18 +97,19 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
             };
         }
 
-        return new Environment() {
-            @Override
-            public void buildEnvVars(Map<String, String> env) {
-                super.buildEnvVars(env);
-            }
+        MavenModuleSet project = (MavenModuleSet) build.getProject();
 
-            @Override
-            public boolean tearDown(AbstractBuild build, BuildListener listener)
-                    throws IOException, InterruptedException {
-                return super.tearDown(build, listener);
-            }
-        };
+        ArtifactoryRedeployPublisher publisher = ActionableHelper.getPublisher(project,
+                ArtifactoryRedeployPublisher.class);
+        ArtifactoryMaven3NativeConfigurator resolver = ActionableHelper.getBuildWrapper(
+                project, ArtifactoryMaven3NativeConfigurator.class);
+
+        // if the artifactory publisher and resolver are not active, return empty env.
+        if (publisher == null && resolver == null) {
+            return new Environment() {
+            };
+        }
+        return new MavenExtractorEnvironment((MavenModuleSetBuild) build, publisher, resolver, listener);
     }
 
     public ArtifactoryServer getArtifactoryServer() {
@@ -164,4 +172,78 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
         }
     }
 
+    public class MavenExtractorEnvironment extends Environment {
+        private final ArtifactoryRedeployPublisher publisher;
+        private final MavenModuleSetBuild build;
+        private final ArtifactoryMaven3NativeConfigurator resolver;
+        private final BuildListener buildListener;
+
+        public MavenExtractorEnvironment(MavenModuleSetBuild build, ArtifactoryRedeployPublisher publisher,
+                ArtifactoryMaven3NativeConfigurator resolver, BuildListener buildListener)
+                throws IOException, InterruptedException {
+            this.buildListener = buildListener;
+            this.build = build;
+            this.publisher = publisher;
+            this.resolver = resolver;
+        }
+
+        @Override
+        public void buildEnvVars(Map<String, String> env) {
+            PublisherContext publisherContext = null;
+            if (publisher != null) {
+                publisherContext = createPublisherContext(publisher, build);
+            }
+
+            ResolverContext resolverContext = null;
+            if (resolver != null) {
+                Credentials resolverCredentials = CredentialResolver.getPreferredResolver(
+                        resolver, resolver.getArtifactoryServer());
+                resolverContext = new ResolverContext(resolver.getArtifactoryServer(), resolver.getDetails(),
+                        resolverCredentials);
+            }
+
+            try {
+                ExtractorUtils.addBuilderInfoArguments(env, build, buildListener, publisherContext, resolverContext);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private PublisherContext createPublisherContext(ArtifactoryRedeployPublisher publisher, AbstractBuild build) {
+            ReleaseAction release = ActionableHelper.getLatestAction(build, ReleaseAction.class);
+            ServerDetails server = publisher.getDetails();
+            if (release != null) {
+                // staging build might change the target deployment repository
+                String stagingRepoKey = release.getStagingRepositoryKey();
+                if (!StringUtils.isBlank(stagingRepoKey) && !stagingRepoKey.equals(server.repositoryKey)) {
+                    server = new ServerDetails(server.artifactoryName, server.getArtifactoryUrl(), stagingRepoKey,
+                            server.snapshotsRepositoryKey, server.downloadRepositoryKey);
+                }
+            }
+
+            PublisherContext context = new PublisherContext.Builder().artifactoryServer(
+                    publisher.getArtifactoryServer())
+                    .serverDetails(server).deployerOverrider(publisher).runChecks(publisher.isRunChecks())
+                    .includePublishArtifacts(publisher.isIncludePublishArtifacts())
+                    .violationRecipients(publisher.getViolationRecipients()).scopes(publisher.getScopes())
+                    .licenseAutoDiscovery(publisher.isLicenseAutoDiscovery())
+                    .discardOldBuilds(publisher.isDiscardOldBuilds()).deployArtifacts(publisher.isDeployArtifacts())
+                    .includesExcludes(publisher.getArtifactDeploymentPatterns())
+                    .skipBuildInfoDeploy(!publisher.isDeployBuildInfo())
+                    .includeEnvVars(publisher.isIncludeEnvVars()).envVarsPatterns(publisher.getEnvVarsPatterns())
+                    .discardBuildArtifacts(publisher.isDiscardBuildArtifacts())
+                    .matrixParams(publisher.getMatrixParams()).evenIfUnstable(publisher.isEvenIfUnstable())
+                    .enableIssueTrackerIntegration(publisher.isEnableIssueTrackerIntegration())
+                    .aggregateBuildIssues(publisher.isAggregateBuildIssues())
+                    .aggregationBuildStatus(publisher.getAggregationBuildStatus())
+                    .integrateBlackDuck(publisher.isBlackDuckRunChecks(), publisher.getBlackDuckAppName(),
+                            publisher.getBlackDuckAppVersion(), publisher.getBlackDuckReportRecipients(),
+                            publisher.getBlackDuckScopes(), publisher.isBlackDuckIncludePublishedArtifacts(),
+                            publisher.isAutoCreateMissingComponentRequests(),
+                            publisher.isAutoDiscardStaleComponentRequests())
+                    .build();
+
+            return context;
+        }
+    }
 }
