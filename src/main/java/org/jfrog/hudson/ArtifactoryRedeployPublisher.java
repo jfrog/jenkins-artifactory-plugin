@@ -316,6 +316,10 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         return filterExcludedArtifactsFromBuild;
     }
 
+    public boolean isApplicable(AbstractBuild build) {
+        return !isBuildFromM2ReleasePlugin(build);
+    }
+
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
         return details != null ? new ArtifactoryProjectAction(details.getArtifactoryUrl(), project) : null;

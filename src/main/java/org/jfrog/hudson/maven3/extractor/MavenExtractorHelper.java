@@ -27,6 +27,9 @@ public abstract class MavenExtractorHelper {
 
         ArtifactoryRedeployPublisher publisher = ActionableHelper.getPublisher(project,
                 ArtifactoryRedeployPublisher.class);
+        if (publisher != null && !publisher.isApplicable(build)) {
+            publisher = null;
+        }
         ArtifactoryMaven3NativeConfigurator resolver = ActionableHelper.getBuildWrapper(
                 project, ArtifactoryMaven3NativeConfigurator.class);
 
