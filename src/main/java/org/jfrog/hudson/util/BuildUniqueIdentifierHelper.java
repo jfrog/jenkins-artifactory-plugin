@@ -3,6 +3,7 @@ package org.jfrog.hudson.util;
 import hudson.matrix.Combination;
 import hudson.matrix.MatrixRun;
 import hudson.model.*;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.gradle.ArtifactoryGradleConfigurator;
@@ -119,7 +120,7 @@ public class BuildUniqueIdentifierHelper {
             buildName = buildName.substring(0, buildName.indexOf("/"));
         }
 
-        return buildName;
+        return StringUtils.replace(buildName, "/", " :: ");
     }
 
     public static String getBuildNumber(AbstractBuild build) {
