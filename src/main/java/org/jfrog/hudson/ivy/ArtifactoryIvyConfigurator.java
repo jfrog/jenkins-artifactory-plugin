@@ -361,7 +361,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
 
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject project) {
-        return ActionableHelper.getArtifactoryProjectAction(details.getArtifactoryUrl(), project);
+        return ActionableHelper.getArtifactoryProjectAction(getArtifactoryUrl(), project);
     }
 
     @Override

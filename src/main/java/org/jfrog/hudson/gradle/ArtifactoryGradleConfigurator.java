@@ -412,7 +412,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject project) {
         List<ArtifactoryProjectAction> action =
-                ActionableHelper.getArtifactoryProjectAction(details.getArtifactoryUrl(), project);
+                ActionableHelper.getArtifactoryProjectAction(getArtifactoryUrl(), project);
         if (getReleaseWrapper() != null) {
             List<Action> actions = new ArrayList<Action>();
             actions.addAll(action);
