@@ -6,3 +6,5 @@ Before we can accept your contribution, process your GitHub pull requests, and t
 This should only take a minute to complete and is a one-time process.
 
 *Thanks for Your Contribution to the Community!* :-)
+
+TODO @jbaruch: Describe the configuration of Maven repositories so that external developers can build this
