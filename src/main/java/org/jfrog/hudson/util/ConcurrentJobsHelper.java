@@ -1,5 +1,6 @@
 package org.jfrog.hudson.util;
 
+import hudson.model.AbstractBuild;
 import hudson.model.Result;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -10,7 +11,37 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Lior Hasson
  */
 public class ConcurrentJobsHelper {
-    public static ConcurrentHashMap<String, ConcurrentBuild> concurrentBuildHandler = new ConcurrentHashMap<String, ConcurrentBuild>();
+    private static ConcurrentHashMap<String, ConcurrentBuild> concurrentBuildHandler = new ConcurrentHashMap<String, ConcurrentBuild>();
+
+    /**
+     * Get an 'identifier' for the build which is composed of {@link BuildUniqueIdentifierHelper#getBuildName(AbstractBuild)}
+     * -{@link AbstractBuild#getNumber()}. This supports even concurrent builds of the same buildjob on a slave.
+     *
+     * @param build The build
+     * @return The identifier for the given build.
+     */
+    private static String getConcurrentBuildJobId(AbstractBuild build) {
+        return BuildUniqueIdentifierHelper.getBuildName(build) + "." + build.getNumber();
+    }
+
+    /**
+     * Get the information for the given build.
+     *
+     * @param build The build
+     * @return The information about the build
+     */
+    public static ConcurrentBuild getConcurrentBuild(AbstractBuild build) {
+        return concurrentBuildHandler.get(getConcurrentBuildJobId(build));
+    }
+
+    /**
+     * Removes the information for the given build.
+     *
+     * @param build The build
+     */
+    public static void removeConcurrentBuildJob(AbstractBuild build) {
+        concurrentBuildHandler.remove(getConcurrentBuildJobId(build));
+    }
 
     /**
      * The class is used to synchronize the setup stage of jobs which are part of the same multi-configuration project (matrix projects).
@@ -22,16 +53,16 @@ public class ConcurrentJobsHelper {
      * and in addtion, all jobs will wait till the initialization is finished.
      */
     public static abstract class ConcurrentBuildSetupSync {
-        public ConcurrentBuildSetupSync(String buildName, int totalBuilds) {
+        public ConcurrentBuildSetupSync(AbstractBuild build, int totalBuilds) {
             // Add the build to the concurrent map
             ConcurrentBuild newBuild = new ConcurrentBuild(new AtomicInteger(totalBuilds));
-            ConcurrentBuild build = concurrentBuildHandler.putIfAbsent(buildName, newBuild);
-            build = build == null ? newBuild : build;
+            ConcurrentBuild existingBuild = concurrentBuildHandler.putIfAbsent(getConcurrentBuildJobId(build), newBuild);
+            existingBuild = existingBuild == null ? newBuild : existingBuild;
 
             if (totalBuilds == 1) {
                 setUp();
             } else {
-                setupMultiBuild(build);
+                setupMultiBuild(existingBuild);
             }
         }
 
@@ -68,11 +99,12 @@ public class ConcurrentJobsHelper {
      * The tearDown() method will be invoked by only the last job running.
      */
     public static abstract class ConcurrentBuildTearDownSync {
-        public ConcurrentBuildTearDownSync(String buildName, Result buildResult) {
-            ConcurrentBuild build = concurrentBuildHandler.get(buildName);
-            if (build.getThreadsCounter().decrementAndGet() == 0 || Result.ABORTED.equals(buildResult)) {
+
+        public ConcurrentBuildTearDownSync(AbstractBuild build, Result buildResult) {
+            ConcurrentBuild concurrentBuild = concurrentBuildHandler.get(getConcurrentBuildJobId(build));
+            if (concurrentBuild.getThreadsCounter().decrementAndGet() == 0 || Result.ABORTED.equals(buildResult)) {
                 tearDown();
-                concurrentBuildHandler.remove(buildName);
+                removeConcurrentBuildJob(build);
             }
         }
 
