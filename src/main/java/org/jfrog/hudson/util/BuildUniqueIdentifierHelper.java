@@ -2,12 +2,19 @@ package org.jfrog.hudson.util;
 
 import hudson.matrix.Combination;
 import hudson.matrix.MatrixRun;
-import hudson.model.*;
-import org.apache.commons.lang.StringUtils;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.Cause;
+import hudson.model.Hudson;
+import hudson.model.Item;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.gradle.ArtifactoryGradleConfigurator;
 
+import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -114,7 +121,21 @@ public class BuildUniqueIdentifierHelper {
         return null;
     }
 
-    public static String getBuildName(AbstractBuild build) {
+    public static String getBuildName(AbstractBuild build, BuildListener listener) {
+        String productName = null;
+        try
+        {
+            productName = build.getEnvironment(listener).get("PRODUCT_NAME");
+        }
+        catch (Exception e)
+        {
+            debuggingLogger.log(Level.WARNING, "Unable to fetch the env variable PRODUCT_NAME", e);
+        }
+        if(productName != null && productName.length() > 0)
+        {
+            debuggingLogger.log(Level.INFO, "Detected PRODUCT_NAME", productName);
+            return productName;
+        }
         String lastItemInBuildName = build.getProject().getName();
         String buildName = build.getProject().getFullName();
         if (!buildName.equals(lastItemInBuildName)) {

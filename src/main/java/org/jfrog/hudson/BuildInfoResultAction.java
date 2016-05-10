@@ -63,7 +63,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
     }
 
     private String generateUrl(String artifactoryRootUrl, AbstractBuild build) {
-        return artifactoryRootUrl + "/webapp/builds/" + Util.rawEncode(BuildUniqueIdentifierHelper.getBuildName(build)) + "/"
+        return artifactoryRootUrl + "/webapp/builds/" + Util.rawEncode(BuildUniqueIdentifierHelper.getBuildName(build, listener)) + "/"
                 + Util.rawEncode(BuildUniqueIdentifierHelper.getBuildNumber(build));
     }
 }

@@ -309,7 +309,7 @@ public class UnifiedPromoteBuildAction<C extends BuildInfoAwareConfigurator & De
 
         private void handlePluginPromotion(TaskListener listener, ArtifactoryBuildInfoClient client)
                 throws IOException {
-            String buildName = BuildUniqueIdentifierHelper.getBuildName(build);
+            String buildName = BuildUniqueIdentifierHelper.getBuildName(build, listener);
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             HttpResponse pluginPromotionResponse = client.executePromotionUserPlugin(
                     promotionPlugin.getPluginName(), buildName, buildNumber, promotionPlugin.getParamMap());
@@ -332,7 +332,7 @@ public class UnifiedPromoteBuildAction<C extends BuildInfoAwareConfigurator & De
                     .dryRun(true);
             listener.getLogger()
                     .println("Performing dry run promotion (no changes are made during dry run) ...");
-            String buildName = BuildUniqueIdentifierHelper.getBuildName(build);
+            String buildName = BuildUniqueIdentifierHelper.getBuildName(build, listener);
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             HttpResponse dryResponse = client.stageBuild(buildName, buildNumber, promotionBuilder.build());
             if (checkSuccess(dryResponse, true, true, listener)) {
