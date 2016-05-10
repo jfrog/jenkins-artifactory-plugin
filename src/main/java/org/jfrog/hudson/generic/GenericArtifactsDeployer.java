@@ -85,7 +85,7 @@ public class GenericArtifactsDeployer {
     private ArrayListMultimap<String, String> getbuildPropertiesMap() {
         ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
 
-        properties.put("build.name", BuildUniqueIdentifierHelper.getBuildName(build));
+        properties.put("build.name", BuildUniqueIdentifierHelper.getBuildName(build, listener));
         properties.put("build.number", BuildUniqueIdentifierHelper.getBuildNumber(build));
         properties.put("build.timestamp", build.getTimestamp().getTime().getTime() + "");
         Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);

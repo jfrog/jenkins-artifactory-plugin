@@ -8,6 +8,7 @@ import org.jfrog.hudson.ArtifactoryRedeployPublisher;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.gradle.ArtifactoryGradleConfigurator;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
@@ -114,7 +115,13 @@ public class BuildUniqueIdentifierHelper {
         return null;
     }
 
-    public static String getBuildName(AbstractBuild build) {
+    public static String getBuildName(AbstractBuild build, BuildListener listener) {
+        String productName = build.getEnvironment(listener).get("PRODUCT_NAME");
+        if(productName != null && productName.length() > 0)
+        {
+            debuggingLogger.log(Level.INFO, "Detected PRODUCT_NAME", productName);
+            return productName;
+        }
         String lastItemInBuildName = build.getProject().getName();
         String buildName = build.getProject().getFullName();
         if (!buildName.equals(lastItemInBuildName)) {

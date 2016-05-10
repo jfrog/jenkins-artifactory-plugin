@@ -15,14 +15,14 @@ public class ConcurrentJobsHelper {
     private static ConcurrentHashMap<String, ConcurrentBuild> concurrentBuildHandler = new ConcurrentHashMap<String, ConcurrentBuild>();
 
     /**
-     * Get an 'identifier' for the build which is composed of {@link BuildUniqueIdentifierHelper#getBuildName(AbstractBuild)}
+     * Get an 'identifier' for the build which is composed of {@link BuildUniqueIdentifierHelper#getBuildName(AbstractBuild, BuildListener)}
      * -{@link AbstractBuild#getNumber()}. This supports even concurrent builds of the same buildjob on a slave.
      *
      * @param build The build
      * @return The identifier for the given build.
      */
     private static String getConcurrentBuildJobId(AbstractBuild build) {
-        return BuildUniqueIdentifierHelper.getBuildName(build) + "." + build.getNumber();
+        return BuildUniqueIdentifierHelper.getBuildName(build, listener) + "." + build.getNumber();
     }
 
     /**

@@ -216,7 +216,7 @@ public class ExtractorUtils {
                                          PublisherContext context, ArtifactoryClientConfiguration configuration) {
         configuration.setActivateRecorder(Boolean.TRUE);
 
-        String buildName = BuildUniqueIdentifierHelper.getBuildName(build);
+        String buildName = BuildUniqueIdentifierHelper.getBuildName(build, listener);
         configuration.info.setBuildName(buildName);
         configuration.publisher.addMatrixParam("build.name", buildName);
         String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
