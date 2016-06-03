@@ -132,6 +132,8 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
         defaultModules = null;
         defaultVcsConfig = null;
         defaultPromotionConfig = null;
+        releaseVersion = null;
+        nextVersion = null;
     }
 
     public boolean isStrategyRequestFailed() {
@@ -373,6 +375,8 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
 
     public abstract String getNextVersionFor(Object moduleName);
 
+    public abstract boolean isValid(AbstractBuild build, BuildListener listener, String versioning);
+
     protected void initBuilderSpecific() throws Exception {
     }
 
@@ -403,8 +407,10 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
     }
 
     protected void doGlobalVersioning() {
-        releaseVersion = defaultGlobalModule.getReleaseVersion();
-        nextVersion = defaultGlobalModule.getNextDevelopmentVersion();
+        if (defaultGlobalModule != null) {
+            releaseVersion = defaultGlobalModule.getReleaseVersion();
+            nextVersion = defaultGlobalModule.getNextDevelopmentVersion();
+        }
     }
 
     protected W getWrapper() {
