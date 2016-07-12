@@ -65,7 +65,7 @@ public class CredentialsConfig implements Serializable {
      * @return the username that should be apply in this configuration
      */
     public String provideUsername(Item item) {
-        return !PluginsUtils.isCredentialsPluginEnabled() ? credentials.getUsername() : PluginsUtils.credentialsLookup(credentialsId, item).getUsername();
+        return !PluginsUtils.isCredentialsPluginEnabled() || credentialsId == null ? credentials.getUsername() : PluginsUtils.credentialsLookup(credentialsId, item).getUsername();
     }
     /**
      * Not like getPassword this will return the username of the current Credentials mode of the system (legacy/credentials plugin)
@@ -73,11 +73,11 @@ public class CredentialsConfig implements Serializable {
      * @return the password that should be apply in this configuration
      */
     public String providePassword(Item item) {
-        return !PluginsUtils.isCredentialsPluginEnabled() ? credentials.getPassword() : PluginsUtils.credentialsLookup(credentialsId, item).getPassword();
+        return !PluginsUtils.isCredentialsPluginEnabled() || credentialsId == null ? credentials.getPassword() : PluginsUtils.credentialsLookup(credentialsId, item).getPassword();
     }
 
     public Credentials getCredentials(Item item) {
-        return !PluginsUtils.isCredentialsPluginEnabled()? credentials : PluginsUtils.credentialsLookup(credentialsId, item) ;
+        return !PluginsUtils.isCredentialsPluginEnabled() || credentialsId == null ? credentials : PluginsUtils.credentialsLookup(credentialsId, item) ;
     }
 
     // NOTE: These getters are not part of the API, but used by Jenkins Jelly for displaying values on user interface
