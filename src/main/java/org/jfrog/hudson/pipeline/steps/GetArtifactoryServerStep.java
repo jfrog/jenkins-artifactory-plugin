@@ -75,7 +75,7 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
             }
             ArtifactoryServer server = artifactoryServers.get(0);
             org.jfrog.hudson.pipeline.types.ArtifactoryServer artifactoryPipelineServer = new org.jfrog.hudson.pipeline.types.ArtifactoryServer(artifactoryServerID, server.getUrl(),
-                    server.getResolvingCredentialsConfig().getUsername(), server.getResolvingCredentialsConfig().getPassword(),
+                    server.getResolvingCredentialsConfig().provideUsername(build.getParent()), server.getResolvingCredentialsConfig().providePassword(build.getParent()),
                     build, listener);
             return artifactoryPipelineServer;
         }
