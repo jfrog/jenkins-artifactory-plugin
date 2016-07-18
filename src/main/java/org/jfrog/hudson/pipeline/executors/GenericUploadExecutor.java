@@ -24,6 +24,7 @@ import org.jfrog.hudson.pipeline.json.FileJson;
 import org.jfrog.hudson.pipeline.types.BuildInfo;
 import org.jfrog.hudson.pipeline.types.PipelineBuildInfoAccessor;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.ExtractorUtils;
 
 import java.io.IOException;
@@ -70,7 +71,7 @@ public class GenericUploadExecutor {
             boolean isRegexp = BooleanUtils.toBoolean(file.getRegexp());
 
             GenericArtifactsDeployer.FilesDeployerCallable deployer = new GenericArtifactsDeployer.FilesDeployerCallable(listener, pairs, server,
-                    server.getDeployerCredentialsConfig().getCredentials(build.getParent()), repoKey, propertiesToAdd,
+                    new Credentials(server.getResolvingCredentialsConfig().getUsername(), server.getResolvingCredentialsConfig().getPassword()), repoKey, propertiesToAdd,
                     server.createProxyConfiguration(Jenkins.getInstance().proxy));
             deployer.setPatternType(GenericArtifactsDeployer.FilesDeployerCallable.PatternType.WILDCARD);
             deployer.setRecursive(isRecursive);

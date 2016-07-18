@@ -5,6 +5,7 @@ import hudson.model.TaskListener;
 import hudson.util.StreamTaskListener;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
+import org.jfrog.hudson.CredentialsConfig;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -19,29 +20,32 @@ import java.util.logging.Logger;
 public class ArtifactoryServer implements Serializable {
     private String serverName;
     private String url;
-    private String username;
-    private String password;
     private boolean bypassProxy;
     private transient Run build;
     private transient TaskListener listener;
+    private CredentialsConfig credentials;
+    private String user;
+    private String password;
 
     private CpsScript cpsScript;
 
     public ArtifactoryServer(String artifactoryServerName, String url, String username, String password, Run build, TaskListener listener) {
         serverName = artifactoryServerName;
         this.url = url;
-        this.username = username;
-        this.password = password;
         this.build = build;
         this.listener = listener;
+        createNewCredentialsConfig(username, password);
     }
 
     public ArtifactoryServer(String url, String username, String password, Run build, TaskListener listener) {
         this.url = url;
-        this.username = username;
-        this.password = password;
         this.build = build;
         this.listener = listener;
+        createNewCredentialsConfig(username, password);
+    }
+
+    private void createNewCredentialsConfig(String username, String password) {
+        this.credentials = new CredentialsConfig(username, password, null, null);
     }
 
     public void setCpsScript(CpsScript cpsScript) {
@@ -101,6 +105,18 @@ public class ArtifactoryServer implements Serializable {
     }
 
     @Whitelisted
+    public void setUser(String user){
+        this.user = user;
+        createNewCredentialsConfig(this.user, this.password);
+    }
+
+    @Whitelisted
+    public void setPassword(String password){
+        this.password = password;
+        createNewCredentialsConfig(this.user, this.password);
+    }
+
+    @Whitelisted
     public void promote(String buildName, String buildNumber, String targetRepository) throws Exception {
         Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
         stepVariables.put("promotionConfig", new PromotionConfig(buildName, buildNumber, targetRepository));
@@ -137,22 +153,6 @@ public class ArtifactoryServer implements Serializable {
         this.url = url;
     }
 
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public void setBypassProxy(boolean bypassProxy) {
         this.bypassProxy = bypassProxy;
     }
@@ -160,5 +160,14 @@ public class ArtifactoryServer implements Serializable {
     public boolean isBypassProxy() {
         return bypassProxy;
     }
+
+    public CredentialsConfig getCredentials() {
+        return credentials;
+    }
+
+    public void setCredentials(CredentialsConfig credentials) {
+        this.credentials = credentials;
+    }
+
 
 }

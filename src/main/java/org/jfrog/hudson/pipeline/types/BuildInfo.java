@@ -132,8 +132,8 @@ public class BuildInfo implements Serializable {
             throws InterruptedException, NoSuchAlgorithmException, IOException {
         ArtifactoryPipelineConfigurator config = new ArtifactoryPipelineConfigurator(server);
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(config, server);
-        ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideUsername(build.getParent()),
-                preferredDeployer.providePassword(build.getParent()), server.createProxyConfiguration(Jenkins.getInstance().proxy));
+        ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.getUsername(),
+                preferredDeployer.getPassword(), server.createProxyConfiguration(Jenkins.getInstance().proxy));
 
         return new PipelineBuildInfoDeployer(config, client, build, listener, new PipelineBuildInfoAccessor(this));
     }
