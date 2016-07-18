@@ -24,6 +24,8 @@ public class ArtifactoryServer implements Serializable {
     private transient Run build;
     private transient TaskListener listener;
     private CredentialsConfig credentials;
+    private String user;
+    private String password;
 
     private CpsScript cpsScript;
 
@@ -100,6 +102,18 @@ public class ArtifactoryServer implements Serializable {
         stepVariables.put("server", this);
 
         cpsScript.invokeMethod("artifactoryPromoteBuild", stepVariables);
+    }
+
+    @Whitelisted
+    public void setUser(String user){
+        this.user = user;
+        createNewCredentialsConfig(this.user, this.password);
+    }
+
+    @Whitelisted
+    public void setPassword(String password){
+        this.password = password;
+        createNewCredentialsConfig(this.user, this.password);
     }
 
     @Whitelisted
