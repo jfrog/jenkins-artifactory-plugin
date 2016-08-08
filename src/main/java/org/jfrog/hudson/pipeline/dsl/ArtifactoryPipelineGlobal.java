@@ -31,10 +31,10 @@ public class ArtifactoryPipelineGlobal implements Serializable {
     }
 
     @Whitelisted
-    public ArtifactoryServer newServer(String url, String userName, String password) {
+    public ArtifactoryServer newServer(String url, String username, String password) {
         Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
         stepVariables.put("url", url);
-        stepVariables.put("userName", userName);
+        stepVariables.put("username", username);
         stepVariables.put("password", password);
         ArtifactoryServer server = (ArtifactoryServer) this.script.invokeMethod("newArtifactoryServer", stepVariables);
         server.setCpsScript(this.script);
@@ -43,7 +43,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public ArtifactoryServer newServer(Map<String, Object> serverArguments) {
-        List<String> keysAsList = Arrays.asList(new String[] {"url", "userName", "password"});
+        List<String> keysAsList = Arrays.asList(new String[] {"url", "username", "password"});
         if (!keysAsList.containsAll(serverArguments.keySet())) {
             throw new IllegalArgumentException("create new server allows only the following arguments, " + keysAsList);
         }

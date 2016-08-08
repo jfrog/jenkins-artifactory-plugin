@@ -13,10 +13,10 @@ public class PromotionConfig implements Serializable {
     private String buildNumber;
     private String targetRepo;
     private String sourceRepo;
-    private String targetStatus;
+    private String status;
     private String comment;
     private boolean includeDependencies;
-    private boolean useCopy;
+    private boolean copy;
 
     @Whitelisted
     public String getBuildName() {
@@ -59,13 +59,13 @@ public class PromotionConfig implements Serializable {
     }
 
     @Whitelisted
-    public String getTargetStatus() {
-        return targetStatus;
+    public String getStatus() {
+        return status;
     }
 
     @Whitelisted
-    public void setTargetStatus(String targetStatus) {
-        this.targetStatus = targetStatus;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Whitelisted
@@ -89,12 +89,12 @@ public class PromotionConfig implements Serializable {
     }
 
     @Whitelisted
-    public boolean isUseCopy() {
-        return useCopy;
+    public boolean isCopy() {
+        return copy;
     }
 
     @Whitelisted
-    public void setUseCopy(boolean useCopy) {
-        this.useCopy = useCopy;
+    public void setCopy(boolean copy) {
+        this.copy = copy;
     }
 }

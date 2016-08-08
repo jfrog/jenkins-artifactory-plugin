@@ -18,13 +18,13 @@ import java.util.Map;
  */
 public class CreateArtifactoryServerStep extends AbstractStepImpl {
     private String url;
-    private String userName;
+    private String username;
     private String password;
 
     @DataBoundConstructor
-    public CreateArtifactoryServerStep(String url, String userName, String password) {
+    public CreateArtifactoryServerStep(String url, String username, String password) {
         this.url = url;
-        this.userName = userName;
+        this.username = username;
         this.password = password;
     }
 
@@ -32,8 +32,8 @@ public class CreateArtifactoryServerStep extends AbstractStepImpl {
         return url;
     }
 
-    public String getUserName() {
-        return userName;
+    public String getUsername() {
+        return username;
     }
 
     public String getPassword() {
@@ -52,7 +52,7 @@ public class CreateArtifactoryServerStep extends AbstractStepImpl {
             if (StringUtils.isEmpty(artifactoryUrl)) {
                 getContext().onFailure(new MissingArgumentException("Artifactory server URL is mandatory"));
             }
-            return new ArtifactoryServer(artifactoryUrl, step.getUserName(), step.getPassword());
+            return new ArtifactoryServer(artifactoryUrl, step.getUsername(), step.getPassword());
         }
     }
 
@@ -81,8 +81,8 @@ public class CreateArtifactoryServerStep extends AbstractStepImpl {
             if (StringUtils.isNotEmpty(cStep.getUrl())) {
                 args.put("url", cStep.getUrl());
             }
-            if (StringUtils.isNotEmpty(cStep.getUserName())) {
-                args.put("username", cStep.getUserName());
+            if (StringUtils.isNotEmpty(cStep.getUsername())) {
+                args.put("username", cStep.getUsername());
             }
             if (StringUtils.isNotEmpty(cStep.getPassword())) {
                 args.put("password", cStep.getPassword());

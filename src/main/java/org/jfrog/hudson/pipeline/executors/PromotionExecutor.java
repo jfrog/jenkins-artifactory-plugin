@@ -43,12 +43,12 @@ public class PromotionExecutor {
                 server.createProxyConfiguration(Jenkins.getInstance().proxy));
 
         PromotionBuilder promotionBuilder = new PromotionBuilder()
-                .status(promotionConfig.getTargetStatus())
+                .status(promotionConfig.getStatus())
                 .comment(promotionConfig.getComment())
                 .targetRepo(promotionConfig.getTargetRepo())
                 .sourceRepo(promotionConfig.getSourceRepo())
                 .dependencies(promotionConfig.isIncludeDependencies())
-                .copy(promotionConfig.isUseCopy());
+                .copy(promotionConfig.isCopy());
 
         logInfo();
 
@@ -70,8 +70,8 @@ public class PromotionExecutor {
             strBuilder.append(" from '").append(promotionConfig.getSourceRepo()).append("'");
         }
 
-        if (StringUtils.isNotEmpty(promotionConfig.getTargetStatus())) {
-            strBuilder.append(", with status: '").append(promotionConfig.getTargetStatus()).append("'");
+        if (StringUtils.isNotEmpty(promotionConfig.getStatus())) {
+            strBuilder.append(", with status: '").append(promotionConfig.getStatus()).append("'");
         }
 
         if (StringUtils.isNotEmpty(promotionConfig.getComment())) {
@@ -82,7 +82,7 @@ public class PromotionExecutor {
             strBuilder.append(", including dependencies");
         }
 
-        if (promotionConfig.isUseCopy()) {
+        if (promotionConfig.isCopy()) {
             strBuilder.append(", using copy");
         }
 
