@@ -84,12 +84,6 @@ public class GitCoordinator extends AbstractScmCoordinator {
             scmManager.createTag(releaseAction.getTagUrl(), releaseAction.getTagComment());
             state.tagCreated = true;
         }
-
-        if (modifiedFilesForReleaseVersion || releaseAction.isCreateReleaseBranch() || releaseAction.isCreateVcsTag()) {
-            // push the current branch
-            scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), state.currentWorkingBranch);
-            state.releaseBranchPushed = true;
-        }
     }
 
     public void beforeDevelopmentVersionChange() throws IOException, InterruptedException {
@@ -113,9 +107,11 @@ public class GitCoordinator extends AbstractScmCoordinator {
         if (build.getResult().isBetterOrEqualTo(Result.SUCCESS)) {
             // pull before attempting to push changes?
             //scmManager.pull(scmManager.getRemoteUrl(), checkoutBranch);
-            if (modifiedFilesForDevVersion) {
-                scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), state.currentWorkingBranch);
+
+            if (state.releaseBranchCreated) {
+                scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), releaseBranch);
             }
+            scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), checkoutBranch);
         } else {
             // go back to the original checkout branch (required to delete the release branch and reset the working copy)
             scmManager.checkoutBranch(checkoutBranch, false);
@@ -123,9 +119,6 @@ public class GitCoordinator extends AbstractScmCoordinator {
 
             if (state.releaseBranchCreated) {
                 safeDeleteBranch(releaseBranch);
-            }
-            if (state.releaseBranchPushed) {
-                safeDeleteRemoteBranch(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), releaseBranch);
             }
             if (state.tagCreated) {
                 safeDeleteTag(releaseAction.getTagUrl());
@@ -178,7 +171,6 @@ public class GitCoordinator extends AbstractScmCoordinator {
     private static class State {
         String currentWorkingBranch;
         boolean releaseBranchCreated;
-        boolean releaseBranchPushed;
         boolean tagCreated;
     }
 }
