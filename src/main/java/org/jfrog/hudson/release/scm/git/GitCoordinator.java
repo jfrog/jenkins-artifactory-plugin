@@ -72,18 +72,25 @@ public class GitCoordinator extends AbstractScmCoordinator {
         }
     }
 
-    public void afterSuccessfulReleaseVersionBuild() throws Exception {
+    public void afterReleaseVersionChange(boolean modified) throws IOException, InterruptedException {
+        super.afterReleaseVersionChange(modified);
         if (modifiedFilesForReleaseVersion) {
-            // commit local changes
+            // commit local changes immediately - so that e.g. if the build uses it's own git commit, that commit
+            // correctly points to the release commit. In general, it's good to avoid "dirty" builds.
             log(String.format("Committing release version on branch '%s'", state.currentWorkingBranch));
             scmManager.commitWorkingCopy(releaseAction.getTagComment());
         }
 
         if (releaseAction.isCreateVcsTag()) {
             // create tag
+            log(String.format("Committing release tag '%s' on branch '%s'", releaseAction.getTagUrl(), state.currentWorkingBranch));
             scmManager.createTag(releaseAction.getTagUrl(), releaseAction.getTagComment());
             state.tagCreated = true;
         }
+    }
+
+    public void afterSuccessfulReleaseVersionBuild() throws Exception {
+        // nop
     }
 
     public void beforeDevelopmentVersionChange() throws IOException, InterruptedException {
@@ -108,9 +115,13 @@ public class GitCoordinator extends AbstractScmCoordinator {
             // pull before attempting to push changes?
             //scmManager.pull(scmManager.getRemoteUrl(), checkoutBranch);
 
+            // only push at the very end - this avoid unnecessary cleanup and makes the build as atomic as possible
+            // from the point of view of the git repo.
             if (state.releaseBranchCreated) {
+                log(String.format("Pushing release branch '%s'", releaseBranch));
                 scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), releaseBranch);
             }
+            log(String.format("Pushing branch '%s'", checkoutBranch));
             scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), checkoutBranch);
         } else {
             // go back to the original checkout branch (required to delete the release branch and reset the working copy)
@@ -134,15 +145,6 @@ public class GitCoordinator extends AbstractScmCoordinator {
         } catch (Exception e) {
             debuggingLogger.log(Level.FINE, "Failed to delete release branch: ", e);
             log("Failed to delete release branch: " + e.getLocalizedMessage());
-        }
-    }
-
-    private void safeDeleteRemoteBranch(ReleaseRepository remoteRepository, String branch) {
-        try {
-            scmManager.deleteRemoteBranch(remoteRepository, branch);
-        } catch (Exception e) {
-            debuggingLogger.log(Level.FINE, "Failed to delete remote release branch: ", e);
-            log("Failed to delete remote release branch: " + e.getLocalizedMessage());
         }
     }
 
