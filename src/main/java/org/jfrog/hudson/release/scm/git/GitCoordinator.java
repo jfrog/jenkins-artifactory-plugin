@@ -21,7 +21,6 @@ import hudson.model.BuildListener;
 import hudson.model.Result;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.release.ReleaseAction;
-import org.jfrog.hudson.release.ReleaseRepository;
 import org.jfrog.hudson.release.scm.AbstractScmCoordinator;
 
 import java.io.IOException;
