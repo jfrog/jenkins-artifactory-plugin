@@ -20,6 +20,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.release.scm.AbstractScmCoordinator;
 
@@ -69,6 +70,7 @@ public class GitCoordinator extends AbstractScmCoordinator {
             scmManager.checkoutBranch(checkoutBranch, false);
             state.currentWorkingBranch = checkoutBranch;
         }
+        state.initialGitRevision = scmManager.revParse(state.currentWorkingBranch);
     }
 
     public void afterReleaseVersionChange(boolean modified) throws IOException, InterruptedException {
@@ -134,7 +136,7 @@ public class GitCoordinator extends AbstractScmCoordinator {
                 safeDeleteTag(releaseAction.getTagUrl());
             }
             // reset changes done on the original checkout branch (next dev version)
-            safeRevertWorkingCopy();
+            safeRevertWorkingCopy(checkoutBranch, state.initialGitRevision);
         }
     }
 
@@ -156,9 +158,9 @@ public class GitCoordinator extends AbstractScmCoordinator {
         }
     }
 
-    private void safeRevertWorkingCopy() {
+    private void safeRevertWorkingCopy(String branch, ObjectId revision) {
         try {
-            scmManager.revertWorkingCopy();
+            scmManager.revertWorkingCopyTo(branch, revision.name());
         } catch (Exception e) {
             debuggingLogger.log(Level.FINE, "Failed to revert working copy: ", e);
             log("Failed to revert working copy: " + e.getLocalizedMessage());
@@ -170,6 +172,7 @@ public class GitCoordinator extends AbstractScmCoordinator {
     }
 
     private static class State {
+        ObjectId initialGitRevision;
         String currentWorkingBranch;
         boolean releaseBranchCreated;
         boolean tagCreated;

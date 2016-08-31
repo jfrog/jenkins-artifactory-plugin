@@ -30,6 +30,7 @@ import hudson.plugins.git.GitSCM;
 import hudson.plugins.git.UserRemoteConfig;
 import hudson.security.ACL;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.transport.RemoteConfig;
 import org.eclipse.jgit.transport.URIish;
 import org.jenkinsci.plugins.gitclient.Git;
@@ -70,6 +71,14 @@ public class GitManager extends AbstractScmManager<GitSCM> {
         }
     }
 
+    /**
+     * Exposes GitClient.revParse to retrieve e.g. the git commit id of a branch or tag
+     */
+    public ObjectId revParse(String revName) throws IOException, InterruptedException {
+        GitClient client = getGitClient(null);
+        return client.revParse(revName);
+    }
+
     public void commitWorkingCopy(final String commitMessage) throws IOException, InterruptedException {
         GitClient client = getGitClient(null);
 
@@ -101,6 +110,14 @@ public class GitManager extends AbstractScmManager<GitSCM> {
 
         log(buildListener, "Reverting git working copy (reset --hard)");
         client.clean();
+    }
+
+    /**
+     * Exposes GitClient.checkoutBranch to make sure local git repo is is on the given branch at given commit as HEAD
+     */
+    public void revertWorkingCopyTo(String branch, String rev) throws IOException, InterruptedException {
+        GitClient gitClient = getGitClient(null);
+        gitClient.checkoutBranch(branch, rev);
     }
 
     public void deleteLocalBranch(final String branch) throws IOException, InterruptedException {
