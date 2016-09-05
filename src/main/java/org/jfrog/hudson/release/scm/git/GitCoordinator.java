@@ -83,8 +83,6 @@ public class GitCoordinator extends AbstractScmCoordinator {
         }
 
         if (releaseAction.isCreateVcsTag()) {
-            // create tag
-            log(String.format("Committing release tag '%s' on branch '%s'", releaseAction.getTagUrl(), state.currentWorkingBranch));
             scmManager.createTag(releaseAction.getTagUrl(), releaseAction.getTagComment());
             state.tagCreated = true;
         }
@@ -119,10 +117,8 @@ public class GitCoordinator extends AbstractScmCoordinator {
             // only push at the very end - this avoid unnecessary cleanup and makes the build as atomic as possible
             // from the point of view of the git repo.
             if (state.releaseBranchCreated) {
-                log(String.format("Pushing release branch '%s'", releaseBranch));
                 scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), releaseBranch);
             }
-            log(String.format("Pushing branch '%s'", checkoutBranch));
             scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), checkoutBranch);
         } else {
             // go back to the original checkout branch (required to delete the release branch and reset the working copy)
