@@ -79,7 +79,6 @@ public class GenericArtifactsResolver {
     }
 
     private String replaceVariables(String subject) {
-        Util.replaceMacro(subject, envVars);
-        return subject;
+        return Util.replaceMacro(subject, envVars);
     }
 }
