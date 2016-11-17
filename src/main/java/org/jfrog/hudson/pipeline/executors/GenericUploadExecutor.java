@@ -1,28 +1,23 @@
 package org.jfrog.hudson.pipeline.executors;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.BuildInfoFields;
+import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.generic.GenericArtifactsDeployer;
-import org.jfrog.hudson.pipeline.PipelineUtils;
-import org.jfrog.hudson.pipeline.json.DownloadUploadJson;
-import org.jfrog.hudson.pipeline.json.FileJson;
-import org.jfrog.hudson.pipeline.types.BuildInfo;
-import org.jfrog.hudson.pipeline.types.BuildInfoAccessor;
+import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.ExtractorUtils;
@@ -45,44 +40,22 @@ public class GenericUploadExecutor {
         this.server = server;
         this.listener = listener;
         this.build = build;
-        this.buildinfo = PipelineUtils.prepareBuildinfo(build, buildInfo);
+        this.buildinfo = Utils.prepareBuildinfo(build, buildInfo);
         this.ws = ws;
         this.context = context;
     }
 
-    public BuildInfo execution(String json) throws IOException, InterruptedException {
-        ObjectMapper mapper = new ObjectMapper();
-        DownloadUploadJson uploadJson = mapper.readValue(json, DownloadUploadJson.class);
-        uploadArtifacts(uploadJson);
+    public BuildInfo execution(String spec) throws IOException, InterruptedException {
+        Credentials credentials = new Credentials(server.getDeployerCredentialsConfig().getUsername(),
+                server.getDeployerCredentialsConfig().getPassword());
+        ProxyConfiguration proxyConfiguration = server.createProxyConfiguration(Jenkins.getInstance().proxy);
+        List<Artifact> artifactsToDeploy = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
+                server, credentials, getPropertiesMap(), proxyConfiguration));
+        new BuildInfoAccessor(buildinfo).appendDeployedArtifacts(artifactsToDeploy);
         return buildinfo;
     }
 
-    private void uploadArtifacts(DownloadUploadJson uploadJson) throws IOException, InterruptedException {
-        ArtifactoryServer server = this.server;
-        for (FileJson file : uploadJson.getFiles()) {
-            ArrayListMultimap<String, String> propertiesToAdd = getPropertiesMap(file.getProps());
-            Multimap<String, String> pairs = HashMultimap.create();
-
-            String repoKey = getRepositoryKey(file.getTarget());
-            pairs.put(file.getPattern(), getLocalPath(file.getTarget()));
-
-            boolean isFlat = file.getFlat() == null || BooleanUtils.toBoolean(file.getFlat());
-            boolean isRecursive = file.getRecursive() == null || BooleanUtils.toBoolean(file.getRecursive());
-            boolean isRegexp = BooleanUtils.toBoolean(file.getRegexp());
-
-            GenericArtifactsDeployer.FilesDeployerCallable deployer = new GenericArtifactsDeployer.FilesDeployerCallable(listener, pairs, server,
-                new Credentials(server.getResolvingCredentialsConfig().getUsername(), server.getResolvingCredentialsConfig().getPassword()), repoKey, propertiesToAdd,
-                server.createProxyConfiguration(Jenkins.getInstance().proxy));
-            deployer.setPatternType(GenericArtifactsDeployer.FilesDeployerCallable.PatternType.WILDCARD);
-            deployer.setRecursive(isRecursive);
-            deployer.setFlat(isFlat);
-            deployer.setRegexp( isRegexp);
-            List<Artifact> artifactsToDeploy = ws.act(deployer);
-            new BuildInfoAccessor(buildinfo).appendDeployedArtifacts(artifactsToDeploy);
-        }
-    }
-
-    private ArrayListMultimap<String, String> getPropertiesMap(String props) throws IOException, InterruptedException {
+    private ArrayListMultimap<String, String> getPropertiesMap() throws IOException, InterruptedException {
         ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
 
         if (buildinfo.getName() != null) {
@@ -106,24 +79,6 @@ public class GenericUploadExecutor {
         if (StringUtils.isNotBlank(revision)) {
             properties.put(BuildInfoFields.VCS_REVISION, revision);
         }
-        if (props == null) {
-            return properties;
-        }
-        for (String prop : props.trim().split(";")) {
-            String key = StringUtils.substringBefore(prop, "=");
-            String values = StringUtils.substringAfter(prop, "=");
-            for (String value : values.split(",")) {
-                properties.put(key, value);
-            }
-        }
         return properties;
-    }
-
-    private String getRepositoryKey(String path) {
-        return StringUtils.substringBefore(path, "/");
-    }
-
-    private String getLocalPath(String path) {
-        return StringUtils.substringAfter(path, "/");
     }
 }

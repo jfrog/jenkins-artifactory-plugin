@@ -1,8 +1,8 @@
 package org.jfrog.hudson.pipeline;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.jfrog.hudson.pipeline.json.DownloadUploadJson;
+import org.jfrog.build.extractor.clientConfiguration.util.spec.Spec;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class ArtifactoryDownloadUploadJsonTest {
         InputStream stream = ArtifactoryDownloadUploadJsonTest.class.getClassLoader().getResourceAsStream("jsons/download.json");
         String jsonStr = IOUtils.toString(stream);
         ObjectMapper mapper = new ObjectMapper();
-        DownloadUploadJson downloadJson = mapper.readValue(jsonStr, DownloadUploadJson.class);
+        Spec downloadJson = mapper.readValue(jsonStr, Spec.class);
 
         assertEquals("File pattern is incorrect", "my-repo/resolved.my", downloadJson.getFiles()[0].getPattern());
 

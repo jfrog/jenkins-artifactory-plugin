@@ -66,19 +66,21 @@ public class MavenExtractorEnvironment extends Environment {
     private final BuildListener buildListener;
     private final EnvVars envVars;
     private String propertiesFilePath;
+    private final hudson.Launcher launcher;
 
     // the build env vars method may be called again from another setUp of a wrapper so we need this flag to
     // attempt only once certain operations (like copying file or changing maven opts).
     private boolean initialized;
 
     public MavenExtractorEnvironment(MavenModuleSetBuild build, ArtifactoryRedeployPublisher publisher,
-                                     ArtifactoryMaven3NativeConfigurator resolver, BuildListener buildListener)
+                                     ArtifactoryMaven3NativeConfigurator resolver, BuildListener buildListener, hudson.Launcher launcher)
             throws IOException, InterruptedException {
         this.buildListener = buildListener;
         this.build = build;
         this.publisher = publisher;
         this.resolver = resolver;
         this.envVars = build.getEnvironment(buildListener);
+        this.launcher = launcher;
     }
 
     @Override
@@ -97,7 +99,12 @@ public class MavenExtractorEnvironment extends Environment {
         }
 
         // if not valid Maven version don't modify the environment
-        if (!isMavenVersionValid()) {
+        try {
+            if (!isMavenVersionValid()) {
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace(buildListener.error("Unable to determine Maven version"));
             return;
         }
 
@@ -130,7 +137,7 @@ public class MavenExtractorEnvironment extends Environment {
                 }
 
                 ArtifactoryClientConfiguration configuration = ExtractorUtils.addBuilderInfoArguments(
-                        env, build, buildListener, publisherContext, resolverContext);
+                        env, build, buildListener, publisherContext, resolverContext, build.getWorkspace(), launcher);
                 propertiesFilePath = configuration.getPropertiesFile();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -160,12 +167,8 @@ public class MavenExtractorEnvironment extends Environment {
         return false;
     }
 
-    private boolean isMavenVersionValid() {
-        try {
+    private boolean isMavenVersionValid() throws Exception {
             return MavenVersionHelper.isAtLeastResolutionCapableVersion(build, envVars, buildListener);
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to determine Maven version", e);
-        }
     }
 
     /**
@@ -228,7 +231,7 @@ public class MavenExtractorEnvironment extends Environment {
             }
 
             File maven3ExtractorJar = Which.jarFile(BuildInfoRecorder.class);
-            FilePath dependenciesDirectory = PluginDependencyHelper.getActualDependencyDirectory(context, maven3ExtractorJar);
+            FilePath dependenciesDirectory = PluginDependencyHelper.getActualDependencyDirectory(maven3ExtractorJar, context.getBuiltOn().getRootPath());
 
             FilePath[] files = dependenciesDirectory.list(INCLUDED_FILES, EXCLUDED_FILES);
             List<FilePath> jars = Lists.newArrayList();

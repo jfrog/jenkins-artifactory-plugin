@@ -20,12 +20,12 @@ import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.util.PublishedItemsHelper;
+import org.jfrog.build.extractor.clientConfiguration.util.spec.Spec;
+import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
-import org.jfrog.hudson.util.Credentials;
-import org.jfrog.hudson.util.ExtractorUtils;
+import org.jfrog.hudson.util.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,21 +66,29 @@ public class GenericArtifactsDeployer {
 
     public void deploy()
             throws IOException, InterruptedException {
-        String deployPattern = Util.replaceMacro(configurator.getDeployPattern(), env);
-        deployPattern = StringUtils.replace(deployPattern, "\r\n", "\n");
-        deployPattern = StringUtils.replace(deployPattern, ",", "\n");
-        Multimap<String, String> pairs = PublishedItemsHelper.getPublishedItemsPatternPairs(deployPattern);
-        if (pairs.isEmpty()) {
-            return;
-        }
-
         FilePath workingDir = build.getExecutor().getCurrentWorkspace();
         ArrayListMultimap<String, String> propertiesToAdd = getbuildPropertiesMap();
         ArtifactoryServer artifactoryServer = configurator.getArtifactoryServer();
-        String repositoryKey = Util.replaceMacro(configurator.getRepositoryKey(), env);
-        artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, pairs, artifactoryServer,
-                credentialsConfig.getCredentials(build.getParent()), repositoryKey, propertiesToAdd,
-                artifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
+
+        if (configurator.isUseSpecs()) {
+            String spec = Util.replaceMacro(SpecUtils.getSpecStringFromSpecConf(
+                            configurator.getUploadSpec(), env, workingDir, listener.getLogger()) , env);
+            artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, spec, artifactoryServer,
+                    credentialsConfig.getCredentials(build.getParent()), propertiesToAdd,
+                    artifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
+        } else {
+            String deployPattern = Util.replaceMacro(configurator.getDeployPattern(), env);
+            deployPattern = StringUtils.replace(deployPattern, "\r\n", "\n");
+            deployPattern = StringUtils.replace(deployPattern, ",", "\n");
+            Multimap<String, String> pairs = PublishedItemsHelper.getPublishedItemsPatternPairs(deployPattern);
+            if (pairs.isEmpty()) {
+                return;
+            }
+            String repositoryKey = Util.replaceMacro(configurator.getRepositoryKey(), env);
+            artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, pairs, artifactoryServer,
+                    credentialsConfig.getCredentials(build.getParent()), repositoryKey, propertiesToAdd,
+                    artifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
+        }
     }
 
     private ArrayListMultimap<String, String> getbuildPropertiesMap() {
@@ -121,17 +129,15 @@ public class GenericArtifactsDeployer {
 
     public static class FilesDeployerCallable implements FilePath.FileCallable<List<Artifact>> {
 
-        private final String repositoryKey;
+        private String repositoryKey;
         private TaskListener listener;
         private Multimap<String, String> patternPairs;
         private ArtifactoryServer server;
         private Credentials credentials;
         private ArrayListMultimap<String, String> buildProperties;
         private ProxyConfiguration proxyConfiguration;
-        private boolean recursive;
-        private boolean flat;
-        private boolean regexp;
         private PatternType patternType = PatternType.ANT;
+        private String spec;
 
         public enum PatternType {
             ANT, WILDCARD
@@ -149,27 +155,32 @@ public class GenericArtifactsDeployer {
             this.proxyConfiguration = proxyConfiguration;
         }
 
-        public void setRecursive(boolean recursive) {
-            this.recursive = recursive;
-        }
-
-        public void setFlat(boolean flat) {
-            this.flat = flat;
-        }
-
-        public void setRegexp(boolean regexp){
-            this.regexp = regexp;
-        }
-
-        public void setPatternType(PatternType patternType) {
-            this.patternType = patternType;
+        public FilesDeployerCallable(TaskListener listener, String spec,
+                                     ArtifactoryServer server, Credentials credentials,
+                                     ArrayListMultimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration) {
+            this.listener = listener;
+            this.spec = spec;
+            this.server = server;
+            this.credentials = credentials;
+            this.buildProperties = buildProperties;
+            this.proxyConfiguration = proxyConfiguration;
         }
 
         public List<Artifact> invoke(File workspace, VirtualChannel channel) throws IOException, InterruptedException {
-            Multimap<String, File> targetPathToFilesMap = buildTargetPathToFiles(workspace);
             Set<DeployDetails> artifactsToDeploy = Sets.newHashSet();
-            for (Map.Entry<String, File> entry : targetPathToFilesMap.entries()) {
-                artifactsToDeploy.addAll(buildDeployDetailsFromFileEntry(entry));
+            if (StringUtils.isNotEmpty(spec)) {
+                SpecsHelper specsHelper = new SpecsHelper(new JenkinsBuildInfoLog(listener));
+                Spec uploadSpec = specsHelper.getDownloadUploadSpec(spec);
+                try {
+                    artifactsToDeploy = specsHelper.getDeployDetails(uploadSpec, workspace, buildProperties);
+                } catch (NoSuchAlgorithmException e) {
+                    throw new RuntimeException("Failed uploading artifacts by spec", e);
+                }
+            } else {
+                Multimap<String, File> targetPathToFilesMap = buildTargetPathToFiles(workspace);
+                for (Map.Entry<String, File> entry : targetPathToFilesMap.entries()) {
+                    artifactsToDeploy.addAll(buildDeployDetailsFromFileEntry(entry));
+                }
             }
 
             ArtifactoryBuildInfoClient client = server.createArtifactoryClient(credentials.getUsername(),
@@ -197,7 +208,7 @@ public class GenericArtifactsDeployer {
                 throws IOException {
             for (DeployDetails deployDetail : artifactsToDeploy) {
                 StringBuilder deploymentPathBuilder = new StringBuilder(server.getUrl());
-                deploymentPathBuilder.append("/").append(repositoryKey);
+                deploymentPathBuilder.append("/").append(deployDetail.getTargetRepository());
                 if (!deployDetail.getArtifactPath().startsWith("/")) {
                     deploymentPathBuilder.append("/");
                 }
@@ -209,16 +220,14 @@ public class GenericArtifactsDeployer {
 
         private Multimap<String, File> buildTargetPathToFiles(File workspace) throws IOException {
             Multimap<String, File> result = HashMultimap.create();
+            if (patternPairs == null) {
+                return result;
+            }
             for (Map.Entry<String, String> entry : patternPairs.entries()) {
                 String pattern = entry.getKey();
                 String targetPath = entry.getValue();
-                Multimap<String, File> publishingData = null;
-
-                if (patternType == PatternType.ANT) {
-                    publishingData = PublishedItemsHelper.buildPublishingData(workspace, pattern, targetPath);
-                } else {
-                    publishingData = PublishedItemsHelper.wildCardBuildPublishingData(workspace, pattern, targetPath, flat, recursive, regexp);
-                }
+                Multimap<String, File> publishingData =
+                        PublishedItemsHelper.buildPublishingData(workspace, pattern, targetPath);
 
                 if (publishingData != null) {
                     listener.getLogger().println(

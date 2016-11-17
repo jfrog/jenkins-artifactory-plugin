@@ -38,6 +38,7 @@ import org.jfrog.build.extractor.listener.ArtifactoryBuildListener;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.release.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.util.*;
 import org.jfrog.hudson.util.converters.DeployerResolverOverriderConverter;
@@ -338,7 +339,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     }
 
     @Override
-    public Environment setUp(final AbstractBuild build, Launcher launcher, final BuildListener listener)
+    public Environment setUp(final AbstractBuild build, final Launcher launcher, final BuildListener listener)
             throws IOException, InterruptedException {
         listener.getLogger().println(
                 "Jenkins Artifactory Plugin version: " + ActionableHelper.getArtifactoryPluginVersion());
@@ -388,9 +389,9 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
             public void buildEnvVars(Map<String, String> env) {
                 super.buildEnvVars(env);
                 try {
-                    String actualDependencyDirPath = actualDependencyDirPath(build);
+                    String actualDependencyDirPath = actualDependencyDirPath(build, launcher);
                     env.put("ARTIFACTORY_CACHE_LIBS", actualDependencyDirPath);
-                    ExtractorUtils.addBuilderInfoArguments(env, build, listener, finalPublisherContext, null);
+                    ExtractorUtils.addBuilderInfoArguments(env, build, listener, finalPublisherContext, null, build.getWorkspace(), launcher);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -441,10 +442,10 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         };
     }
 
-    private String actualDependencyDirPath(AbstractBuild build) throws IOException, InterruptedException {
+    private String actualDependencyDirPath(AbstractBuild build, Launcher launcher) throws IOException, InterruptedException {
         File localDependencyFile = Which.jarFile(ArtifactoryBuildListener.class);
         FilePath actualDependencyDir =
-                PluginDependencyHelper.getActualDependencyDirectory(build, localDependencyFile);
+                PluginDependencyHelper.getActualDependencyDirectory(localDependencyFile, Utils.getNode(launcher).getRootPath());
         String actualDependencyDirPath = actualDependencyDir.getRemote();
         actualDependencyDirPath = actualDependencyDirPath.replace('\\', '/');
         actualDependencyDirPath = "\"" + actualDependencyDirPath + "\"";

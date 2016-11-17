@@ -21,6 +21,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.util.XStream2;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.*;
+import org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator;
 import org.jfrog.hudson.util.Credentials;
 
 import java.io.IOException;
@@ -116,7 +117,7 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
      * Convert the (ServerDetails)details to (ServerDetails)resolverDetails if it doesn't exists already
      */
     private void overrideResolverDetails(T overrider, Class overriderClass) {
-        if (overrider instanceof ResolverOverrider) {
+        if (overrider instanceof ResolverOverrider && !overriderClass.getSimpleName().equals(ArtifactoryMaven3NativeConfigurator.class.getSimpleName())) {
             try {
                 Field resolverDetailsField = overriderClass.getDeclaredField("resolverDetails");
                 resolverDetailsField.setAccessible(true);

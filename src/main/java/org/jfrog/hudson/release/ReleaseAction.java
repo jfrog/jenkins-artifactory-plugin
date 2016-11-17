@@ -18,6 +18,8 @@ package org.jfrog.hudson.release;
 
 import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.Maps;
 import hudson.Util;
 import hudson.matrix.MatrixConfiguration;
@@ -25,8 +27,6 @@ import hudson.matrix.MatrixProject;
 import hudson.model.*;
 import hudson.tasks.BuildWrapper;
 import org.apache.commons.lang.StringUtils;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 import org.jfrog.hudson.ArtifactoryPlugin;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.PluginSettings;
@@ -291,7 +291,7 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
             resp.setStatus(StaplerResponse.SC_INTERNAL_SERVER_ERROR);
             ErrorResponse errorResponse = new ErrorResponse(StaplerResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(SerializationConfig.Feature.INDENT_OUTPUT, true);
+            mapper.enable(SerializationFeature.INDENT_OUTPUT);
             resp.getWriter().write(mapper.writeValueAsString(errorResponse));
         }
     }

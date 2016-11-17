@@ -9,7 +9,7 @@ import org.jfrog.build.api.builder.PromotionBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.pipeline.ArtifactoryPipelineConfigurator;
+import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.types.PromotionConfig;
 import org.jfrog.hudson.release.PromotionUtils;
 import org.jfrog.hudson.util.CredentialManager;
@@ -37,7 +37,7 @@ public class PromotionExecutor {
     }
 
     public void execution() throws IOException {
-        ArtifactoryPipelineConfigurator configurator = new ArtifactoryPipelineConfigurator(server);
+        ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(server);
         CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, server);
         ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideUsername(build.getParent()), deployerConfig.providePassword(build.getParent()),
                 server.createProxyConfiguration(Jenkins.getInstance().proxy));

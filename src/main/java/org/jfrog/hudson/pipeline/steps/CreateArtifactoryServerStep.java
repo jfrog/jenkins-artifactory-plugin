@@ -1,7 +1,10 @@
 package org.jfrog.hudson.pipeline.steps;
 
 import com.google.inject.Inject;
+import hudson.EnvVars;
 import hudson.Extension;
+import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.cli.MissingArgumentException;
@@ -20,12 +23,14 @@ public class CreateArtifactoryServerStep extends AbstractStepImpl {
     private String url;
     private String username;
     private String password;
+    private String credentialsId;
 
     @DataBoundConstructor
-    public CreateArtifactoryServerStep(String url, String username, String password) {
+    public CreateArtifactoryServerStep(String url, String username, String password, String credentialsId) {
         this.url = url;
         this.username = username;
         this.password = password;
+        this.credentialsId = credentialsId;
     }
 
     public String getUrl() {
@@ -40,17 +45,39 @@ public class CreateArtifactoryServerStep extends AbstractStepImpl {
         return password;
     }
 
+    public String getCredentialsId() {
+        return credentialsId;
+    }
+
     public static class Execution extends AbstractSynchronousStepExecution<ArtifactoryServer> {
         private static final long serialVersionUID = 1L;
 
         @Inject(optional = true)
         private transient CreateArtifactoryServerStep step;
 
+        @StepContextParameter
+        private transient Run build;
+
+        @StepContextParameter
+        private transient TaskListener listener;
+
+        @StepContextParameter
+        private transient Launcher launcher;
+
+        @StepContextParameter
+        private transient FilePath ws;
+
+        @StepContextParameter
+        private transient EnvVars env;
+
         @Override
         protected ArtifactoryServer run() throws Exception {
             String artifactoryUrl = step.getUrl();
             if (StringUtils.isEmpty(artifactoryUrl)) {
                 getContext().onFailure(new MissingArgumentException("Artifactory server URL is mandatory"));
+            }
+            if (!StringUtils.isEmpty(step.getCredentialsId())) {
+                return new ArtifactoryServer(artifactoryUrl, step.getCredentialsId());
             }
             return new ArtifactoryServer(artifactoryUrl, step.getUsername(), step.getPassword());
         }
@@ -74,20 +101,8 @@ public class CreateArtifactoryServerStep extends AbstractStepImpl {
         }
 
         @Override
-        public Map<String, Object> defineArguments(Step step) throws UnsupportedOperationException {
-            Map<String, Object> args = new HashMap<String, Object>();
-            CreateArtifactoryServerStep cStep = (CreateArtifactoryServerStep) step;
-
-            if (StringUtils.isNotEmpty(cStep.getUrl())) {
-                args.put("url", cStep.getUrl());
-            }
-            if (StringUtils.isNotEmpty(cStep.getUsername())) {
-                args.put("username", cStep.getUsername());
-            }
-            if (StringUtils.isNotEmpty(cStep.getPassword())) {
-                args.put("password", cStep.getPassword());
-            }
-            return args;
+        public boolean isAdvanced() {
+            return true;
         }
     }
 }

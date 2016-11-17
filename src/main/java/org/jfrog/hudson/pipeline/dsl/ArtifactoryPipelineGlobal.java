@@ -1,9 +1,13 @@
 package org.jfrog.hudson.pipeline.dsl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.BuildInfo;
+import org.jfrog.hudson.pipeline.types.Docker;
+import org.jfrog.hudson.pipeline.types.GradleBuild;
+import org.jfrog.hudson.pipeline.types.MavenBuild;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -31,6 +35,35 @@ public class ArtifactoryPipelineGlobal implements Serializable {
     }
 
     @Whitelisted
+    public Docker docker(String username, String password) {
+        return new Docker(script, username, password, null, null);
+    }
+
+    @Whitelisted
+    public Docker docker(String username, String password, String host) {
+        return new Docker(script, username, password, null, host);
+    }
+
+    @Whitelisted
+    public Docker docker() {
+        return new Docker(script, null, null, null, null);
+    }
+
+    @Whitelisted
+    public Docker docker(Map<String, Object> dockerArguments) {
+        List<String> keysAsList = Arrays.asList(new String[]{"username", "password", "credentialsId", "host"});
+        if (!keysAsList.containsAll(dockerArguments.keySet())) {
+            throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList);
+        }
+
+        final ObjectMapper mapper = new ObjectMapper();
+        Docker docker = mapper.convertValue(dockerArguments, Docker.class);
+        docker.setCpsScript(script);
+        return docker;
+    }
+
+
+    @Whitelisted
     public ArtifactoryServer newServer(String url, String username, String password) {
         Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
         stepVariables.put("url", url);
@@ -43,9 +76,9 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public ArtifactoryServer newServer(Map<String, Object> serverArguments) {
-        List<String> keysAsList = Arrays.asList(new String[] {"url", "username", "password"});
+        List<String> keysAsList = Arrays.asList(new String[]{"url", "username", "password", "credentialsId"});
         if (!keysAsList.containsAll(serverArguments.keySet())) {
-            throw new IllegalArgumentException("create new server allows only the following arguments, " + keysAsList);
+            throw new IllegalArgumentException("The newServer method accepts the following arguments only: " + keysAsList);
         }
 
         ArtifactoryServer server = (ArtifactoryServer) this.script.invokeMethod("newArtifactoryServer", serverArguments);
@@ -58,5 +91,19 @@ public class ArtifactoryPipelineGlobal implements Serializable {
         BuildInfo buildInfo = (BuildInfo) this.script.invokeMethod("newBuildInfo", new LinkedHashMap<String, Object>());
         buildInfo.setCpsScript(this.script);
         return buildInfo;
+    }
+
+    @Whitelisted
+    public MavenBuild newMavenBuild() {
+        MavenBuild mavenBuild = (MavenBuild) this.script.invokeMethod("newMavenBuild", new LinkedHashMap<String, Object>());
+        mavenBuild.setCpsScript(this.script);
+        return mavenBuild;
+    }
+
+    @Whitelisted
+    public GradleBuild newGradleBuild() {
+        GradleBuild gradleBuild = (GradleBuild) this.script.invokeMethod("newGradleBuild", new LinkedHashMap<String, Object>());
+        gradleBuild.setCpsScript(this.script);
+        return gradleBuild;
     }
 }

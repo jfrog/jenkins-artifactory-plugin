@@ -19,6 +19,7 @@ package org.jfrog.hudson.util;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
 import hudson.model.*;
@@ -37,6 +38,8 @@ import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.util.plugins.MultiConfigurationUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
@@ -132,19 +135,33 @@ public class ExtractorUtils {
      * @param publisherContext A context for publisher settings
      * @param resolverContext  A context for resolver settings
      */
-    public static ArtifactoryClientConfiguration addBuilderInfoArguments(Map<String, String> env, AbstractBuild build,
-                                                                         BuildListener listener, PublisherContext publisherContext, ResolverContext resolverContext)
+    public static ArtifactoryClientConfiguration addBuilderInfoArguments(Map<String, String> env, Run build, TaskListener listener,
+                PublisherContext publisherContext, ResolverContext resolverContext, FilePath ws, hudson.Launcher launcher)
             throws IOException, InterruptedException {
+        ArtifactoryClientConfiguration configuration = getArtifactoryClientConfiguration(env, build,
+                null, listener, publisherContext, resolverContext, ws);
+        persistConfiguration(configuration, env, ws, launcher);
+        return configuration;
+    }
+
+    public static ArtifactoryClientConfiguration getArtifactoryClientConfiguration(Map<String, String> env, Run build,
+                BuildInfo pipelineBuildInfo, TaskListener listener, PublisherContext publisherContext, ResolverContext resolverContext, FilePath ws) throws UnsupportedEncodingException {
         ArtifactoryClientConfiguration configuration = new ArtifactoryClientConfiguration(new NullLog());
-        addBuildRootIfNeeded(build, configuration);
+        if (build instanceof AbstractBuild) {
+            addBuildRootIfNeeded((AbstractBuild) build, configuration);
+        }
 
         if (publisherContext != null) {
-            setPublisherInfo(env, build, publisherContext, configuration);
+            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration, listener, ws);
             publisherContext.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
         }
 
         if (resolverContext != null) {
             setResolverInfo(configuration, build, resolverContext, env);
+        }
+
+        if (!shouldBypassProxy(resolverContext, publisherContext)) {
+            setProxy(configuration);
         }
 
         if ((Jenkins.getInstance().getPlugin("jira") != null) && (publisherContext != null) &&
@@ -157,22 +174,30 @@ public class ExtractorUtils {
         if (publisherContext != null && publisherContext.getEnvVarsPatterns() != null) {
             envVarsPatterns = publisherContext.getEnvVarsPatterns();
         }
-        addEnvVars(env, build, configuration, envVarsPatterns);
-        persistConfiguration(build, configuration, env);
+        addEnvVars(env, build, configuration, envVarsPatterns, listener);
         return configuration;
     }
 
-    private static void setProxy(ArtifactoryServer server, ArtifactoryClientConfiguration configuration) {
-        // TODO: distinguish between resolving bypass and deployment bypass
-        if (!server.isBypassProxy() && Jenkins.getInstance().proxy != null) {
-            configuration.proxy.setHost(Jenkins.getInstance().proxy.name);
-            configuration.proxy.setPort(Jenkins.getInstance().proxy.port);
-            configuration.proxy.setUsername(Jenkins.getInstance().proxy.getUserName());
-            configuration.proxy.setPassword(Jenkins.getInstance().proxy.getPassword());
+    private static boolean shouldBypassProxy(ResolverContext resolverContext, PublisherContext publisherContext) {
+        boolean bypass =
+                resolverContext != null && resolverContext.getServer() != null
+                        && resolverContext.getServer().isBypassProxy();
+        return bypass ||
+                publisherContext != null && publisherContext.getArtifactoryServer() != null
+                        && publisherContext.getArtifactoryServer().isBypassProxy();
+    }
+
+    private static void setProxy(ArtifactoryClientConfiguration configuration) {
+        Jenkins j = Jenkins.getInstance();
+        if (j.proxy != null) {
+            configuration.proxy.setHost(j.proxy.name);
+            configuration.proxy.setPort(j.proxy.port);
+            configuration.proxy.setUsername(j.proxy.getUserName());
+            configuration.proxy.setPassword(j.proxy.getPassword());
         }
     }
 
-    private static void setResolverInfo(ArtifactoryClientConfiguration configuration, AbstractBuild build,
+    private static void setResolverInfo(ArtifactoryClientConfiguration configuration, Run build,
                                         ResolverContext context, Map<String, String> env) {
         configuration.setTimeout(context.getServer().getTimeout());
         configuration.resolver.setContextUrl(context.getServerDetails().getArtifactoryUrl());
@@ -182,9 +207,9 @@ public class ExtractorUtils {
         replaceRepositoryInputForValues(configuration, build, inputDownloadReleaseKey, inputDownloadSnapshotKey, env);
         CredentialsConfig preferredResolver = CredentialManager.getPreferredResolver(context.getResolverOverrider(),
                 context.getServer());
-        if (StringUtils.isNotBlank(preferredResolver.provideUsername(build.getProject()))) {
-            configuration.resolver.setUsername(preferredResolver.provideUsername(build.getProject()));
-            configuration.resolver.setPassword(preferredResolver.providePassword(build.getProject()));
+        if (StringUtils.isNotBlank(preferredResolver.provideUsername(build.getParent()))) {
+            configuration.resolver.setUsername(preferredResolver.provideUsername(build.getParent()));
+            configuration.resolver.setPassword(preferredResolver.providePassword(build.getParent()));
         }
     }
 
@@ -193,7 +218,7 @@ public class ExtractorUtils {
      * under the current environment. We are not allowing for the input or the value to be empty.
      */
     private static void replaceRepositoryInputForValues(ArtifactoryClientConfiguration configuration,
-                                                        AbstractBuild build, String resolverReleaseInput,
+                                                        Run build, String resolverReleaseInput,
                                                         String resolverSnapshotInput, Map<String, String> env) {
         if (StringUtils.isBlank(resolverReleaseInput) || StringUtils.isBlank(resolverSnapshotInput)) {
             build.setResult(Result.FAILURE);
@@ -212,14 +237,21 @@ public class ExtractorUtils {
     /**
      * Set all the parameters relevant for publishing artifacts and build info
      */
-    private static void setPublisherInfo(Map<String, String> env, AbstractBuild build,
-                                         PublisherContext context, ArtifactoryClientConfiguration configuration) {
+    private static void setPublisherInfo(Map<String, String> env, Run build, BuildInfo pipelineBuildInfo, PublisherContext context,
+                ArtifactoryClientConfiguration configuration, TaskListener listerner, FilePath ws) {
         configuration.setActivateRecorder(Boolean.TRUE);
+        String buildName;
+        String buildNumber;
+        if (pipelineBuildInfo != null) {
+            buildName = pipelineBuildInfo.getName();
+            buildNumber = pipelineBuildInfo.getNumber();
+        } else {
+            buildName = BuildUniqueIdentifierHelper.getBuildName(build);
+            buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
+        }
 
-        String buildName = BuildUniqueIdentifierHelper.getBuildName(build);
         configuration.info.setBuildName(buildName);
         configuration.publisher.addMatrixParam("build.name", buildName);
-        String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         configuration.info.setBuildNumber(buildNumber);
         configuration.publisher.addMatrixParam("build.number", buildNumber);
         configuration.info.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
@@ -268,13 +300,13 @@ public class ExtractorUtils {
 
         configuration.info.setPrincipal(userName);
         configuration.info.setAgentName("Jenkins");
-        configuration.info.setAgentVersion(build.getHudsonVersion());
+        configuration.info.setAgentVersion(Jenkins.VERSION);
         ArtifactoryServer artifactoryServer = context.getArtifactoryServer();
         CredentialsConfig preferredDeployer =
                 CredentialManager.getPreferredDeployer(context.getDeployerOverrider(), artifactoryServer);
-        if (StringUtils.isNotBlank(preferredDeployer.provideUsername(build.getProject()))) {
-            configuration.publisher.setUsername(preferredDeployer.provideUsername(build.getProject()));
-            configuration.publisher.setPassword(preferredDeployer.providePassword(build.getProject()));
+        if (StringUtils.isNotBlank(preferredDeployer.provideUsername(build.getParent()))) {
+            configuration.publisher.setUsername(preferredDeployer.provideUsername(build.getParent()));
+            configuration.publisher.setPassword(preferredDeployer.providePassword(build.getParent()));
         }
         configuration.setTimeout(artifactoryServer.getTimeout());
         configuration.publisher.setContextUrl(artifactoryServer.getUrl());
@@ -393,7 +425,7 @@ public class ExtractorUtils {
         return notToDelete;
     }
 
-    private static String getBuildNumbersNotToBeDeletedAsString(AbstractBuild build) {
+    private static String getBuildNumbersNotToBeDeletedAsString(Run build) {
         StringBuilder builder = new StringBuilder();
         List<String> notToBeDeleted = getBuildNumbersNotToBeDeleted(build);
         for (String notToDelete : notToBeDeleted) {
@@ -411,15 +443,15 @@ public class ExtractorUtils {
         }
     }
 
-    public static void persistConfiguration(AbstractBuild build, ArtifactoryClientConfiguration configuration,
-                                            Map<String, String> env) throws IOException, InterruptedException {
-        FilePath propertiesFile = build.getWorkspace().createTextTempFile("buildInfo", ".properties", "", false);
+    public static void persistConfiguration(ArtifactoryClientConfiguration configuration, Map<String, String> env, FilePath ws,
+                hudson.Launcher launcher) throws IOException, InterruptedException {
+        FilePath propertiesFile = ws.createTextTempFile("buildInfo", ".properties", "", false);
         configuration.setPropertiesFile(propertiesFile.getRemote());
         env.put("BUILDINFO_PROPFILE", propertiesFile.getRemote());
         env.put(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFile.getRemote());
         // Jenkins prefixes env variables with 'env' but we need it clean..
         System.setProperty(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFile.getRemote());
-        if (!(Computer.currentComputer() instanceof SlaveComputer)) {
+        if (!(getComputer(launcher) instanceof SlaveComputer)) {
             configuration.persistToPropertiesFile();
         } else {
             try {
@@ -437,6 +469,15 @@ public class ExtractorUtils {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private static Computer getComputer(hudson.Launcher launcher) {
+        Computer computer = Computer.currentComputer();
+        if (computer != null) {
+            return computer;
+        } else {
+            return Utils.getCurrentComputer(launcher);
         }
     }
 
@@ -462,8 +503,8 @@ public class ExtractorUtils {
         }
     }
 
-    private static void addEnvVars(Map<String, String> env, AbstractBuild<?, ?> build,
-                                   ArtifactoryClientConfiguration configuration, IncludesExcludes envVarsPatterns) {
+    private static void addEnvVars(Map<String, String> env, Run<?, ?> build,
+                ArtifactoryClientConfiguration configuration, IncludesExcludes envVarsPatterns, TaskListener listener) {
         IncludeExcludePatterns patterns = new IncludeExcludePatterns(
                 Util.replaceMacro(envVarsPatterns.getIncludePatterns(), env),
                 Util.replaceMacro(envVarsPatterns.getExcludePatterns(), env)
@@ -475,7 +516,7 @@ public class ExtractorUtils {
         configuration.info.addBuildVariables(filteredEnvDifference, patterns);
 
         // Add Jenkins build variables
-        Map<String, String> buildVariables = build.getBuildVariables();
+        EnvVars buildVariables = getEnvVars(build, listener);
         MapDifference<String, String> buildVarDifference = Maps.difference(buildVariables, System.getenv());
         Map<String, String> filteredBuildVarDifferences = buildVarDifference.entriesOnlyOnLeft();
         configuration.info.addBuildVariables(filteredBuildVarDifferences, patterns);
@@ -489,5 +530,16 @@ public class ExtractorUtils {
         }
 
         MultiConfigurationUtils.addMatrixCombination(build, configuration);
+    }
+
+    private static EnvVars getEnvVars(Run<?, ?> build, TaskListener listener) {
+        EnvVars buildVariables;
+        if (build instanceof AbstractBuild) {
+            buildVariables = new EnvVars();
+            buildVariables.putAll(((AbstractBuild) build).getBuildVariables());
+        } else {
+            buildVariables = Utils.extractBuildParameters(build, listener);
+        }
+        return buildVariables;
     }
 }

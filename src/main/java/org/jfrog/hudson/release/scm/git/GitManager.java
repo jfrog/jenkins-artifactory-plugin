@@ -161,6 +161,17 @@ public class GitManager extends AbstractScmManager<GitSCM> {
         return defaultRemoteUrl;
     }
 
+    public String getBranchNameWithoutRemote(String branchName) {
+        List<RemoteConfig> repositories = getJenkinsScm().getRepositories();
+        for (RemoteConfig remoteConfig : repositories) {
+            String prefix = remoteConfig.getName() + "/";
+            if (branchName.startsWith(prefix)) {
+                return StringUtils.removeStart(branchName, prefix);
+            }
+        }
+        return branchName;
+    }
+
     public ReleaseRepository getRemoteConfig(String defaultRemoteNameOrUrl) throws IOException {
         List<RemoteConfig> repositories = getJenkinsScm().getRepositories();
         if (StringUtils.isBlank(defaultRemoteNameOrUrl)) {

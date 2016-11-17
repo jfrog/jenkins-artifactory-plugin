@@ -4,6 +4,8 @@ import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.*;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.security.ACL;
@@ -13,8 +15,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.util.Credentials;
 
@@ -69,12 +69,7 @@ public class PluginsUtils {
     }
 
     public static boolean isUseCredentialsPlugin() {
-        ArtifactoryBuilder.DescriptorImpl descriptor = (ArtifactoryBuilder.DescriptorImpl)
-                Hudson.getInstance().getDescriptor(ArtifactoryBuilder.class);
-        if (descriptor != null) {
-            return descriptor.getUseCredentialsPlugin();
-        }
-        throw new IllegalStateException("ArtifactoryBuilder descriptor is null");
+        return getDescriptor().getUseCredentialsPlugin();
     }
 
     /**
@@ -84,10 +79,14 @@ public class PluginsUtils {
      * @throws IllegalStateException
      */
     public static boolean isPushToBintrayEnabled() {
+        return getDescriptor().isPushToBintrayEnabled();
+    }
+
+    private static ArtifactoryBuilder.DescriptorImpl getDescriptor() {
         ArtifactoryBuilder.DescriptorImpl descriptor = (ArtifactoryBuilder.DescriptorImpl)
                 Hudson.getInstance().getDescriptor(ArtifactoryBuilder.class);
         if (descriptor != null) {
-            return descriptor.isPushToBintrayEnabled();
+            return descriptor;
         }
         throw new IllegalStateException("ArtifactoryBuilder descriptor is null");
     }
@@ -100,12 +99,7 @@ public class PluginsUtils {
      */
 
     public static boolean isCredentialsPluginEnabled() {
-        ArtifactoryBuilder.DescriptorImpl descriptor = (ArtifactoryBuilder.DescriptorImpl)
-                Hudson.getInstance().getDescriptor(ArtifactoryBuilder.class);
-        if (descriptor != null) {
-            return descriptor.getUseCredentialsPlugin();
-        }
-        throw new IllegalStateException("ArtifactoryBuilder descriptor is null");
+        return getDescriptor().getUseCredentialsPlugin();
     }
 
     /**
@@ -122,7 +116,8 @@ public class PluginsUtils {
             URL requestUrl = new URL(jiraBaseUrl + JIRA_REST_SERVERINFO_ENDPOINT);
             HttpResponse response = client.execute(new HttpGet(requestUrl.toURI()));
             lazyInitMapper();
-            Map<String, Object> responseMap = mapper.readValue(response.getEntity().getContent(), new TypeReference<Map<String, Object>>() {});
+            Map<String, Object> responseMap = mapper.readValue(response.getEntity().getContent(), new TypeReference<Map<String, Object>>() {
+            });
             return ((String) responseMap.get("version"));
         } catch (Exception e) {
             throw new RuntimeException("Error while trying to get Jira Issue Tracker version: " + e.getMessage());
@@ -134,5 +129,21 @@ public class PluginsUtils {
             mapper = new ObjectMapper();
         }
         return mapper;
+    }
+
+    public static int getProxyPort() {
+        try {
+            return getDescriptor().getBuildInfoProxyPort();
+        } catch (IllegalStateException e) {
+            return 0;
+        }
+    }
+
+    public static boolean isProxyEnabled() {
+        try {
+            return getDescriptor().isBuildInfoProxyEnabled();
+        } catch (IllegalStateException e) {
+            return false;
+        }
     }
 }

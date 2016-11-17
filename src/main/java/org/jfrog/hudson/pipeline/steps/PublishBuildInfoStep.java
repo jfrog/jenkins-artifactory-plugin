@@ -3,14 +3,15 @@ package org.jfrog.hudson.pipeline.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.*;
-import org.jfrog.hudson.pipeline.PipelineBuildInfoDeployer;
-import org.jfrog.hudson.pipeline.PipelineUtils;
+import org.jfrog.hudson.pipeline.BuildInfoDeployer;
+import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.BuildInfo;
-import org.jfrog.hudson.pipeline.types.BuildInfoAccessor;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.HashMap;
@@ -46,13 +47,16 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
         @StepContextParameter
         private transient TaskListener listener;
 
+        @StepContextParameter
+        private transient Launcher launcher;
+
         @Inject(optional = true)
         private transient PublishBuildInfoStep step;
 
         @Override
         protected Boolean run() throws Exception {
             BuildInfoAccessor buildInfo = new BuildInfoAccessor(step.getBuildInfo());
-            PipelineBuildInfoDeployer deployer = buildInfo.createDeployer(build, listener, PipelineUtils.prepareArtifactoryServer(null, step.getServer()));
+            BuildInfoDeployer deployer = buildInfo.createDeployer(build, listener, launcher, Utils.prepareArtifactoryServer(null, step.getServer()));
             deployer.deploy();
             return true;
         }
@@ -77,8 +81,8 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
         }
 
         @Override
-        public Map<String, Object> defineArguments(Step step) throws UnsupportedOperationException {
-            return new HashMap<String, Object>();
+        public boolean isAdvanced() {
+            return true;
         }
     }
 

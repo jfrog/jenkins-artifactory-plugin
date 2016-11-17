@@ -1,13 +1,15 @@
-package org.jfrog.hudson.pipeline.types;
+package org.jfrog.hudson.pipeline.types.buildInfo;
 
+import hudson.EnvVars;
+import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.dependency.BuildDependency;
-import org.jfrog.hudson.pipeline.PipelineBuildInfoDeployer;
+import org.jfrog.hudson.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.BuildInfoDeployer;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -57,10 +59,10 @@ public class BuildInfoAccessor {
         return this.buildInfo.getRetention();
     }
 
-    public void captureVariables(StepContext context) throws Exception {
+    public void captureVariables(EnvVars envVars, Run build, TaskListener listener) throws Exception {
         Env env = this.buildInfo.getEnv();
         if (env.isCapture()) {
-            env.collectVariables(context);
+            env.collectVariables(envVars, build, listener);
         }
     }
 
@@ -68,9 +70,9 @@ public class BuildInfoAccessor {
         this.buildInfo.appendDeployedArtifacts(artifacts);
     }
 
-    public PipelineBuildInfoDeployer createDeployer(Run build, TaskListener listener, org.jfrog.hudson.ArtifactoryServer server)
+    public BuildInfoDeployer createDeployer(Run build, TaskListener listener, Launcher launcher, ArtifactoryServer server)
             throws InterruptedException, NoSuchAlgorithmException, IOException {
-        return this.buildInfo.createDeployer(build, listener, server);
+        return this.buildInfo.createDeployer(build, listener, launcher, server);
     }
 
     public List<Module> getModules() {

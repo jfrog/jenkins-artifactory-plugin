@@ -171,7 +171,7 @@
                             <f:optionalBlock name="blackDuckRunChecks"
                                              checked="${instance.blackDuckRunChecks}"
                                              inline="true"
-                                             title="Run Black Duck Code Center compliance checks (requires Artifactory Pro)"
+                                             title="Run Black Duck Code Center compliance checks (deprecated)"
                                              help="/plugin/artifactory/help/common/help-blackDuckRunChecks.html">
                                 <f:entry title="${%Code Center application name: }"
                                          field="blackDuckAppName"

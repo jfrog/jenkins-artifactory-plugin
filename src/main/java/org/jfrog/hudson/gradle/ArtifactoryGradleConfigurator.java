@@ -426,7 +426,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     @Override
-    public Environment setUp(final AbstractBuild build, Launcher launcher, final BuildListener listener)
+    public Environment setUp(final AbstractBuild build, final Launcher launcher, final BuildListener listener)
             throws IOException, InterruptedException {
         final PrintStream log = listener.getLogger();
         log.println("Jenkins Artifactory Plugin version: " + ActionableHelper.getArtifactoryPluginVersion());
@@ -502,7 +502,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return new Environment() {
             @Override
             public void buildEnvVars(Map<String, String> env) {
-                GradleInitScriptWriter writer = new GradleInitScriptWriter(build);
+                GradleInitScriptWriter writer = new GradleInitScriptWriter(build, launcher);
                 FilePath workspace = build.getWorkspace();
                 FilePath initScript;
                 String initScriptPath;
@@ -542,7 +542,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
 
                 try {
                     ExtractorUtils.addBuilderInfoArguments(env, build, listener,
-                            finalPublisherBuilder.build(), resolverContext);
+                            finalPublisherBuilder.build(), resolverContext, build.getWorkspace(), launcher);
                 } catch (Exception e) {
                     log.println(e.getMessage());
                     throw new RuntimeException(e);

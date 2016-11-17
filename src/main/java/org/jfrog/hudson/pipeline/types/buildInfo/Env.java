@@ -1,11 +1,13 @@
-package org.jfrog.hudson.pipeline.types;
+package org.jfrog.hudson.pipeline.types.buildInfo;
 
 import hudson.EnvVars;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
+import org.jfrog.hudson.pipeline.Utils;
 
 import java.io.Serializable;
 import java.util.*;
@@ -28,12 +30,13 @@ public class Env implements Serializable {
     /**
      * Collect environment variables and system properties under with filter constrains
      *
-     * @param context
+     * @param env
+     * @param build
+     * @param listener
      * @throws Exception
      */
-    public void collectVariables(StepContext context) throws Exception {
-
-        EnvVars env = context.get(EnvVars.class);
+    public void collectVariables(EnvVars env, Run build, TaskListener listener) throws Exception {
+        env.putAll(Utils.extractBuildParameters(build, listener));
         addAllWithFilter(envVars, env, filter.getPatternFilter());
 
         Map<String, String> sysEnv = new HashMap<String, String>();
@@ -53,7 +56,7 @@ public class Env implements Serializable {
      */
     protected void append(Env env) {
         addAllWithFilter(this.envVars, env.envVars, filter.getPatternFilter());
-        addAllWithFilter(this.envVars, env.sysVars, filter.getPatternFilter());
+        addAllWithFilter(this.sysVars, env.sysVars, filter.getPatternFilter());
     }
 
     /**

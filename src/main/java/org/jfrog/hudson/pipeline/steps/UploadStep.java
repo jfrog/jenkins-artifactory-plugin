@@ -1,20 +1,21 @@
 package org.jfrog.hudson.pipeline.steps;
 
 import com.google.inject.Inject;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.*;
-import org.jfrog.hudson.pipeline.PipelineUtils;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.executors.GenericUploadExecutor;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.BuildInfo;
-import org.jfrog.hudson.pipeline.types.BuildInfoAccessor;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class UploadStep extends AbstractStepImpl {
 
@@ -53,13 +54,16 @@ public class UploadStep extends AbstractStepImpl {
         @StepContextParameter
         private transient TaskListener listener;
 
+        @StepContextParameter
+        private transient EnvVars env;
+
         @Inject(optional = true)
         private transient UploadStep step;
 
         @Override
         protected BuildInfo run() throws Exception {
-            BuildInfo buildInfo = new GenericUploadExecutor(PipelineUtils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), getContext()).execution(step.getSpec());
-            new BuildInfoAccessor(buildInfo).captureVariables(getContext());
+            BuildInfo buildInfo = new GenericUploadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), getContext()).execution(step.getSpec());
+            new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
             return buildInfo;
         }
     }
@@ -83,8 +87,8 @@ public class UploadStep extends AbstractStepImpl {
         }
 
         @Override
-        public Map<String, Object> defineArguments(Step step) throws UnsupportedOperationException {
-            return new HashMap<String, Object>();
+        public boolean isAdvanced() {
+            return true;
         }
     }
 

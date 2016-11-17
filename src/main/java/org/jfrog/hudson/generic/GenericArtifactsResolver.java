@@ -16,17 +16,19 @@
 
 package org.jfrog.hudson.generic;
 
+import com.google.common.collect.Lists;
+import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
-import org.jfrog.build.extractor.clientConfiguration.util.AntDependenciesHelper;
-import org.jfrog.build.extractor.clientConfiguration.util.BuildDependenciesHelper;
-import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloader;
-import org.jfrog.build.extractor.clientConfiguration.util.DependenciesHelper;
+import org.jfrog.build.extractor.clientConfiguration.util.*;
+import org.jfrog.build.extractor.clientConfiguration.util.spec.Spec;
+import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import java.io.IOException;
@@ -41,25 +43,35 @@ import java.util.List;
 public class GenericArtifactsResolver {
     private final AbstractBuild build;
     private final ArtifactoryDependenciesClient client;
-    private String resolvePattern;
     private Log log;
+    private EnvVars envVars;
 
-    public GenericArtifactsResolver(AbstractBuild build, BuildListener listener, ArtifactoryDependenciesClient client,
-            String resolvePattern) throws IOException, InterruptedException {
+    public GenericArtifactsResolver(AbstractBuild build, BuildListener listener, ArtifactoryDependenciesClient client)
+            throws IOException, InterruptedException {
         this.build = build;
         this.client = client;
-        this.resolvePattern = Util.replaceMacro(resolvePattern, build.getEnvironment(listener));
-        log = new JenkinsBuildInfoLog(listener);
+        this.envVars = build.getEnvironment(listener);
+        this.log = new JenkinsBuildInfoLog(listener);
     }
 
-    public List<Dependency> retrievePublishedDependencies() throws IOException, InterruptedException {
-        DependenciesHelper helper = new AntDependenciesHelper(createDependenciesDownloader(), log);
-        return helper.retrievePublishedDependencies(resolvePattern);
+    public List<Dependency> retrievePublishedDependencies(String resolvePattern) throws IOException, InterruptedException {
+        DependenciesHelper helper = new AntPatternsDependenciesHelper(createDependenciesDownloader(), log);
+        return helper.retrievePublishedDependencies(Util.replaceMacro(resolvePattern, envVars));
     }
 
-    public List<BuildDependency> retrieveBuildDependencies() throws IOException, InterruptedException {
+    public List<BuildDependency> retrieveBuildDependencies(String resolvePattern) throws IOException, InterruptedException {
         BuildDependenciesHelper helper = new BuildDependenciesHelper(createDependenciesDownloader(), log);
-        return helper.retrieveBuildDependencies(resolvePattern);
+        return helper.retrieveBuildDependencies(Util.replaceMacro(resolvePattern, envVars));
+    }
+
+    public List<Dependency> retrieveDependenciesBySpec(String serverUrl, String downloadSpec) throws IOException {
+        if (StringUtils.isEmpty(downloadSpec)) {
+            return Lists.newArrayList();
+        }
+        DependenciesDownloaderHelper helper = new DependenciesDownloaderHelper(createDependenciesDownloader(), log);
+        SpecsHelper specsHelper = new SpecsHelper(log);
+        Spec spec = specsHelper.getDownloadUploadSpec(Util.replaceMacro(downloadSpec, envVars));
+        return helper.downloadDependencies(serverUrl, spec);
     }
 
     private DependenciesDownloader createDependenciesDownloader() {

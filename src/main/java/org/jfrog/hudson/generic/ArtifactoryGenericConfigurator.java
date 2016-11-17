@@ -1,5 +1,6 @@
 package org.jfrog.hudson.generic;
 
+import com.google.common.collect.Lists;
 import com.tikal.jenkins.plugins.multijob.MultiJobProject;
 import hudson.Extension;
 import hudson.Launcher;
@@ -51,6 +52,9 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     private final ServerDetails resolverDetails;
     private final CredentialsConfig deployerCredentialsConfig;
     private final CredentialsConfig resolverCredentialsConfig;
+    private final boolean useSpecs;
+    private final SpecConfiguration uploadSpec;
+    private final SpecConfiguration downloadSpec;
     private final String deployPattern;
     private final String resolvePattern;
     private final String matrixParams;
@@ -82,6 +86,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     public ArtifactoryGenericConfigurator(ServerDetails details, ServerDetails resolverDetails,
                                           CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                           String deployPattern, String resolvePattern, String matrixParams,
+                                          boolean useSpecs, SpecConfiguration uploadSpec, SpecConfiguration downloadSpec,
                                           boolean deployBuildInfo,
                                           boolean includeEnvVars, IncludesExcludes envVarsPatterns,
                                           boolean discardOldBuilds,
@@ -94,6 +99,9 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         this.resolverCredentialsConfig = resolverCredentialsConfig;
         this.deployPattern = deployPattern;
         this.resolvePattern = resolvePattern;
+        this.useSpecs = useSpecs;
+        this.uploadSpec = uploadSpec;
+        this.downloadSpec = downloadSpec;
         this.matrixParams = matrixParams;
         this.deployBuildInfo = deployBuildInfo;
         this.includeEnvVars = includeEnvVars;
@@ -152,6 +160,18 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
     public String getResolvePattern() {
         return resolvePattern;
+    }
+
+    public boolean isUseSpecs() {
+        return useSpecs;
+    }
+
+    public SpecConfiguration getUploadSpec() {
+        return uploadSpec;
+    }
+
+    public SpecConfiguration getDownloadSpec() {
+        return downloadSpec;
     }
 
     public String getMatrixParams() {
@@ -261,6 +281,9 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public List<Repository> getReleaseRepositoryList() {
+        if (details.getDeploySnapshotRepository() == null) {
+            return Lists.newArrayList();
+        }
         return RepositoriesUtils.collectRepositories(details.getDeploySnapshotRepository().getKeyFromSelect());
     }
 
@@ -295,21 +318,27 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         CredentialsConfig preferredResolver = CredentialManager.getPreferredResolver(ArtifactoryGenericConfigurator.this,
                 server);
         ArtifactoryDependenciesClient dependenciesClient = server.createArtifactoryDependenciesClient(
-                preferredResolver.provideUsername(build.getProject()), preferredResolver.providePassword(build.getProject()), proxyConfiguration,
-                listener);
+                preferredResolver.provideUsername(build.getProject()),
+                preferredResolver.providePassword(build.getProject()), proxyConfiguration, listener);
         try {
             GenericArtifactsResolver artifactsResolver = new GenericArtifactsResolver(build, listener,
-                    dependenciesClient, getResolvePattern());
-            publishedDependencies = artifactsResolver.retrievePublishedDependencies();
-            buildDependencies = artifactsResolver.retrieveBuildDependencies();
+                    dependenciesClient);
+            if (isUseSpecs()) {
+                String spec = SpecUtils.getSpecStringFromSpecConf(
+                        downloadSpec, build.getEnvironment(listener), build.getExecutor().getCurrentWorkspace(), listener.getLogger());
+                publishedDependencies = artifactsResolver.retrieveDependenciesBySpec(resolverDetails.getArtifactoryUrl(), spec);
+            } else {
+                publishedDependencies = artifactsResolver.retrievePublishedDependencies(resolvePattern);
+                buildDependencies = artifactsResolver.retrieveBuildDependencies(resolvePattern);
+            }
 
             return createEnvironmentOnSuccessfulSetup();
         } catch (Exception e) {
             e.printStackTrace(listener.error(e.getMessage()));
+            build.setResult(Result.FAILURE);
         } finally {
             dependenciesClient.shutdown();
         }
-
         return null;
     }
 

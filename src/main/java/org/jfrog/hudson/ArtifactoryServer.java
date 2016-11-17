@@ -17,8 +17,8 @@
 package org.jfrog.hudson;
 
 import com.google.common.collect.Lists;
-import hudson.model.BuildListener;
 import hudson.model.Item;
+import hudson.model.TaskListener;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
@@ -252,7 +252,7 @@ public class ArtifactoryServer implements Serializable {
      * This method might run on slaves, this is why we provide it with a proxy from the master config
      */
     public ArtifactoryDependenciesClient createArtifactoryDependenciesClient(String userName, String password,
-                                                                             ProxyConfiguration proxyConfiguration, BuildListener listener) {
+                                                                             ProxyConfiguration proxyConfiguration, TaskListener listener) {
         ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(url, userName, password,
                 new JenkinsBuildInfoLog(listener));
         client.setConnectionTimeout(timeout);

@@ -1,9 +1,10 @@
 package org.jfrog.hudson.pipeline.types;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
 import java.util.*;
@@ -19,8 +20,13 @@ public class ArtifactoryServer implements Serializable {
     private String url;
     private String username;
     private String password;
+    private String credentialsId;
     private boolean bypassProxy;
     private CpsScript cpsScript;
+    private boolean usesCredetialsId;
+
+    public ArtifactoryServer() {
+    }
 
     public ArtifactoryServer(String artifactoryServerName, String url, String username, String password) {
         serverName = artifactoryServerName;
@@ -35,8 +41,16 @@ public class ArtifactoryServer implements Serializable {
         this.password = password;
     }
 
+    public ArtifactoryServer(String url, String credentialsId) {
+        this.url = url;
+        this.credentialsId = credentialsId;
+        this.usesCredetialsId = true;
+    }
+
     public CredentialsConfig createCredentialsConfig() {
-        return new CredentialsConfig(this.username, this.password, null, null);
+        CredentialsConfig credentialsConfig = new CredentialsConfig(this.username, this.password, this.credentialsId, null);
+        credentialsConfig.setIgnoreCredentialPluginDisabled(usesCredetialsId);
+        return credentialsConfig;
     }
 
     public void setCpsScript(CpsScript cpsScript) {
@@ -53,7 +67,7 @@ public class ArtifactoryServer implements Serializable {
             throw new IllegalArgumentException(SPEC + " is a mandatory field");
         }
 
-        List<String> keysAsList = Arrays.asList(new String[] {SPEC, BUILD_INFO});
+        List<String> keysAsList = Arrays.asList(new String[]{SPEC, BUILD_INFO});
         if (!keysAsList.containsAll(arguments.keySet())) {
             throw new IllegalArgumentException("Only the following arguments are allowed, " + keysAsList.toString());
         }
@@ -131,13 +145,13 @@ public class ArtifactoryServer implements Serializable {
         final String buildName = "buildName";
         final String buildNumber = "buildNumber";
         final String targetRepository = "targetRepo";
-        List<String> mandatoryArgumentsAsList = Arrays.asList(new String[] {buildName, buildNumber, targetRepository});
+        List<String> mandatoryArgumentsAsList = Arrays.asList(new String[]{buildName, buildNumber, targetRepository});
         if (!promotionParams.keySet().containsAll(mandatoryArgumentsAsList)) {
-            throw new IllegalArgumentException(mandatoryArgumentsAsList.toString() +" are mandatory fields");
+            throw new IllegalArgumentException(mandatoryArgumentsAsList.toString() + " are mandatory fields");
         }
 
         Set<String> promotionParamsSet = promotionParams.keySet();
-        List<String> keysAsList = Arrays.asList(new String[] {buildName, buildNumber, targetRepository, "sourceRepo", "status", "comment", "includeDependencies", "copy"});
+        List<String> keysAsList = Arrays.asList(new String[]{buildName, buildNumber, targetRepository, "sourceRepo", "status", "comment", "includeDependencies", "copy"});
         if (!keysAsList.containsAll(promotionParamsSet)) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
         }
@@ -170,11 +184,19 @@ public class ArtifactoryServer implements Serializable {
     @Whitelisted
     public void setUsername(String username) {
         this.username = username;
+        this.credentialsId = "";
+        this.usesCredetialsId = false;
     }
 
     @Whitelisted
-    public void setPassword(String password){
+    public void setPassword(String password) {
         this.password = password;
+        this.credentialsId = "";
+        this.usesCredetialsId = false;
+    }
+
+    public String getPassword() {
+        return this.password;
     }
 
     @Whitelisted
@@ -187,4 +209,16 @@ public class ArtifactoryServer implements Serializable {
         return bypassProxy;
     }
 
+    @Whitelisted
+    public String getCredentialsId() {
+        return credentialsId;
+    }
+
+    @Whitelisted
+    public void setCredentialsId(String credentialsId) {
+        this.credentialsId = credentialsId;
+        this.password = "";
+        this.username = "";
+        this.usesCredetialsId = true;
+    }
 }

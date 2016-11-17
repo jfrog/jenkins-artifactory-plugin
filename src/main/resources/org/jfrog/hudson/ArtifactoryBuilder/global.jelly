@@ -1,6 +1,7 @@
 <j:jelly xmlns:j="jelly:core"
          xmlns:f="/lib/form"
          xmlns:st="jelly:stapler"
+         xmlns:r="/lib/jfrog"
          xmlns:c="/lib/credentials">
     <st:adjunct includes="lib.jfrog.repos.credentials"/>
     <f:section title="Artifactory">
@@ -116,5 +117,31 @@
                 </table>
             </f:repeatable>
         </f:entry>
+
+        <f:optionalBlock title="Enable Build-Info proxy for Docker images"
+            name="buildInfoProxyEnabled"
+            field="buildInfoProxyEnabled"
+            checked="${descriptor.buildInfoProxyEnabled}">
+
+            <f:entry title="Port" help="/plugin/artifactory/help/ArtifactoryBuilder/help-buildInfoProxyPort.html">
+                <f:textbox id="buildInfoProxyPort" field="buildInfoProxyPort" value="${descriptor.buildInfoProxyPort}"/>
+            </f:entry>
+            <f:entry title="PEM-encoded certificate file path on master" help="/plugin/artifactory/help/ArtifactoryBuilder/help-buildInfoProxyCertPublic.html">
+                <pre id="buildInfoProxyCertPublic">${descriptor.buildInfoProxyCertPublic}</pre>
+            </f:entry>
+            <f:entry title="PEM-encoded private key file path on master" help="/plugin/artifactory/help/ArtifactoryBuilder/help-buildInfoProxyCertPrivate.html">
+                <pre id="buildInfoProxyCertPrivate">${descriptor.buildInfoProxyCertPrivate}</pre>
+            </f:entry>
+
+            <script>
+                var bindToDescriptor = <st:bind value="${descriptor}"/>
+            </script>
+
+            <r:certs title="${%Generate certs and restart proxy}"
+                     progress="${%Generating...}"
+                     bind="bindToDescriptor"/>
+
+        </f:optionalBlock>
+
     </f:section>
 </j:jelly>

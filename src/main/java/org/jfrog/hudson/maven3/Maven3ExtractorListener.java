@@ -48,6 +48,6 @@ public class Maven3ExtractorListener extends RunListener<AbstractBuild> {
             };
         }
 
-        return new MavenExtractorEnvironment((MavenModuleSetBuild) build, tuple.publisher, tuple.resolver, listener);
+        return new MavenExtractorEnvironment((MavenModuleSetBuild) build, tuple.publisher, tuple.resolver, listener, launcher);
     }
 }

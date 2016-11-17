@@ -7,7 +7,7 @@ import hudson.model.TaskListener;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.*;
-import org.jfrog.hudson.pipeline.PipelineUtils;
+import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.executors.PromotionExecutor;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.PromotionConfig;
@@ -66,7 +66,7 @@ public class PromoteBuildStep extends AbstractStepImpl {
                 return false;
             }
 
-            new PromotionExecutor(PipelineUtils.prepareArtifactoryServer(null, step.getServer()), build, listener, getContext(), promotionConfig).execution();
+            new PromotionExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), build, listener, getContext(), promotionConfig).execution();
             return true;
         }
     }
@@ -92,6 +92,11 @@ public class PromoteBuildStep extends AbstractStepImpl {
         @Override
         public Map<String, Object> defineArguments(Step step) throws UnsupportedOperationException {
             return new HashMap<String, Object>();
+        }
+
+        @Override
+        public boolean isAdvanced() {
+            return true;
         }
     }
 

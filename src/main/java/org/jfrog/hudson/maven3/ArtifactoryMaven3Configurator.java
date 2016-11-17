@@ -400,7 +400,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     @Override
-    public Environment setUp(final AbstractBuild build, Launcher launcher, final BuildListener listener)
+    public Environment setUp(final AbstractBuild build, final Launcher launcher, final BuildListener listener)
             throws IOException, InterruptedException {
 
         final String artifactoryServerName = getArtifactoryName();
@@ -460,7 +460,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
             @Override
             public void buildEnvVars(Map<String, String> env) {
                 try {
-                    ExtractorUtils.addBuilderInfoArguments(env, build, listener, publisherContext, resolverContext);
+                    ExtractorUtils.addBuilderInfoArguments(env, build, listener, publisherContext, resolverContext, build.getWorkspace(), launcher);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

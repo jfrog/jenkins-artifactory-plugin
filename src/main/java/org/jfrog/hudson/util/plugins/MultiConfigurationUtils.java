@@ -5,6 +5,7 @@ import hudson.matrix.MatrixConfiguration;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
+import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
 
@@ -37,9 +38,9 @@ public class MultiConfigurationUtils {
         return false;
     }
 
-    public static void addMatrixCombination(AbstractBuild<?, ?> build, ArtifactoryClientConfiguration configuration) {
-        if (build.getProject() instanceof MatrixConfiguration) {
-            Combination combination = ((MatrixConfiguration) build.getProject()).getCombination();
+    public static void addMatrixCombination(Run<?, ?> build, ArtifactoryClientConfiguration configuration) {
+        if (build.getParent() instanceof MatrixConfiguration) {
+            Combination combination = ((MatrixConfiguration) build.getParent()).getCombination();
             for (Map.Entry<String, String> entries : combination.entrySet()) {
                 configuration.info.addRunParameters(entries.getKey(), entries.getValue());
             }

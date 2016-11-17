@@ -52,7 +52,8 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
 
     public String getTargetDir(String targetDir, String relativeDir) throws IOException {
         try {
-            String downloadFileRelativePath = this.flatDownload ? StringUtils.substringAfterLast(relativeDir, "/") : relativeDir;
+            String downloadFileRelativePath = this.flatDownload && relativeDir.contains("/") ?
+                    StringUtils.substringAfterLast(relativeDir, "/") : relativeDir;
             FilePath targetDirFile = new FilePath(workspace, targetDir).child(downloadFileRelativePath);
             return targetDirFile.absolutize().getRemote();
         } catch (InterruptedException e) {
@@ -83,15 +84,20 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
                 return false;
             }
 
-            // If it's a folder return true since we don't care about it, not going to download a folder anyway
             if (child.isDirectory()) {
-                return true;
+                return false;
             }
 
             Map<String, String> checksumsMap = child.act(new DownloadFileCallable(log));
-            return checksumsMap != null &&
+            boolean isExists =  checksumsMap != null &&
                     StringUtils.isNotBlank(md5) && StringUtils.equals(md5, checksumsMap.get("md5")) &&
                     StringUtils.isNotBlank(sha1) && StringUtils.equals(sha1, checksumsMap.get("sha1"));
+            if (isExists) {
+                return true;
+            } else {
+                log.info(String.format("Overriding existing in destination file: %s", child));
+                return false;
+            }
         } catch (InterruptedException e) {
             log.warn("Caught interrupted exception: " + e.getLocalizedMessage());
         }
@@ -129,11 +135,6 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
     public void setFlatDownload(boolean flat){
         this.flatDownload = flat;
     }
-
-    public boolean getFlatDownload(){
-        return this.flatDownload;
-    }
-
 
     private boolean isResolvedOrParentOfResolvedFile(Set<String> resolvedFiles, final String path) {
         return Iterables.any(resolvedFiles, new Predicate<String>() {

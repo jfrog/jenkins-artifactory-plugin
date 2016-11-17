@@ -1,11 +1,12 @@
 package org.jfrog.hudson.util;
 
 import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.AbstractBuild;
-import hudson.model.Computer;
 import hudson.model.Hudson;
-import hudson.slaves.SlaveComputer;
+import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.hudson.pipeline.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,21 +16,17 @@ import java.io.IOException;
  */
 public class PluginDependencyHelper {
 
-    public static FilePath getActualDependencyDirectory(AbstractBuild build, File localDependencyFile)
+    public static FilePath getActualDependencyDirectory(File localDependencyFile, FilePath rootPath)
             throws IOException, InterruptedException {
 
         File localDependencyDir = localDependencyFile.getParentFile();
-//        if (!(Computer.currentComputer() instanceof SlaveComputer)) {
-//            return new FilePath(localDependencyDir);
-//        }
-
         String pluginVersion = Hudson.getInstance().getPluginManager().getPlugin("artifactory").getVersion();
         if (pluginVersion.contains(" ")) {
             //Trim the plugin version in case we're working on a snapshot version (contains illegal chars)
             pluginVersion = StringUtils.split(pluginVersion, " ")[0];
         }
 
-        FilePath remoteDependencyDir = new FilePath(build.getBuiltOn().getRootPath(),"cache/artifactory-plugin/" + pluginVersion);
+        FilePath remoteDependencyDir = new FilePath(rootPath, "cache/artifactory-plugin/" + pluginVersion);
 
         if (!remoteDependencyDir.exists()) {
             remoteDependencyDir.mkdirs();
@@ -58,4 +55,15 @@ public class PluginDependencyHelper {
 
         return remoteDependencyDir;
     }
+
+    private static FilePath getRootPath(Run build, Launcher launcher) {
+        // The build type can be Run or AbstractBuild,
+        // it's dependence whether we are running a pipleline or other kind of job.
+        // If are running a pipeline jon the build type is Run.
+        if (build instanceof AbstractBuild) {
+            return ((AbstractBuild) build).getBuiltOn().getRootPath();
+        }
+        return Utils.getNode(launcher).getRootPath();
+    }
+
 }

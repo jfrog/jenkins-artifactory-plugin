@@ -24,7 +24,7 @@ import hudson.maven.MavenEmbedderUtils;
 import hudson.maven.MavenModuleSet;
 import hudson.maven.MavenModuleSetBuild;
 import hudson.model.BuildListener;
-import hudson.model.Computer;
+import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.tasks.Maven;
 import org.apache.commons.lang.StringUtils;
@@ -68,14 +68,14 @@ public class MavenVersionHelper {
      * @return True if the Maven version of this build is at least {@link MavenVersionHelper#MINIMUM_MAVEN_VERSION}
      */
     public static boolean isAtLeastResolutionCapableVersion(MavenModuleSetBuild build, EnvVars vars,
-            BuildListener listener) throws IOException, InterruptedException {
+            TaskListener listener) throws IOException, InterruptedException {
         return isAtLeastVersion(build, vars, listener, MINIMUM_MAVEN_VERSION);
     }
 
     /**
      * @return True if the Maven version is at least the version that is passed.
      */
-    public static boolean isAtLeastVersion(MavenModuleSetBuild build, EnvVars vars, BuildListener listener,
+    public static boolean isAtLeastVersion(MavenModuleSetBuild build, EnvVars vars, TaskListener listener,
             String version) throws IOException, InterruptedException {
         Maven.MavenInstallation mavenInstallation = getMavenInstallation(build, vars, listener);
         return isAtLeast(build, mavenInstallation.getHome(), version);
@@ -94,7 +94,7 @@ public class MavenVersionHelper {
      *                               is {@code null} then this exception is thrown.
      */
     private static Maven.MavenInstallation getMavenInstallation(MavenModuleSetBuild build, EnvVars vars,
-            BuildListener listener) throws IOException, InterruptedException {
+            TaskListener listener) throws IOException, InterruptedException {
         MavenModuleSet project = build.getProject();
         Maven.MavenInstallation mavenInstallation = project.getMaven();
         if (mavenInstallation == null) {

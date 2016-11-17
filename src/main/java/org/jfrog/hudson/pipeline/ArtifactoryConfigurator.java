@@ -11,11 +11,11 @@ import org.jfrog.hudson.util.IncludesExcludes;
  * This class will be held with each new build info created in the pipeline.
  * So we know what to collect to the build info.
  */
-public class ArtifactoryPipelineConfigurator implements BuildInfoAwareConfigurator, DeployerOverrider {
+public class ArtifactoryConfigurator implements BuildInfoAwareConfigurator, DeployerOverrider {
 
     private ArtifactoryServer server;
 
-    public ArtifactoryPipelineConfigurator(ArtifactoryServer server) {
+    public ArtifactoryConfigurator(ArtifactoryServer server) {
         this.server = server;
     }
 
