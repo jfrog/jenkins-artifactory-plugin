@@ -53,10 +53,10 @@ public class GitCoordinator extends AbstractScmCoordinator {
 
         scmManager = new GitManager(build, listener);
         scmManager.setGitCredentials(releaseAction.getGitCredentials());
-        state.initialGitRevision = scmManager.revParse(gitBranchName);
 
         // find the current local built branch
         String gitBranchName = build.getEnvironment(listener).get("GIT_BRANCH");
+        state.initialGitRevision = scmManager.revParse(gitBranchName);
         checkoutBranch = scmManager.getBranchNameWithoutRemote(gitBranchName);
     }
 
