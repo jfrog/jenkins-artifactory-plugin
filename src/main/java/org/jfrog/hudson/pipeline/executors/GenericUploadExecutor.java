@@ -5,6 +5,7 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Cause;
 import hudson.model.Run;
+import hudson.model.Item;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
@@ -13,6 +14,7 @@ import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.hudson.ArtifactoryServer;
+import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.generic.GenericArtifactsDeployer;
 import org.jfrog.hudson.pipeline.Utils;
@@ -21,6 +23,7 @@ import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.ExtractorUtils;
+import org.jfrog.hudson.util.plugins.PluginsUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,19 +38,27 @@ public class GenericUploadExecutor {
     private BuildInfo buildinfo;
     private ArtifactoryServer server;
     private StepContext context;
+    private CredentialsConfig credentialsConfig;
 
-    public GenericUploadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, StepContext context) {
+    public GenericUploadExecutor(
+            ArtifactoryServer server, 
+            TaskListener listener, 
+            Run build, 
+            FilePath ws, 
+            BuildInfo buildInfo, 
+            StepContext context, 
+            CredentialsConfig credentialsConfig) {
         this.server = server;
         this.listener = listener;
         this.build = build;
         this.buildinfo = Utils.prepareBuildinfo(build, buildInfo);
         this.ws = ws;
         this.context = context;
+        this.credentialsConfig = credentialsConfig;
     }
 
     public BuildInfo execution(String spec) throws IOException, InterruptedException {
-        Credentials credentials = new Credentials(server.getDeployerCredentialsConfig().getUsername(),
-                server.getDeployerCredentialsConfig().getPassword());
+        Credentials credentials = credentialsConfig.getCredentials(build.getParent());
         ProxyConfiguration proxyConfiguration = server.createProxyConfiguration(Jenkins.getInstance().proxy);
         List<Artifact> artifactsToDeploy = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
                 server, credentials, getPropertiesMap(), proxyConfiguration));
