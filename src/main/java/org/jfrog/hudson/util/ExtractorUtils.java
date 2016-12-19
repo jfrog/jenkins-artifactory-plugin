@@ -405,10 +405,11 @@ public class ExtractorUtils {
     }
 
     /**
-     * Replaces occurrences of '/' with ' :: ' if exist
+     * Replaces occurrences of '/' and '%2F' with ' :: ' if exist
      */
     public static String sanitizeBuildName(String buildName) {
-        return StringUtils.replace(buildName, "/", " :: ");
+        String s = StringUtils.replace(buildName, "/", " :: ");
+        return StringUtils.replace(s, "%2F", " :: ");
     }
 
     /**

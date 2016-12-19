@@ -7,6 +7,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
@@ -103,10 +104,26 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
             String mavenOpts = step.getOpts() + (env.get("MAVEN_OPTS") != null ? env.get("MAVEN_OPTS") : "");
             mavenOpts = mavenOpts.replaceAll("[\t\r\n]+", " ");
             Maven3Builder maven3Builder = new Maven3Builder(step.getTool(), step.getPom(), step.getGoal(), mavenOpts);
+            convertJdkPath();
             maven3Builder.perform(build, launcher, listener, env, ws);
             Build regularBuildInfo = Utils.getGeneratedBuildInfo(build, env, listener, ws, launcher);
             buildInfo.append(regularBuildInfo);
             return buildInfo;
+        }
+
+        /**
+         * The Maven3Builder class is looking for the PATH+JDK environment varibale due to legacy code.
+         * In The pipeline flow we need to convert the JAVA_HOME to PATH+JDK in order to reuse the code.
+         */
+        private void convertJdkPath() {
+            String seperator = launcher.isUnix() ? "/" : "\\";
+            String java_home = env.get("JAVA_HOME");
+            if (StringUtils.isNotEmpty(java_home)) {
+                if (!StringUtils.endsWith(java_home, seperator)) {
+                    java_home += seperator;
+                }
+                env.put("PATH+JDK", java_home + "bin");
+            }
         }
 
         private Deployer getDeployer() {

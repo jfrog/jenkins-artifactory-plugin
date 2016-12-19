@@ -19,12 +19,23 @@ public class GradleBuild implements Serializable {
     private GradleResolver resolver = new GradleResolver();
     private String tool = "";
     private boolean useWrapper;
+    private boolean usesPlugin;
 
     public GradleBuild() {
     }
 
     public void setCpsScript(CpsScript cpsScript) {
         this.cpsScript = cpsScript;
+    }
+
+    @Whitelisted
+    public boolean isUsesPlugin() {
+        return usesPlugin;
+    }
+
+    @Whitelisted
+    public void setUsesPlugin(boolean usesPlugin) {
+        this.usesPlugin = usesPlugin;
     }
 
     @Whitelisted
@@ -113,6 +124,7 @@ public class GradleBuild implements Serializable {
         stepVariables.put("switches", switches);
         stepVariables.put("useWrapper", useWrapper);
         stepVariables.put("buildInfo", buildInfo);
+        stepVariables.put("usesPlugin", usesPlugin);
         return stepVariables;
     }
 }

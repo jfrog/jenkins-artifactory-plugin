@@ -87,6 +87,10 @@ public class PromotionExecutor {
             strBuilder.append(", using copy");
         }
 
+        if (promotionConfig.isFailFast()) {
+            strBuilder.append(", failing on first error");
+        }
+
         listener.getLogger().println(strBuilder.append(".").toString());
     }
 }

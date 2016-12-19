@@ -13,7 +13,6 @@ import org.jfrog.hudson.util.publisher.PublisherContext;
  * Created by Tamirh on 16/08/2016.
  */
 public class GradleDeployer extends Deployer {
-    private boolean usesPlugin = false;
     private boolean deployMavenDescriptors;
     private boolean deployIvyDescriptors;
     private String ivyPattern = "[organisation]/[module]/ivy-[revision].xml";
@@ -35,16 +34,6 @@ public class GradleDeployer extends Deployer {
         RepositoryConf snapshotRepositoryConf = null;
         RepositoryConf releaesRepositoryConf = new RepositoryConf(repo, repo, false);
         return new ServerDetails(this.server.getServerName(), this.server.getUrl(), releaesRepositoryConf, snapshotRepositoryConf, releaesRepositoryConf, snapshotRepositoryConf, "", "");
-    }
-
-    @Whitelisted
-    public boolean isUsesPlugin() {
-        return usesPlugin;
-    }
-
-    @Whitelisted
-    public void setUsesPlugin(boolean usesPlugin) {
-        this.usesPlugin = usesPlugin;
     }
 
     @Whitelisted

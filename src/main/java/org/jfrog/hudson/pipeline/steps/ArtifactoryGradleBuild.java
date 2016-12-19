@@ -44,9 +44,10 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
     private String switches;
     private BuildInfo buildInfo;
     private boolean useWrapper;
+    private boolean usesPlugin;
 
     @DataBoundConstructor
-    public ArtifactoryGradleBuild(GradleBuild gradleBuild, String tool, String rootDir, String buildFile, String tasks, String switches, boolean useWrapper, BuildInfo buildInfo) {
+    public ArtifactoryGradleBuild(GradleBuild gradleBuild, String tool, String rootDir, String buildFile, String tasks, String switches, boolean useWrapper, BuildInfo buildInfo, boolean usesPlugin) {
         this.gradleBuild = gradleBuild;
         this.tasks = tasks == null ? "artifactoryPublish" : tasks;
         this.rootDir = rootDir == null ? "" : rootDir;
@@ -55,6 +56,7 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
         this.switches = switches == null ? "" : switches;
         this.buildInfo = buildInfo;
         this.useWrapper = useWrapper;
+        this.usesPlugin = usesPlugin;
     }
 
     public GradleBuild getGradleBuild() {
@@ -91,6 +93,10 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
 
     public boolean isUseWrapper() {
         return useWrapper;
+    }
+
+    public boolean isUsesPlugin() {
+        return usesPlugin;
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<BuildInfo> {
@@ -177,7 +183,7 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
 
         private String getSwitches() {
             String switches = step.getSwitches();
-            if (!step.getGradleBuild().getDeployer().isUsesPlugin()) {
+            if (!step.getGradleBuild().isUsesPlugin()) {
                 try {
                     switches += " --init-script " + createInitScript();
                 } catch (Exception e) {

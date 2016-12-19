@@ -46,8 +46,8 @@ public class GenericUploadExecutor {
     }
 
     public BuildInfo execution(String spec) throws IOException, InterruptedException {
-        Credentials credentials = new Credentials(server.getDeployerCredentialsConfig().getUsername(),
-                server.getDeployerCredentialsConfig().getPassword());
+        Credentials credentials = new Credentials(server.getDeployerCredentialsConfig().provideUsername(build.getParent()),
+                server.getDeployerCredentialsConfig().providePassword(build.getParent()));
         ProxyConfiguration proxyConfiguration = server.createProxyConfiguration(Jenkins.getInstance().proxy);
         List<Artifact> artifactsToDeploy = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
                 server, credentials, getPropertiesMap(), proxyConfiguration));
