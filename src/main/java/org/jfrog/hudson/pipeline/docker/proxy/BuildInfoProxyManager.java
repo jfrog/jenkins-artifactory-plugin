@@ -35,6 +35,7 @@ public class BuildInfoProxyManager implements Serializable {
                 .build();
 
         server = DefaultHttpProxyServer.bootstrap()
+                .withListenOnAllAddresses(true)
                 .withPort(proxyPort)
                 .withAllowLocalOnly(false)
                 .withFiltersSource(new BuildInfoHttpFiltersSource())
