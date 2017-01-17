@@ -16,6 +16,9 @@ public class ArtifactoryServer implements Serializable {
     public static final String BUILD_INFO = "buildInfo";
     public static final String SPEC = "spec";
     public static final String SERVER = "server";
+    public static final String BUILD_NAME = "buildName";
+    public static final String BUILD_NUMBER = "buildNumber";
+
     private String serverName;
     private String url;
     private String username;
@@ -64,7 +67,7 @@ public class ArtifactoryServer implements Serializable {
 
     private Map<String, Object> getDownloadUploadObjectMap(Map<String, Object> arguments) {
         if (!arguments.containsKey(SPEC)) {
-            throw new IllegalArgumentException(SPEC + " is a mandatory field");
+            throw new IllegalArgumentException(SPEC + " is a mandatory arguments");
         }
 
         List<String> keysAsList = Arrays.asList(new String[]{SPEC, BUILD_INFO});
@@ -141,17 +144,42 @@ public class ArtifactoryServer implements Serializable {
         cpsScript.invokeMethod("artifactoryPromoteBuild", stepVariables);
     }
 
+    @Whitelisted
+    public XrayScanResult xrayScan(Map<String, Object> xrayScanParams) throws Exception {
+        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+        stepVariables.put("xrayScanConfig", createXrayScanConfig(xrayScanParams));
+        stepVariables.put(SERVER, this);
+
+        return (XrayScanResult) cpsScript.invokeMethod("xrayScanBuild", stepVariables);
+    }
+
+    private XrayScanConfig createXrayScanConfig(Map<String, Object> xrayScanParams) {
+        final String failBuild = "failBuild";
+
+        List<String> mandatoryArgumentsAsList = Arrays.asList(new String[]{BUILD_NAME, BUILD_NAME});
+        if (!xrayScanParams.keySet().containsAll(mandatoryArgumentsAsList)) {
+            throw new IllegalArgumentException(mandatoryArgumentsAsList.toString() + " are mandatory arguments");
+        }
+
+        Set<String> xrayScanParamsSet = xrayScanParams.keySet();
+        List<String> keysAsList = Arrays.asList(new String[]{BUILD_NAME, BUILD_NUMBER, failBuild});
+        if (!keysAsList.containsAll(xrayScanParamsSet)) {
+            throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
+        }
+
+        return new XrayScanConfig((String) xrayScanParams.get(BUILD_NAME),
+                (String) xrayScanParams.get(BUILD_NUMBER), (Boolean) xrayScanParams.get(failBuild));
+    }
+
     private PromotionConfig createPromotionConfig(Map<String, Object> promotionParams) {
-        final String buildName = "buildName";
-        final String buildNumber = "buildNumber";
         final String targetRepository = "targetRepo";
-        List<String> mandatoryArgumentsAsList = Arrays.asList(new String[]{buildName, buildNumber, targetRepository});
+        List<String> mandatoryArgumentsAsList = Arrays.asList(new String[]{BUILD_NAME, BUILD_NUMBER, targetRepository});
         if (!promotionParams.keySet().containsAll(mandatoryArgumentsAsList)) {
-            throw new IllegalArgumentException(mandatoryArgumentsAsList.toString() + " are mandatory fields");
+            throw new IllegalArgumentException(mandatoryArgumentsAsList.toString() + " are mandatory arguments");
         }
 
         Set<String> promotionParamsSet = promotionParams.keySet();
-        List<String> keysAsList = Arrays.asList(new String[]{buildName, buildNumber, targetRepository, "sourceRepo", "status", "comment", "includeDependencies", "copy", "failFast"});
+        List<String> keysAsList = Arrays.asList(new String[]{BUILD_NAME, BUILD_NUMBER, targetRepository, "sourceRepo", "status", "comment", "includeDependencies", "copy", "failFast"});
         if (!keysAsList.containsAll(promotionParamsSet)) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
         }

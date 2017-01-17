@@ -88,6 +88,8 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private boolean blackDuckIncludePublishedArtifacts;
     private boolean autoCreateMissingComponentRequests;
     private boolean autoDiscardStaleComponentRequests;
+    private String customBuildName;
+    private boolean overrideBuildName;
 
     /**
      * @deprecated: Use org.jfrog.hudson.ivy.ArtifactoryIvyConfigurator#getDeployerCredentialsConfig()()
@@ -106,7 +108,8 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
                                       boolean blackDuckRunChecks, String blackDuckAppName, String blackDuckAppVersion,
                                       String blackDuckReportRecipients, String blackDuckScopes, boolean blackDuckIncludePublishedArtifacts,
                                       boolean autoCreateMissingComponentRequests, boolean autoDiscardStaleComponentRequests,
-                                      boolean filterExcludedArtifactsFromBuild) {
+                                      boolean filterExcludedArtifactsFromBuild,
+                                      String customBuildName, boolean overrideBuildName) {
         this.details = details;
         this.deployArtifacts = deployArtifacts;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
@@ -138,6 +141,8 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         this.blackDuckIncludePublishedArtifacts = blackDuckIncludePublishedArtifacts;
         this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
         this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
+        this.customBuildName = customBuildName;
+        this.overrideBuildName = overrideBuildName;
     }
 
     /**
@@ -357,9 +362,21 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         return filterExcludedArtifactsFromBuild;
     }
 
+    public String getCustomBuildName() {
+        return customBuildName;
+    }
+
+    public boolean isOverrideBuildName() {
+        return overrideBuildName;
+    }
+
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject project) {
-        return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project);
+        if (isOverrideBuildName()) {
+            return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project, getCustomBuildName());
+        } else {
+            return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project);
+        }
     }
 
     @Override
@@ -386,6 +403,8 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
                         isAutoCreateMissingComponentRequests(), isAutoDiscardStaleComponentRequests())
                 .filterExcludedArtifactsFromBuild(isFilterExcludedArtifactsFromBuild())
                 .artifactoryPluginVersion(artifactoryPluginVersion)
+                .overrideBuildName(isOverrideBuildName())
+                .customBuildName(getCustomBuildName())
                 .build();
         build.setResult(Result.SUCCESS);
         return new AntIvyBuilderEnvironment() {

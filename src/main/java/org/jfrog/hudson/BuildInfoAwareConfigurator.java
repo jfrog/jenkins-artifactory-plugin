@@ -54,4 +54,8 @@ public interface BuildInfoAwareConfigurator {
     boolean isAutoCreateMissingComponentRequests();
 
     boolean isAutoDiscardStaleComponentRequests();
+
+    String getCustomBuildName();
+
+    boolean isOverrideBuildName();
 }

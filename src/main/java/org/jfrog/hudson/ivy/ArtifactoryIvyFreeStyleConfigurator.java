@@ -106,6 +106,8 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private boolean autoCreateMissingComponentRequests;
     private boolean autoDiscardStaleComponentRequests;
     private String artifactoryCombinationFilter;
+    private String customBuildName;
+    private boolean overrideBuildName;
 
     @Deprecated
     private Credentials overridingDeployerCredentials;
@@ -123,7 +125,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                                                String blackDuckAppVersion, String blackDuckReportRecipients, String blackDuckScopes,
                                                boolean blackDuckIncludePublishedArtifacts, boolean autoCreateMissingComponentRequests,
                                                boolean autoDiscardStaleComponentRequests, boolean filterExcludedArtifactsFromBuild,
-                                               String artifactoryCombinationFilter) {
+                                               String artifactoryCombinationFilter, String customBuildName, boolean overrideBuildName) {
         this.details = details;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.deployArtifacts = deployArtifacts;
@@ -158,6 +160,8 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
         this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
+        this.customBuildName = customBuildName;
+        this.overrideBuildName = overrideBuildName;
     }
 
     /**
@@ -333,9 +337,21 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         return getDescriptor().isMultiConfProject();
     }
 
+    public String getCustomBuildName() {
+        return customBuildName;
+    }
+
+    public boolean isOverrideBuildName() {
+        return overrideBuildName;
+    }
+
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject project) {
-        return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project);
+        if (isOverrideBuildName()) {
+            return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project, getCustomBuildName());
+        } else {
+            return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project);
+        }
     }
 
     @Override
@@ -423,7 +439,8 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
 
                 if (!finalPublisherContext.isSkipBuildInfoDeploy() && (result == null ||
                         result.isBetterOrEqualTo(Result.SUCCESS))) {
-                    build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build));
+                    String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryIvyFreeStyleConfigurator.this, build);
+                    build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                     build.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryIvyFreeStyleConfigurator>(build,
                             ArtifactoryIvyFreeStyleConfigurator.this));
                     // Checks if Push to Bintray is disabled.
@@ -495,7 +512,9 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                         getBlackDuckReportRecipients(), getBlackDuckScopes(), isBlackDuckIncludePublishedArtifacts(),
                         isAutoCreateMissingComponentRequests(), isAutoDiscardStaleComponentRequests())
                 .filterExcludedArtifactsFromBuild(isFilterExcludedArtifactsFromBuild())
-                .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
+                .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
+                .overrideBuildName(isOverrideBuildName())
+                .customBuildName(getCustomBuildName());
     }
 
     public ArtifactoryServer getArtifactoryServer() {

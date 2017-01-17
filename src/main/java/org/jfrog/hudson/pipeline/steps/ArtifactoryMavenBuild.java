@@ -5,12 +5,13 @@ import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
+import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
+import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.build.api.Build;
 import org.jfrog.hudson.maven3.Maven3Builder;
@@ -72,7 +73,7 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
         this.mavenBuild = mavenBuild;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<BuildInfo> {
+    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
         private static final long serialVersionUID = 1L;
 
         @StepContextParameter
@@ -105,7 +106,11 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
             mavenOpts = mavenOpts.replaceAll("[\t\r\n]+", " ");
             Maven3Builder maven3Builder = new Maven3Builder(step.getTool(), step.getPom(), step.getGoal(), mavenOpts);
             convertJdkPath();
-            maven3Builder.perform(build, launcher, listener, env, ws);
+            boolean result = maven3Builder.perform(build, launcher, listener, env, ws);
+            if (!result) {
+                build.setResult(Result.FAILURE);
+                throw new RuntimeException("Maven build failed");
+            }
             Build regularBuildInfo = Utils.getGeneratedBuildInfo(build, env, listener, ws, launcher);
             buildInfo.append(regularBuildInfo);
             return buildInfo;

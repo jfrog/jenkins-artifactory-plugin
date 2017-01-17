@@ -114,6 +114,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private boolean autoCreateMissingComponentRequests;
     private boolean autoDiscardStaleComponentRequests;
     private String artifactoryCombinationFilter;
+    private String customBuildName;
+    private boolean overrideBuildName;
 
     /**
      * @deprecated: Use org.jfrog.hudson.gradle.ArtifactoryGradleConfigurator#getDeployerCredentialsConfig()
@@ -147,7 +149,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                          boolean blackDuckIncludePublishedArtifacts,
                                          boolean autoCreateMissingComponentRequests,
                                          boolean autoDiscardStaleComponentRequests,
-                                         boolean filterExcludedArtifactsFromBuild, String artifactoryCombinationFilter) {
+                                         boolean filterExcludedArtifactsFromBuild, String artifactoryCombinationFilter,
+                                         String customBuildName, boolean overrideBuildName) {
         this.details = details;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
@@ -191,6 +194,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
         this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
+        this.customBuildName = customBuildName;
+        this.overrideBuildName = overrideBuildName;
     }
 
     public GradleReleaseWrapper getReleaseWrapper() {
@@ -402,6 +407,14 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return getDescriptor().isMultiConfProject();
     }
 
+    public String getCustomBuildName() {
+        return customBuildName;
+    }
+
+    public boolean isOverrideBuildName() {
+        return overrideBuildName;
+    }
+
     private String cleanString(String artifactPattern) {
         return StringUtils.removeEnd(StringUtils.removeStart(artifactPattern, "\""), "\"");
     }
@@ -413,8 +426,12 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
 
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject project) {
-        List<ArtifactoryProjectAction> action =
-                ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project);
+        List<ArtifactoryProjectAction> action = null;
+        if (isOverrideBuildName()) {
+            action = ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project, getCustomBuildName());
+        } else {
+            action = ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project);
+        }
         if (getReleaseWrapper() != null) {
             List<Action> actions = new ArrayList<Action>();
             actions.addAll(action);
@@ -581,7 +598,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 }
                 if (result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
                     if (isDeployBuildInfo()) {
-                        build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build));
+                        String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGradleConfigurator.this, build);
+                        build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                         ArtifactoryGradleConfigurator configurator =
                                 ActionableHelper.getBuildWrapper(build.getProject(),
                                         ArtifactoryGradleConfigurator.class);
@@ -653,7 +671,9 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                         isBlackDuckIncludePublishedArtifacts(), isAutoCreateMissingComponentRequests(),
                         isAutoDiscardStaleComponentRequests())
                 .filterExcludedArtifactsFromBuild(isFilterExcludedArtifactsFromBuild())
-                .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
+                .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
+                .overrideBuildName(isOverrideBuildName())
+                .customBuildName(getCustomBuildName());
     }
 
     public boolean isRelease(AbstractBuild build) {

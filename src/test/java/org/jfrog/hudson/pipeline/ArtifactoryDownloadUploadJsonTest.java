@@ -25,7 +25,7 @@ public class ArtifactoryDownloadUploadJsonTest {
 
         assertEquals("File pattern is incorrect", "my-repo/resolved.my", downloadJson.getFiles()[0].getPattern());
 
-        String expectedAql = "items.find({\"repo\":\"my-repo\",\"$or\":[{\"$and\":[{\"path\":{\"$match\":\"*\"},\"name\":{\"$match\":\"*.zip\"}}]}]})";
+        String expectedAql = "{\"repo\":\"my-repo\",\"$or\":[{\"$and\":[{\"path\":{\"$match\":\"*\"},\"name\":{\"$match\":\"*.zip\"}}]}]}";
         assertEquals("Aql is incorrect", expectedAql, downloadJson.getFiles()[1].getAql());
 
         assertEquals("File target is incorrect", "my-repo/by-pattern/", downloadJson.getFiles()[0].getTarget());

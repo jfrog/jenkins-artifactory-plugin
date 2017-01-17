@@ -37,6 +37,21 @@
                        blockTitle="Override default deployer credentials"
                        elementId="overridingDeployerCredentials-ivy-project"/>
 
+       <f:block>
+           <table style="width:100%">
+               <f:optionalBlock field="overrideBuildName"
+                             help="/plugin/artifactory/help/common/help-overrideBuildName.html"
+                             title="Override build name" inline="true"
+                             checked="${instance.overrideBuildName}">
+                   <f:block>
+                       <f:entry title="Build name" field="customBuildName"
+                                                           help="/plugin/artifactory/help/common/help-customizedBuildName.html">
+                           <f:textbox value="${instance.customBuildName}"/>
+                       </f:entry>
+                   </f:block>
+               </f:optionalBlock>
+           </table>
+       </f:block>
         <f:block>
             <table style="width:100%">
                 <f:optionalBlock name="deployArtifacts"

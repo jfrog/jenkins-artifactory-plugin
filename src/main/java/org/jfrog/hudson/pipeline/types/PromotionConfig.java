@@ -19,82 +19,66 @@ public class PromotionConfig implements Serializable {
     private boolean copy;
     private boolean failFast = true;
 
-    @Whitelisted
     public String getBuildName() {
         return buildName;
     }
 
-    @Whitelisted
     public void setBuildName(String buildName) {
         this.buildName = buildName;
     }
 
-    @Whitelisted
     public String getBuildNumber() {
         return buildNumber;
     }
 
-    @Whitelisted
     public void setBuildNumber(String buildNumber) {
         this.buildNumber = buildNumber;
     }
 
-    @Whitelisted
     public String getTargetRepo() {
         return targetRepo;
     }
 
-    @Whitelisted
     public void setTargetRepo(String targetRepo) {
         this.targetRepo = targetRepo;
     }
 
-    @Whitelisted
     public String getSourceRepo() {
         return sourceRepo;
     }
 
-    @Whitelisted
     public void setSourceRepo(String sourceRepo) {
         this.sourceRepo = sourceRepo;
     }
 
-    @Whitelisted
     public String getStatus() {
         return status;
     }
 
-    @Whitelisted
     public void setStatus(String status) {
         this.status = status;
     }
 
-    @Whitelisted
     public String getComment() {
         return comment;
     }
 
-    @Whitelisted
     public void setComment(String comment) {
         this.comment = comment;
     }
 
-    @Whitelisted
     public boolean isIncludeDependencies() {
         return includeDependencies;
     }
 
-    @Whitelisted
     public void setIncludeDependencies(boolean includeDependencies) {
         this.includeDependencies = includeDependencies;
     }
 
-    @Whitelisted
     public boolean isCopy() {
         return copy;
     }
 
-    @Whitelisted
     public void setCopy(boolean copy) {
         this.copy = copy;
     }

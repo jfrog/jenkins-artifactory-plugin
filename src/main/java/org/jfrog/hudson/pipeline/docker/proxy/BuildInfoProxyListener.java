@@ -26,10 +26,11 @@ public class BuildInfoProxyListener extends ComputerListener implements Serializ
             Utils.copyCertsToAgent(c);
             final String publicKey = c.getNode().getRootPath() + "/" + CertManager.DEFAULT_RELATIVE_CERT_PATH;
             final String privateKey = c.getNode().getRootPath() + "/" + CertManager.DEFAULT_RELATIVE_KEY_PATH;
+            final String agentName = c.getNode().getDisplayName();
 
             c.getChannel().call(new Callable<Boolean, IOException>() {
                 public Boolean call() throws IOException {
-                    BuildInfoProxyManager.start(port, publicKey, privateKey);
+                    BuildInfoProxy.start(port, publicKey, privateKey, agentName);
                     return true;
                 }
             });

@@ -16,7 +16,7 @@ import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
+import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.build.api.Build;
 import org.jfrog.hudson.gradle.GradleInitScriptWriter;
@@ -99,7 +99,7 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
         return usesPlugin;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<BuildInfo> {
+    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
         private static final long serialVersionUID = 1L;
 
         @StepContextParameter
@@ -166,7 +166,6 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
             args.addTokenized(getTasks());
             args.add("-b");
             args.add(step.getBuildFile());
-            env.put("GRADLE_USER_HOME", ws.getRemote());
             if (!launcher.isUnix()) {
                 args = args.toWindowsCommand();
             }

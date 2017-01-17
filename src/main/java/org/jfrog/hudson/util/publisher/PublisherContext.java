@@ -65,6 +65,8 @@ public class PublisherContext {
     private boolean filterExcludedArtifactsFromBuild;
     private boolean recordAllDependencies;
     private String artifactoryPluginVersion;
+    private String customBuildName;
+    private boolean overrideBuildName;
 
     private PublisherContext() {
     }
@@ -139,6 +141,14 @@ public class PublisherContext {
 
     public boolean isDiscardOldBuilds() {
         return discardOldBuilds;
+    }
+
+    public String getCustomBuildName() {
+        return customBuildName;
+    }
+
+    public boolean isOverrideBuildName() {
+        return overrideBuildName;
     }
 
     public boolean isDeployArtifacts() {
@@ -250,6 +260,11 @@ public class PublisherContext {
 
         public Builder deployerOverrider(DeployerOverrider deployerOverrider) {
             publisher.deployerOverrider = deployerOverrider;
+            return this;
+        }
+
+        public Builder overrideBuildName(boolean overrideBuildName) {
+            publisher.overrideBuildName = overrideBuildName;
             return this;
         }
 
@@ -390,6 +405,11 @@ public class PublisherContext {
 
         public Builder artifactoryPluginVersion(String artifactoryPluginVersion){
             publisher.artifactoryPluginVersion = artifactoryPluginVersion;
+            return this;
+        }
+
+        public Builder customBuildName(String customBuildName){
+            publisher.customBuildName = customBuildName;
             return this;
         }
     }

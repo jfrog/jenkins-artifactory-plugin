@@ -152,7 +152,7 @@ public class ExtractorUtils {
         }
 
         if (publisherContext != null) {
-            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration, listener, ws);
+            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration, ws);
             publisherContext.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
         }
 
@@ -238,7 +238,7 @@ public class ExtractorUtils {
      * Set all the parameters relevant for publishing artifacts and build info
      */
     private static void setPublisherInfo(Map<String, String> env, Run build, BuildInfo pipelineBuildInfo, PublisherContext context,
-                ArtifactoryClientConfiguration configuration, TaskListener listerner, FilePath ws) {
+                ArtifactoryClientConfiguration configuration, FilePath ws) {
         configuration.setActivateRecorder(Boolean.TRUE);
         String buildName;
         String buildNumber;
@@ -246,7 +246,7 @@ public class ExtractorUtils {
             buildName = pipelineBuildInfo.getName();
             buildNumber = pipelineBuildInfo.getNumber();
         } else {
-            buildName = BuildUniqueIdentifierHelper.getBuildName(build);
+            buildName = context.isOverrideBuildName() ? context.getCustomBuildName() : BuildUniqueIdentifierHelper.getBuildName(build);
             buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         }
 

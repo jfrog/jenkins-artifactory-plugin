@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.types.buildInfo;
 
-import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jfrog.build.api.Module;
@@ -25,12 +24,11 @@ public class DockerBuildInfoHelper implements Serializable {
         this.buildInfo = buildInfo;
     }
 
-    public List<Module> generateBuildInfoModules(Run build, TaskListener listener, ArtifactoryConfigurator config,
-                                                 Launcher launcher) throws IOException, InterruptedException {
+    public List<Module> generateBuildInfoModules(Run build, TaskListener listener, ArtifactoryConfigurator config) throws IOException, InterruptedException {
         aggregatedBuildInfoIds.add(buildInfo.hashCode());
         List<DockerImage> dockerImages = new ArrayList<DockerImage>();
         for (Integer buildInfoId : aggregatedBuildInfoIds) {
-            dockerImages.addAll(DockerAgentUtils.getDockerImagesFromAgent(launcher, buildInfoId));
+            dockerImages.addAll(DockerAgentUtils.getDockerImagesFromAgents(buildInfoId));
         }
 
         String timestamp = Long.toString(buildInfo.getStartDate().getTime());

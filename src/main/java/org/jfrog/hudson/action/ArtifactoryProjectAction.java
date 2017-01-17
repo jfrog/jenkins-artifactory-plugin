@@ -36,6 +36,11 @@ public class ArtifactoryProjectAction implements ProminentProjectAction {
         this.artifactoryServerName = artifactoryServerName;
     }
 
+    public ArtifactoryProjectAction(String artifactoryServerName, String buildName) {
+        urlSuffix = generateUrlSuffix(buildName);
+        this.artifactoryServerName = artifactoryServerName;
+    }
+
     public String getIconFileName() {
         return "/plugin/artifactory/images/artifactory-icon.png";
     }
@@ -51,5 +56,10 @@ public class ArtifactoryProjectAction implements ProminentProjectAction {
     private String generateUrlSuffix(AbstractProject<?, ?> project) {
         return "/webapp/builds/" +
                 Util.rawEncode(ExtractorUtils.sanitizeBuildName(project.getFullName()));
+    }
+
+    private String generateUrlSuffix(String buildName) {
+        return "/webapp/builds/" +
+                Util.rawEncode(buildName);
     }
 }

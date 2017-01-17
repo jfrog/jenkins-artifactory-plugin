@@ -11,6 +11,7 @@ import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.types.resolvers.Resolver;
@@ -69,7 +70,7 @@ public class MavenGradleEnvExtractor {
 
             ArtifactoryClientConfiguration configuration = ExtractorUtils.getArtifactoryClientConfiguration(
                     env, build, buildInfo, buildListener, publisherContext, resolverContext, ws);
-            addPipelineInfoToConfiguration(ws, env, configuration);
+            addPipelineInfoToConfiguration(env, configuration);
             ExtractorUtils.persistConfiguration(configuration, env, ws, launcher);
             propertiesFilePath = configuration.getPropertiesFile();
         } catch (Exception e) {
@@ -79,26 +80,16 @@ public class MavenGradleEnvExtractor {
         env.put(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFilePath);
     }
 
-    private void addPipelineInfoToConfiguration(FilePath ws, EnvVars env, ArtifactoryClientConfiguration configuration) {
-        FilePath tempFile = getGeneratedBuildInfoPath(ws);
-        env.put(BuildInfoFields.GENERATED_BUILD_INFO, tempFile.getRemote());
-        configuration.info.setGeneratedBuildInfoFilePath(tempFile.getRemote());
-    }
-
-    private FilePath getGeneratedBuildInfoPath(FilePath ws) {
-        FilePath tempFile;
+    private void addPipelineInfoToConfiguration(EnvVars env, ArtifactoryClientConfiguration configuration) {
+        String tempFile = "";
         try {
-            tempFile = ws.createTextTempFile(BuildInfoFields.GENERATED_BUILD_INFO, ".json", "", false);
-        } catch (IOException e) {
-            buildListener.error("Failed while generating temp build info file.");
-            build.setResult(Result.FAILURE);
-            throw new Run.RunnerAbortedException();
-        } catch (InterruptedException e) {
-            buildListener.error("Failed while generating temp build info file.");
+            tempFile = Utils.createTempBuildInfoFile(launcher);
+        } catch (Exception e) {
+            buildListener.error("Failed while generating temp build info file. " + e.getMessage());
             build.setResult(Result.FAILURE);
             throw new Run.RunnerAbortedException();
         }
-        return tempFile;
+        env.put(BuildInfoFields.GENERATED_BUILD_INFO, tempFile);
+        configuration.info.setGeneratedBuildInfoFilePath(tempFile);
     }
-
 }

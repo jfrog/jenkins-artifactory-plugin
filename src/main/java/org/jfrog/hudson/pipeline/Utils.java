@@ -7,6 +7,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.plugins.git.util.BuildData;
+import hudson.remoting.Callable;
 import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
@@ -20,6 +21,7 @@ import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.IncludesExcludes;
 import org.jfrog.hudson.util.RepositoriesUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -194,11 +196,11 @@ public class Utils {
         }
     }
 
-    private static void deleteFilePathQuietly(FilePath  filePath) {
+    private static void deleteFilePathQuietly(FilePath filePath) {
         try {
-          if (filePath != null && filePath.exists()) {
-              filePath.delete();
-          }
+            if (filePath != null && filePath.exists()) {
+                filePath.delete();
+            }
         } catch (Exception e) {
             // Ignore exceptions
         }
@@ -219,4 +221,13 @@ public class Utils {
         }
     }
 
+    public static String createTempBuildInfoFile(Launcher launcher) throws Exception {
+        return launcher.getChannel().call(new Callable<String, Exception>() {
+            public String call() throws IOException {
+                File tempFile = File.createTempFile(BuildInfoFields.GENERATED_BUILD_INFO, ".json");
+                tempFile.deleteOnExit();
+                return tempFile.getAbsolutePath();
+            }
+        });
+    }
 }

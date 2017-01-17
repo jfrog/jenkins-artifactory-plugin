@@ -174,17 +174,38 @@ public abstract class ActionableHelper {
      */
     public static List<ArtifactoryProjectAction> getArtifactoryProjectAction(
             String artifactoryServerName, AbstractProject project) {
+        if (shouldReturnEmptyList(artifactoryServerName, project)) return Collections.emptyList();
+
+        return Lists.newArrayList(new ArtifactoryProjectAction(artifactoryServerName, project));
+    }
+
+    private static boolean shouldReturnEmptyList(String artifactoryServerName, AbstractProject project) {
         if (artifactoryServerName == null) {
-            return Collections.emptyList();
+            return true;
         }
         if (project.getAction(ArtifactoryProjectAction.class) != null) {
             // don't add if already exist (if multiple Artifactory builders are configured in free style)
-            return Collections.emptyList();
+            return true;
         }
         if (project instanceof MatrixConfiguration)
-            return Collections.emptyList();
+            return true;
+        return false;
+    }
 
-        return Lists.newArrayList(new ArtifactoryProjectAction(artifactoryServerName, project));
+    /**
+     * Return list with {@link ArtifactoryProjectAction} if not already exists in project actions.
+     *
+     * @param artifactoryServerName The name of Artifactory server
+     * @param project               The hudson project
+     * @return Empty list or list with one {@link ArtifactoryProjectAction}
+     */
+    public static List<ArtifactoryProjectAction> getArtifactoryProjectAction(
+            String artifactoryServerName, AbstractProject project, String buildName) {
+        if (shouldReturnEmptyList(artifactoryServerName, project)) {
+            return Collections.emptyList();
+        }
+
+        return Lists.newArrayList(new ArtifactoryProjectAction(artifactoryServerName, buildName));
     }
 
     /**

@@ -34,14 +34,16 @@ public class DockerImage implements Serializable {
     private final String imageTag;
     private final String manifest;
     private final String targetRepo;
+    private String agentName = "";
     private Properties properties = new Properties();
     private final ArtifactoryVersion VIRTUAL_REPOS_SUPPORTED_VERSION = new ArtifactoryVersion("4.8.1");
 
-    public DockerImage(String imageId, String imageTag, String targetRepo, String manifest) {
+    public DockerImage(String imageId, String imageTag, String targetRepo, String manifest, String agentName) {
         this.imageId = imageId;
         this.imageTag = imageTag;
         this.targetRepo = targetRepo;
         this.manifest = manifest;
+        this.agentName = agentName;
     }
 
     public String getImageTag() {
@@ -50,6 +52,10 @@ public class DockerImage implements Serializable {
 
     public String getImageId() {
         return imageId;
+    }
+
+    public String getAgentName() {
+        return agentName;
     }
 
     public void addProperties(Properties properties) {
@@ -72,7 +78,7 @@ public class DockerImage implements Serializable {
 
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(config, server);
         ArtifactoryBuildInfoClient propertyChangeClient = server.createArtifactoryClient(
-                preferredDeployer.provideUsername(build.getParent()), preferredDeployer.provideUsername(build.getParent()),
+                preferredDeployer.provideUsername(build.getParent()), preferredDeployer.providePassword(build.getParent()),
                 server.createProxyConfiguration(Jenkins.getInstance().proxy));
 
         Module buildInfoModule = new Module();

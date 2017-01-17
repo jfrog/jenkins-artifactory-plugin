@@ -32,7 +32,7 @@ import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.pipeline.docker.proxy.CertManager;
-import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxyManager;
+import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
@@ -224,14 +224,14 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         private synchronized void configureProxy(JSONObject proxyConfig) throws IOException, InterruptedException {
             if (proxyConfig == null) {
-                BuildInfoProxyManager.stopAll();
+                BuildInfoProxy.stopAll();
                 buildInfoProxyEnabled = false;
                 return;
             }
 
             int portFromForm = Integer.parseInt(proxyConfig.get("buildInfoProxyPort").toString());
             if (!buildInfoProxyEnabled || portFromForm != buildInfoProxyPort) {
-                BuildInfoProxyManager.startAll(portFromForm);
+                BuildInfoProxy.startAll(portFromForm);
                 buildInfoProxyEnabled = true;
                 buildInfoProxyPort = portFromForm;
             }
@@ -289,7 +289,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             int port = Integer.parseInt(buildInfoProxyPort);
             CertManager.createCertificateSource(buildInfoProxyCertPublic, buildInfoProxyCertPrivate);
             try {
-                BuildInfoProxyManager.startAll(port);
+                BuildInfoProxy.startAll(port);
             } catch (IOException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {

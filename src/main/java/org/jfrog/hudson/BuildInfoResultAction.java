@@ -44,8 +44,8 @@ public class BuildInfoResultAction implements BuildBadgeAction {
     @Deprecated
     private transient AbstractBuild build;
 
-    public BuildInfoResultAction(String artifactoryRootUrl, Run build) {
-        url = generateUrl(artifactoryRootUrl, build);
+    public BuildInfoResultAction(String artifactoryRootUrl, Run build, String buildName) {
+        url = generateUrl(artifactoryRootUrl, build, buildName);
     }
 
     public BuildInfoResultAction(String artifactoryRootUrl, Run build, Build buildInfo) {
@@ -63,14 +63,15 @@ public class BuildInfoResultAction implements BuildBadgeAction {
     public String getUrlName() {
         // for backward compatibility if url is empty calculate it from the old structs
         if (url == null && artifactoryRedeployPublisher != null && build != null) {
-            return generateUrl(artifactoryRedeployPublisher.getArtifactoryName(), build);
+            String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(artifactoryRedeployPublisher, build);
+            return generateUrl(artifactoryRedeployPublisher.getArtifactoryName(), build, buildName);
         } else {
             return url;
         }
     }
 
-    private String generateUrl(String artifactoryRootUrl, Run build) {
-        return artifactoryRootUrl + "/webapp/builds/" + Util.rawEncode(BuildUniqueIdentifierHelper.getBuildName(build)) + "/"
+    private String generateUrl(String artifactoryRootUrl, Run build, String buildName) {
+        return artifactoryRootUrl + "/webapp/builds/" + Util.rawEncode(buildName) + "/"
                 + Util.rawEncode(BuildUniqueIdentifierHelper.getBuildNumber(build));
     }
 

@@ -9,10 +9,11 @@ import hudson.model.TaskListener;
 import org.apache.commons.cli.MissingArgumentException;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
+import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
 import org.jfrog.hudson.pipeline.docker.utils.DockerAgentUtils;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -58,7 +59,7 @@ public class DockerPushStep extends AbstractStepImpl {
         return targetRepo;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<BuildInfo> {
+    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
         private static final long serialVersionUID = 1L;
 
         @Inject(optional = true)
@@ -78,7 +79,7 @@ public class DockerPushStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            if (!DockerAgentUtils.isProxyUp(launcher)) {
+            if (!BuildInfoProxy.isUp()) {
                 getContext().onFailure(new RuntimeException("Build info capturing for Docker images is not available while Artifactory proxy is not running, enable the proxy in Jenkins configuration."));
                 return null;
             }
@@ -93,19 +94,19 @@ public class DockerPushStep extends AbstractStepImpl {
                 return null;
             }
             BuildInfo buildInfo = Utils.prepareBuildinfo(build, step.getBuildInfo());
-            DockerAgentUtils.registerImage(launcher, step.getImage(), step.getHost(), step.getTargetRepo(), buildInfo.hashCode());
+            DockerAgentUtils.registerImageOnAgents(launcher, step.getImage(), step.getHost(), step.getTargetRepo(), buildInfo.hashCode());
 
             String username = step.getCredentialsConfig().provideUsername(build.getParent());
             String password = step.getCredentialsConfig().providePassword(build.getParent());
 
-            DockerAgentUtils.pushImage(launcher, step.getImage(), username, password, step.getHost());
-            if (!DockerAgentUtils.updateImageParent(launcher, step.getImage(), step.getHost(), buildInfo.hashCode())) {
+            JenkinsBuildInfoLog log = new JenkinsBuildInfoLog(listener);
+            DockerAgentUtils.pushImage(launcher, log, step.getImage(), username, password, step.getHost());
+            if (!DockerAgentUtils.updateImageParentOnAgents(log, step.getImage(), step.getHost(), buildInfo.hashCode())) {
                 getContext().onFailure(new IllegalStateException("Build info capturing failed for docker image: " +
                         step.getImage() + " check build info proxy configuration."));
                 return null;
             }
 
-            JenkinsBuildInfoLog log = new JenkinsBuildInfoLog(listener);
             log.info("Successfully pushed docker image: " + step.getImage());
             return buildInfo;
         }

@@ -300,7 +300,7 @@ public class UnifiedPromoteBuildAction<C extends BuildInfoAwareConfigurator & De
                             .copy(useCopy)
                             .failFast(failFast);
 
-                    String buildName = BuildUniqueIdentifierHelper.getBuildName(build);
+                    String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build);
                     String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
                     PromotionUtils.promoteAndCheckResponse(promotionBuilder, client, listener, buildName, buildNumber);
                 }
@@ -324,7 +324,7 @@ public class UnifiedPromoteBuildAction<C extends BuildInfoAwareConfigurator & De
 
         private void handlePluginPromotion(TaskListener listener, ArtifactoryBuildInfoClient client)
                 throws IOException {
-            String buildName = BuildUniqueIdentifierHelper.getBuildName(build);
+            String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build);
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             HttpResponse pluginPromotionResponse = client.executePromotionUserPlugin(
                     promotionPlugin.getPluginName(), buildName, buildNumber, promotionPlugin.getParamMap());

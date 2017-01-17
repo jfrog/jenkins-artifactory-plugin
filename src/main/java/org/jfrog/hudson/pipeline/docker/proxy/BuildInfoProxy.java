@@ -12,6 +12,7 @@ import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.logging.Logger;
@@ -19,15 +20,15 @@ import java.util.logging.Logger;
 /**
  * Created by romang on 7/10/16.
  */
-public class BuildInfoProxyManager implements Serializable {
+public class BuildInfoProxy implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    static private HttpProxyServer server = null;
-    private static final Logger logger = Logger.getLogger(BuildInfoProxyManager.class.getName());
+    private static HttpProxyServer server = null;
+    private static String agentName;
 
-    public static void start(int proxyPort, String proxyPublicKey, String proxyPrivateKey) {
+    public static void start(int proxyPort, String proxyPublicKey, String proxyPrivateKey, String agentName) {
         stop();
-        logger.info("Starting Build-Info proxy");
+        getLogger().info("Starting Build-Info proxy");
         PemFileCertificateSource fileCertificateSource = CertManager.getCertificateSource(proxyPublicKey, proxyPrivateKey);
         ImpersonatingMitmManager mitmManager = ImpersonatingMitmManager.builder()
                 .rootCertificateSource(fileCertificateSource)
@@ -41,15 +42,13 @@ public class BuildInfoProxyManager implements Serializable {
                 .withManInTheMiddle(mitmManager)
                 .withConnectTimeout(0)
                 .start();
-        logger.info("Build-Info proxy certificate public key path: " + proxyPublicKey);
-        logger.info("Build-Info proxy certificate private key path: " + proxyPrivateKey);
+        getLogger().info("Build-Info proxy certificate public key path: " + proxyPublicKey);
+        getLogger().info("Build-Info proxy certificate private key path: " + proxyPrivateKey);
+        BuildInfoProxy.agentName = agentName;
     }
 
     public static boolean isUp() {
-        if (server == null) {
-            return false;
-        }
-        return true;
+        return server != null;
     }
 
     public static void stop() {
@@ -59,6 +58,10 @@ public class BuildInfoProxyManager implements Serializable {
         }
     }
 
+    public static String getAgentName() {
+        return agentName;
+    }
+
     public static void stopAll() throws IOException, InterruptedException {
         stop();
         List<Node> nodes = Jenkins.getInstance().getNodes();
@@ -66,12 +69,18 @@ public class BuildInfoProxyManager implements Serializable {
             if (node == null || node.getChannel() == null) {
                 continue;
             }
-            node.getChannel().call(new Callable<Boolean, IOException>() {
-                public Boolean call() throws IOException {
-                    BuildInfoProxyManager.stop();
-                    return true;
-                }
-            });
+            try {
+                node.getChannel().call(new Callable<Boolean, IOException>() {
+                    public Boolean call() throws IOException {
+                        BuildInfoProxy.stop();
+                        return true;
+                    }
+                });
+            } catch (InvalidClassException e) {
+                getLogger().warning("Failed stopping Build-Info proxy on agent: '" + node.getDisplayName() +
+                    "'. It could be because the agent uses a different JDK than the master. " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 
@@ -82,7 +91,7 @@ public class BuildInfoProxyManager implements Serializable {
         File publicCert = new File(jenkinsHome, CertManager.DEFAULT_RELATIVE_CERT_PATH);
         File privateCert = new File(jenkinsHome, CertManager.DEFAULT_RELATIVE_KEY_PATH);
 
-        start(port, publicCert.getPath(), privateCert.getPath());
+        start(port, publicCert.getPath(), privateCert.getPath(), Jenkins.getInstance().getDisplayName());
         List<Node> nodes = Jenkins.getInstance().getNodes();
         for (Node node : nodes) {
             if (node == null || node.getChannel() == null) {
@@ -90,6 +99,7 @@ public class BuildInfoProxyManager implements Serializable {
             }
             final String agentCertPath = node.getRootPath() + "/" + CertManager.DEFAULT_RELATIVE_CERT_PATH;
             final String agentKeyPath = node.getRootPath() + "/" + CertManager.DEFAULT_RELATIVE_KEY_PATH;
+            final String agentName = node.getDisplayName();
 
             FilePath remoteCertPath = new FilePath(node.getChannel(), agentCertPath);
             FilePath localCertPath = new FilePath(publicCert);
@@ -99,12 +109,22 @@ public class BuildInfoProxyManager implements Serializable {
             FilePath localKeyPath = new FilePath(privateCert);
             localKeyPath.copyTo(remoteKeyPath);
 
-            node.getChannel().call(new Callable<Boolean, IOException>() {
-                public Boolean call() throws IOException {
-                    BuildInfoProxyManager.start(port, agentCertPath, agentKeyPath);
-                    return true;
-                }
-            });
+            try {
+                node.getChannel().call(new Callable<Boolean, IOException>() {
+                    public Boolean call() throws IOException {
+                        BuildInfoProxy.start(port, agentCertPath, agentKeyPath, agentName);
+                        return true;
+                    }
+                });
+            } catch (InvalidClassException e) {
+                getLogger().warning("Failed starting Build-Info proxy on agent: '" + node.getDisplayName() +
+                        "'. It could be because the agent uses a different JDK than the master. " + e.getMessage());
+                e.printStackTrace();
+            }
         }
+    }
+
+    private static Logger getLogger() {
+        return Logger.getLogger(BuildInfoProxy.class.getName());
     }
 }

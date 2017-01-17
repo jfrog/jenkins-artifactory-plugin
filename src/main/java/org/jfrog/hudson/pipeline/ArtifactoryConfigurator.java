@@ -127,4 +127,11 @@ public class ArtifactoryConfigurator implements BuildInfoAwareConfigurator, Depl
         return null;
     }
 
+    public String getCustomBuildName() {
+        return "";
+    }
+
+    public boolean isOverrideBuildName() {
+        return false;
+    }
 }

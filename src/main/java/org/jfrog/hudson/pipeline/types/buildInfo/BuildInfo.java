@@ -175,7 +175,7 @@ public class BuildInfo implements Serializable {
         ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideUsername(build.getParent()),
                 preferredDeployer.providePassword(build.getParent()), server.createProxyConfiguration(Jenkins.getInstance().proxy));
 
-        List<Module> dockerModules = dockerBuildInfoHelper.generateBuildInfoModules(build, listener, config, launcher);
+        List<Module> dockerModules = dockerBuildInfoHelper.generateBuildInfoModules(build, listener, config);
 
         addDockerBuildInfoModules(dockerModules);
         addDefaultModuleToModules(buildName);

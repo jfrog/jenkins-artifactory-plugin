@@ -4,6 +4,7 @@ import hudson.matrix.Combination;
 import hudson.matrix.MatrixRun;
 import hudson.model.*;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;
+import org.jfrog.hudson.BuildInfoAwareConfigurator;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.gradle.ArtifactoryGradleConfigurator;
 
@@ -137,5 +138,9 @@ public class BuildUniqueIdentifierHelper {
         }
 
         return buildNumber;
+    }
+
+    public static String getBuildNameConsiderOverride(BuildInfoAwareConfigurator configurator, Run build) {
+        return configurator.isOverrideBuildName() ? configurator.getCustomBuildName() : BuildUniqueIdentifierHelper.getBuildName(build);
     }
 }

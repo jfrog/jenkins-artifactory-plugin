@@ -70,6 +70,8 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     private transient List<BuildDependency> buildDependencies;
     private String artifactoryCombinationFilter;
     private boolean multiConfProject;
+    private String customBuildName;
+    private boolean overrideBuildName;
 
     /**
      * @deprecated: Use org.jfrog.hudson.generic.ArtifactoryGenericConfigurator#getDeployerCredentials()()
@@ -92,7 +94,9 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                                           boolean discardOldBuilds,
                                           boolean discardBuildArtifacts,
                                           boolean multiConfProject,
-                                          String artifactoryCombinationFilter) {
+                                          String artifactoryCombinationFilter,
+                                          String customBuildName,
+                                          boolean overrideBuildName) {
         this.details = details;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
@@ -110,6 +114,8 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.multiConfProject = multiConfProject;
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
+        this.customBuildName = customBuildName;
+        this.overrideBuildName = overrideBuildName;
     }
 
     public String getArtifactoryName() {
@@ -271,6 +277,14 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         return multiConfProject;
     }
 
+    public String getCustomBuildName() {
+        return customBuildName;
+    }
+
+    public boolean isOverrideBuildName() {
+        return overrideBuildName;
+    }
+
     public ArtifactoryServer getArtifactoryServer() {
         return RepositoriesUtils.getArtifactoryServer(getArtifactoryName(), getDescriptor().getArtifactoryServers());
     }
@@ -289,7 +303,11 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject project) {
-        return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project);
+        if (isOverrideBuildName()) {
+            return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project, getCustomBuildName());
+        } else {
+            return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project);
+        }
     }
 
     @Override
@@ -377,8 +395,9 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                         if (deployBuildInfo) {
                             new GenericBuildInfoDeployer(ArtifactoryGenericConfigurator.this, client, build,
                                     listener, deployedArtifacts, buildDependencies, publishedDependencies).deploy();
+                            String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGenericConfigurator.this, build);
                             // add the result action (prefer always the same index)
-                            build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build));
+                            build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                             build.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryGenericConfigurator>(build,
                                     ArtifactoryGenericConfigurator.this));
                             // Checks if Push to Bintray is disabled.

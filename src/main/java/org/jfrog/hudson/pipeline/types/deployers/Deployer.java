@@ -25,6 +25,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
     private boolean includeEnvVars;
     private List<String> properties = new ArrayList<String>();
     private Filter artifactDeploymentPatterns = new Filter();
+    private String customBuildName = "";
 
     protected ArtifactoryServer server;
 
@@ -123,7 +124,16 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         if (buildInfo != null) {
             Env buildInfoEnv = buildInfo.getEnv();
             this.setIncludeEnvVars(buildInfoEnv.isCapture());
+            this.setCustomBuildName(buildInfo.getName());
         }
+    }
+
+    public String getCustomBuildName() {
+        return customBuildName;
+    }
+
+    public void setCustomBuildName(String customBuildName) {
+        this.customBuildName = customBuildName;
     }
 
     public abstract ServerDetails getDetails();

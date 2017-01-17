@@ -104,6 +104,8 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     private boolean autoCreateMissingComponentRequests;
     private boolean autoDiscardStaleComponentRequests;
     private String artifactoryCombinationFilter;
+    private String customBuildName;
+    private boolean overrideBuildName;
 
     /**
      * @deprecated: Use org.jfrog.hudson.maven3.ArtifactoryMaven3Configurator#deployBuildInfo
@@ -139,6 +141,8 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                                          boolean autoCreateMissingComponentRequests,
                                          boolean autoDiscardStaleComponentRequests,
                                          boolean filterExcludedArtifactsFromBuild,
+                                         String customBuildName,
+                                         boolean overrideBuildName,
                                          String artifactoryCombinationFilter
     ) {
         this.details = details;
@@ -173,6 +177,8 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
         this.enableResolveArtifacts = enableResolveArtifacts;
+        this.customBuildName = customBuildName;
+        this.overrideBuildName = overrideBuildName;
     }
 
     public ServerDetails getDetails() {
@@ -241,6 +247,14 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
 
     public boolean isDeployBuildInfo() {
         return deployBuildInfo;
+    }
+
+    public String getCustomBuildName() {
+        return customBuildName;
+    }
+
+    public boolean isOverrideBuildName() {
+        return overrideBuildName;
     }
 
     public boolean isRecordAllDependencies() {
@@ -396,7 +410,11 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
 
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject project) {
-        return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project);
+        if (isOverrideBuildName()) {
+            return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project, getCustomBuildName());
+        } else {
+            return ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project);
+        }
     }
 
     @Override
@@ -430,7 +448,9 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                         getBlackDuckReportRecipients(), getBlackDuckScopes(), isBlackDuckIncludePublishedArtifacts(),
                         isAutoCreateMissingComponentRequests(), isAutoDiscardStaleComponentRequests())
                 .filterExcludedArtifactsFromBuild(isFilterExcludedArtifactsFromBuild())
-                .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
+                .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
+                .overrideBuildName(isOverrideBuildName())
+                .customBuildName(getCustomBuildName());
 
         if (isMultiConfProject(build) && isDeployArtifacts()) {
             if (StringUtils.isBlank(getArtifactoryCombinationFilter())) {
@@ -470,7 +490,8 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
             public boolean tearDown(AbstractBuild build, BuildListener listener) {
                 Result result = build.getResult();
                 if (deployBuildInfo && result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
-                    build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build));
+                    String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryMaven3Configurator.this, build);
+                    build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                     build.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryMaven3Configurator>(build, ArtifactoryMaven3Configurator.this));
                     // Checks if Push to Bintray is disabled.
                     if (PluginsUtils.isPushToBintrayEnabled()) {

@@ -2,11 +2,13 @@ package org.jfrog.hudson;
 
 import hudson.EnvVars;
 import hudson.Util;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.Cause;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.*;
-import org.jfrog.build.api.Build;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.PromotionStatusBuilder;
 import org.jfrog.build.api.release.Promotion;
@@ -45,8 +47,8 @@ public class AbstractBuildInfoDeployer {
     }
 
     protected Build createBuildInfo(String buildAgentName, String buildAgentVersion, BuildType buildType) {
-        BuildInfoBuilder builder = new BuildInfoBuilder(
-                BuildUniqueIdentifierHelper.getBuildName(build))
+        String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build);
+        BuildInfoBuilder builder = new BuildInfoBuilder(buildName)
                 .number(BuildUniqueIdentifierHelper.getBuildNumber(build)).type(buildType)
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .buildAgent(new BuildAgent(buildAgentName, buildAgentVersion))

@@ -112,6 +112,8 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     private boolean blackDuckIncludePublishedArtifacts;
     private boolean autoCreateMissingComponentRequests;
     private boolean autoDiscardStaleComponentRequests;
+    private String customBuildName;
+    private boolean overrideBuildName;
     /**
      * @deprecated: Use org.jfrog.hudson.ArtifactoryRedeployPublisher#deployBuildInfo
      */
@@ -139,7 +141,8 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
                                         boolean blackDuckRunChecks, String blackDuckAppName, String blackDuckAppVersion,
                                         String blackDuckReportRecipients, String blackDuckScopes,
                                         boolean blackDuckIncludePublishedArtifacts, boolean autoCreateMissingComponentRequests,
-                                        boolean autoDiscardStaleComponentRequests, boolean filterExcludedArtifactsFromBuild) {
+                                        boolean autoDiscardStaleComponentRequests, boolean filterExcludedArtifactsFromBuild,
+                                        String customBuildName, boolean overrideBuildName) {
         this.details = details;
         this.deployArtifacts = deployArtifacts;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
@@ -174,6 +177,8 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
         this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
         this.allowBintrayPushOfNonStageBuilds = allowBintrayPushOfNonStageBuilds;
+        this.customBuildName = customBuildName;
+        this.overrideBuildName = overrideBuildName;
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
@@ -361,23 +366,28 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         return !isBuildFromM2ReleasePlugin(build);
     }
 
+    public String getCustomBuildName() {
+        return customBuildName;
+    }
+
+    public boolean isOverrideBuildName() {
+        return overrideBuildName;
+    }
+
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
-        return details != null ? new ArtifactoryProjectAction(details.getArtifactoryName(), project) : null;
+        if (details != null) {
+            if (isOverrideBuildName()) {
+                return new ArtifactoryProjectAction(details.getArtifactoryName(), getCustomBuildName());
+            }
+            return new ArtifactoryProjectAction(details.getArtifactoryName(), project);
+        }
+        return null;
     }
 
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
-
-        //This step runs in maven2 and in maven3 builds, in maven 3 the plugin version printed to the log earlier
-        //so this line should be printed only in case of Maven 2
-        //need to fix the isM2Build, NPE in case of clear workspace
-//        if (isM2Build(build)) {
-//            listener.getLogger().println("Jenkins Artifactory Plugin version: " +
-//                    ActionableHelper.getArtifactoryPluginVersion());
-//        }
-
         if (build.getResult().isWorseThan(getTreshold())) {
             return true;    // build failed. Don't publish
         }
@@ -386,20 +396,12 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
             return true;
         }
 
+        String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryRedeployPublisher.this, build);
         // The following if statement Checks if the build job uses Maven 3:
         if (isExtractorUsed(build.getEnvironment(listener))) {
             if (deployBuildInfo) {
                 //Add build info icon to Jenkins job
-                build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build));
-                if (isAllowPromotionOfNonStagedBuilds()) {
-                    build.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryRedeployPublisher>(build, this));
-                }
-                // Checks if Push to Bintray is disabled.
-                if (PluginsUtils.isPushToBintrayEnabled()) {
-                    if (isAllowBintrayPushOfNonStageBuilds()) {
-                        build.getActions().add(new BintrayPublishAction<ArtifactoryRedeployPublisher>(build, this));
-                    }
-                }
+                addJobActions(build, buildName);
             }
             return true;
         }
@@ -437,16 +439,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
             if (deployBuildInfo) {
                 new MavenBuildInfoDeployer(this, client, mavenBuild, listener).deploy();
                 // add the result action (prefer always the same index)
-                build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build));
-                if (isAllowPromotionOfNonStagedBuilds()) {
-                    build.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryRedeployPublisher>(build, this));
-                }
-                // Checks if Push to Bintray is disabled.
-                if (PluginsUtils.isPushToBintrayEnabled()) {
-                    if (isAllowBintrayPushOfNonStageBuilds()) {
-                        build.getActions().add(new BintrayPublishAction<ArtifactoryRedeployPublisher>(build, this));
-                    }
-                }
+                addJobActions(build, buildName);
             }
             return true;
         } catch (Exception e) {
@@ -457,6 +450,19 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         // failed
         build.setResult(Result.FAILURE);
         return true;
+    }
+
+    private void addJobActions(AbstractBuild build, String buildName) {
+        build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+        if (isAllowPromotionOfNonStagedBuilds()) {
+            build.getActions().add(new UnifiedPromoteBuildAction<ArtifactoryRedeployPublisher>(build, this));
+        }
+        // Checks if Push to Bintray is disabled.
+        if (PluginsUtils.isPushToBintrayEnabled()) {
+            if (isAllowBintrayPushOfNonStageBuilds()) {
+                build.getActions().add(new BintrayPublishAction<ArtifactoryRedeployPublisher>(build, this));
+            }
+        }
     }
 
     private boolean isBuildFromM2ReleasePlugin(AbstractBuild<?, ?> build) {

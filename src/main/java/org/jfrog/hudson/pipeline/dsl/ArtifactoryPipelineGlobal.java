@@ -3,10 +3,7 @@ package org.jfrog.hudson.pipeline.dsl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.Docker;
-import org.jfrog.hudson.pipeline.types.GradleBuild;
-import org.jfrog.hudson.pipeline.types.MavenBuild;
+import org.jfrog.hudson.pipeline.types.*;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
@@ -105,5 +102,12 @@ public class ArtifactoryPipelineGlobal implements Serializable {
         GradleBuild gradleBuild = (GradleBuild) this.script.invokeMethod("newGradleBuild", new LinkedHashMap<String, Object>());
         gradleBuild.setCpsScript(this.script);
         return gradleBuild;
+    }
+
+    @Whitelisted
+    public MavenDescriptor mavenDescriptor() {
+        MavenDescriptor descriptorHandler = new MavenDescriptor();
+        descriptorHandler.setCpsScript(this.script);
+        return descriptorHandler;
     }
 }
