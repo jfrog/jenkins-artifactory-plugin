@@ -218,7 +218,7 @@ public class DockerUtils implements Serializable {
         String imageName;
         String imageVersion;
 
-        if (indexOfLastColon < 0) {
+        if (indexOfLastColon < 0 || indexOfLastColon < indexOfFirstSlash) {
             imageName = imageTag.substring(indexOfFirstSlash + 1);
             imageVersion = "latest";
         } else {
