@@ -5,6 +5,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.model.AuthConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
+import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.command.PullImageResultCallback;
 import com.github.dockerjava.core.command.PushImageResultCallback;
 import com.google.common.base.Charsets;
@@ -299,7 +300,7 @@ public class DockerUtils implements Serializable {
             return DockerClientBuilder.getInstance().build();
         }
 
-        DockerClientConfig config = DockerClientConfig.createDefaultConfigBuilder()
+        DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
                 .withDockerHost(host)
                 .build();
         return DockerClientBuilder.getInstance(config).build();
