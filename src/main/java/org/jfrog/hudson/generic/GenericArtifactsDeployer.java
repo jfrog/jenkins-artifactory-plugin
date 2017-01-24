@@ -189,7 +189,7 @@ public class GenericArtifactsDeployer {
                 deploy(client, artifactsToDeploy);
                 return convertDeployDetailsToArtifacts(artifactsToDeploy);
             } finally {
-                client.shutdown();
+                client.close();
             }
         }
 

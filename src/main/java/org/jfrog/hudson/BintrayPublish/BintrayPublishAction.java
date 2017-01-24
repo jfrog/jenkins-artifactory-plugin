@@ -280,7 +280,7 @@ public class BintrayPublishAction<C extends BuildInfoAwareConfigurator & Deploye
             }
             passphrase = null;
             workerThread = null;
-            client.shutdown();
+            client.close();
         }
     }
 }

@@ -130,7 +130,7 @@ public class ArtifactoryServer implements Serializable {
             }
             return Lists.newArrayList();
         } finally {
-            client.shutdown();
+            client.close();
         }
         return repositories;
     }
@@ -163,7 +163,7 @@ public class ArtifactoryServer implements Serializable {
             return client.getStagingStrategy(selectedStagingPlugin.getPluginName(), buildName,
                     selectedStagingPlugin.getParamMap());
         } finally {
-            client.shutdown();
+            client.close();
         }
     }
 
@@ -182,7 +182,7 @@ public class ArtifactoryServer implements Serializable {
             }
             return Lists.newArrayList();
         } finally {
-            client.shutdown();
+            client.close();
         }
 
         return virtualRepositories;
@@ -302,7 +302,7 @@ public class ArtifactoryServer implements Serializable {
         } catch (IOException e) {
             log.log(Level.WARNING, "Failed to obtain user plugin info: " + e.getMessage());
         } finally {
-            client.shutdown();
+            client.close();
         }
     }
 

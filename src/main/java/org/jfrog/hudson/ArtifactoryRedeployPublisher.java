@@ -445,7 +445,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         } catch (Exception e) {
             e.printStackTrace(listener.error(e.getMessage()));
         } finally {
-            client.shutdown();
+            client.close();
         }
         // failed
         build.setResult(Result.FAILURE);

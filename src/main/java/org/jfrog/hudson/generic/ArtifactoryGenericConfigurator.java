@@ -355,7 +355,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
             e.printStackTrace(listener.error(e.getMessage()));
             build.setResult(Result.FAILURE);
         } finally {
-            dependenciesClient.shutdown();
+            dependenciesClient.close();
         }
         return null;
     }
@@ -413,7 +413,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                 } catch (Exception e) {
                     e.printStackTrace(listener.error(e.getMessage()));
                 } finally {
-                    client.shutdown();
+                    client.close();
                 }
 
                 // failed

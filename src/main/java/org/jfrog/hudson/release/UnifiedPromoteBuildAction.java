@@ -317,7 +317,7 @@ public class UnifiedPromoteBuildAction<C extends BuildInfoAwareConfigurator & De
                 e.printStackTrace(listener.error(e.getMessage()));
             } finally {
                 if (client != null) {
-                    client.shutdown();
+                    client.close();
                 }
             }
         }
