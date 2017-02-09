@@ -16,9 +16,9 @@ import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.BuildInfoDeployer;
+import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.CredentialManager;
-import org.jfrog.hudson.util.ExtractorUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -46,7 +46,7 @@ public class BuildInfo implements Serializable {
     public BuildInfo(Run build) {
         this.buildName = BuildUniqueIdentifierHelper.getBuildName(build);
         this.buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        this.startDate = new Date(build.getStartTimeInMillis());
+        this.startDate = Calendar.getInstance().getTime();
         this.retention = new BuildRetention();
     }
 
@@ -175,9 +175,11 @@ public class BuildInfo implements Serializable {
         ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideUsername(build.getParent()),
                 preferredDeployer.providePassword(build.getParent()), server.createProxyConfiguration(Jenkins.getInstance().proxy));
 
-        List<Module> dockerModules = dockerBuildInfoHelper.generateBuildInfoModules(build, listener, config);
+        if (BuildInfoProxy.isUp()) {
+            List<Module> dockerModules = dockerBuildInfoHelper.generateBuildInfoModules(build, listener, config);
+            addDockerBuildInfoModules(dockerModules);
+        }
 
-        addDockerBuildInfoModules(dockerModules);
         addDefaultModuleToModules(buildName);
         return new BuildInfoDeployer(config, client, build, listener, new BuildInfoAccessor(this));
     }

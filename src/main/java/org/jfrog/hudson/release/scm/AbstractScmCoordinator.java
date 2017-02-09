@@ -21,7 +21,6 @@ import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
 import hudson.model.BuildListener;
 import hudson.scm.SCM;
-import hudson.scm.SubversionSCM;
 import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.release.scm.git.GitCoordinator;
 import org.jfrog.hudson.release.scm.perforce.LegacyPerforceManager;
@@ -51,7 +50,7 @@ public abstract class AbstractScmCoordinator implements ScmCoordinator {
     public static ScmCoordinator createScmCoordinator(AbstractBuild build, BuildListener listener,
                                                       ReleaseAction releaseAction) {
         SCM projectScm = build.getProject().getScm();
-        if (projectScm instanceof SubversionSCM) {
+        if (isSvn(build.getProject())) {
             return new SubversionCoordinator(build, listener, releaseAction);
         }
         // Git is optional SCM so we cannot use the class here
@@ -75,8 +74,11 @@ public abstract class AbstractScmCoordinator implements ScmCoordinator {
     }
 
     public static boolean isSvn(AbstractProject project) {
-        SCM projectScm = project.getScm();
-        return projectScm instanceof SubversionSCM;
+        SCM scm = project.getScm();
+        if (scm != null) {
+            return scm.getClass().getName().equals("hudson.scm.SubversionSCM");
+        }
+        return false;
     }
 
     public static boolean isGitScm(AbstractProject project) {

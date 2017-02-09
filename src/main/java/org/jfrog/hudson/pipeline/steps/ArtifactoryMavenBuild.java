@@ -96,7 +96,7 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            BuildInfo buildInfo = step.getBuildInfo() == null ? new BuildInfo(build) : step.getBuildInfo();
+            BuildInfo buildInfo = Utils.prepareBuildinfo(build, step.getBuildInfo());
             Deployer deployer = getDeployer();
             deployer.createPublisherBuildInfoDetails(buildInfo);
             MavenGradleEnvExtractor envExtractor = new MavenGradleEnvExtractor(build,
