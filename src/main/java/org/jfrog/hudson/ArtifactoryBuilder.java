@@ -156,7 +156,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 return FormValidation.error("Please set a valid Artifactory URL");
             }
 
-            if (maxRetry <= 0) {
+            if (maxRetry < 0) {
                 return FormValidation.error("Max Retries can not be less then 0");
             }
 
