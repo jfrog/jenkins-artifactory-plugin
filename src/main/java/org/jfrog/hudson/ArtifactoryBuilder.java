@@ -31,6 +31,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.docker.proxy.CertManager;
 import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
 import org.jfrog.hudson.util.Credentials;
@@ -178,7 +179,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             if (StringUtils.isNotBlank(timeout))
                 client.setConnectionTimeout(Integer.parseInt(timeout));
 
-            RepositoriesUtils.setRetryParams(doRetry, maxRetry, retryRequestsAlreadySent, client);
+            int maxRetryValue = maxRetry != 0 ? maxRetry : ActionableHelper.getDefaultMaxNumberOfRetries();
+            RepositoriesUtils.setRetryParams(doRetry, maxRetryValue, retryRequestsAlreadySent, client);
 
             ArtifactoryVersion version;
             try {
