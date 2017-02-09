@@ -27,6 +27,7 @@ import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.build.client.ArtifactoryHttpClient;
 import org.jfrog.hudson.util.publisher.PublisherFindImpl;
 import org.jfrog.hudson.util.publisher.PublisherFlexible;
 
@@ -221,5 +222,13 @@ public abstract class ActionableHelper {
             return Jenkins.getInstance().getPlugin(pluginsSortName).getWrapper().getVersion();
         }
         return "";
+    }
+
+    /**
+     * Returns the default number of retries
+     * @return the default number of retries
+     */
+    public static int getDefaultMaxNumberOfRetries() {
+        return ArtifactoryHttpClient.DEFAULT_MAX_RETRY;
     }
 }

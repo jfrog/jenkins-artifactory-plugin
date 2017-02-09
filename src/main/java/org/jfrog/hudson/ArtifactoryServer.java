@@ -26,8 +26,10 @@ import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryHttpClient;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBaseClient;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.util.CredentialManager;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -58,7 +60,9 @@ public class ArtifactoryServer implements Serializable {
     // Network timeout in seconds to use both for connection establishment and for unanswered requests
     private int timeout = DEFAULT_CONNECTION_TIMEOUT;
     private boolean bypassProxy;
-
+    private boolean doRetry;
+    private boolean retryRequestsAlreadySent = false;
+    private int maxRetry = ActionableHelper.getDefaultMaxNumberOfRetries();
     /**
      * List of repository keys, last time we checked. Copy on write semantics.
      */
@@ -83,13 +87,17 @@ public class ArtifactoryServer implements Serializable {
 
     @DataBoundConstructor
     public ArtifactoryServer(String serverId, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
-                             CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy) {
+                             CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy,
+                             boolean doRetry, boolean retryRequestsAlreadySent, int maxRetry) {
         this.url = StringUtils.removeEnd(artifactoryUrl, "/");
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
         this.timeout = timeout > 0 ? timeout : DEFAULT_CONNECTION_TIMEOUT;
         this.bypassProxy = bypassProxy;
         this.id = serverId;
+        this.doRetry = doRetry;
+        this.retryRequestsAlreadySent = retryRequestsAlreadySent;
+        this.maxRetry = maxRetry > 0 ? maxRetry : ActionableHelper.getDefaultMaxNumberOfRetries();
     }
 
     public String getName() {
@@ -114,6 +122,18 @@ public class ArtifactoryServer implements Serializable {
 
     public boolean isBypassProxy() {
         return bypassProxy;
+    }
+
+    public boolean isDoRetry() {
+        return doRetry;
+    }
+
+    public int getMaxRetry() {
+        return maxRetry;
+    }
+
+    public boolean isRetryRequestsAlreadySent() {
+        return retryRequestsAlreadySent;
     }
 
     public List<String> getLocalRepositoryKeys(Credentials credentials) {
@@ -225,6 +245,7 @@ public class ArtifactoryServer implements Serializable {
                                                               ProxyConfiguration proxyConfiguration) {
         ArtifactoryBuildInfoClient client = new ArtifactoryBuildInfoClient(url, userName, password, new NullLog());
         client.setConnectionTimeout(timeout);
+        setRetryParams(client);
         if (!bypassProxy && proxyConfiguration != null) {
             client.setProxyConfiguration(proxyConfiguration.host,
                     proxyConfiguration.port,
@@ -233,6 +254,14 @@ public class ArtifactoryServer implements Serializable {
         }
 
         return client;
+    }
+
+    /**
+     * Set the retry params for the base client
+     * @param client - the client to set the params.
+     */
+    private void setRetryParams(ArtifactoryBaseClient client) {
+        RepositoriesUtils.setRetryParams(doRetry, maxRetry, retryRequestsAlreadySent, client);
     }
 
     public ProxyConfiguration createProxyConfiguration(hudson.ProxyConfiguration proxy) {
@@ -256,6 +285,7 @@ public class ArtifactoryServer implements Serializable {
         ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(url, userName, password,
                 new JenkinsBuildInfoLog(listener));
         client.setConnectionTimeout(timeout);
+        setRetryParams(client);
         if (!bypassProxy && proxyConfiguration != null) {
             client.setProxyConfiguration(proxyConfiguration.host, proxyConfiguration.port, proxyConfiguration.username,
                     proxyConfiguration.password);
@@ -269,7 +299,7 @@ public class ArtifactoryServer implements Serializable {
      *
      * @return Preferred credentials for repo resolving. Never null.
      */
-    public CredentialsConfig getResolvingCredentialsConfig(){
+    public CredentialsConfig getResolvingCredentialsConfig() {
         if (resolverCredentialsConfig != null && resolverCredentialsConfig.isCredentialsProvided()) {
             return getResolverCredentialsConfig();
         }
@@ -314,6 +344,17 @@ public class ArtifactoryServer implements Serializable {
                 return -1;
             }
         }
+    }
+
+    /**
+     * Log setter for jobs that are using createArtifactoryClient which
+     * creates the client with NullLog object.
+     *
+     * @param listener the listener of the job
+     * @param client   the client that was created
+     */
+    public void setLog(TaskListener listener, ArtifactoryBaseClient client) {
+        client.setLog(new JenkinsBuildInfoLog(listener));
     }
 
     /**

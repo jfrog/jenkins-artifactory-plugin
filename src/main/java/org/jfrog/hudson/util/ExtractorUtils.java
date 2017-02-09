@@ -200,6 +200,7 @@ public class ExtractorUtils {
     private static void setResolverInfo(ArtifactoryClientConfiguration configuration, Run build,
                                         ResolverContext context, Map<String, String> env) {
         configuration.setTimeout(context.getServer().getTimeout());
+        setRetryParams(configuration, context.getServer());
         configuration.resolver.setContextUrl(context.getServerDetails().getArtifactoryUrl());
         String inputDownloadReleaseKey = context.getServerDetails().getResolveReleaseRepository().getRepoKey();
         String inputDownloadSnapshotKey = context.getServerDetails().getResolveSnapshotRepository().getRepoKey();
@@ -309,6 +310,8 @@ public class ExtractorUtils {
             configuration.publisher.setPassword(preferredDeployer.providePassword(build.getParent()));
         }
         configuration.setTimeout(artifactoryServer.getTimeout());
+        setRetryParams(configuration, artifactoryServer);
+
         configuration.publisher.setContextUrl(artifactoryServer.getUrl());
 
         ServerDetails serverDetails = context.getServerDetails();
@@ -391,6 +394,16 @@ public class ExtractorUtils {
             configuration.setEnvVarsExcludePatterns(Util.replaceMacro(envVarsPatterns.getExcludePatterns(), env));
         }
         addMatrixParams(context, configuration.publisher, env);
+    }
+
+    private static void setRetryParams(ArtifactoryClientConfiguration configuration, ArtifactoryServer artifactoryServer) {
+        if (artifactoryServer.isDoRetry()) {
+            configuration.setMaxRetries(artifactoryServer.getMaxRetry());
+            configuration.setRetryRequestsAlreadySent(artifactoryServer.isRetryRequestsAlreadySent());
+        } else {
+            configuration.setMaxRetries(ActionableHelper.getDefaultMaxNumberOfRetries());
+            configuration.setRetryRequestsAlreadySent(false);
+        }
     }
 
     // Naive implementation of the difference in days between two dates

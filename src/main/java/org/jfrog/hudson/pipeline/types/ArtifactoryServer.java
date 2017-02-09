@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
@@ -27,6 +28,8 @@ public class ArtifactoryServer implements Serializable {
     private boolean bypassProxy;
     private CpsScript cpsScript;
     private boolean usesCredetialsId;
+    private boolean retryRequestsAlreadySent = false;
+    private int maxRetries = ActionableHelper.getDefaultMaxNumberOfRetries();
 
     public ArtifactoryServer() {
     }
@@ -235,6 +238,26 @@ public class ArtifactoryServer implements Serializable {
     @Whitelisted
     public boolean isBypassProxy() {
         return bypassProxy;
+    }
+
+    @Whitelisted
+    public void setMaxRetries(int maxRetries) {
+        this.maxRetries = maxRetries;
+    }
+
+    @Whitelisted
+    public int getMaxRetries() {
+        return maxRetries;
+    }
+
+    @Whitelisted
+    public void setRetryRequestsAlreadySent(boolean retryRequestsAlreadySent) {
+        this.retryRequestsAlreadySent = retryRequestsAlreadySent;
+    }
+
+    @Whitelisted
+    public boolean isRetryRequestsAlreadySent() {
+        return retryRequestsAlreadySent;
     }
 
     @Whitelisted

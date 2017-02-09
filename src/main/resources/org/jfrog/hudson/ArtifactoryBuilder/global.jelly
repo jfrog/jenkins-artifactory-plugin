@@ -62,20 +62,46 @@
                         </f:block>
                     </f:section>
                     <f:advanced>
-                        <f:entry title="Connection Timeout" field="artifactory.timeout"
-                                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
-                            <f:textbox clazz="number" value="${server.timeout}"/>
-                        </f:entry>
-                        <f:entry name="artifactory.bypassProxy" field="artifactory.bypassProxy"
-                                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
-                            <f:checkbox checked="${server.bypassProxy}"/>
-                            <label class="attach-previous">${%Bypass HTTP Proxy}</label>
+                        <f:entry>
+                            <table style="width:100%">
+                                <f:entry title="Connection Timeout" field="artifactory.timeout"
+                                     help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
+                                        <f:textbox clazz="number" value="${server.timeout}"/>
+                                </f:entry>
+                                <f:optionalBlock name="doRetry"
+                                    checked="${server.doRetry}"
+                                    title="Override client retry configuration"
+                                    inline="true"
+                                    help="/plugin/artifactory/help/ArtifactoryBuilder/help-retry.html">
+                                        <f:block>
+                                            <table style="width:100%">
+                                                <f:entry title="Number of retries" field="maxRetry"
+                                                    help="/plugin/artifactory/help/ArtifactoryBuilder/help-maxRetry.html">
+                                                        <f:textbox value="${server.maxRetry}"/>
+                                                </f:entry>
+                                            </table>
+                                        </f:block>
+                                        <f:block>
+                                            <table style="width:100%">
+                                                <f:entry field="retryRequestsAlreadySent"
+                                                  help="/plugin/artifactory/help/ArtifactoryBuilder/help-retryRequestsAlreadySent.html">
+                                                    <f:checkbox default="false" checked="${server.retryRequestsAlreadySent}"/>
+                                                    <label class="attach-previous">Retry requests already sent</label>
+                                                </f:entry>
+                                            </table>
+                                        </f:block>
+                                </f:optionalBlock>
+
+                                <f:optionalBlock name="bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
+                                                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
+                                </f:optionalBlock>
+                            </table>
                         </f:entry>
                     </f:advanced>
                     <f:validateButton
                             title="${%Test Connection}" progress="${%Testing...}"
                             method="testConnection"
-                            with="artifactoryUrl,artifactory.timeout,artifactory.bypassProxy,useCredentialsPlugin,credentialsId,username,password"/>
+                            with="artifactoryUrl,artifactory.timeout,artifactory.bypassProxy,useCredentialsPlugin,credentialsId,username,password,doRetry,maxRetry,retryRequestsAlreadySent"/>
 
                     <f:optionalBlock title="Use Different Resolver Credentials"
                                      name="resolverCredentialsConfig"

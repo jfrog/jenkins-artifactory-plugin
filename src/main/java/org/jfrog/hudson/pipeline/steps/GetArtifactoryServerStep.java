@@ -12,6 +12,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.ArtifactoryServer;
+import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -69,6 +70,13 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
             org.jfrog.hudson.pipeline.types.ArtifactoryServer artifactoryPipelineServer = new org.jfrog.hudson.pipeline.types.ArtifactoryServer(artifactoryServerID, server.getUrl(),
                     server.getResolvingCredentialsConfig().provideUsername(build.getParent()), server.getResolvingCredentialsConfig().providePassword(build.getParent()));
             artifactoryPipelineServer.setBypassProxy(server.isBypassProxy());
+            if (server.isDoRetry()) {
+                artifactoryPipelineServer.setMaxRetries(server.getMaxRetry());
+                artifactoryPipelineServer.setRetryRequestsAlreadySent(server.isRetryRequestsAlreadySent());
+            } else {
+                artifactoryPipelineServer.setMaxRetries(ActionableHelper.getDefaultMaxNumberOfRetries());
+                artifactoryPipelineServer.setRetryRequestsAlreadySent(false);
+            }
             return artifactoryPipelineServer;
         }
 

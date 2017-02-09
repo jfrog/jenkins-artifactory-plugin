@@ -185,6 +185,7 @@ public class GenericArtifactsDeployer {
 
             ArtifactoryBuildInfoClient client = server.createArtifactoryClient(credentials.getUsername(),
                     credentials.getPassword(), proxyConfiguration);
+            server.setLog(listener, client);
             try {
                 deploy(client, artifactsToDeploy);
                 return convertDeployDetailsToArtifacts(artifactsToDeploy);

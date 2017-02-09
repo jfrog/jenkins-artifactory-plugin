@@ -44,7 +44,9 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import javax.servlet.ServletException;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author Yossi Shaul
@@ -144,11 +146,18 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 @QueryParameter("useCredentialsPlugin") final boolean useLegacyCredentials,
                 @QueryParameter("credentialsId") final String deployerCredentialsId,
                 @QueryParameter("username") final String deployerCredentialsUsername,
-                @QueryParameter("password") final String deployerCredentialsPassword
+                @QueryParameter("password") final String deployerCredentialsPassword,
+                @QueryParameter("doRetry") final boolean doRetry,
+                @QueryParameter("maxRetry") final int maxRetry,
+                @QueryParameter("retryRequestsAlreadySent") final boolean retryRequestsAlreadySent
         ) throws ServletException {
 
             if (StringUtils.isBlank(url)) {
                 return FormValidation.error("Please set a valid Artifactory URL");
+            }
+
+            if (maxRetry <= 0) {
+                return FormValidation.error("Max Retries can not be less then 0");
             }
 
             Credentials credentials = PluginsUtils.credentialsLookup(deployerCredentialsId, null);
@@ -168,6 +177,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
             if (StringUtils.isNotBlank(timeout))
                 client.setConnectionTimeout(Integer.parseInt(timeout));
+
+            RepositoriesUtils.setRetryParams(doRetry, maxRetry, retryRequestsAlreadySent, client);
 
             ArtifactoryVersion version;
             try {
