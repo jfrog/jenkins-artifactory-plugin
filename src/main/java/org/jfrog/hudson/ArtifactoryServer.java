@@ -39,10 +39,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -60,9 +57,10 @@ public class ArtifactoryServer implements Serializable {
     // Network timeout in seconds to use both for connection establishment and for unanswered requests
     private int timeout = DEFAULT_CONNECTION_TIMEOUT;
     private boolean bypassProxy;
-    private boolean doRetry;
-    private boolean retryRequestsAlreadySent = false;
-    private int maxRetry = ActionableHelper.getDefaultMaxNumberOfRetries();
+    // This object is set to Integer instead of int so upon starting if it's missing (due to upgrade from previous version)
+    // This object will be null instead of 0. In the ArtifactoryBuilder there is a check if the object is null then we are
+    // setting to 3 that is the default.
+    private Integer connectionRetry = ActionableHelper.getDefaultConnectionRetries();
     /**
      * List of repository keys, last time we checked. Copy on write semantics.
      */
@@ -87,17 +85,14 @@ public class ArtifactoryServer implements Serializable {
 
     @DataBoundConstructor
     public ArtifactoryServer(String serverId, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
-                             CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy,
-                             boolean doRetry, boolean retryRequestsAlreadySent, int maxRetry) {
+                             CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry) {
         this.url = StringUtils.removeEnd(artifactoryUrl, "/");
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
         this.timeout = timeout > 0 ? timeout : DEFAULT_CONNECTION_TIMEOUT;
         this.bypassProxy = bypassProxy;
         this.id = serverId;
-        this.doRetry = doRetry;
-        this.retryRequestsAlreadySent = retryRequestsAlreadySent;
-        this.maxRetry = maxRetry > 0 ? maxRetry : ActionableHelper.getDefaultMaxNumberOfRetries();
+        this.connectionRetry = connectionRetry;
     }
 
     public String getName() {
@@ -124,16 +119,21 @@ public class ArtifactoryServer implements Serializable {
         return bypassProxy;
     }
 
-    public boolean isDoRetry() {
-        return doRetry;
+    // To populate the dropdown list from the jelly
+    public List<Integer> getConnectionRetries() {
+        List<Integer> items = new ArrayList<Integer>();
+        for (int i = 0; i < 10; i++) {
+            items.add(i);
+        }
+        return items;
     }
 
-    public int getMaxRetry() {
-        return maxRetry;
-    }
+   public Integer getConnectionRetry() {
+       return connectionRetry;
+   }
 
-    public boolean isRetryRequestsAlreadySent() {
-        return retryRequestsAlreadySent;
+    public void setConnectionRetry(int connectionRetry) {
+        this.connectionRetry = connectionRetry;
     }
 
     public List<String> getLocalRepositoryKeys(Credentials credentials) {
@@ -261,7 +261,7 @@ public class ArtifactoryServer implements Serializable {
      * @param client - the client to set the params.
      */
     private void setRetryParams(ArtifactoryBaseClient client) {
-        RepositoriesUtils.setRetryParams(doRetry, maxRetry, retryRequestsAlreadySent, client);
+        RepositoriesUtils.setRetryParams(connectionRetry, client);
     }
 
     public ProxyConfiguration createProxyConfiguration(hudson.ProxyConfiguration proxy) {

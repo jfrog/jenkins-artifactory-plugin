@@ -215,8 +215,7 @@ public class MavenExtractorEnvironment extends Environment {
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .overrideBuildName(publisher.isOverrideBuildName())
                 .customBuildName(publisher.getCustomBuildName())
-                .maxRetry(publisher.getArtifactoryServer().getMaxRetry())
-                .retryRequestsAlreadySent(publisher.getArtifactoryServer().isRetryRequestsAlreadySent())
+                .connectionRetry(publisher.getArtifactoryServer().getConnectionRetry())
                 .build();
 
         return context;

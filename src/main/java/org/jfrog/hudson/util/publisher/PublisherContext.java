@@ -67,8 +67,7 @@ public class PublisherContext {
     private String artifactoryPluginVersion;
     private String customBuildName;
     private boolean overrideBuildName;
-    private int maxRetry;
-    private boolean retryRequestsAlreadySent;
+    private int connectionRetry;
 
     private PublisherContext() {
     }
@@ -415,13 +414,8 @@ public class PublisherContext {
             return this;
         }
 
-        public Builder maxRetry(int maxRetry){
-            publisher.maxRetry = maxRetry;
-            return this;
-        }
-
-        public Builder retryRequestsAlreadySent(boolean retryRequestsAlreadySent){
-            publisher.retryRequestsAlreadySent = retryRequestsAlreadySent;
+        public Builder connectionRetry(int connectionRetry){
+            publisher.connectionRetry = connectionRetry;
             return this;
         }
     }

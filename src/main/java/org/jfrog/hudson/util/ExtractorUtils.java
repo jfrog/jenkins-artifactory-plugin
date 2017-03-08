@@ -397,13 +397,7 @@ public class ExtractorUtils {
     }
 
     private static void setRetryParams(ArtifactoryClientConfiguration configuration, ArtifactoryServer artifactoryServer) {
-        if (artifactoryServer.isDoRetry()) {
-            configuration.setMaxRetries(artifactoryServer.getMaxRetry());
-            configuration.setRetryRequestsAlreadySent(artifactoryServer.isRetryRequestsAlreadySent());
-        } else {
-            configuration.setMaxRetries(ActionableHelper.getDefaultMaxNumberOfRetries());
-            configuration.setRetryRequestsAlreadySent(false);
-        }
+        configuration.setConnectionRetries(artifactoryServer.getConnectionRetry());
     }
 
     // Naive implementation of the difference in days between two dates

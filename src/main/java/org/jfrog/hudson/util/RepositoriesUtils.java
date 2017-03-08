@@ -187,23 +187,15 @@ public abstract class RepositoriesUtils {
     }
 
     private static void setRetryParams(ArtifactoryServer artifactoryServer, ArtifactoryBuildInfoClient client) {
-        setRetryParams(artifactoryServer.isDoRetry(), artifactoryServer.getMaxRetry(), artifactoryServer.isRetryRequestsAlreadySent(), client);
+        setRetryParams(artifactoryServer.getConnectionRetry(), client);
     }
 
     /**
      * Sets the params of the retry mechanism
-     * @param doRetry - If to perform retry
-     * @param maxRetry - The max number of retries configured
-     * @param retryRequestsAlreadySent - If to allow retry on requests that already have been sent
+     * @param connectionRetry - The max number of retries configured
      * @param client - The client to set the values
      */
-    public static void setRetryParams(boolean doRetry, int maxRetry, boolean retryRequestsAlreadySent, ArtifactoryBaseClient client) {
-        if (doRetry) {
-            client.setMaxRetries(maxRetry);
-            client.setRetryRequestsAlreadySent(retryRequestsAlreadySent);
-        } else {
-            client.setMaxRetries(ActionableHelper.getDefaultMaxNumberOfRetries());
-            client.setRetryRequestsAlreadySent(false);
-        }
+    public static void setRetryParams(int connectionRetry, ArtifactoryBaseClient client) {
+        client.setConnectionRetries(connectionRetry);
     }
 }

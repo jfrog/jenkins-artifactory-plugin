@@ -228,7 +228,7 @@ public abstract class ActionableHelper {
      * Returns the default number of retries
      * @return the default number of retries
      */
-    public static int getDefaultMaxNumberOfRetries() {
-        return ArtifactoryHttpClient.DEFAULT_MAX_RETRY;
+    public static int getDefaultConnectionRetries() {
+        return ArtifactoryHttpClient.DEFAULT_CONNECTION_RETRY;
     }
 }

@@ -78,6 +78,20 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             super(ArtifactoryBuilder.class);
             initDefaultCertPaths();
             load();
+            setConnectionRetry();
+        }
+
+        /**
+         * We need to check upon starting the server if the connection retry field is null.
+         * This can happen upon upgrading from previous version that the field is missing.
+         * If null, we need to set this to the default that is 3.
+         */
+        private void setConnectionRetry() {
+            for (ArtifactoryServer artifactoryServer : artifactoryServers) {
+                if (artifactoryServer.getConnectionRetry() == null) {
+                    artifactoryServer.setConnectionRetry(ActionableHelper.getDefaultConnectionRetries());
+                }
+            }
         }
 
         private void initDefaultCertPaths() {
@@ -148,17 +162,16 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 @QueryParameter("credentialsId") final String deployerCredentialsId,
                 @QueryParameter("username") final String deployerCredentialsUsername,
                 @QueryParameter("password") final String deployerCredentialsPassword,
-                @QueryParameter("doRetry") final boolean doRetry,
-                @QueryParameter("maxRetry") final int maxRetry,
-                @QueryParameter("retryRequestsAlreadySent") final boolean retryRequestsAlreadySent
+                @QueryParameter("connectionRetry") final int connectionRetry
+
         ) throws ServletException {
 
             if (StringUtils.isBlank(url)) {
                 return FormValidation.error("Please set a valid Artifactory URL");
             }
 
-            if (maxRetry < 0) {
-                return FormValidation.error("Max Retries can not be less then 0");
+            if (connectionRetry < 0) {
+                return FormValidation.error("Connection Retries can not be less then 0");
             }
 
             Credentials credentials = PluginsUtils.credentialsLookup(deployerCredentialsId, null);
@@ -176,11 +189,10 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 client.setProxyConfiguration(RepositoriesUtils.createProxyConfiguration(Jenkins.getInstance().proxy));
             }
 
-            if (StringUtils.isNotBlank(timeout))
+            if (StringUtils.isNotBlank(timeout)) {
                 client.setConnectionTimeout(Integer.parseInt(timeout));
-
-            int maxRetryValue = maxRetry != 0 ? maxRetry : ActionableHelper.getDefaultMaxNumberOfRetries();
-            RepositoriesUtils.setRetryParams(doRetry, maxRetryValue, retryRequestsAlreadySent, client);
+            }
+            RepositoriesUtils.setRetryParams(connectionRetry, client);
 
             ArtifactoryVersion version;
             try {

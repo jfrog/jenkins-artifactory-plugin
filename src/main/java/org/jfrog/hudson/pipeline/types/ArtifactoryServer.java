@@ -28,8 +28,7 @@ public class ArtifactoryServer implements Serializable {
     private boolean bypassProxy;
     private CpsScript cpsScript;
     private boolean usesCredetialsId;
-    private boolean retryRequestsAlreadySent = false;
-    private int maxRetries = ActionableHelper.getDefaultMaxNumberOfRetries();
+    private Connection connection = new Connection();
 
     public ArtifactoryServer() {
     }
@@ -241,26 +240,6 @@ public class ArtifactoryServer implements Serializable {
     }
 
     @Whitelisted
-    public void setMaxRetries(int maxRetries) {
-        this.maxRetries = maxRetries;
-    }
-
-    @Whitelisted
-    public int getMaxRetries() {
-        return maxRetries;
-    }
-
-    @Whitelisted
-    public void setRetryRequestsAlreadySent(boolean retryRequestsAlreadySent) {
-        this.retryRequestsAlreadySent = retryRequestsAlreadySent;
-    }
-
-    @Whitelisted
-    public boolean isRetryRequestsAlreadySent() {
-        return retryRequestsAlreadySent;
-    }
-
-    @Whitelisted
     public String getCredentialsId() {
         return credentialsId;
     }
@@ -272,4 +251,10 @@ public class ArtifactoryServer implements Serializable {
         this.username = "";
         this.usesCredetialsId = true;
     }
+
+    @Whitelisted
+    public Connection getConnection() {
+        return connection;
+    }
+
 }

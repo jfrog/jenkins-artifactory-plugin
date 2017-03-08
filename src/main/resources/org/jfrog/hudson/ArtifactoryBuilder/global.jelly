@@ -25,7 +25,7 @@
 
 
             <f:repeatable name="artifactoryServer" var="server" items="${descriptor.artifactoryServers}"
-                          header="Artifactory">
+                          header="Artifactory" add="${%Add Artifactory Server}">
                 <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ArtifactoryServer"/>
 
                 <table width="100%">
@@ -68,29 +68,16 @@
                                      help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
                                         <f:textbox clazz="number" value="${server.timeout}"/>
                                 </f:entry>
-                                <f:optionalBlock name="doRetry"
-                                    checked="${server.doRetry}"
-                                    title="Override client retry configuration"
-                                    inline="true"
-                                    help="/plugin/artifactory/help/ArtifactoryBuilder/help-retry.html">
-                                        <f:block>
-                                            <table style="width:100%">
-                                                <f:entry title="Number of retries" field="maxRetry"
-                                                    help="/plugin/artifactory/help/ArtifactoryBuilder/help-maxRetry.html">
-                                                        <f:textbox value="${server.maxRetry}"/>
-                                                </f:entry>
-                                            </table>
-                                        </f:block>
-                                        <f:block>
-                                            <table style="width:100%">
-                                                <f:entry field="retryRequestsAlreadySent"
-                                                  help="/plugin/artifactory/help/ArtifactoryBuilder/help-retryRequestsAlreadySent.html">
-                                                    <f:checkbox default="false" checked="${server.retryRequestsAlreadySent}"/>
-                                                    <label class="attach-previous">Retry requests already sent</label>
-                                                </f:entry>
-                                            </table>
-                                        </f:block>
-                                </f:optionalBlock>
+                                <f:entry field="connectionRetry" title="Number of retries"
+                                    help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
+                                     <select class="setting-input" name="connectionRetry">
+                                         <j:forEach var="r" items="${server.connectionRetries}">
+                                             <f:option selected="${r==server.connectionRetry}"
+                                                value="${r}">${r}
+                                             </f:option>
+                                         </j:forEach>
+                                    </select>
+                                </f:entry>
 
                                 <f:optionalBlock name="bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
                                                                          help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
@@ -101,7 +88,7 @@
                     <f:validateButton
                             title="${%Test Connection}" progress="${%Testing...}"
                             method="testConnection"
-                            with="artifactoryUrl,artifactory.timeout,artifactory.bypassProxy,useCredentialsPlugin,credentialsId,username,password,doRetry,maxRetry,retryRequestsAlreadySent"/>
+                            with="artifactoryUrl,artifactory.timeout,artifactory.bypassProxy,useCredentialsPlugin,credentialsId,username,password,connectionRetry"/>
 
                     <f:optionalBlock title="Use Different Resolver Credentials"
                                      name="resolverCredentialsConfig"
@@ -170,4 +157,8 @@
         </f:optionalBlock>
 
     </f:section>
+    <st:adjunct includes="lib.jfrog.global.global"/>
+    <script>
+       populateDropDownList()
+    </script>
 </j:jelly>
