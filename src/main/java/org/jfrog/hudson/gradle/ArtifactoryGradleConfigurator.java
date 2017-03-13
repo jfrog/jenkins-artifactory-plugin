@@ -473,6 +473,10 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         }
 
         final Gradle gradleBuild = getLastGradleBuild(build.getProject());
+        // If the result is failure, stop the build.
+        if(build.getResult() != null && build.getResult().toString().equals("FAILURE")){
+            return null;
+        }
         if (gradleBuild != null) {
             // The ConcurrentBuildSetupSync helper class is used to make sure that the code
             // inside its setUp() method is invoked by only one job in this build

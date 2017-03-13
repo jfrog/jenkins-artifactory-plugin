@@ -171,6 +171,10 @@ public class GradleReleaseWrapper {
             return;
         }
         log(listener, "Release build triggered");
+        if( !releaseAction.isValid(build, listener, releaseAction.getVersioning().name()) ){
+            build.setResult(Result.FAILURE);
+            return;
+        }
         scmCoordinator = AbstractScmCoordinator.createScmCoordinator(build, listener, releaseAction);
         scmCoordinator.prepare();
         // TODO: replace the versioning mode with something else

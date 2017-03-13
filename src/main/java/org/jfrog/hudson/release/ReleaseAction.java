@@ -32,6 +32,7 @@ import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.PluginSettings;
 import org.jfrog.hudson.UserPluginInfo;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.release.gradle.GradleReleaseApiAction;
 import org.jfrog.hudson.release.scm.AbstractScmCoordinator;
 import org.jfrog.hudson.release.scm.svn.SubversionManager;
 import org.jfrog.hudson.util.ErrorResponse;
@@ -137,6 +138,8 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
         defaultModules = null;
         defaultVcsConfig = null;
         defaultPromotionConfig = null;
+        releaseVersion = null;
+        nextVersion = null;
     }
 
     public boolean isStrategyRequestFailed() {
@@ -314,6 +317,8 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
     private void overrideStagingPluginParams(StaplerRequest req) throws Exception {
         req.bindParameters(this);
         String versioningStr = req.getParameter("versioning");
+
+        // The object versioningStr is not null in case of Maven job
         if (versioningStr != null) {
             versioning = VERSIONING.valueOf(versioningStr);
             switch (versioning) {
@@ -323,6 +328,11 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
                 case PER_MODULE:
                     doPerModuleVersioning(req);
             }
+        }
+
+        // In case this is a Gradle job, it always will be per module
+        if(this instanceof GradleReleaseApiAction) {
+            doPerModuleVersioning(req);
         }
 
         if (req.getParameter("createVcsTag") != null) {
@@ -401,6 +411,8 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
 
     public abstract String getNextVersionFor(Object moduleName);
 
+    public abstract boolean isValid(AbstractBuild build, BuildListener listener, String versioning);
+
     protected void initBuilderSpecific() throws Exception {
     }
 
@@ -431,8 +443,10 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
     }
 
     protected void doGlobalVersioning() {
-        releaseVersion = defaultGlobalModule.getReleaseVersion();
-        nextVersion = defaultGlobalModule.getNextDevelopmentVersion();
+        if (defaultGlobalModule != null) {
+            releaseVersion = defaultGlobalModule.getReleaseVersion();
+            nextVersion = defaultGlobalModule.getNextDevelopmentVersion();
+        }
     }
 
     protected W getWrapper() {

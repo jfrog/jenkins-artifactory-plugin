@@ -20,7 +20,9 @@ import com.google.common.collect.Maps;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
+import hudson.model.AbstractBuild;
 import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
 import hudson.plugins.gradle.Gradle;
 import hudson.tasks.Builder;
 import org.apache.commons.lang.StringUtils;
@@ -229,8 +231,8 @@ public abstract class BaseGradleReleaseAction extends ReleaseAction<AbstractProj
 
     @Override
     protected void doPerModuleVersioning(StaplerRequest req) {
-        releaseVersionPerModule = Maps.newHashMap();
-        nextVersionPerModule = Maps.newHashMap();
+        Map<String, String> releaseVersionPerModule =  Maps.newHashMap();
+        Map<String, String> nextVersionPerModule =  Maps.newHashMap();
         Enumeration params = req.getParameterNames();
         while (params.hasMoreElements()) {
             String key = (String) params.nextElement();
@@ -240,6 +242,11 @@ public abstract class BaseGradleReleaseAction extends ReleaseAction<AbstractProj
                 nextVersionPerModule.put(StringUtils.removeStart(key, "next."), req.getParameter(key));
             }
         }
+
+        if(!releaseVersionPerModule.isEmpty())
+            this.releaseVersionPerModule = releaseVersionPerModule;
+        if(!nextVersionPerModule.isEmpty())
+            this.nextVersionPerModule = nextVersionPerModule;
     }
 
     @Override
@@ -366,5 +373,41 @@ public abstract class BaseGradleReleaseAction extends ReleaseAction<AbstractProj
             return null;
         }
         return publisher.getRepositoryKey();
+    }
+
+    public boolean isValid(AbstractBuild build, BuildListener listener, String versioning){
+
+        BaseGradleReleaseAction releaseAction = build.getAction(GradleReleaseAction.class);
+        if (releaseAction == null) {
+            releaseAction = build.getAction(GradleReleaseApiAction.class);
+        }
+
+        if(releaseVersionPerModule.isEmpty()|| nextVersionPerModule.isEmpty()){
+            listener.getLogger().println("[RELEASE] No release version or next version configured.");
+            return false;
+        }
+
+        VersionedModule versionedModule;
+        if(releaseAction.getDefaultModules() == null){
+            listener.getLogger().println("[RELEASE] No property for version configured for release and next development");
+            return true;
+        }else{
+            versionedModule = releaseAction.getDefaultModules().iterator().next();
+        }
+
+        if(releaseVersionPerModule.get(versionedModule.getModuleName()) == null){
+            listener.getLogger().println("[RELEASE] The release management job was triggered by a different release property version then configured");
+            listener.getLogger().println("[RELEASE] Replacing the provided parameter: " +  releaseVersionPerModule.keySet().iterator().next().toString() + " with the configured one: " + versionedModule.getModuleName());
+            releaseVersionPerModule.clear();
+            releaseVersionPerModule.put(versionedModule.getModuleName(), versionedModule.getReleaseVersion());
+        }
+
+        if(nextVersionPerModule.get(versionedModule.getModuleName()) == null){
+            listener.getLogger().println("[RELEASE] The release management job was triggered by a different next development property version then configured");
+            listener.getLogger().println("[RELEASE] Replacing the provided parameter: " +  nextVersionPerModule.keySet().iterator().next().toString() + " with the configured one: " + versionedModule.getModuleName());
+            nextVersionPerModule.clear();
+            nextVersionPerModule.put(versionedModule.getModuleName(), versionedModule.getReleaseVersion());
+        }
+        return true;
     }
 }
