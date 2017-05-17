@@ -20,16 +20,16 @@ import com.google.common.collect.Maps;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.maven.MavenModule;
-import hudson.maven.MavenModuleSet;
-import hudson.maven.MavenModuleSetBuild;
-import hudson.maven.ModuleName;
+import hudson.maven.*;
 import hudson.model.*;
 import hudson.model.listeners.RunListener;
 import hudson.tasks.BuildWrapper;
 import hudson.tasks.BuildWrapperDescriptor;
+import hudson.tasks.Maven;
 import hudson.util.ListBoxModel;
 import org.apache.commons.lang.StringUtils;
+import org.apache.maven.project.MavenProject;
+import org.apache.maven.project.ProjectBuildingException;
 import org.jfrog.build.extractor.maven.transformer.SnapshotNotAllowedException;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;
 import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
@@ -41,10 +41,9 @@ import org.jfrog.hudson.release.scm.ScmCoordinator;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,6 +64,9 @@ public class MavenReleaseWrapper extends BuildWrapper {
 
     private transient ScmCoordinator scmCoordinator;
     private boolean useReleaseBranch;
+
+    private List<String> mavenModules = new ArrayList<String>();
+    private final String POM_NAME = "pom.xml";
 
     @DataBoundConstructor
     public MavenReleaseWrapper(String releaseBranchPrefix, String tagPrefix, String targetRemoteName, String alternativeGoals,
@@ -158,6 +160,8 @@ public class MavenReleaseWrapper extends BuildWrapper {
         log(listener, "Release build triggered");
 
         final MavenModuleSetBuild mavenBuild = (MavenModuleSetBuild) build;
+        getMavenModules(build, listener, mavenBuild);
+
         scmCoordinator = AbstractScmCoordinator.createScmCoordinator(build, listener, releaseAction);
         scmCoordinator.prepare();
         if (!releaseAction.getVersioning().equals(ReleaseAction.VERSIONING.NONE)) {
@@ -221,6 +225,27 @@ public class MavenReleaseWrapper extends BuildWrapper {
         };
     }
 
+    /**
+     * Retrieve from the parent pom the path to the modules of the project
+     */
+    private void getMavenModules(AbstractBuild build, BuildListener listener, MavenModuleSetBuild mavenBuild) throws IOException, InterruptedException {
+        String rootPom = mavenBuild.getProject().getRootPOM(build.getEnvironment(listener));
+        Maven.MavenInstallation mavenInstallation = ((MavenModuleSetBuild) build).getProject().getMaven();
+        MavenEmbedderRequest mer = new MavenEmbedderRequest(listener, mavenInstallation.getHomeDir(),
+                null, null, null, null);
+        try {
+            MavenEmbedder mavenEmbedder = MavenUtil.createEmbedder(mer);
+            MavenProject mavenProject = mavenEmbedder.readProject(new File(build.getWorkspace().getRemote(), rootPom));
+            mavenModules = mavenProject.getModel().getModules();
+        } catch (MavenEmbedderException e) {
+            log(listener, "ERROR: " + e.getMessage());
+            throw new IOException(e.getMessage());
+        } catch (ProjectBuildingException e) {
+            log(listener, "ERROR: " + e.getMessage());
+            throw new IOException(e.getMessage());
+        }
+    }
+
     private boolean changeVersions(MavenModuleSetBuild mavenBuild, ReleaseAction release, boolean releaseVersion,
                                    String scmUrl) throws IOException, InterruptedException {
         FilePath moduleRoot = mavenBuild.getModuleRoot();
@@ -237,7 +262,7 @@ public class MavenReleaseWrapper extends BuildWrapper {
         boolean modified = false;
         for (MavenModule mavenModule : modules) {
             String relativePath = mavenModule.getRelativePath();
-            String pomRelativePath = StringUtils.isBlank(relativePath) ? "pom.xml" : relativePath + "/pom.xml";
+            String pomRelativePath = StringUtils.isBlank(relativePath) ? POM_NAME : getPomPath(mavenModule, mavenBuild, relativePath);
             FilePath pomPath = new FilePath(moduleRoot, pomRelativePath);
             debuggingLogger.fine("Changing version of pom: " + pomPath);
             scmCoordinator.edit(pomPath);
@@ -245,6 +270,42 @@ public class MavenReleaseWrapper extends BuildWrapper {
                     new PomTransformer(mavenModule.getModuleName(), modulesByName, scmUrl, releaseVersion));
         }
         return modified;
+    }
+
+    /**
+     * Retrieve the path to the pom of the module
+     */
+    private String getPomPath(MavenModule mavenModule, MavenModuleSetBuild mavenBuild, String relativePath) {
+        // If this is the root module, return the root pom path.
+        if (mavenModule.getModuleName().toString().
+                equals(mavenBuild.getProject().getRootModule().getModuleName().toString())) {
+            return mavenBuild.getProject().getRootPOM(null);
+        }
+
+        // to remove the project folder name if exists
+        // keeps only the name of the module
+        String modulePath = relativePath.substring(relativePath.indexOf("/") + 1);
+        for (String moduleName : mavenModules) {
+            if (moduleName.contains(modulePath)) {
+                return createPomPath(relativePath, moduleName);
+            }
+        }
+
+        // In case this module is not in the parent pom
+        return relativePath + "/" + POM_NAME;
+    }
+
+    /**
+     * The actual path to the xml file of the module.
+     */
+    private String createPomPath(String relativePath, String moduleName) {
+        if (!moduleName.contains(".xml")) {
+            // Inside the parent pom, the reference is to the pom.xml file
+            return relativePath + "/" + POM_NAME;
+        }
+        // There is a reference to other xml file that is not the pom.
+        String folderName = relativePath.substring(0, relativePath.indexOf("/"));
+        return folderName + "/" + moduleName;
     }
 
     private void log(BuildListener listener, String message) {
