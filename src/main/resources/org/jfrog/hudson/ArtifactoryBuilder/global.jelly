@@ -78,8 +78,7 @@
                                          </j:forEach>
                                     </select>
                                 </f:entry>
-
-                                <f:optionalBlock name="bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
+                                <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
                                                                          help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
                                 </f:optionalBlock>
                             </table>
