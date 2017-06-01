@@ -61,11 +61,6 @@ public class PromoteBuildStep extends AbstractStepImpl {
                 return false;
             }
 
-            if (StringUtils.isEmpty(promotionConfig.getTargetRepo())) {
-                getContext().onFailure(new MissingArgumentException("Promotion target repository is mandatory"));
-                return false;
-            }
-
             new PromotionExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), build, listener, getContext(), promotionConfig).execution();
             return true;
         }
