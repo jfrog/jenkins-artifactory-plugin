@@ -42,9 +42,7 @@ import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,6 +63,9 @@ public class MavenReleaseWrapper extends BuildWrapper {
 
     private transient ScmCoordinator scmCoordinator;
     private boolean useReleaseBranch;
+
+    private List<String> mavenModules = new ArrayList<String>();
+    private final String POM_NAME = "pom.xml";
 
     @DataBoundConstructor
     public MavenReleaseWrapper(String releaseBranchPrefix, String tagPrefix, String targetRemoteName, String alternativeGoals,
@@ -158,6 +159,8 @@ public class MavenReleaseWrapper extends BuildWrapper {
         log(listener, "Release build triggered");
 
         final MavenModuleSetBuild mavenBuild = (MavenModuleSetBuild) build;
+        mavenModules = getMavenModules(mavenBuild);
+
         scmCoordinator = AbstractScmCoordinator.createScmCoordinator(build, listener, releaseAction);
         scmCoordinator.prepare();
         if (!releaseAction.getVersioning().equals(ReleaseAction.VERSIONING.NONE)) {
@@ -221,6 +224,15 @@ public class MavenReleaseWrapper extends BuildWrapper {
         };
     }
 
+    /**
+     * Retrieve from the parent pom the path to the modules of the project
+     */
+    private List<String> getMavenModules(MavenModuleSetBuild mavenBuild) throws IOException, InterruptedException {
+        FilePath pathToModuleRoot = mavenBuild.getModuleRoot();
+        FilePath pathToPom = new FilePath(pathToModuleRoot, mavenBuild.getProject().getRootPOM(null));
+        return pathToPom.act(new MavenModulesExtractor());
+    }
+
     private boolean changeVersions(MavenModuleSetBuild mavenBuild, ReleaseAction release, boolean releaseVersion,
                                    String scmUrl) throws IOException, InterruptedException {
         FilePath moduleRoot = mavenBuild.getModuleRoot();
@@ -236,15 +248,54 @@ public class MavenReleaseWrapper extends BuildWrapper {
 
         boolean modified = false;
         for (MavenModule mavenModule : modules) {
-            String relativePath = mavenModule.getRelativePath();
-            String pomRelativePath = StringUtils.isBlank(relativePath) ? "pom.xml" : relativePath + "/pom.xml";
-            FilePath pomPath = new FilePath(moduleRoot, pomRelativePath);
+            FilePath pomPath = new FilePath(moduleRoot, getRelativePomPath(mavenModule, mavenBuild));
             debuggingLogger.fine("Changing version of pom: " + pomPath);
             scmCoordinator.edit(pomPath);
             modified |= pomPath.act(
                     new PomTransformer(mavenModule.getModuleName(), modulesByName, scmUrl, releaseVersion));
         }
         return modified;
+    }
+
+    /**
+     * Retrieve the relative path to the pom of the module
+     */
+    private String getRelativePomPath(MavenModule mavenModule, MavenModuleSetBuild mavenBuild) {
+        String relativePath = mavenModule.getRelativePath();
+        if (StringUtils.isBlank(relativePath)) {
+            return POM_NAME;
+        }
+
+        // If this is the root module, return the root pom path.
+        if (mavenModule.getModuleName().toString().
+                equals(mavenBuild.getProject().getRootModule().getModuleName().toString())) {
+            return mavenBuild.getProject().getRootPOM(null);
+        }
+
+        // to remove the project folder name if exists
+        // keeps only the name of the module
+        String modulePath = relativePath.substring(relativePath.indexOf("/") + 1);
+        for (String moduleName : mavenModules) {
+            if (moduleName.contains(modulePath)) {
+                return createPomPath(relativePath, moduleName);
+            }
+        }
+
+        // In case this module is not in the parent pom
+        return relativePath + "/" + POM_NAME;
+    }
+
+    /**
+     * The actual path to the xml file of the module.
+     */
+    private String createPomPath(String relativePath, String moduleName) {
+        if (!moduleName.contains(".xml")) {
+            // Inside the parent pom, the reference is to the pom.xml file
+            return relativePath + "/" + POM_NAME;
+        }
+        // There is a reference to other xml file that is not the pom.
+        String folderName = relativePath.substring(0, relativePath.indexOf("/"));
+        return folderName + "/" + moduleName;
     }
 
     private void log(BuildListener listener, String message) {
