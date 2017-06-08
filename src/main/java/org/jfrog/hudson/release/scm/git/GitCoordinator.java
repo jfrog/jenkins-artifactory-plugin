@@ -20,8 +20,8 @@ import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Result;
 import org.apache.commons.lang.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.jfrog.hudson.release.ReleaseAction;
-import org.jfrog.hudson.release.ReleaseRepository;
 import org.jfrog.hudson.release.scm.AbstractScmCoordinator;
 
 import java.io.IOException;
@@ -56,6 +56,7 @@ public class GitCoordinator extends AbstractScmCoordinator {
 
         // find the current local built branch
         String gitBranchName = build.getEnvironment(listener).get("GIT_BRANCH");
+        state.initialGitRevision = scmManager.revParse(gitBranchName);
         checkoutBranch = scmManager.getBranchNameWithoutRemote(gitBranchName);
     }
 
@@ -72,24 +73,28 @@ public class GitCoordinator extends AbstractScmCoordinator {
         }
     }
 
-    public void afterSuccessfulReleaseVersionBuild() throws Exception {
+    public void afterReleaseVersionChange(boolean modified) throws IOException, InterruptedException {
+        super.afterReleaseVersionChange(modified);
         if (modifiedFilesForReleaseVersion) {
-            // commit local changes
+            // commit local changes immediately - so that e.g. if the build uses it's own git commit, that commit
+            // correctly points to the release commit. In general, it's good to avoid "dirty" builds.
             log(String.format("Committing release version on branch '%s'", state.currentWorkingBranch));
             scmManager.commitWorkingCopy(releaseAction.getTagComment());
         }
 
+        if (!releaseAction.isCreateReleaseBranch() && modifiedFilesForReleaseVersion) {
+            //if we're not on the release branch, we must have modified the original branch
+            state.checkoutBranchModified = true;
+        }
+
         if (releaseAction.isCreateVcsTag()) {
-            // create tag
             scmManager.createTag(releaseAction.getTagUrl(), releaseAction.getTagComment());
             state.tagCreated = true;
         }
+    }
 
-        if (modifiedFilesForReleaseVersion || releaseAction.isCreateReleaseBranch() || releaseAction.isCreateVcsTag()) {
-            // push the current branch
-            scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), state.currentWorkingBranch);
-            state.releaseBranchPushed = true;
-        }
+    public void afterSuccessfulReleaseVersionBuild() throws Exception {
+        // nop
     }
 
     public void beforeDevelopmentVersionChange() throws IOException, InterruptedException {
@@ -106,6 +111,7 @@ public class GitCoordinator extends AbstractScmCoordinator {
         if (modified) {
             log(String.format("Committing next development version on branch '%s'", state.currentWorkingBranch));
             scmManager.commitWorkingCopy(releaseAction.getNextDevelCommitComment());
+            state.checkoutBranchModified = true;
         }
     }
 
@@ -113,8 +119,14 @@ public class GitCoordinator extends AbstractScmCoordinator {
         if (build.getResult().isBetterOrEqualTo(Result.SUCCESS)) {
             // pull before attempting to push changes?
             //scmManager.pull(scmManager.getRemoteUrl(), checkoutBranch);
-            if (modifiedFilesForDevVersion) {
-                scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), state.currentWorkingBranch);
+
+            // only push at the very end - this avoid unnecessary cleanup and makes the build as atomic as possible
+            // from the point of view of the git repo.
+            if (state.releaseBranchCreated) {
+                scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), releaseBranch);
+            }
+            if (state.checkoutBranchModified) {
+                scmManager.push(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), checkoutBranch);
             }
         } else {
             // go back to the original checkout branch (required to delete the release branch and reset the working copy)
@@ -124,14 +136,11 @@ public class GitCoordinator extends AbstractScmCoordinator {
             if (state.releaseBranchCreated) {
                 safeDeleteBranch(releaseBranch);
             }
-            if (state.releaseBranchPushed) {
-                safeDeleteRemoteBranch(scmManager.getRemoteConfig(releaseAction.getTargetRemoteName()), releaseBranch);
-            }
             if (state.tagCreated) {
                 safeDeleteTag(releaseAction.getTagUrl());
             }
             // reset changes done on the original checkout branch (next dev version)
-            safeRevertWorkingCopy();
+            safeRevertWorkingCopy(checkoutBranch, state.initialGitRevision);
         }
     }
 
@@ -144,15 +153,6 @@ public class GitCoordinator extends AbstractScmCoordinator {
         }
     }
 
-    private void safeDeleteRemoteBranch(ReleaseRepository remoteRepository, String branch) {
-        try {
-            scmManager.deleteRemoteBranch(remoteRepository, branch);
-        } catch (Exception e) {
-            debuggingLogger.log(Level.FINE, "Failed to delete remote release branch: ", e);
-            log("Failed to delete remote release branch: " + e.getLocalizedMessage());
-        }
-    }
-
     private void safeDeleteTag(String tag) {
         try {
             scmManager.deleteLocalTag(tag);
@@ -162,9 +162,10 @@ public class GitCoordinator extends AbstractScmCoordinator {
         }
     }
 
-    private void safeRevertWorkingCopy() {
+    private void safeRevertWorkingCopy(String branch, ObjectId revision) {
         try {
-            scmManager.revertWorkingCopy();
+            log("Reverting git checkout to original version " + revision.name());
+            scmManager.revertWorkingCopyTo(branch, revision.name());
         } catch (Exception e) {
             debuggingLogger.log(Level.FINE, "Failed to revert working copy: ", e);
             log("Failed to revert working copy: " + e.getLocalizedMessage());
@@ -176,9 +177,10 @@ public class GitCoordinator extends AbstractScmCoordinator {
     }
 
     private static class State {
+        ObjectId initialGitRevision;
         String currentWorkingBranch;
         boolean releaseBranchCreated;
-        boolean releaseBranchPushed;
+        boolean checkoutBranchModified;
         boolean tagCreated;
     }
 }
