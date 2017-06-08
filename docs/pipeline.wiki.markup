@@ -168,9 +168,9 @@ To promote a build between repositories in Artifactory, define the promotion par
         // Mandatory parameters
         'buildName'          : buildInfo.name,
         'buildNumber'        : buildInfo.number,
-        'targetRepo'         : 'libs-release-local',
 
         // Optional parameters
+        'targetRepo'         : 'libs-release-local',
         'comment'            : 'this is the promotion comment',
         'sourceRepo'         : 'libs-snapshot-local',
         'status'             : 'Released',
