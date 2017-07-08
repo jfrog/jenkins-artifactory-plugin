@@ -37,25 +37,14 @@ public class GenericDownloadExecutor {
 
     public BuildInfo execution(String spec) throws IOException, InterruptedException {
         CredentialsConfig preferredResolver = server.getDeployerCredentialsConfig();
+        ProxyConfiguration proxyConfiguration = server.getProxyConfiguration(Jenkins.getInstance().proxy);
         List<Dependency> resolvedDependencies =
                 ws.act(new FilesResolverCallable(new JenkinsBuildInfoLog(listener),
                         preferredResolver.provideUsername(build.getParent()),
                         preferredResolver.providePassword(build.getParent()),
-                        server.getUrl(), spec, getProxyConfiguration()));
+                        server.getUrl(), spec, proxyConfiguration));
         new BuildInfoAccessor(this.buildInfo).appendPublishedDependencies(resolvedDependencies);
         return this.buildInfo;
     }
-
-    private ProxyConfiguration getProxyConfiguration() {
-        hudson.ProxyConfiguration proxy = Jenkins.getInstance().proxy;
-        ProxyConfiguration proxyConfiguration = null;
-        if (proxy != null) {
-            proxyConfiguration = new ProxyConfiguration();
-            proxyConfiguration.host = proxy.name;
-            proxyConfiguration.port = proxy.port;
-            proxyConfiguration.username = proxy.getUserName();
-            proxyConfiguration.password = proxy.getPassword();
-        }
-        return proxyConfiguration;
-    }
+    
 }
