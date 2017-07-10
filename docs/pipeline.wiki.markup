@@ -31,12 +31,12 @@ def server = Artifactory.newServer url: 'artifactory-url', credentialsId: 'ccrre
 {code}
 You can modify the server object using the following methods:
 {code}
-server.setBypassProxy(true)
+server bypassProxy = true
 // If you're using username and password:
-server.setUsername('new-user-name')
-server.setPassword('new-password')
+server username = 'new-user-name'
+server password = 'new-password'
 // If you're using Credentials ID:
-server.set—redentialsId('ccrreeddeennttiiaall')
+server credentialsId = 'ccrreeddeennttiiaall'
 {code}
 {tip:title=Use variables}We recommend using variables rather than plain text to specify the Artifactory server details.{tip}
 
