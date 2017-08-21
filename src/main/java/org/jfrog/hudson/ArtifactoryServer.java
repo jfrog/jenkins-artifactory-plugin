@@ -288,6 +288,13 @@ public class ArtifactoryServer implements Serializable {
 
         return proxyConfiguration;
     }
+    
+    /**
+     * Return null if bypassProxy == true
+     */
+    public ProxyConfiguration getProxyConfiguration(hudson.ProxyConfiguration proxy) {
+        return !isBypassProxy() ? createProxyConfiguration(proxy) : null;  
+    }
 
     /**
      * This method might run on slaves, this is why we provide it with a proxy from the master config
