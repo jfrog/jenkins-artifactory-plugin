@@ -15,8 +15,8 @@ public class CertManager {
      * The default algorithm to use when encrypting objects in PEM files (such as private keys).
      */
     private static final String DEFAULT_PEM_ENCRYPTION_ALGORITHM = "AES-128-CBC";
-    public static String DEFAULT_RELATIVE_CERT_PATH = "secrets/jfrog/certs/jfrog.proxy.crt";
-    public static String DEFAULT_RELATIVE_KEY_PATH = "secrets/jfrog/certs/jfrog.proxy.key";
+    public static final String DEFAULT_RELATIVE_CERT_PATH = "secrets/jfrog/certs/jfrog.proxy.crt";
+    public static final String DEFAULT_RELATIVE_KEY_PATH = "secrets/jfrog/certs/jfrog.proxy.key";
 
     public static PemFileCertificateSource getCertificateSource(String proxyPublicKeyFilePath, String proxyPrivateKeyFilePath) {
         return new PemFileCertificateSource(

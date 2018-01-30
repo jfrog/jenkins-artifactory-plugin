@@ -20,6 +20,7 @@ public class Repository implements Comparable<Repository> {
         return value;
     }
 
+    @Override
     public int compareTo(Repository r) {
         return this.value.compareTo(r.getValue());
     }

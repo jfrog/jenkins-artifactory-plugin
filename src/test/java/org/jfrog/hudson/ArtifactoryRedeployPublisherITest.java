@@ -33,7 +33,7 @@ public class ArtifactoryRedeployPublisherITest {
 
     @Test
     public void testConfigurationRoundTrip() throws Exception {
-        MavenModuleSet project = j.createMavenProject();
+        MavenModuleSet project = j.jenkins.createProject(MavenModuleSet.class, "mavenBuildProject");
 
         ArtifactoryRedeployPublisher before = new ArtifactoryRedeployPublisher(null, true,
                 new IncludesExcludes("", ""),
