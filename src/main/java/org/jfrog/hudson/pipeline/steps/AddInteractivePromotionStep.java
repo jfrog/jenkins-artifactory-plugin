@@ -31,7 +31,7 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
     }
 
     public ArtifactoryServer getServer() {
-        return server;
+        return this.server;
     }
 
     public PromotionConfig getPromotionConfig() {
@@ -82,7 +82,7 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "AddInteractivePromotion";
+            return "addInteractivePromotion";
         }
 
         @Override

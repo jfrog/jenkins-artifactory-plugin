@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.types;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -7,8 +8,9 @@ import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static org.jfrog.hudson.pipeline.Utils.appendBuildInfo;
 
 public class ConanClient implements Serializable {
     public final static String CONAN_LOG_FILE = "conan_log.log";
@@ -43,7 +45,7 @@ public class ConanClient implements Serializable {
 
     @Whitelisted
     public ConanRemote getRemote() {
-        return remote;
+        return this.remote;
     }
 
     public void setRemote(ConanRemote remote) {
@@ -56,12 +58,15 @@ public class ConanClient implements Serializable {
             throw new IllegalArgumentException("'command' is a mandatory argument.");
         }
         String command = (String) args.get("command");
-        BuildInfo buildInfo = (BuildInfo) args.get("buildInfo");
-        cpsScript.invokeMethod("RunConanCommand", getRunCommandExecutionArguments(command, buildInfo));
+        Map<String, Object> stepVariables = getRunCommandExecutionArguments(command, (BuildInfo) args.get("buildInfo"));
+        appendBuildInfo(cpsScript, stepVariables);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("runConanCommand", stepVariables);
     }
 
     private Map<String, Object> getRunCommandExecutionArguments(String command, BuildInfo buildInfo) {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("command", command);
         stepVariables.put("conanHome", getUserPath());
         stepVariables.put("buildLogPath", getLogFilePath());

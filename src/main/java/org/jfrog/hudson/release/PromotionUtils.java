@@ -3,15 +3,13 @@ package org.jfrog.hudson.release;
 import hudson.model.TaskListener;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
-import org.jfrog.build.api.builder.PromotionBuilder;
+import org.jfrog.build.api.release.Promotion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.hudson.util.ExtractorUtils;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Created by romang on 6/21/16.
@@ -21,25 +19,25 @@ public class PromotionUtils {
     /**
      * Two stage promotion, dry run and actual promotion to verify correctness.
      *
-     * @param promotionBuilder
+     * @param promotion
      * @param client
      * @param listener
      * @param buildName
      * @param buildNumber
      * @throws IOException
      */
-    public static boolean promoteAndCheckResponse(PromotionBuilder promotionBuilder, ArtifactoryBuildInfoClient client, TaskListener listener,
+    public static boolean promoteAndCheckResponse(Promotion promotion, ArtifactoryBuildInfoClient client, TaskListener listener,
                                                   String buildName, String buildNumber) throws IOException {
         // do a dry run first
-        promotionBuilder.dryRun(true);
+        promotion.setDryRun(true);
         listener.getLogger().println("Performing dry run promotion (no changes are made during dry run) ...");
 
-        HttpResponse dryResponse = client.stageBuild(buildName, buildNumber, promotionBuilder.build());
-        if (checkSuccess(dryResponse, true, promotionBuilder.isFailFast(), true, listener)) {
+        HttpResponse dryResponse = client.stageBuild(buildName, buildNumber, promotion);
+        if (checkSuccess(dryResponse, true, promotion.isFailFast(), true, listener)) {
             listener.getLogger().println("Dry run finished successfully.\nPerforming promotion ...");
-            HttpResponse wetResponse = client.stageBuild(buildName,
-                    buildNumber, promotionBuilder.dryRun(false).build());
-            if (checkSuccess(wetResponse, false, promotionBuilder.isFailFast(), true, listener)) {
+            promotion.setDryRun(false);
+            HttpResponse response = client.stageBuild(buildName, buildNumber, promotion);
+            if (checkSuccess(response, false, promotion.isFailFast(), true, listener)) {
                 listener.getLogger().println("Promotion completed successfully!");
                 return true;
             }
@@ -60,9 +58,10 @@ public class PromotionUtils {
                                        boolean parseMessages, TaskListener listener) {
         StatusLine status = response.getStatusLine();
         try {
-            String content = entityToString(response);
+            String content = ExtractorUtils.entityToString(response.getEntity());
             if (assertResponseStatus(dryRun, failFast, listener, status, content)) {
                 if (parseMessages) {
+                    ExtractorUtils.validateStringNotBlank(content);
                     JSONObject json = JSONObject.fromObject(content);
                     JSONArray messages = json.getJSONArray("messages");
                     for (Object messageObj : messages) {
@@ -84,12 +83,6 @@ public class PromotionUtils {
             e.printStackTrace(listener.error("Failed parsing promotion response:"));
         }
         return false;
-    }
-
-    private static String entityToString(HttpResponse response) throws IOException {
-        HttpEntity entity = response.getEntity();
-        InputStream is = entity.getContent();
-        return IOUtils.toString(is, "UTF-8");
     }
 
     private static boolean assertResponseStatus(boolean dryRun, boolean failFast, TaskListener listener, StatusLine status, String content) {

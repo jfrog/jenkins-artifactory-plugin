@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.dsl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -18,34 +19,34 @@ import java.util.Map;
  * Created by Tamirh on 18/05/2016.
  */
 public class ArtifactoryPipelineGlobal implements Serializable {
-    private org.jenkinsci.plugins.workflow.cps.CpsScript script;
+    private CpsScript cpsScript;
 
     public ArtifactoryPipelineGlobal(CpsScript script) {
-        this.script = script;
+        this.cpsScript = script;
     }
 
     @Whitelisted
     public ArtifactoryServer server(String serverName) {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("artifactoryServerID", serverName);
-        ArtifactoryServer server = (ArtifactoryServer) this.script.invokeMethod("getArtifactoryServer", stepVariables);
-        server.setCpsScript(this.script);
+        ArtifactoryServer server = (ArtifactoryServer) cpsScript.invokeMethod("getArtifactoryServer", stepVariables);
+        server.setCpsScript(cpsScript);
         return server;
     }
 
     @Whitelisted
     public Docker docker(String username, String password) {
-        return new Docker(script, username, password, null, null);
+        return new Docker(cpsScript, username, password, null, null);
     }
 
     @Whitelisted
     public Docker docker(String username, String password, String host) {
-        return new Docker(script, username, password, null, host);
+        return new Docker(cpsScript, username, password, null, host);
     }
 
     @Whitelisted
     public Docker docker() {
-        return new Docker(script, null, null, null, null);
+        return new Docker(cpsScript, null, null, null, null);
     }
 
     @Whitelisted
@@ -61,22 +62,21 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
         final ObjectMapper mapper = new ObjectMapper();
         Docker docker = mapper.convertValue(dockerArguments, Docker.class);
-        docker.setCpsScript(script);
+        docker.setCpsScript(cpsScript);
         if (server != null) {
             docker.setServer((ArtifactoryServer) server);
         }
         return docker;
     }
 
-
     @Whitelisted
     public ArtifactoryServer newServer(String url, String username, String password) {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("url", url);
         stepVariables.put("username", username);
         stepVariables.put("password", password);
-        ArtifactoryServer server = (ArtifactoryServer) this.script.invokeMethod("newArtifactoryServer", stepVariables);
-        server.setCpsScript(this.script);
+        ArtifactoryServer server = (ArtifactoryServer) cpsScript.invokeMethod("newArtifactoryServer", stepVariables);
+        server.setCpsScript(cpsScript);
         return server;
     }
 
@@ -87,29 +87,29 @@ public class ArtifactoryPipelineGlobal implements Serializable {
             throw new IllegalArgumentException("The newServer method accepts the following arguments only: " + keysAsList);
         }
 
-        ArtifactoryServer server = (ArtifactoryServer) this.script.invokeMethod("newArtifactoryServer", serverArguments);
-        server.setCpsScript(this.script);
+        ArtifactoryServer server = (ArtifactoryServer) cpsScript.invokeMethod("newArtifactoryServer", serverArguments);
+        server.setCpsScript(cpsScript);
         return server;
     }
 
     @Whitelisted
     public BuildInfo newBuildInfo() {
-        BuildInfo buildInfo = (BuildInfo) this.script.invokeMethod("newBuildInfo", new LinkedHashMap<String, Object>());
-        buildInfo.setCpsScript(this.script);
+        BuildInfo buildInfo = (BuildInfo) cpsScript.invokeMethod("newBuildInfo", Maps.newLinkedHashMap());
+        buildInfo.setCpsScript(cpsScript);
         return buildInfo;
     }
 
     @Whitelisted
     public MavenBuild newMavenBuild() {
-        MavenBuild mavenBuild = (MavenBuild) this.script.invokeMethod("newMavenBuild", new LinkedHashMap<String, Object>());
-        mavenBuild.setCpsScript(this.script);
+        MavenBuild mavenBuild = (MavenBuild) cpsScript.invokeMethod("newMavenBuild", Maps.newLinkedHashMap());
+        mavenBuild.setCpsScript(cpsScript);
         return mavenBuild;
     }
 
     @Whitelisted
     public GradleBuild newGradleBuild() {
-        GradleBuild gradleBuild = (GradleBuild) this.script.invokeMethod("newGradleBuild", new LinkedHashMap<String, Object>());
-        gradleBuild.setCpsScript(this.script);
+        GradleBuild gradleBuild = (GradleBuild) cpsScript.invokeMethod("newGradleBuild", Maps.newLinkedHashMap());
+        gradleBuild.setCpsScript(cpsScript);
         return gradleBuild;
     }
 
@@ -121,33 +121,33 @@ public class ArtifactoryPipelineGlobal implements Serializable {
             throw new IllegalArgumentException("The newConanClient method expects the 'userHome' argument or no arguments.");
         }
         client.setUserPath(userPath);
-        client.setCpsScript(this.script);
-        LinkedHashMap<String, Object> args = new LinkedHashMap<String, Object>();
+        client.setCpsScript(cpsScript);
+        LinkedHashMap<String, Object> args = Maps.newLinkedHashMap();
         args.put("client", client);
-        this.script.invokeMethod("InitConanClient", args);
+        cpsScript.invokeMethod("initConanClient", args);
         return client;
     }
 
     @Whitelisted
     public ConanClient newConanClient() {
         ConanClient client = new ConanClient();
-        client.setCpsScript(this.script);
-        LinkedHashMap<String, Object> args = new LinkedHashMap<String, Object>();
+        client.setCpsScript(cpsScript);
+        LinkedHashMap<String, Object> args = Maps.newLinkedHashMap();
         args.put("client", client);
-        this.script.invokeMethod("InitConanClient", args);
+        cpsScript.invokeMethod("initConanClient", args);
         return client;
     }
 
     @Whitelisted
     public MavenDescriptor mavenDescriptor() {
         MavenDescriptor descriptorHandler = new MavenDescriptor();
-        descriptorHandler.setCpsScript(this.script);
+        descriptorHandler.setCpsScript(cpsScript);
         return descriptorHandler;
     }
 
     @Whitelisted
     public void addInteractivePromotion(Map<String, Object> promotionArguments) {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         List<String> mandatoryParams = Arrays.asList(ArtifactoryServer.SERVER, "promotionConfig");
         List<String> allowedParams = Arrays.asList(ArtifactoryServer.SERVER, "promotionConfig", "displayName");
         if (!promotionArguments.keySet().containsAll(mandatoryParams)) {
@@ -156,10 +156,9 @@ public class ArtifactoryPipelineGlobal implements Serializable {
         if (!allowedParams.containsAll(promotionArguments.keySet())){
             throw new IllegalArgumentException("Only the following arguments are allowed: " + allowedParams.toString());
         }
-        stepVariables.put("promotionConfig", Utils.createPromotionConfig((Map<String, Object>)promotionArguments.get("promotionConfig"), false));
+        stepVariables.put("promotionConfig", Utils.createPromotionConfig((Map<String, Object>) promotionArguments.get("promotionConfig"), false));
         stepVariables.put(ArtifactoryServer.SERVER, promotionArguments.get(ArtifactoryServer.SERVER));
         stepVariables.put("displayName", promotionArguments.get("displayName"));
-        this.script.invokeMethod("AddInteractivePromotion", stepVariables);
+        cpsScript.invokeMethod("addInteractivePromotion", stepVariables);
     }
-
 }

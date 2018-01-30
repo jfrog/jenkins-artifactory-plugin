@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.types;
 
+import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.CredentialsConfig;
@@ -7,13 +8,18 @@ import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.jfrog.hudson.pipeline.Utils.BUILD_INFO;
+import static org.jfrog.hudson.pipeline.Utils.appendBuildInfo;
 
 /**
  * Created by romang on 4/21/16.
  */
 public class ArtifactoryServer implements Serializable {
-    public static final String BUILD_INFO = "buildInfo";
     public static final String SPEC = "spec";
     public static final String SERVER = "server";
     public static final String BUILD_NAME = "buildName";
@@ -26,7 +32,7 @@ public class ArtifactoryServer implements Serializable {
     private String credentialsId;
     private boolean bypassProxy;
     private transient CpsScript cpsScript;
-    private boolean usesCredetialsId;
+    private boolean usesCredentialsId;
     private Connection connection = new Connection();
 
     public ArtifactoryServer() {
@@ -48,12 +54,12 @@ public class ArtifactoryServer implements Serializable {
     public ArtifactoryServer(String url, String credentialsId) {
         this.url = url;
         this.credentialsId = credentialsId;
-        this.usesCredetialsId = true;
+        this.usesCredentialsId = true;
     }
 
     public CredentialsConfig createCredentialsConfig() {
         CredentialsConfig credentialsConfig = new CredentialsConfig(this.username, this.password, this.credentialsId, null);
-        credentialsConfig.setIgnoreCredentialPluginDisabled(usesCredetialsId);
+        credentialsConfig.setIgnoreCredentialPluginDisabled(usesCredentialsId);
         return credentialsConfig;
     }
 
@@ -62,8 +68,8 @@ public class ArtifactoryServer implements Serializable {
     }
 
     @Whitelisted
-    public BuildInfo download(String spec) throws Exception {
-        return download(spec, null);
+    public void download(String spec) {
+        download(spec, null);
     }
 
     private Map<String, Object> getDownloadUploadObjectMap(Map<String, Object> arguments) {
@@ -71,107 +77,113 @@ public class ArtifactoryServer implements Serializable {
             throw new IllegalArgumentException(SPEC + " is a mandatory arguments");
         }
 
-        List<String> keysAsList = Arrays.asList(new String[]{SPEC, BUILD_INFO});
+        List<String> keysAsList = Arrays.asList(SPEC, BUILD_INFO);
         if (!keysAsList.containsAll(arguments.keySet())) {
             throw new IllegalArgumentException("Only the following arguments are allowed, " + keysAsList.toString());
         }
 
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
-        stepVariables.putAll(arguments);
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap(arguments);
         stepVariables.put(SERVER, this);
         return stepVariables;
     }
 
     @Whitelisted
-    public BuildInfo download(String spec, BuildInfo providedBuildInfo) throws Exception {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+    public void download(String spec, BuildInfo providedBuildInfo) {
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put(SPEC, spec);
         stepVariables.put(BUILD_INFO, providedBuildInfo);
         stepVariables.put(SERVER, this);
+        appendBuildInfo(cpsScript, stepVariables);
 
-        BuildInfo buildInfo = (BuildInfo) cpsScript.invokeMethod("artifactoryDownload", stepVariables);
-        buildInfo.setCpsScript(cpsScript);
-        return buildInfo;
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryDownload", stepVariables);
     }
 
     @Whitelisted
-    public BuildInfo download(Map<String, Object> downloadArguments) throws Exception {
+    public void download(Map<String, Object> downloadArguments) {
         Map<String, Object> stepVariables = getDownloadUploadObjectMap(downloadArguments);
-        BuildInfo buildInfo = (BuildInfo) cpsScript.invokeMethod("artifactoryDownload", stepVariables);
-        buildInfo.setCpsScript(cpsScript);
-        return buildInfo;
+        appendBuildInfo(cpsScript, stepVariables);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryDownload", stepVariables);
     }
 
     @Whitelisted
-    public BuildInfo upload(String spec) throws Exception {
-        return upload(spec, null);
+    public void upload(String spec) {
+        upload(spec, null);
     }
 
     @Whitelisted
-    public BuildInfo upload(Map<String, Object> uploadArguments) throws Exception {
+    public void upload(Map<String, Object> uploadArguments) {
         Map<String, Object> stepVariables = getDownloadUploadObjectMap(uploadArguments);
-        BuildInfo buildInfo = (BuildInfo) cpsScript.invokeMethod("artifactoryUpload", stepVariables);
-        buildInfo.setCpsScript(cpsScript);
-        return buildInfo;
+        appendBuildInfo(cpsScript, stepVariables);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryUpload", stepVariables);
     }
 
     @Whitelisted
-    public BuildInfo upload(String spec, BuildInfo providedBuildInfo) throws Exception {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+    public void upload(String spec, BuildInfo buildInfo) {
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put(SPEC, spec);
-        stepVariables.put(BUILD_INFO, providedBuildInfo);
-        stepVariables.put(SERVER, this);
-
-        BuildInfo buildInfo = (BuildInfo) cpsScript.invokeMethod("artifactoryUpload", stepVariables);
-        buildInfo.setCpsScript(cpsScript);
-        return buildInfo;
-    }
-
-    @Whitelisted
-    public void publishBuildInfo(BuildInfo buildInfo) throws Exception {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
         stepVariables.put(BUILD_INFO, buildInfo);
         stepVariables.put(SERVER, this);
+        appendBuildInfo(cpsScript, stepVariables);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryUpload", stepVariables);
+    }
+
+    @Whitelisted
+    public void publishBuildInfo(BuildInfo buildInfo) {
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        stepVariables.put(BUILD_INFO, buildInfo);
+        stepVariables.put(SERVER, this);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
         cpsScript.invokeMethod("publishBuildInfo", stepVariables);
     }
 
     @Whitelisted
-    public void promote(Map<String, Object> promotionParams) throws Exception {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+    public void promote(Map<String, Object> promotionParams) {
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("promotionConfig", Utils.createPromotionConfig(promotionParams, true));
         stepVariables.put(SERVER, this);
 
+        // Throws CpsCallableInvocation - Must be the last line in this method
         cpsScript.invokeMethod("artifactoryPromoteBuild", stepVariables);
     }
 
     @Whitelisted
-    public void distribute(Map<String, Object> distributionParams) throws Exception {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+    public void distribute(Map<String, Object> distributionParams) {
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("distributionConfig", Utils.createDistributionConfig(distributionParams));
         stepVariables.put(SERVER, this);
 
+        // Throws CpsCallableInvocation - Must be the last line in this method
         cpsScript.invokeMethod("artifactoryDistributeBuild", stepVariables);
     }
 
     @Whitelisted
-    public XrayScanResult xrayScan(Map<String, Object> xrayScanParams) throws Exception {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+    public void xrayScan(Map<String, Object> xrayScanParams) {
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("xrayScanConfig", createXrayScanConfig(xrayScanParams));
         stepVariables.put(SERVER, this);
 
-        return (XrayScanResult) cpsScript.invokeMethod("xrayScanBuild", stepVariables);
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("xrayScanBuild", stepVariables);
     }
 
     private XrayScanConfig createXrayScanConfig(Map<String, Object> xrayScanParams) {
         final String failBuild = "failBuild";
 
-        List<String> mandatoryArgumentsAsList = Arrays.asList(new String[]{BUILD_NAME, BUILD_NAME});
+        List<String> mandatoryArgumentsAsList = Arrays.asList(BUILD_NAME, BUILD_NAME);
         if (!xrayScanParams.keySet().containsAll(mandatoryArgumentsAsList)) {
             throw new IllegalArgumentException(mandatoryArgumentsAsList.toString() + " are mandatory arguments");
         }
 
         Set<String> xrayScanParamsSet = xrayScanParams.keySet();
-        List<String> keysAsList = Arrays.asList(new String[]{BUILD_NAME, BUILD_NUMBER, failBuild});
+        List<String> keysAsList = Arrays.asList(BUILD_NAME, BUILD_NUMBER, failBuild);
         if (!keysAsList.containsAll(xrayScanParamsSet)) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
         }
@@ -203,14 +215,14 @@ public class ArtifactoryServer implements Serializable {
     public void setUsername(String username) {
         this.username = username;
         this.credentialsId = "";
-        this.usesCredetialsId = false;
+        this.usesCredentialsId = false;
     }
 
     @Whitelisted
     public void setPassword(String password) {
         this.password = password;
         this.credentialsId = "";
-        this.usesCredetialsId = false;
+        this.usesCredentialsId = false;
     }
 
     public String getPassword() {
@@ -237,7 +249,7 @@ public class ArtifactoryServer implements Serializable {
         this.credentialsId = credentialsId;
         this.password = "";
         this.username = "";
-        this.usesCredetialsId = true;
+        this.usesCredentialsId = true;
     }
 
     @Whitelisted

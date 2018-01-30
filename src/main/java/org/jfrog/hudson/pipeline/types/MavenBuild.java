@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.types;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -10,7 +11,12 @@ import org.jfrog.hudson.pipeline.types.deployers.MavenDeployer;
 import org.jfrog.hudson.pipeline.types.resolvers.MavenResolver;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.jfrog.hudson.pipeline.Utils.appendBuildInfo;
 
 /**
  * Created by Tamirh on 04/08/2016.
@@ -31,17 +37,17 @@ public class MavenBuild implements Serializable {
 
     @Whitelisted
     public Deployer getDeployer() {
-        return deployer;
+        return this.deployer;
     }
 
     @Whitelisted
     public MavenResolver getResolver() {
-        return resolver;
+        return this.resolver;
     }
 
     @Whitelisted
     public String getTool() {
-        return tool;
+        return this.tool;
     }
 
     @Whitelisted
@@ -51,7 +57,7 @@ public class MavenBuild implements Serializable {
 
     @Whitelisted
     public String getOpts() {
-        return opts;
+        return this.opts;
     }
 
     @Whitelisted
@@ -60,14 +66,16 @@ public class MavenBuild implements Serializable {
     }
 
     @Whitelisted
-    public BuildInfo run(Map<String, Object> args) {
+    public void run(Map<String, Object> args) {
         if (!args.containsKey("goals") || !args.containsKey("pom")) {
             throw new IllegalArgumentException("pom and goals are mandatory arguments.");
         }
         deployer.setCpsScript(cpsScript);
         Map<String, Object> stepVariables = getExecutionArguments((String) args.get("pom"), (String) args.get("goals"), (BuildInfo) args.get("buildInfo"));
-        BuildInfo build = (BuildInfo) cpsScript.invokeMethod("ArtifactoryMavenBuild", stepVariables);
-        return build;
+        appendBuildInfo(cpsScript, stepVariables);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryMavenBuild", stepVariables);
     }
 
     @Whitelisted
@@ -85,9 +93,9 @@ public class MavenBuild implements Serializable {
         json.putAll(resolverArguments);
 
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.readerForUpdating(this.resolver).readValue(json.toString());
+        mapper.readerForUpdating(resolver).readValue(json.toString());
         if (server != null) {
-            this.resolver.setServer((ArtifactoryServer) server);
+            resolver.setServer((ArtifactoryServer) server);
         }
     }
 
@@ -106,14 +114,14 @@ public class MavenBuild implements Serializable {
         json.putAll(deployerArguments);
 
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.readerForUpdating(this.deployer).readValue(json.toString());
+        mapper.readerForUpdating(deployer).readValue(json.toString());
         if (server != null) {
-            this.deployer.setServer((ArtifactoryServer) server);
+            deployer.setServer((ArtifactoryServer) server);
         }
     }
 
     private Map<String, Object> getExecutionArguments(String pom, String goals, BuildInfo buildInfo) {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("mavenBuild", this);
         stepVariables.put("pom", pom);
         stepVariables.put("goals", goals);

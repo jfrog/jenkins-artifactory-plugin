@@ -79,7 +79,7 @@ public class Maven3Builder extends Builder {
         return mavenOpts;
     }
 
-    // Used by Generic jobs only
+    // Used by FreeStyle Maven jobs only
     @Override
     public boolean perform(AbstractBuild<?, ?> build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
@@ -149,11 +149,15 @@ public class Maven3Builder extends Builder {
         // maven home
         args.addKeyValuePair("-D", "maven.home", mavenHome.getRemote(), false);
 
+        // Default configuration should be set as system property since maven 3.5.0, for more info see: https://github.com/apache/maven/commit/be5caccaff3d00ffca4b3cefe9665b6106bc44bf?diff=split
+        FilePath mavenConf = mavenHome.child("conf");
+        args.addKeyValuePair("-D", "maven.conf", mavenConf.getRemote(), false);
+
         String buildInfoPropertiesFile = env.get(BuildInfoConfigProperties.PROP_PROPS_FILE);
         boolean artifactoryIntegration = StringUtils.isNotBlank(buildInfoPropertiesFile);
         listener.getLogger().println("Artifactory integration is " + (artifactoryIntegration ? "enabled" : "disabled"));
         if (artifactoryIntegration) {
-            addArtifactoryIntegrationArgs(args, buildInfoPropertiesFile, tempDir);
+            addArtifactoryIntegrationArgs(args, buildInfoPropertiesFile, tempDir, env);
             ActionableHelper.deleteFilePathOnExit(tempDir, classworldsConfPath);
         } else {
             args.addKeyValuePair("-D", "classworlds.conf", new FilePath(mavenHome, "bin/m2.conf").getRemote(), false);
@@ -199,8 +203,12 @@ public class Maven3Builder extends Builder {
         return javaPathBuilder.toString();
     }
 
-    private void addArtifactoryIntegrationArgs(ArgumentListBuilder args, String buildInfoPropertiesFile, FilePath ws) throws IOException, InterruptedException {
+    private void addArtifactoryIntegrationArgs(ArgumentListBuilder args, String buildInfoPropertiesFile, FilePath ws, EnvVars env) throws IOException, InterruptedException {
         args.addKeyValuePair("-D", BuildInfoConfigProperties.PROP_PROPS_FILE, buildInfoPropertiesFile, false);
+
+        if (Boolean.parseBoolean(env.get(BuildInfoConfigProperties.PROP_ARTIFACTORY_RESOLUTION_ENABLED))) {
+            args.addKeyValuePair("-D", BuildInfoConfigProperties.PROP_ARTIFACTORY_RESOLUTION_ENABLED, Boolean.TRUE.toString(), false);
+        }
 
         // use the classworlds conf packaged with this plugin and resolve the extractor libs
         File maven3ExtractorJar = Which.jarFile(Maven3BuildInfoLogger.class);

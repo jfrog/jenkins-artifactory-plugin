@@ -95,7 +95,7 @@ public class AddUserStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "ConanAddUser";
+            return "conanAddUser";
         }
 
         @Override

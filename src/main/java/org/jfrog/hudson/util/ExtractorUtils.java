@@ -28,6 +28,7 @@ import hudson.slaves.SlaveComputer;
 import hudson.util.IOUtils;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpEntity;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.BuildRetention;
@@ -40,13 +41,17 @@ import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.maven3.ArtifactoryMaven3Configurator;
+import org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.types.resolvers.MavenResolver;
 import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.util.plugins.MultiConfigurationUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -139,6 +144,9 @@ public class ExtractorUtils {
             throws IOException, InterruptedException {
         ArtifactoryClientConfiguration configuration = getArtifactoryClientConfiguration(env, build,
                 null, listener, publisherContext, resolverContext, ws);
+        if (isMavenResolutionConfigured(resolverContext)) {
+            env.put(BuildInfoConfigProperties.PROP_ARTIFACTORY_RESOLUTION_ENABLED, Boolean.TRUE.toString());
+        }
         persistConfiguration(configuration, env, ws, launcher);
         return configuration;
     }
@@ -559,5 +567,39 @@ public class ExtractorUtils {
             buildVariables = Utils.extractBuildParameters(build, listener);
         }
         return buildVariables;
+    }
+
+    /**
+     * Converts the http entity to string. If entity is null, returns empty string.
+     * @param entity
+     * @return
+     * @throws IOException
+     */
+    public static String entityToString(HttpEntity entity) throws IOException {
+        if (entity != null) {
+            InputStream is = entity.getContent();
+            return IOUtils.toString(is, "UTF-8");
+        }
+        return "";
+    }
+
+    /**
+     * Validates that the String is not blank.
+     * @param content
+     * @throws IOException - If the string is empty.
+     */
+    public static void validateStringNotBlank(String content) throws IOException {
+        if (StringUtils.isBlank(content)) {
+            throw new IOException("Received empty String.");
+        }
+
+    }
+
+    private static boolean isMavenResolutionConfigured(ResolverContext resolverContext) {
+        return resolverContext != null &&
+                resolverContext.getResolverOverrider() != null &&
+                (resolverContext.getResolverOverrider() instanceof ArtifactoryMaven3Configurator ||
+                        resolverContext.getResolverOverrider() instanceof ArtifactoryMaven3NativeConfigurator ||
+                        resolverContext.getResolverOverrider() instanceof MavenResolver);
     }
 }

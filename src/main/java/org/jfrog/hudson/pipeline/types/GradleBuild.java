@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.types;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -9,7 +10,13 @@ import org.jfrog.hudson.pipeline.types.deployers.GradleDeployer;
 import org.jfrog.hudson.pipeline.types.resolvers.GradleResolver;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.jfrog.hudson.pipeline.Utils.BUILD_INFO;
+import static org.jfrog.hudson.pipeline.Utils.appendBuildInfo;
 
 /**
  * Created by Tamirh on 04/08/2016.
@@ -31,7 +38,7 @@ public class GradleBuild implements Serializable {
 
     @Whitelisted
     public boolean isUsesPlugin() {
-        return usesPlugin;
+        return this.usesPlugin;
     }
 
     @Whitelisted
@@ -41,12 +48,12 @@ public class GradleBuild implements Serializable {
 
     @Whitelisted
     public GradleDeployer getDeployer() {
-        return deployer;
+        return this.deployer;
     }
 
     @Whitelisted
     public GradleResolver getResolver() {
-        return resolver;
+        return this.resolver;
     }
 
     @Whitelisted
@@ -70,14 +77,16 @@ public class GradleBuild implements Serializable {
     }
 
     @Whitelisted
-    public BuildInfo run(Map<String, Object> args) {
+    public void run(Map<String, Object> args) {
         if (!args.containsKey("tasks")) {
             throw new IllegalArgumentException("tasks is a mandatory argument.");
         }
         deployer.setCpsScript(cpsScript);
         Map<String, Object> stepVariables = getRunArguments((String) args.get("buildFile"), (String) args.get("tasks"), (String) args.get("switches"), (String) args.get("rootDir"), (BuildInfo) args.get("buildInfo"));
-        BuildInfo build = (BuildInfo) cpsScript.invokeMethod("ArtifactoryGradleBuild", stepVariables);
-        return build;
+        appendBuildInfo(cpsScript, stepVariables);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("ArtifactoryGradleBuild", stepVariables);
     }
 
     @Whitelisted
@@ -95,9 +104,9 @@ public class GradleBuild implements Serializable {
         json.putAll(resolverArguments);
 
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.readerForUpdating(this.resolver).readValue(json.toString());
+        mapper.readerForUpdating(resolver).readValue(json.toString());
         if (server != null) {
-            this.resolver.setServer((ArtifactoryServer) server);
+            resolver.setServer((ArtifactoryServer) server);
         }
     }
 
@@ -116,20 +125,20 @@ public class GradleBuild implements Serializable {
         json.putAll(deployerArguments);
 
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.readerForUpdating(this.deployer).readValue(json.toString());
+        mapper.readerForUpdating(deployer).readValue(json.toString());
         if (server != null) {
-            this.deployer.setServer((ArtifactoryServer) server);
+            deployer.setServer((ArtifactoryServer) server);
         }
     }
 
     private Map<String, Object> getRunArguments(String buildFile, String tasks, String switches, String rootDir, BuildInfo buildInfo) {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("gradleBuild", this);
         stepVariables.put("rootDir", rootDir);
         stepVariables.put("buildFile", buildFile);
         stepVariables.put("tasks", tasks);
         stepVariables.put("switches", switches);
-        stepVariables.put("buildInfo", buildInfo);
+        stepVariables.put(BUILD_INFO, buildInfo);
         return stepVariables;
     }
 }

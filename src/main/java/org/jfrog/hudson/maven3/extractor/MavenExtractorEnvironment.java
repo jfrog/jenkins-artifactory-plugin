@@ -144,7 +144,9 @@ public class MavenExtractorEnvironment extends Environment {
             }
             initialized = true;
         }
-
+        if (resolver != null) {
+            env.put(BuildInfoConfigProperties.PROP_ARTIFACTORY_RESOLUTION_ENABLED, Boolean.TRUE.toString());
+        }
         env.put(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFilePath);
     }
 

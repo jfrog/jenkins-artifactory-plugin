@@ -53,7 +53,7 @@ public class PromotionExecutor {
 
         logInfo();
 
-        boolean status = PromotionUtils.promoteAndCheckResponse(promotionBuilder, client, listener,
+        boolean status = PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), client, listener,
                 promotionConfig.getBuildName(), promotionConfig.getBuildNumber());
         if (!status) {
             context.onFailure(new Exception("Build promotion failed"));

@@ -343,6 +343,11 @@ public class MavenReleaseWrapper extends BuildWrapper {
             return "Enable Artifactory release management";
         }
 
+        @Override
+        public String getHelpFile() {
+            return "/plugin/artifactory/help/release/common/help-releaseManagement.html";
+        }
+
         /**
          * @return Model with the release actions allowed. Used to set the defaultVersioning.
          */

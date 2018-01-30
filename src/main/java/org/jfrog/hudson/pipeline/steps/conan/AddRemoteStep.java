@@ -28,15 +28,15 @@ public class AddRemoteStep extends AbstractStepImpl {
     }
 
     public String getServerUrl() {
-        return serverUrl;
+        return this.serverUrl;
     }
 
     public String getServerName() {
-        return serverName;
+        return this.serverName;
     }
 
     public String getConanHome() {
-        return conanHome;
+        return this.conanHome;
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<Boolean> {
@@ -82,7 +82,7 @@ public class AddRemoteStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "ConanAddRemote";
+            return "conanAddRemote";
         }
 
         @Override

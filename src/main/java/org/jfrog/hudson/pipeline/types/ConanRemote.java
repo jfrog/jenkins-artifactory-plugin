@@ -1,11 +1,11 @@
 package org.jfrog.hudson.pipeline.types;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 
 import java.io.Serializable;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -16,6 +16,7 @@ import java.util.UUID;
 public class ConanRemote implements Serializable {
     private transient CpsScript cpsScript;
     private String conanHome;
+
     public ConanRemote() {
     }
 
@@ -35,14 +36,14 @@ public class ConanRemote implements Serializable {
         ArtifactoryServer server = (ArtifactoryServer) args.get("server");
         String serverName = UUID.randomUUID().toString();
         String repo = (String) args.get("repo");
-        cpsScript.invokeMethod("ConanAddRemote", getAddRemoteExecutionArguments(server, serverName, repo));
-        cpsScript.invokeMethod("ConanAddUser", getAddUserExecutionArguments(server, serverName));
+        cpsScript.invokeMethod("conanAddRemote", getAddRemoteExecutionArguments(server, serverName, repo));
+        cpsScript.invokeMethod("conanAddUser", getAddUserExecutionArguments(server, serverName));
         return serverName;
     }
 
     private Map<String, Object> getAddRemoteExecutionArguments(ArtifactoryServer server, String serverName, String repo) {
         String serverUrl = buildConanRemoteUrl(server, repo);
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("serverUrl", serverUrl);
         stepVariables.put("serverName", serverName);
         stepVariables.put("conanHome", conanHome);
@@ -59,7 +60,7 @@ public class ConanRemote implements Serializable {
     }
 
     private Map<String, Object> getAddUserExecutionArguments(ArtifactoryServer server, String serverName) {
-        Map<String, Object> stepVariables = new LinkedHashMap<String, Object>();
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("server", server);
         stepVariables.put("serverName", serverName);
         stepVariables.put("conanHome", conanHome);

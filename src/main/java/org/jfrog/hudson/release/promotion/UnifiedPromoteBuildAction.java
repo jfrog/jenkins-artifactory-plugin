@@ -403,8 +403,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
 
                     String buildName = getCurrentBuildName();
                     String buildNumber = getCurrentBuildNumber();
-                    PromotionUtils.promoteAndCheckResponse(promotionBuilder,
-                            client, listener, buildName, buildNumber);
+                    PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), client, listener, buildName, buildNumber);
                 }
 
                 build.save();

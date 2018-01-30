@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Maps;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -18,6 +19,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
+import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.Vcs;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.hudson.CredentialsConfig;
@@ -43,6 +45,7 @@ public class Utils {
     public static final String BUILD_INFO_DELIMITER = ".";
     public static final String CONAN_USER_HOME = "CONAN_USER_HOME";
     private static final String UNIX_GLOB_CHARS = "*?[]";
+    public static final String BUILD_INFO = "buildInfo";
 
     /**
      * Prepares Artifactory server either from serverID or from ArtifactoryServer.
@@ -349,4 +352,21 @@ public class Utils {
         }
         return "Unknown";
     }
+
+    /**
+     * Add the buildInfo to step variables if missing and set its cps script.
+     * @param cpsScript the cps script
+     * @param stepVariables step variables map
+     * @return the build info
+     */
+    public static BuildInfo appendBuildInfo(CpsScript cpsScript, Map<String, Object> stepVariables) {
+        BuildInfo buildInfo = (BuildInfo) stepVariables.get(BUILD_INFO);
+        if (buildInfo == null) {
+            buildInfo = (BuildInfo) cpsScript.invokeMethod("newBuildInfo", Maps.newLinkedHashMap());
+            stepVariables.put(BUILD_INFO, buildInfo);
+        }
+        buildInfo.setCpsScript(cpsScript);
+        return buildInfo;
+    }
+
 }

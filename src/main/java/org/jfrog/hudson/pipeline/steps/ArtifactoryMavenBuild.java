@@ -13,6 +13,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.hudson.maven3.Maven3Builder;
 import org.jfrog.hudson.pipeline.Utils;
@@ -100,6 +101,9 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
                     ) + extendedEnv.get("MAVEN_OPTS") : ""
             );
             mavenOpts = mavenOpts.replaceAll("[\t\r\n]+", " ");
+            if (!step.getMavenBuild().getResolver().isEmpty()) {
+                extendedEnv.put(BuildInfoConfigProperties.PROP_ARTIFACTORY_RESOLUTION_ENABLED, Boolean.TRUE.toString());
+            }
             Maven3Builder maven3Builder = new Maven3Builder(step.getMavenBuild().getTool(), step.getPom(), step.getGoal(), mavenOpts);
             convertJdkPath();
             boolean result = maven3Builder.perform(build, launcher, listener, extendedEnv, ws, tempDir);
@@ -147,7 +151,7 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "ArtifactoryMavenBuild";
+            return "artifactoryMavenBuild";
         }
 
         @Override

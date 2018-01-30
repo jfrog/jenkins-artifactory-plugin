@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.types;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.CredentialsConfig;
@@ -8,14 +9,16 @@ import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static org.jfrog.hudson.pipeline.Utils.BUILD_INFO;
+import static org.jfrog.hudson.pipeline.Utils.appendBuildInfo;
 
 /**
  * Created by romang on 7/28/16.
  */
 public class Docker implements Serializable {
-    private transient CpsScript script;
+    private transient CpsScript cpsScript;
     private String username;
     private String password;
     private String credentialsId;
@@ -28,15 +31,15 @@ public class Docker implements Serializable {
     }
 
     public Docker(CpsScript script, String username, String password, String credentialsId, String host) {
-        this.script = script;
+        this.cpsScript = script;
         this.username = username;
         this.password = password;
         this.credentialsId = credentialsId;
         this.host = host;
     }
 
-    public void setCpsScript(CpsScript script) {
-        this.script = script;
+    public void setCpsScript(CpsScript cpsScript) {
+        this.cpsScript = cpsScript;
     }
 
     public void setUsername(String username) {
@@ -66,58 +69,59 @@ public class Docker implements Serializable {
     }
 
     @Whitelisted
-    public BuildInfo push(String imageTag, String targetRepository) throws Exception {
-        return push(imageTag, targetRepository, null);
+    public void push(String imageTag, String targetRepository) {
+        push(imageTag, targetRepository, null);
     }
 
     @Whitelisted
-    public BuildInfo push(String imageTag, String targetRepository, BuildInfo providedBuildInfo) throws Exception {
-        Map<String, Object> dockerArguments = new LinkedHashMap<String, Object>();
+    public void push(String imageTag, String targetRepository, BuildInfo providedBuildInfo) {
+        Map<String, Object> dockerArguments = Maps.newLinkedHashMap();
         dockerArguments.put("image", imageTag);
         dockerArguments.put("targetRepo", targetRepository);
-        dockerArguments.put("buildInfo", providedBuildInfo);
-        return push(dockerArguments);
+        dockerArguments.put(BUILD_INFO, providedBuildInfo);
+        push(dockerArguments);
     }
 
     @Whitelisted
-    public BuildInfo push(Map<String, Object> dockerArguments) throws Exception {
+    public void push(Map<String, Object> dockerArguments) {
         CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId);
         dockerArguments.put("credentialsConfig", credentialsConfig);
         dockerArguments.put("host", host);
         dockerArguments.put("properties", properties);
         dockerArguments.put("server", server);
+        appendBuildInfo(cpsScript, dockerArguments);
 
-        BuildInfo buildInfo;
         if (server != null) {
-            buildInfo = (BuildInfo) script.invokeMethod("dockerPushStep", dockerArguments);
+            // Throws CpsCallableInvocation - Must be the last line in this method
+            cpsScript.invokeMethod("dockerPushStep", dockerArguments);
         } else {
             // Deprecated docker push step using proxy
-            buildInfo = (BuildInfo) script.invokeMethod("dockerPushWithProxyStep", dockerArguments);
+            // Throws CpsCallableInvocation - Must be the last line in this method
+            cpsScript.invokeMethod("dockerPushWithProxyStep", dockerArguments);
         }
-        buildInfo.setCpsScript(script);
-        return buildInfo;
     }
 
     @Whitelisted
-    public BuildInfo pull(String imageTag) throws Exception {
-        return pull(imageTag, null);
+    public void pull(String imageTag) {
+        pull(imageTag, null);
     }
 
     @Whitelisted
-    public BuildInfo pull(String imageTag, BuildInfo providedBuildInfo) throws Exception {
-        Map<String, Object> pullVariables = new LinkedHashMap<String, Object>();
+    public void pull(String imageTag, BuildInfo providedBuildInfo) {
+        Map<String, Object> pullVariables = Maps.newLinkedHashMap();
         pullVariables.put("image", imageTag);
-        pullVariables.put("buildInfo", providedBuildInfo);
-
-        return pull(pullVariables);
+        pullVariables.put(BUILD_INFO, providedBuildInfo);
+        pull(pullVariables);
     }
 
     @Whitelisted
-    public BuildInfo pull(Map<String, Object> dockerArguments) throws Exception {
+    public void pull(Map<String, Object> dockerArguments) {
         CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId);
         dockerArguments.put("credentialsConfig", credentialsConfig);
         dockerArguments.put("host", host);
+        appendBuildInfo(cpsScript, dockerArguments);
 
-        return (BuildInfo) script.invokeMethod("dockerPullStep", dockerArguments);
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("dockerPullStep", dockerArguments);
     }
 }
