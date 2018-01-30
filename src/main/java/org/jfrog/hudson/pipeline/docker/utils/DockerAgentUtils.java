@@ -296,15 +296,29 @@ public class DockerAgentUtils implements Serializable {
     }
 
     /**
-     * Get image Id from imageTag using DockerBuildInfoHelper client on agent
+     * Get image ID from imageTag on the current agent.
      *
      * @param imageTag
      * @return
      */
-    private static String getImageIdFromAgent(Launcher launcher, final String imageTag, final String host) throws IOException, InterruptedException {
+    public static String getImageIdFromAgent(Launcher launcher, final String imageTag, final String host) throws IOException, InterruptedException {
         return launcher.getChannel().call(new Callable<String, IOException>() {
             public String call() throws IOException {
                 return DockerUtils.getImageIdFromTag(imageTag, host);
+            }
+        });
+    }
+
+    /**
+     * Get image parent ID from imageID on the current agent.
+     *
+     * @param imageID
+     * @return
+     */
+    public static String getParentIdFromAgent(Launcher launcher, final String imageID, final String host) throws IOException, InterruptedException {
+        return launcher.getChannel().call(new Callable<String, IOException>() {
+            public String call() throws IOException {
+                return DockerUtils.getParentId(imageID, host);
             }
         });
     }

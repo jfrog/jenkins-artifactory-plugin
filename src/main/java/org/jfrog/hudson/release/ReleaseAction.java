@@ -447,8 +447,10 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
     }
 
     protected void doGlobalVersioning() {
-        releaseVersion = defaultGlobalModule.getReleaseVersion();
-        nextVersion = defaultGlobalModule.getNextDevelopmentVersion();
+        if (defaultGlobalModule != null) {
+            releaseVersion = defaultGlobalModule.getReleaseVersion();
+            nextVersion = defaultGlobalModule.getNextDevelopmentVersion();
+        }
     }
 
     protected W getWrapper() {

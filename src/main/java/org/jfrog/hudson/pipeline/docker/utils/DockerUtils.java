@@ -111,6 +111,14 @@ public class DockerUtils implements Serializable {
      */
     public static String getConfigDigest(String manifest) throws IOException {
         JsonNode manifestTree = Utils.mapper().readTree(manifest);
+        JsonNode schemaVersion = manifestTree.get("schemaVersion");
+        if (schemaVersion == null) {
+            throw new IllegalStateException("Could not find 'schemaVersion' in manifest");
+        }
+        if (schemaVersion.asInt() == 1) {
+            throw new IllegalStateException("Docker build info is not supported for docker V1 images");
+        }
+
         JsonNode config = manifestTree.get("config");
         if (config == null) {
             throw new IllegalStateException("Could not find 'config' in manifest");

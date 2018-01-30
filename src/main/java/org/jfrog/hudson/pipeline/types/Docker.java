@@ -22,6 +22,7 @@ public class Docker implements Serializable {
     private String host;
     // Properties to attach to the deployed docker layers.
     private ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+    private ArtifactoryServer server;
 
     public Docker() {
     }
@@ -54,6 +55,10 @@ public class Docker implements Serializable {
         this.host = host;
     }
 
+    public void setServer(ArtifactoryServer server) {
+        this.server = server;
+    }
+
     @Whitelisted
     public Docker addProperty(String key, String... values) {
         properties.putAll(key, Arrays.asList(values));
@@ -80,8 +85,15 @@ public class Docker implements Serializable {
         dockerArguments.put("credentialsConfig", credentialsConfig);
         dockerArguments.put("host", host);
         dockerArguments.put("properties", properties);
+        dockerArguments.put("server", server);
 
-        BuildInfo buildInfo = (BuildInfo) script.invokeMethod("dockerPushStep", dockerArguments);
+        BuildInfo buildInfo;
+        if (server != null) {
+            buildInfo = (BuildInfo) script.invokeMethod("dockerPushStep", dockerArguments);
+        } else {
+            // Deprecated docker push step using proxy
+            buildInfo = (BuildInfo) script.invokeMethod("dockerPushWithProxyStep", dockerArguments);
+        }
         buildInfo.setCpsScript(script);
         return buildInfo;
     }

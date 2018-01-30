@@ -6,7 +6,6 @@ import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
@@ -14,17 +13,12 @@ import org.jfrog.hudson.util.publisher.PublisherContext;
  * Created by Tamirh on 16/08/2016.
  */
 public class GradleDeployer extends Deployer {
-    private boolean deployMavenDescriptors;
-    private boolean deployIvyDescriptors;
+    private Boolean deployMavenDescriptors;
+    private Boolean deployIvyDescriptors;
     private String ivyPattern = "[organisation]/[module]/ivy-[revision].xml";
     private String artifactPattern = "[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
     private boolean mavenCompatible = true;
     private String repo;
-    public final static GradleDeployer EMPTY_DEPLOYER;
-
-    static {
-        EMPTY_DEPLOYER = createEmptyDeployer();
-    }
 
     public GradleDeployer() {
         super();
@@ -32,13 +26,15 @@ public class GradleDeployer extends Deployer {
 
     @Override
     public ServerDetails getDetails() {
-        RepositoryConf snapshotRepositoryConf = null;
         RepositoryConf releaesRepositoryConf = new RepositoryConf(repo, repo, false);
-        return new ServerDetails(this.server.getServerName(), this.server.getUrl(), releaesRepositoryConf, snapshotRepositoryConf, releaesRepositoryConf, snapshotRepositoryConf, "", "");
+        if (server != null) {
+            return new ServerDetails(server.getServerName(), server.getUrl(), releaesRepositoryConf, null, releaesRepositoryConf, null, "", "");
+        }
+        return new ServerDetails("", "", releaesRepositoryConf, null, releaesRepositoryConf, null, "", "");
     }
 
     @Whitelisted
-    public boolean isDeployMavenDescriptors() {
+    public Boolean isDeployMavenDescriptors() {
         return deployMavenDescriptors;
     }
 
@@ -48,7 +44,7 @@ public class GradleDeployer extends Deployer {
     }
 
     @Whitelisted
-    public boolean isDeployIvyDescriptors() {
+    public Boolean isDeployIvyDescriptors() {
         return deployIvyDescriptors;
     }
 
@@ -125,14 +121,5 @@ public class GradleDeployer extends Deployer {
                 .maven2Compatible(getMavenCompatible())
                 .matrixParams(ExtractorUtils.buildPropertiesString(getProperties()))
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
-    }
-
-    private static GradleDeployer createEmptyDeployer() {
-        GradleDeployer dummy = new GradleDeployer();
-        ArtifactoryServer server = new ArtifactoryServer("http://empty_url", "user", "passwrod");
-        dummy.setServer(server);
-        dummy.setRepo("empty_repo");
-        dummy.setDeployArtifacts(false);
-        return dummy;
     }
 }

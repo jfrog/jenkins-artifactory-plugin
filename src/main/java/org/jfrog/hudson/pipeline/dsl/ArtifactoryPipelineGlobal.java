@@ -50,14 +50,21 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public Docker docker(Map<String, Object> dockerArguments) {
-        List<String> keysAsList = Arrays.asList(new String[]{"username", "password", "credentialsId", "host"});
+        List<String> keysAsList = Arrays.asList("username", "password", "credentialsId", "host", "server");
         if (!keysAsList.containsAll(dockerArguments.keySet())) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList);
         }
 
+        // We don't want to handle the deserialization of the ArtifactoryServer.
+        // Instead we will remove it and later on set it on the deployer object.
+        Object server = dockerArguments.remove("server");
+
         final ObjectMapper mapper = new ObjectMapper();
         Docker docker = mapper.convertValue(dockerArguments, Docker.class);
         docker.setCpsScript(script);
+        if (server != null) {
+            docker.setServer((ArtifactoryServer) server);
+        }
         return docker;
     }
 
@@ -75,7 +82,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public ArtifactoryServer newServer(Map<String, Object> serverArguments) {
-        List<String> keysAsList = Arrays.asList(new String[]{"url", "username", "password", "credentialsId"});
+        List<String> keysAsList = Arrays.asList("url", "username", "password", "credentialsId");
         if (!keysAsList.containsAll(serverArguments.keySet())) {
             throw new IllegalArgumentException("The newServer method accepts the following arguments only: " + keysAsList);
         }

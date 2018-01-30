@@ -38,8 +38,6 @@ import org.kohsuke.stapler.StaplerRequest;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * Maven3 builder for free style projects. Hudson 1.392 added native support for maven 3 but this one is useful for free style.
@@ -144,8 +142,9 @@ public class Maven3Builder extends Builder {
         args.add(getJavaPathBuilder(env.get("PATH+JDK"), launcher));
 
         // classpath
-        Path classPath = Paths.get(mavenHome.getRemote(), "boot", "*");
-        args.add("-classpath", classPath.toString());
+        String fileSeparator = getFileSeparator(launcher);
+        String[] pathsToJoin = {mavenHome.getRemote(), "boot", "*"};
+        args.add("-classpath", StringUtils.join(pathsToJoin, fileSeparator));
 
         // maven home
         args.addKeyValuePair("-D", "maven.home", mavenHome.getRemote(), false);
@@ -178,6 +177,14 @@ public class Maven3Builder extends Builder {
         args.addTokenized(Util.replaceMacro(getGoals(), env));
 
         return args;
+    }
+
+    private String getFileSeparator(Launcher launcher) {
+        String fileSeparator = "/";
+        if (!launcher.isUnix()) {
+            fileSeparator = "\\";
+        }
+        return fileSeparator;
     }
 
     private String getJavaPathBuilder(String jdkBinPath, Launcher launcher) {

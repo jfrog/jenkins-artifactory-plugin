@@ -24,6 +24,7 @@ import org.jfrog.hudson.pipeline.docker.utils.DockerUtils;
 import org.jfrog.hudson.util.CredentialManager;
 import org.jfrog.hudson.util.ExtractorUtils;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
@@ -140,12 +141,36 @@ public class DockerImage implements Serializable {
         buildInfoModule.setId(imageTag.substring(imageTag.indexOf("/") + 1));
 
         boolean includeVirtualReposSupported = propertyChangeClient.getArtifactoryVersion().isAtLeast(VIRTUAL_REPOS_SUPPORTED_VERSION);
-        DockerLayers layers = createLayers(dependenciesClient, includeVirtualReposSupported);
+        if (StringUtils.isEmpty(manifest) && !findAndSetManifestFromArtifactory(server, dependenciesClient, listener)) {
+            return buildInfoModule;
+        }
 
+        DockerLayers layers = createLayers(dependenciesClient, includeVirtualReposSupported);
         setDependenciesAndArtifacts(buildInfoModule, layers, artifactsPropsStr, buildInfoItemsProps,
                 dependenciesClient, propertyChangeClient, server);
         setBuildInfoModuleProps(buildInfoModule);
         return buildInfoModule;
+    }
+
+    // Find and validate manifest.json file in Artifactory for the current image.
+    private boolean findAndSetManifestFromArtifactory(ArtifactoryServer server, ArtifactoryDependenciesClient dependenciesClient, TaskListener listener) throws IOException {
+        String imagePath = DockerUtils.getImagePath(imageTag);
+        String manifestPath = StringUtils.join(new String[]{server.getUrl(), targetRepo, imagePath, "manifest.json"}, "/");
+        try {
+            HttpResponse res = dependenciesClient.downloadArtifact(manifestPath);
+
+            String candidateManifest = IOUtils.toString(res.getEntity().getContent());
+            String imageDigest = DockerUtils.getConfigDigest(candidateManifest);
+            if (imageDigest.equals(imageId)) {
+                manifest = candidateManifest;
+                return true;
+            } else {
+                listener.getLogger().println("Found incorrect manifest.json file in Artifactory, expecting: " + imageId + "got: " + imageDigest);
+            }
+        } catch (FileNotFoundException e) {
+            listener.getLogger().println("Could not find manifest.json in Artifactory in the following path: " + manifestPath);
+        }
+        return false;
     }
 
     private void setBuildInfoModuleProps(Module buildInfoModule) {
@@ -183,7 +208,7 @@ public class DockerImage implements Serializable {
     private void setDependenciesAndArtifacts(Module buildInfoModule, DockerLayers layers, String artifactsProps, Properties buildInfoItemsProps, ArtifactoryDependenciesClient dependenciesClient, ArtifactoryBuildInfoClient propertyChangeClient, ArtifactoryServer server) throws IOException {
         DockerLayer historyLayer = layers.getByDigest(imageId);
         if (historyLayer == null) {
-            return;
+            throw new IllegalStateException("Could not find the history docker layer: " + imageId + " for image: " + imageTag + " in Artifactory.");
         }
         HttpResponse res = dependenciesClient.downloadArtifact(server.getUrl() + "/" + historyLayer.getFullPath());
         int dependencyLayerNum = DockerUtils.getNumberOfDependentLayers(IOUtils.toString(res.getEntity().getContent()));

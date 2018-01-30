@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.types;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import net.sf.json.JSONObject;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
@@ -82,7 +83,7 @@ public class GradleBuild implements Serializable {
     @Whitelisted
     public void resolver(Map<String, Object> resolverArguments) throws Exception {
         Set<String> resolverArgumentsSet = resolverArguments.keySet();
-        List<String> keysAsList = Arrays.asList(new String[]{"repo", "server"});
+        List<String> keysAsList = Arrays.asList("repo", "server");
         if (!keysAsList.containsAll(resolverArgumentsSet)) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
         }
@@ -90,8 +91,11 @@ public class GradleBuild implements Serializable {
         // We don't want to handle the deserialization of the ArtifactoryServer.
         // Instead we will remove it and later on set it on the deployer object.
         Object server = resolverArguments.remove("server");
+        JSONObject json = new JSONObject();
+        json.putAll(resolverArguments);
+
         final ObjectMapper mapper = new ObjectMapper();
-        this.resolver = mapper.convertValue(resolverArguments, GradleResolver.class);
+        mapper.readerForUpdating(this.resolver).readValue(json.toString());
         if (server != null) {
             this.resolver.setServer((ArtifactoryServer) server);
         }
@@ -100,7 +104,7 @@ public class GradleBuild implements Serializable {
     @Whitelisted
     public void deployer(Map<String, Object> deployerArguments) throws Exception {
         Set<String> resolverArgumentsSet = deployerArguments.keySet();
-        List<String> keysAsList = Arrays.asList(new String[]{"repo", "server", "deployArtifacts", "includeEnvVars", "usesPlugin", "deployMaven", "deployIvy", "ivyPattern", "artifactPattern"});
+        List<String> keysAsList = Arrays.asList("repo", "server", "deployArtifacts", "includeEnvVars", "usesPlugin", "deployMaven", "deployIvy", "ivyPattern", "artifactPattern");
         if (!keysAsList.containsAll(resolverArgumentsSet)) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
         }
@@ -108,8 +112,11 @@ public class GradleBuild implements Serializable {
         // We don't want to handle the deserialization of the ArtifactoryServer.
         // Instead we will remove it and later on set it on the deployer object.
         Object server = deployerArguments.remove("server");
+        JSONObject json = new JSONObject();
+        json.putAll(deployerArguments);
+
         final ObjectMapper mapper = new ObjectMapper();
-        this.deployer = mapper.convertValue(deployerArguments, GradleDeployer.class);
+        mapper.readerForUpdating(this.deployer).readValue(json.toString());
         if (server != null) {
             this.deployer.setServer((ArtifactoryServer) server);
         }

@@ -302,16 +302,17 @@ public class ExtractorUtils {
         configuration.info.setAgentName("Jenkins");
         configuration.info.setAgentVersion(Jenkins.VERSION);
         ArtifactoryServer artifactoryServer = context.getArtifactoryServer();
-        CredentialsConfig preferredDeployer =
-                CredentialManager.getPreferredDeployer(context.getDeployerOverrider(), artifactoryServer);
-        if (StringUtils.isNotBlank(preferredDeployer.provideUsername(build.getParent()))) {
-            configuration.publisher.setUsername(preferredDeployer.provideUsername(build.getParent()));
-            configuration.publisher.setPassword(preferredDeployer.providePassword(build.getParent()));
-        }
-        configuration.setTimeout(artifactoryServer.getTimeout());
-        setRetryParams(configuration, artifactoryServer);
+        if (artifactoryServer != null) {
+            CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(context.getDeployerOverrider(), artifactoryServer);
+            if (StringUtils.isNotBlank(preferredDeployer.provideUsername(build.getParent()))) {
+                configuration.publisher.setUsername(preferredDeployer.provideUsername(build.getParent()));
+                configuration.publisher.setPassword(preferredDeployer.providePassword(build.getParent()));
+            }
+            configuration.setTimeout(artifactoryServer.getTimeout());
+            setRetryParams(configuration, artifactoryServer);
 
-        configuration.publisher.setContextUrl(artifactoryServer.getUrl());
+            configuration.publisher.setContextUrl(artifactoryServer.getUrl());
+        }
 
         ServerDetails serverDetails = context.getServerDetails();
         if (serverDetails != null) {
@@ -363,8 +364,12 @@ public class ExtractorUtils {
         }
         configuration.publisher.setPublishArtifacts(context.isDeployArtifacts());
         configuration.publisher.setEvenUnstable(context.isEvenIfUnstable());
-        configuration.publisher.setIvy(context.isDeployIvy());
-        configuration.publisher.setMaven(context.isDeployMaven());
+        if (context.isDeployIvy() != null) {
+            configuration.publisher.setIvy(context.isDeployIvy());
+        }
+        if (context.isDeployMaven() != null) {
+            configuration.publisher.setMaven(context.isDeployMaven());
+        }
         IncludesExcludes deploymentPatterns = context.getIncludesExcludes();
         if (deploymentPatterns != null) {
             String includePatterns = deploymentPatterns.getIncludePatterns();

@@ -8,33 +8,24 @@ import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.cli.MissingArgumentException;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.build.api.Module;
 import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.docker.DockerImage;
+import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
 import org.jfrog.hudson.pipeline.docker.utils.DockerAgentUtils;
-import org.jfrog.hudson.pipeline.docker.utils.DockerUtils;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.util.Properties;
 
 /**
  * Created by romang on 5/2/16.
  */
-public class DockerPushStep extends AbstractStepImpl {
+public class DockerPushWithProxyStep extends AbstractStepImpl {
 
     private final String image;
-    private final ArtifactoryServer server;
     private CredentialsConfig credentialsConfig;
     private String host;
     private BuildInfo buildInfo;
@@ -43,8 +34,8 @@ public class DockerPushStep extends AbstractStepImpl {
     private ArrayListMultimap<String, String> properties;
 
     @DataBoundConstructor
-    public DockerPushStep(String image, CredentialsConfig credentialsConfig, String host, String targetRepo,
-                          BuildInfo buildInfo, ArrayListMultimap<String, String> properties, ArtifactoryServer server) {
+    public DockerPushWithProxyStep(String image, CredentialsConfig credentialsConfig, String host, String targetRepo,
+                                   BuildInfo buildInfo, ArrayListMultimap<String, String> properties) {
 
         this.image = image;
         this.credentialsConfig = credentialsConfig;
@@ -52,11 +43,6 @@ public class DockerPushStep extends AbstractStepImpl {
         this.targetRepo = targetRepo;
         this.buildInfo = buildInfo;
         this.properties = properties;
-        this.server = server;
-    }
-
-    public ArtifactoryServer getServer() {
-        return server;
     }
 
     public String getImage() {
@@ -87,7 +73,7 @@ public class DockerPushStep extends AbstractStepImpl {
         private static final long serialVersionUID = 1L;
 
         @Inject(optional = true)
-        private transient DockerPushStep step;
+        private transient DockerPushWithProxyStep step;
 
         @StepContextParameter
         private transient TaskListener listener;
@@ -103,6 +89,11 @@ public class DockerPushStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
+            if (!BuildInfoProxy.isUp()) {
+                getContext().onFailure(new RuntimeException("Build info capturing for Docker images is not available while Artifactory proxy is not running, enable the proxy in Jenkins configuration."));
+                return null;
+            }
+
             if (step.getImage() == null) {
                 getContext().onFailure(new MissingArgumentException("Missing 'image' parameter"));
                 return null;
@@ -112,34 +103,29 @@ public class DockerPushStep extends AbstractStepImpl {
                 getContext().onFailure(new MissingArgumentException("Missing 'targetRepo' parameter"));
                 return null;
             }
-            JenkinsBuildInfoLog log = new JenkinsBuildInfoLog(listener);
+
             BuildInfo buildInfo = Utils.prepareBuildinfo(build, step.getBuildInfo());
+            DockerAgentUtils.registerImagOnAgents(
+                    launcher, step.getImage(), step.getHost(), step.getTargetRepo(), step.getProperties(), buildInfo.hashCode());
 
-            ArtifactoryServer server = step.getServer();
-            String username = server.createCredentialsConfig().provideUsername(build.getParent());
-            String password = server.createCredentialsConfig().providePassword(build.getParent());
+            String username = step.getCredentialsConfig().provideUsername(build.getParent());
+            String password = step.getCredentialsConfig().providePassword(build.getParent());
 
-            String imageId = DockerAgentUtils.getImageIdFromAgent(launcher, step.getImage(), step.getHost());
+            JenkinsBuildInfoLog log = new JenkinsBuildInfoLog(listener);
+            String deprecationMessage = "It looks like you are using the following deprecated signature of creating Artifactory.docker instance:\n" +
+                    "    def rtDocker = Artifactory.docker [credentialsId: 'credentialsId'], [host: 'tcp://<daemon IP>:<daemon port>']\n" +
+                    "Please use the following signature of the method, adding the Artifactory server as argument:\n" +
+                    "    def rtDocker = Artifactory.docker <server: server>, [host: 'tcp://<daemon IP>:<daemon port>']\n" +
+                    "The new method signature does not require setting up the Build-Info Proxy.";
+
+            log.warn(deprecationMessage);
+
             DockerAgentUtils.pushImage(launcher, log, step.getImage(), username, password, step.getHost());
-            DockerImage image = new DockerImage(imageId, step.getImage(), step.getTargetRepo(), buildInfo.hashCode());
-
-            String parentId = DockerAgentUtils.getParentIdFromAgent(launcher, imageId, step.getHost());
-            if (!StringUtils.isEmpty(parentId)) {
-                Properties properties = new Properties();
-                properties.put("docker.image.parent", DockerUtils.getShaValue(parentId));
-                image.addBuildInfoModuleProps(properties);
+            if (!DockerAgentUtils.updateImageParentOnAgents(log, step.getImage(), step.getHost(), buildInfo.hashCode())) {
+                getContext().onFailure(new IllegalStateException("Build info capturing failed for docker image: " +
+                        step.getImage() + " check build info proxy configuration."));
+                return null;
             }
-
-            String timestamp = Long.toString(buildInfo.getStartDate().getTime());
-            ArtifactoryConfigurator config = new ArtifactoryConfigurator(Utils.prepareArtifactoryServer(null, server));
-            Module module = image.generateBuildInfoModule(build, listener, config, buildInfo.getName(), buildInfo.getNumber(), timestamp);
-
-            if (module.getArtifacts().size() == 0) {
-                log.warn("Could not find docker image: " + step.getImage() + "in Artifactory.");
-            }
-
-            BuildInfoAccessor buildInfoAccessor = new BuildInfoAccessor(buildInfo);
-            buildInfoAccessor.getModules().add(module);
 
             log.info("Successfully pushed docker image: " + step.getImage());
             return buildInfo;
@@ -150,12 +136,12 @@ public class DockerPushStep extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(DockerPushStep.Execution.class);
+            super(DockerPushWithProxyStep.Execution.class);
         }
 
         @Override
         public String getFunctionName() {
-            return "dockerPushStep";
+            return "dockerPushWithProxyStep";
         }
 
         @Override

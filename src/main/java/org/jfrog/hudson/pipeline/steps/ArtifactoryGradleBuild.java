@@ -26,7 +26,6 @@ import org.jfrog.hudson.pipeline.executors.MavenGradleEnvExtractor;
 import org.jfrog.hudson.pipeline.types.GradleBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.Deployer;
-import org.jfrog.hudson.pipeline.types.deployers.GradleDeployer;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -107,7 +106,7 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
         @Override
         protected BuildInfo run() throws Exception {
             BuildInfo buildInfo = Utils.prepareBuildinfo(build, step.getBuildInfo());
-            Deployer deployer = getDeployer();
+            Deployer deployer = step.getGradleBuild().getDeployer();
             deployer.createPublisherBuildInfoDetails(buildInfo);
             String revision = Utils.extractVcsRevision(new FilePath(ws, step.getRootDir()));
             extendedEnv = new EnvVars(env);
@@ -125,14 +124,6 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
             buildInfo.appendDeployableArtifacts(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), tempDir, listener);
             buildInfo.setAgentName(Utils.getAgentName(ws));
             return buildInfo;
-        }
-
-        private Deployer getDeployer() {
-            Deployer deployer = step.getGradleBuild().getDeployer();
-            if (deployer == null || deployer.isEmpty()) {
-                deployer = GradleDeployer.EMPTY_DEPLOYER;
-            }
-            return deployer;
         }
 
         private ArgumentListBuilder getGradleExecutor() {

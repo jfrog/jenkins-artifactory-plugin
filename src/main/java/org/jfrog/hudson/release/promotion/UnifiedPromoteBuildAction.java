@@ -95,6 +95,11 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         return currentPromotionCandidate.getConfigurator();
     }
 
+    private String getDefaultPromotionTargetRepository() {
+        BuildInfoAwareConfigurator configurator = getCurrentConfigurator();
+        return configurator != null ? configurator.getDefaultPromotionTargetRepository() : "";
+    }
+
     /**
      * @return List of promote infos for deployment. Called from the UI.
      */
@@ -125,6 +130,10 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
             List<String> repositoryKeys = getRepositoryKeys();
             List<UserPluginInfo> plugins = getPromotionsUserPluginInfo();
             PromotionConfig promotionConfig = getPromotionConfig();
+            String defaultTargetRepository = getDefaultPromotionTargetRepository();
+            if (StringUtils.isNotBlank(defaultTargetRepository) && repositoryKeys.contains(defaultTargetRepository)) {
+                promotionConfig.setTargetRepo(defaultTargetRepository);
+            }
             response.addRepositories(repositoryKeys);
             response.setPlugins(plugins);
             response.setPromotionConfig(promotionConfig);

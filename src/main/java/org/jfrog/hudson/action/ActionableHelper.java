@@ -36,13 +36,15 @@ import org.jfrog.hudson.util.publisher.PublisherFlexible;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 
 /**
  * @author Yossi Shaul
  */
-public abstract class ActionableHelper {
+public abstract class ActionableHelper implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     public static MavenArtifactRecord getLatestMavenArtifactRecord(MavenBuild mavenBuild) {
         return getLatestAction(mavenBuild, MavenArtifactRecord.class);
