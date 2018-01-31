@@ -2,14 +2,17 @@ package org.jfrog.hudson.util;
 
 import hudson.EnvVars;
 import hudson.FilePath;
+import hudson.Plugin;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.SpecConfiguration;
 
 import java.io.IOException;
 import java.io.PrintStream;
+
 
 /**
  * Created by diman on 16/10/2016.
@@ -20,21 +23,31 @@ public class SpecUtils {
             throws IOException, InterruptedException {
         EnvVars env =build.getEnvironment(listener);
         if (StringUtils.isNotBlank(specConfiguration.getFilePath())) {
-            String filePath = specConfiguration.getFilePath().trim();
-            filePath = Util.replaceMacro(filePath, env);
+            String filePath = expand(build, listener, specConfiguration.getFilePath().trim());
             FilePath workspace= build.getExecutor().getCurrentWorkspace();
             PrintStream logger =listener.getLogger();
             return buildDownloadSpecPath(filePath, workspace, logger).readToString();
         }
         if (StringUtils.isNotBlank(specConfiguration.getSpec())) {
-            try {
-                Class.forName("org.jenkinsci.plugins.tokenmacro.TokenMacro");
-                return org.jenkinsci.plugins.tokenmacro.TokenMacro.expandAll(build, listener, specConfiguration.getSpec().trim());
-            } catch (Throwable ex) {
-                return Util.replaceMacro(specConfiguration.getSpec().trim(), env);
-            }
+            return expand(build, listener, specConfiguration.getSpec().trim());
         }
         return "";
+    }
+
+    private static String expand(AbstractBuild<?, ?> build, final BuildListener listener, String specString) throws InterruptedException, IOException {
+        EnvVars env =build.getEnvironment(listener);
+        Plugin p =Jenkins.getInstance().getPlugin("token-macro");
+        if(null!= p && p.getWrapper().isActive()){
+            try {
+                return org.jenkinsci.plugins.tokenmacro.TokenMacro.expandAll(build, listener, specString);
+            } catch (org.jenkinsci.plugins.tokenmacro.MacroEvaluationException ex) {
+                listener.error("TokenMacro was unable to evaluate: "+specString);
+                return Util.replaceMacro(specString, env);
+            }
+        }
+        else {
+            return Util.replaceMacro(specString, env);
+        }
     }
 
     private static FilePath buildDownloadSpecPath(String providedPath, FilePath workingDir, PrintStream logger)
