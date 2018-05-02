@@ -18,9 +18,9 @@ import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
+import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.util.PublishedItemsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.UploadSpecHelper;
@@ -188,8 +188,6 @@ public class GenericArtifactsDeployer {
                 SpecsHelper specsHelper = new SpecsHelper(log);
                 try {
                     return specsHelper.uploadArtifactsBySpec(spec, workspace, buildProperties, client);
-                } catch (InterruptedException e) {
-                    throw e;
                 } catch (Exception e) {
                     throw new RuntimeException("Failed uploading artifacts by spec", e);
                 } finally {
