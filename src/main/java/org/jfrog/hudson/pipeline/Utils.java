@@ -12,7 +12,6 @@ import hudson.remoting.Channel;
 import hudson.remoting.LocalChannel;
 import hudson.remoting.VirtualChannel;
 import hudson.util.ArgumentListBuilder;
-import hudson.util.ListBoxModel;
 import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
@@ -22,6 +21,7 @@ import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.Vcs;
+import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.docker.proxy.CertManager;
@@ -357,6 +357,13 @@ public class Utils {
         }
         buildInfo.setCpsScript(cpsScript);
         return buildInfo;
+    }
+
+    public static ProxyConfiguration getProxyConfiguration(org.jfrog.hudson.ArtifactoryServer server) {
+        if (server.isBypassProxy()) {
+            return null;
+        }
+        return org.jfrog.hudson.ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
     }
 
 }
