@@ -32,6 +32,8 @@ import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.client.ArtifactoryHttpClient;
+import org.jfrog.hudson.DeployerOverrider;
+import org.jfrog.hudson.ResolverOverrider;
 import org.jfrog.hudson.util.publisher.PublisherFindImpl;
 import org.jfrog.hudson.util.publisher.PublisherFlexible;
 
@@ -90,8 +92,7 @@ public abstract class ActionableHelper implements Serializable {
     /**
      * @return The wrapped item (eg, project) wrapper of the given type. Null if not found.
      */
-    public static <T extends BuildWrapper> T getBuildWrapper(BuildableItem wrapped,
-                                                             Class<T> type) {
+    private static <T> T getBuildableItem(BuildableItem wrapped, Class<T> type) {
         DescribableList<BuildWrapper, Descriptor<BuildWrapper>> wrappers =
                 ((BuildableItemWithBuildWrappers) wrapped).getBuildWrappersList();
         for (BuildWrapper wrapper : wrappers) {
@@ -100,6 +101,29 @@ public abstract class ActionableHelper implements Serializable {
             }
         }
         return null;
+    }
+
+    /**
+     * @return The wrapped item (eg, project) wrapper of the given type. Null if not found.
+     */
+    public static <T extends BuildWrapper> T getBuildWrapper(BuildableItem wrapped, Class<T> type) {
+        return getBuildableItem(wrapped, type);
+    }
+
+    /**
+     * @return The wrapped item (eg, project) which implements the DeployerOverrider interface.
+     * Null is returned if not found.
+     */
+    public static DeployerOverrider getDeployerOverrider(BuildableItem wrapped) {
+        return getBuildableItem(wrapped, DeployerOverrider.class);
+    }
+
+    /**
+     * @return The wrapped item (eg, project) which implements the ResolverOverrider interface.
+     * Null is returned if not found.
+     */
+    public static ResolverOverrider getResolverOverrider(BuildableItem wrapped) {
+        return getBuildableItem(wrapped, ResolverOverrider.class);
     }
 
     /**

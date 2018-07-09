@@ -53,6 +53,10 @@ public class CredentialsConfig implements Serializable {
         this.overridingCredentials = overridingCredentials;
     }
 
+    public void deleteCredentials() {
+        this.credentials = new Credentials(StringUtils.EMPTY, StringUtils.EMPTY);
+    }
+
     /**
      * In case of overriding the global configuration this method should be called to check if override credentials were supplied
      * from configuration - this will take under  consideration the state of the "useCredentialsPlugin" option in global config object
