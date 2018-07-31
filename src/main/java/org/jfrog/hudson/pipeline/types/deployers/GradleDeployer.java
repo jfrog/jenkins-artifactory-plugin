@@ -39,8 +39,8 @@ public class GradleDeployer extends Deployer {
     }
 
     @Whitelisted
-    public void setDeployMavenDescriptors(boolean deployMavenDescriptors) {
-        this.deployMavenDescriptors = deployMavenDescriptors;
+    public void setDeployMavenDescriptors(Object deployMavenDescriptors) {
+        this.deployMavenDescriptors = Boolean.getBoolean(Utils.parseJenkinsArg(deployMavenDescriptors));
     }
 
     @Whitelisted
@@ -49,8 +49,8 @@ public class GradleDeployer extends Deployer {
     }
 
     @Whitelisted
-    public void setDeployIvyDescriptors(boolean deployIvyDescriptors) {
-        this.deployIvyDescriptors = deployIvyDescriptors;
+    public void setDeployIvyDescriptors(Object deployIvyDescriptors) {
+        this.deployIvyDescriptors = Boolean.getBoolean(Utils.parseJenkinsArg(deployIvyDescriptors));
     }
 
     @Whitelisted
@@ -59,8 +59,8 @@ public class GradleDeployer extends Deployer {
     }
 
     @Whitelisted
-    public void setIvyPattern(String ivyPattern) {
-        this.ivyPattern = ivyPattern;
+    public void setIvyPattern(Object ivyPattern) {
+        this.ivyPattern = Utils.parseJenkinsArg(ivyPattern);
     }
 
     @Whitelisted
@@ -69,8 +69,8 @@ public class GradleDeployer extends Deployer {
     }
 
     @Whitelisted
-    public void setArtifactPattern(String artifactPattern) {
-        this.artifactPattern = artifactPattern;
+    public void setArtifactPattern(Object artifactPattern) {
+        this.artifactPattern = Utils.parseJenkinsArg(artifactPattern);
     }
 
     @Whitelisted
@@ -79,8 +79,8 @@ public class GradleDeployer extends Deployer {
     }
 
     @Whitelisted
-    public void setMavenCompatible(boolean mavenCompatible) {
-        this.mavenCompatible = mavenCompatible;
+    public void setMavenCompatible(Object mavenCompatible) {
+        this.mavenCompatible = Boolean.getBoolean(Utils.parseJenkinsArg(mavenCompatible));
     }
 
     @Whitelisted
@@ -94,8 +94,8 @@ public class GradleDeployer extends Deployer {
     }
 
     @Whitelisted
-    public void setRepo(String repo) {
-        this.repo = repo;
+    public void setRepo(Object repo) {
+        this.repo = Utils.parseJenkinsArg(repo);
     }
 
     public boolean isEmpty() {

@@ -366,4 +366,11 @@ public class Utils {
         return org.jfrog.hudson.ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
     }
 
+    public static String parseJenkinsArg(Object arg) {
+        if (arg instanceof Map) {
+            return ((List)((Map) arg).get("values")).get(0).toString();
+        }
+        return arg.toString();
+    }
+
 }
