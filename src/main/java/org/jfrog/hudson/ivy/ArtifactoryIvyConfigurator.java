@@ -59,9 +59,13 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private final CredentialsConfig deployerCredentialsConfig;
     private final IncludesExcludes artifactDeploymentPatterns;
     private final boolean discardBuildArtifacts;
-    private final String matrixParams;
+    @Deprecated
+    private final String matrixParams = null;
+    private final String deploymentProperties;
     private final boolean filterExcludedArtifactsFromBuild;
-    private ServerDetails details;
+    @Deprecated
+    private ServerDetails details = null;
+    private ServerDetails deployerDetails;
     private boolean deployArtifacts;
     private boolean deployBuildInfo;
     private boolean includeEnvVars;
@@ -74,7 +78,9 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private boolean disableLicenseAutoDiscovery;
     private boolean discardOldBuilds;
     private boolean asyncBuildRetention;
-    private boolean notM2Compatible;
+    @Deprecated
+    private final Boolean notM2Compatible = null;
+    private final Boolean useMavenPatterns;
     private String ivyPattern;
     private String aggregationBuildStatus;
     private String artifactPattern;
@@ -98,19 +104,19 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private Credentials overridingDeployerCredentials;
 
     @DataBoundConstructor
-    public ArtifactoryIvyConfigurator(ServerDetails details, CredentialsConfig deployerCredentialsConfig,
+    public ArtifactoryIvyConfigurator(ServerDetails details, ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
                                       boolean deployArtifacts, IncludesExcludes artifactDeploymentPatterns, boolean deployBuildInfo,
                                       boolean includeEnvVars, IncludesExcludes envVarsPatterns,
                                       boolean runChecks, String violationRecipients, boolean includePublishArtifacts,
-                                      String scopes, boolean disableLicenseAutoDiscovery, boolean notM2Compatible, String ivyPattern,
-                                      String artifactPattern, boolean discardOldBuilds, boolean discardBuildArtifacts, boolean asyncBuildRetention, String matrixParams,
-                                      boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues, String aggregationBuildStatus,
-                                      boolean blackDuckRunChecks, String blackDuckAppName, String blackDuckAppVersion,
+                                      String scopes, boolean disableLicenseAutoDiscovery, Boolean useMavenPatterns, Boolean notM2Compatible, String ivyPattern,
+                                      String artifactPattern, boolean discardOldBuilds, boolean discardBuildArtifacts, boolean asyncBuildRetention,
+                                      String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
+                                      String aggregationBuildStatus, boolean blackDuckRunChecks, String blackDuckAppName, String blackDuckAppVersion,
                                       String blackDuckReportRecipients, String blackDuckScopes, boolean blackDuckIncludePublishedArtifacts,
                                       boolean autoCreateMissingComponentRequests, boolean autoDiscardStaleComponentRequests,
                                       boolean filterExcludedArtifactsFromBuild,
                                       String customBuildName, boolean overrideBuildName) {
-        this.details = details;
+        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.deployArtifacts = deployArtifacts;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
@@ -122,7 +128,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         this.includePublishArtifacts = includePublishArtifacts;
         this.scopes = scopes;
         this.disableLicenseAutoDiscovery = disableLicenseAutoDiscovery;
-        this.notM2Compatible = notM2Compatible;
+        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
         this.ivyPattern = ivyPattern;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
@@ -130,7 +136,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         this.discardOldBuilds = discardOldBuilds;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.matrixParams = matrixParams;
+        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
         this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
@@ -153,12 +159,12 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         return StringUtils.removeEnd(StringUtils.removeStart(artifactPattern, "\""), "\"");
     }
 
-    public ServerDetails getDetails() {
-        return details;
+    public ServerDetails getDeployerDetails() {
+        return deployerDetails != null ? deployerDetails : details;
     }
 
-    public String getMatrixParams() {
-        return matrixParams;
+    public String getDeploymentProperties() {
+        return deploymentProperties != null ? deploymentProperties : matrixParams;
     }
 
     public boolean isOverridingDefaultDeployer() {
@@ -171,14 +177,6 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
 
     public CredentialsConfig getDeployerCredentialsConfig() {
         return deployerCredentialsConfig;
-    }
-
-    public boolean isNotM2Compatible() {
-        return notM2Compatible;
-    }
-
-    public void setNotM2Compatible(boolean notM2Compatible) {
-        this.notM2Compatible = notM2Compatible;
     }
 
     public boolean isDiscardBuildArtifacts() {
@@ -213,8 +211,11 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         this.ivyPattern = ivyPattern;
     }
 
-    public boolean isM2Compatible() {
-        return !notM2Compatible;
+    public boolean isUseMavenPatterns() {
+        if (useMavenPatterns != null) {
+            return useMavenPatterns;
+        }
+        return notM2Compatible != null && !notM2Compatible;
     }
 
     public boolean isIncludePublishArtifacts() {
@@ -270,11 +271,11 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     }
 
     public String getArtifactoryName() {
-        return details != null ? details.artifactoryName : null;
+        return getDeployerDetails() != null ? getDeployerDetails().artifactoryName : null;
     }
 
     public String getRepositoryKey() {
-        return details != null ? details.getDeployReleaseRepository().getRepoKey() : null;
+        return getDeployerDetails() != null ? getDeployerDetails().getDeployReleaseRepository().getRepoKey() : null;
     }
 
     public String getDefaultPromotionTargetRepository() {
@@ -393,14 +394,14 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         final FilePath actualDependencyDir =
                 PluginDependencyHelper.getActualDependencyDirectory(localDependencyFile, ActionableHelper.getNode(launcher).getRootPath());
         final PublisherContext context = new PublisherContext.Builder().artifactoryServer(getArtifactoryServer())
-                .serverDetails(getDetails()).deployerOverrider(ArtifactoryIvyConfigurator.this).runChecks(isRunChecks())
+                .serverDetails(getDeployerDetails()).deployerOverrider(ArtifactoryIvyConfigurator.this).runChecks(isRunChecks())
                 .includePublishArtifacts(isIncludePublishArtifacts()).violationRecipients(getViolationRecipients())
                 .scopes(getScopes()).licenseAutoDiscovery(licenseAutoDiscovery).discardOldBuilds(isDiscardOldBuilds())
                 .deployArtifacts(isDeployArtifacts()).includesExcludes(getArtifactDeploymentPatterns())
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
                 .includeEnvVars(isIncludeEnvVars()).envVarsPatterns(getEnvVarsPatterns())
                 .discardBuildArtifacts(isDiscardBuildArtifacts()).asyncBuildRetention(isAsyncBuildRetention())
-                .matrixParams(getMatrixParams()).artifactsPattern(getArtifactPattern()).ivyPattern(getIvyPattern()).maven2Compatible(isM2Compatible())
+                .deploymentProperties(getDeploymentProperties()).artifactsPattern(getArtifactPattern()).ivyPattern(getIvyPattern()).maven2Compatible(isUseMavenPatterns())
                 .enableIssueTrackerIntegration(isEnableIssueTrackerIntegration())
                 .aggregateBuildIssues(isAggregateBuildIssues()).aggregationBuildStatus(getAggregationBuildStatus())
                 .integrateBlackDuck(isBlackDuckRunChecks(), getBlackDuckAppName(), getBlackDuckAppVersion(),
@@ -441,7 +442,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     }
 
     public List<Repository> getReleaseRepositoryList() {
-        return RepositoriesUtils.collectRepositories(details.getDeployReleaseRepository().getKeyFromSelect());
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeployReleaseRepository().getKeyFromSelect());
     }
 
     @Override

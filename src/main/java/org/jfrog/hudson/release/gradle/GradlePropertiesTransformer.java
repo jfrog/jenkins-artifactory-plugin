@@ -18,6 +18,7 @@ package org.jfrog.hudson.release.gradle;
 import hudson.AbortException;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 import org.jfrog.build.extractor.release.PropertiesTransformer;
 
 import java.io.File;
@@ -29,7 +30,7 @@ import java.util.Map;
  *
  * @author Tomer Cohen
  */
-public class GradlePropertiesTransformer implements FilePath.FileCallable<Boolean> {
+public class GradlePropertiesTransformer extends MasterToSlaveFileCallable<Boolean> {
 
     private final Map<String, String> versionsByName;
 

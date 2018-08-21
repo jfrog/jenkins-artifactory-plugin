@@ -428,8 +428,11 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
             String buildNumber = getCurrentBuildNumber();
             HttpResponse pluginPromotionResponse = client.executePromotionUserPlugin(
                     promotionPlugin.getPluginName(), buildName, buildNumber, promotionPlugin.getParamMap());
-            if (PromotionUtils.checkSuccess(pluginPromotionResponse, false, failFast, false, listener)) {
+            try {
+                PromotionUtils.validatePromotionSuccessful(pluginPromotionResponse, false, failFast, listener);
                 listener.getLogger().println("Promotion completed successfully!");
+            } catch (IOException e) {
+                listener.error(e.getMessage());
             }
         }
     }

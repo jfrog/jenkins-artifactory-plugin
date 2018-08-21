@@ -5,12 +5,13 @@ import com.google.common.collect.Sets;
 import hudson.FilePath;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.util.FileChecksumCalculator;
-import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.DeployerOverrider;
 import org.jfrog.hudson.ServerDetails;
@@ -181,7 +182,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         }
     }
 
-    public static class DeployDetailsCallable implements FilePath.FileCallable<Set<DeployDetails>> {
+    public static class DeployDetailsCallable extends MasterToSlaveFileCallable<Set<DeployDetails>> {
         private static final String SHA1 = "SHA1";
         private static final String MD5 = "MD5";
         private List<DeployDetails> deployableArtifactsPaths;

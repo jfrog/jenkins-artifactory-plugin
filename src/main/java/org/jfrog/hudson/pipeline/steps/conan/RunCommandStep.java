@@ -10,6 +10,7 @@ import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.util.ArgumentListBuilder;
 import hudson.util.IOUtils;
+import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -18,6 +19,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.build.api.Build;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.util.ExtractorUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
@@ -92,9 +94,10 @@ public class RunCommandStep extends AbstractStepImpl {
 
         // Conan collect buildInfo as part of the tasks execution.
         // In order to transform the collected buildInfo into Artifctory buildInfo format we need to execute the conan_build_info command.
-        // The conan_build_info command exepect to get a path for the output file.
-        private FilePath execConanCollectBuildInfo(EnvVars extendedEnv) throws IOException, InterruptedException {
-            FilePath logFilePath = ws.createTextTempFile("conan", "build-info", "", false);
+        // The conan_build_info command expect to get a path for the output file.
+        private FilePath execConanCollectBuildInfo(EnvVars extendedEnv) throws Exception {
+            FilePath tempDir = ExtractorUtils.createAndGetTempDir(launcher, ws);
+            FilePath logFilePath = tempDir.createTextTempFile("conan", "build-info", "", true);
             ArgumentListBuilder args = new ArgumentListBuilder();
             args.add("conan_build_info");
             args.add(step.getBuildLogPath());
@@ -118,7 +121,7 @@ public class RunCommandStep extends AbstractStepImpl {
             final String revision = Utils.extractVcsRevision(ws);
             final long startTime = buildInfo.getStartDate().getTime();
             buildProperties.touch(0);
-            buildProperties.act(new FilePath.FileCallable<Boolean>() {
+            buildProperties.act(new MasterToSlaveFileCallable<Boolean>() {
                 public Boolean invoke(File conanProperties, VirtualChannel channel) throws IOException, InterruptedException {
                     final String propsPrefix = "artifact_property_";
                     Properties props = new Properties();

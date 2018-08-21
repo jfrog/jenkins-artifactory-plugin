@@ -3,6 +3,7 @@ package org.jfrog.hudson.generic;
 import com.google.common.collect.Lists;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.util.Log;
@@ -17,7 +18,7 @@ import java.util.List;
 /**
  * Created by diman on 21/06/2017.
  */
-public class FilesResolverCallable implements FilePath.FileCallable<List<Dependency>> {
+public class FilesResolverCallable extends MasterToSlaveFileCallable<List<Dependency>> {
     private Log log;
     private String username;
     private String password;

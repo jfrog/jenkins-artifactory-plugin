@@ -4,7 +4,7 @@
         <l:main-panel>
             <f:form method="post" action="submit" name="form">
                 <f:section>
-                    <h1>Push to Bintray</h1>
+                    <h1>Push to Bintray (deprecated)</h1>
                     <p>If descriptor file was uploaded as part of the build you can
                         <a href="https://wiki.jenkins-ci.org/display/JENKINS/Artifactory+Plugin#ArtifactoryPlugin-PushToBintray">
                         push your artifacts</a> to Bintray as is.

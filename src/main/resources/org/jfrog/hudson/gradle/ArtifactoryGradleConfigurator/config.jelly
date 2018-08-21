@@ -3,7 +3,7 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:r="/lib/jfrog">
     <f:section title="${%Artifactory Configuration}">
         <f:section title="Deployment Details">
-            <f:dropdownList name="details" title="${%Artifactory deployment server}">
+            <f:dropdownList name="deployerDetails" title="${%Artifactory deployment server}">
                 <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
                     <f:dropdownListBlock value="${s.name}" title="${s.url}"
                                          selected="${s.name==instance.artifactoryName}">
@@ -17,7 +17,7 @@
                                             title="Publishing repository"
                                             field="deployReleaseRepository"
                                             repositories="${instance.releaseRepositories}"
-                                            repositoryConf="${instance.details.deployReleaseRepository}"/>
+                                            repositoryConf="${instance.deployerDetails.deployReleaseRepository}"/>
 
                             <f:entry title="${%Custom staging configuration}"
                                      help="/plugin/artifactory/help/release/common/help-stagingPlugin.html">
@@ -27,9 +27,9 @@
                                     <j:choose>
                                         <j:when test="${s.name==instance.artifactoryName}">
                                             <j:choose>
-                                                <f:option selected="${instance.details.stagingPlugin.pluginName}"
-                                                          value="${instance.details.stagingPlugin.pluginName}">
-                                                    ${instance.details.stagingPlugin.pluginName}
+                                                <f:option selected="${instance.deployerDetails.stagingPlugin.pluginName}"
+                                                          value="${instance.deployerDetails.stagingPlugin.pluginName}">
+                                                    ${instance.deployerDetails.stagingPlugin.pluginName}
                                                 </f:option>
                                             </j:choose>
                                         </j:when>
@@ -39,11 +39,11 @@
                                     <j:choose>
                                         <j:when test="${s.name==instance.artifactoryName}">
                                             <j:choose>
-                                                <j:when test="${instance.details.stagingPlugin.paramsString != ''}">
+                                                <j:when test="${instance.deployerDetails.stagingPlugin.paramsString != ''}">
                                                     <input class='setting-input' name='userPluginParams'
-                                                           id='stagingParams-${instance.details.stagingPlugin.pluginName}'
+                                                           id='stagingParams-${instance.deployerDetails.stagingPlugin.pluginName}'
                                                            type='text'
-                                                           value='${instance.details.stagingPlugin.paramsString}'/>
+                                                           value='${instance.deployerDetails.stagingPlugin.paramsString}'/>
                                                 </j:when>
                                             </j:choose>
                                         </j:when>
@@ -111,9 +111,9 @@
         <f:section title="More Details">
             <f:block>
                 <table style="width:100%">
-                    <f:optionalBlock field="skipInjectInitScript"
-                                     help="/plugin/artifactory/help/ArtifactoryGradleConfigurator/help-injectInitScript.html"
-                                     inline="true" checked="${instance.skipInjectInitScript}"
+                    <f:optionalBlock field="useArtifactoryGradlePlugin"
+                                     help="/plugin/artifactory/help/ArtifactoryGradleConfigurator/help-useArtifactoryGradlePlugin.html"
+                                     inline="true" checked="${instance.useArtifactoryGradlePlugin}"
                                      title="Project uses the Artifactory Gradle Plugin">
                     </f:optionalBlock>
                 </table>
@@ -167,7 +167,7 @@
                             <table style="width:100%">
                                 <f:optionalBlock name="runChecks"
                                                  checked="${instance.runChecks}"
-                                                 title="Run Artifactory license checks (requires Artifactory Pro)"
+                                                 title="Run Artifactory license checks (deprecated)"
                                                  inline="true"
                                                  help="/plugin/artifactory/help/common/help-runChecks.html">
                                     <f:entry title="${%Send license violation notifications to: }"
@@ -324,9 +324,9 @@
                         </f:block>
                         <f:block>
                             <table style="width:100%">
-                                <f:optionalBlock field="notM2Compatible" negative="true"
-                                                 help="/plugin/artifactory/help/common/help-m2Compatible.html"
-                                                 inline="true" checked="${!instance.notM2Compatible}"
+                                <f:optionalBlock field="useMavenPatterns"
+                                                 help="/plugin/artifactory/help/common/help-useMavenPatterns.html"
+                                                 inline="true" checked="${instance.useMavenPatterns}"
                                                  title="Use Maven compatible patterns">
                                 </f:optionalBlock>
                             </table>
@@ -371,9 +371,9 @@
                         </f:block>
                         <f:block>
                             <table style="width:100%">
-                                <f:entry title="Deployment properties" field="matrixParams"
-                                         help="/plugin/artifactory/help/common/help-matrixParams.html">
-                                    <f:textbox value="${instance.matrixParams}"/>
+                                <f:entry title="Deployment properties" field="deploymentProperties"
+                                         help="/plugin/artifactory/help/common/help-deploymentProperties.html">
+                                    <f:textbox value="${instance.deploymentProperties}"/>
                                 </f:entry>
                             </table>
                         </f:block>

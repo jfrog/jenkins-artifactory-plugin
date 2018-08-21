@@ -119,7 +119,7 @@ public class GradleDeployer extends Deployer {
                 .deployerOverrider(this)
                 .includeEnvVars(isIncludeEnvVars())
                 .maven2Compatible(getMavenCompatible())
-                .matrixParams(ExtractorUtils.buildPropertiesString(getProperties()))
+                .deploymentProperties(ExtractorUtils.buildPropertiesString(getProperties()))
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
     }
 }

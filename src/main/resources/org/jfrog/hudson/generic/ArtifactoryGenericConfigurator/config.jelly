@@ -36,7 +36,7 @@
                                 <r:dynamicRepos id="genericRepositoryKeys-${s.url}"
                                                 title="Target Repository"
                                                 field="deployReleaseRepository"
-                                                repositoryConf="${instance.details.deployReleaseRepository}"
+                                                repositoryConf="${instance.deployerDetails.deployReleaseRepository}"
                                                 repositories="${instance.releaseRepositoryList}"
                                                 helpUrl="/plugin/artifactory/help/common/help-deployRepository.html"/>
 
@@ -84,9 +84,9 @@
                          help="/plugin/artifactory/help/common/help-deployPattern.html">
                     <f:textarea value="${instance.deployPattern}"/>
                 </f:entry>
-                <f:entry title="Upload properties" field="matrixParams"
-                         help="/plugin/artifactory/help/common/help-matrixParams.html">
-                    <f:textbox value="${instance.matrixParams}"/>
+                <f:entry title="Upload properties" field="deploymentProperties"
+                         help="/plugin/artifactory/help/common/help-deploymentProperties.html">
+                    <f:textbox value="${instance.deploymentProperties}"/>
                 </f:entry>
             </table>
         </f:block>

@@ -83,16 +83,22 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private final boolean disableLicenseAutoDiscovery;
     private final String ivyPattern;
     private final String artifactPattern;
-    private final boolean notM2Compatible;
+    @Deprecated
+    private final Boolean notM2Compatible = null;
+    private final Boolean useMavenPatterns;
     private final IncludesExcludes artifactDeploymentPatterns;
     private final boolean discardOldBuilds;
     private final boolean asyncBuildRetention;
     private final boolean passIdentifiedDownstream;
     private final boolean discardBuildArtifacts;
-    private final String matrixParams;
+    @Deprecated
+    private final String matrixParams = null;
+    private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean filterExcludedArtifactsFromBuild;
-    private ServerDetails details;
+    @Deprecated
+    private final ServerDetails details = null;
+    private ServerDetails deployerDetails;
     private boolean deployArtifacts;
     private IncludesExcludes envVarsPatterns;
     private String aggregationBuildStatus;
@@ -113,20 +119,20 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private Credentials overridingDeployerCredentials;
 
     @DataBoundConstructor
-    public ArtifactoryIvyFreeStyleConfigurator(ServerDetails details, CredentialsConfig deployerCredentialsConfig,
+    public ArtifactoryIvyFreeStyleConfigurator(ServerDetails details, ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
                                                boolean deployArtifacts, String remotePluginLocation,
                                                boolean includeEnvVars, IncludesExcludes envVarsPatterns,
                                                boolean deployBuildInfo, boolean runChecks, String violationRecipients,
                                                boolean includePublishArtifacts, String scopes, boolean disableLicenseAutoDiscovery, String ivyPattern,
-                                               String artifactPattern, boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
+                                               String artifactPattern, Boolean useMavenPatterns, Boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
                                                boolean discardOldBuilds, boolean asyncBuildRetention, boolean passIdentifiedDownstream, boolean discardBuildArtifacts,
-                                               String matrixParams, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
+                                               String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                                String aggregationBuildStatus, boolean blackDuckRunChecks, String blackDuckAppName,
                                                String blackDuckAppVersion, String blackDuckReportRecipients, String blackDuckScopes,
                                                boolean blackDuckIncludePublishedArtifacts, boolean autoCreateMissingComponentRequests,
                                                boolean autoDiscardStaleComponentRequests, boolean filterExcludedArtifactsFromBuild,
                                                String artifactoryCombinationFilter, String customBuildName, boolean overrideBuildName) {
-        this.details = details;
+        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.deployArtifacts = deployArtifacts;
         this.remotePluginLocation = remotePluginLocation;
@@ -142,12 +148,12 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.artifactPattern = clearApostrophes(artifactPattern);
-        this.notM2Compatible = notM2Compatible;
+        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.discardOldBuilds = discardOldBuilds;
         this.asyncBuildRetention = asyncBuildRetention;
         this.passIdentifiedDownstream = passIdentifiedDownstream;
-        this.matrixParams = matrixParams;
+        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
@@ -172,12 +178,12 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         return StringUtils.removeEnd(StringUtils.removeStart(artifactPattern, "\""), "\"");
     }
 
-    public ServerDetails getDetails() {
-        return details;
+    public ServerDetails getDeployerDetails() {
+        return deployerDetails != null ? deployerDetails : details;
     }
 
-    public String getMatrixParams() {
-        return matrixParams;
+    public String getDeploymentProperties() {
+        return deploymentProperties != null ? deploymentProperties : matrixParams;
     }
 
     public boolean isPassIdentifiedDownstream() {
@@ -257,7 +263,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     }
 
     public String getRepositoryKey() {
-        return details != null ? details.getDeployReleaseRepository().getRepoKey() : null;
+        return getDeployerDetails() != null ? getDeployerDetails().getDeployReleaseRepository().getRepoKey() : null;
     }
 
     public String getDefaultPromotionTargetRepository() {
@@ -266,7 +272,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     }
 
     public String getArtifactoryName() {
-        return details != null ? details.artifactoryName : null;
+        return getDeployerDetails() != null ? getDeployerDetails().artifactoryName : null;
     }
 
     public String getArtifactoryUrl() {
@@ -278,12 +284,11 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         return deployArtifacts;
     }
 
-    public boolean isNotM2Compatible() {
-        return notM2Compatible;
-    }
-
-    public boolean isM2Compatible() {
-        return !notM2Compatible;
+    public boolean isUseMavenPatterns() {
+        if (useMavenPatterns != null) {
+            return useMavenPatterns;
+        }
+        return notM2Compatible != null && !notM2Compatible;
     }
 
     public boolean isEnableIssueTrackerIntegration() {
@@ -501,7 +506,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private PublisherContext.Builder getBuilder() {
         return new PublisherContext.Builder().
                 artifactoryServer(getArtifactoryServer())
-                .serverDetails(getDetails()).deployerOverrider(ArtifactoryIvyFreeStyleConfigurator.this)
+                .serverDetails(getDeployerDetails()).deployerOverrider(ArtifactoryIvyFreeStyleConfigurator.this)
                 .runChecks(isRunChecks()).includePublishArtifacts(isIncludePublishArtifacts())
                 .violationRecipients(getViolationRecipients()).scopes(getScopes())
                 .licenseAutoDiscovery(isLicenseAutoDiscovery()).discardOldBuilds(isDiscardOldBuilds())
@@ -509,7 +514,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
                 .includeEnvVars(isIncludeEnvVars()).envVarsPatterns(getEnvVarsPatterns())
                 .discardBuildArtifacts(isDiscardBuildArtifacts()).asyncBuildRetention(isAsyncBuildRetention())
-                .matrixParams(getMatrixParams()).maven2Compatible(isM2Compatible()).artifactsPattern(getArtifactPattern())
+                .deploymentProperties(getDeploymentProperties()).maven2Compatible(isUseMavenPatterns()).artifactsPattern(getArtifactPattern())
                 .ivyPattern(getIvyPattern()).enableIssueTrackerIntegration(isEnableIssueTrackerIntegration())
                 .aggregateBuildIssues(isAggregateBuildIssues()).aggregationBuildStatus(getAggregationBuildStatus())
                 .integrateBlackDuck(isBlackDuckRunChecks(), getBlackDuckAppName(), getBlackDuckAppVersion(),
@@ -526,7 +531,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     }
 
     public List<Repository> getReleaseRepositoryList() {
-        return RepositoriesUtils.collectRepositories(details.getDeploySnapshotRepository().getKeyFromSelect());
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeploySnapshotRepository().getKeyFromSelect());
     }
 
     private boolean isMultiConfProject(AbstractBuild build) {

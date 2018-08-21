@@ -294,7 +294,7 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
             } else {
                 String url = req.getContextPath() + '/' + item.getUrl();
                 JSONObject json = new JSONObject();
-                json.element("queueItem", item.id);
+                json.element("queueItem", item.getId());
                 json.element("releaseVersion", getReleaseVersion());
                 json.element("nextVersion", getNextVersion());
                 json.element("releaseBranch", getReleaseBranch());

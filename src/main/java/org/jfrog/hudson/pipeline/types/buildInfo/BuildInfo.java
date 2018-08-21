@@ -6,16 +6,17 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.dependency.BuildDependency;
-import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.client.DeployableArtifactDetail;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.build.util.DeployableArtifactsUtils;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployableArtifactsUtils;
 import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.BuildInfoDeployer;
 import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
@@ -36,13 +37,13 @@ public class BuildInfo implements Serializable {
     private String buildNumber;
     private Date startDate;
     private BuildRetention retention;
-    private List<BuildDependency> buildDependencies = new ArrayList<BuildDependency>();
-    private List<Artifact> deployedArtifacts = new ArrayList<Artifact>();
+    private List<BuildDependency> buildDependencies = Collections.synchronizedList(new ArrayList<BuildDependency>());
+    private List<Artifact> deployedArtifacts = Collections.synchronizedList(new ArrayList<Artifact>());
     // The candidates artifacts to be deployed in the 'deployArtifacts' step.
-    private List<DeployDetails> deployableArtifacts = new ArrayList<DeployDetails>();
-    private List<Dependency> publishedDependencies = new ArrayList<Dependency>();
+    private List<DeployDetails> deployableArtifacts = Collections.synchronizedList(new ArrayList<DeployDetails>());
+    private List<Dependency> publishedDependencies = Collections.synchronizedList(new ArrayList<Dependency>());
 
-    private List<Module> modules = new ArrayList<Module>();
+    private List<Module> modules = Collections.synchronizedList(new ArrayList<Module>());
     private Env env = new Env();
     private String agentName;
 
@@ -229,7 +230,7 @@ public class BuildInfo implements Serializable {
         return modules;
     }
 
-    public static class DeployPathsAndPropsCallable implements FilePath.FileCallable<List<DeployDetails>> {
+    public static class DeployPathsAndPropsCallable extends MasterToSlaveFileCallable<List<DeployDetails>> {
         private String deployableArtifactsPath;
         private TaskListener listener;
         private ArrayListMultimap<String, String> propertiesMap;

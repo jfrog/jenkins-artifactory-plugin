@@ -210,7 +210,7 @@ public class BintrayPublishAction<C extends BuildInfoAwareConfigurator & Deploye
     }
 
     public String getDisplayName() {
-        return "Push to Bintray";
+        return "Push to Bintray (deprecated)";
     }
 
     public String getUrlName() {

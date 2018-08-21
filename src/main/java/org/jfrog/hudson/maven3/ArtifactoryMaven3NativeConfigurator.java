@@ -36,7 +36,9 @@ import java.util.List;
  */
 public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements ResolverOverrider {
 
-    private final ServerDetails details;
+    @Deprecated
+    private ServerDetails details = null;
+    private final ServerDetails resolverDetails;
     /**
      * @deprecated: Use org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator#getResolverCredentialsId()()
      */
@@ -45,29 +47,29 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
     private final CredentialsConfig resolverCredentialsConfig;
 
     @DataBoundConstructor
-    public ArtifactoryMaven3NativeConfigurator(ServerDetails details, CredentialsConfig resolverCredentialsConfig) {
-        this.details = details;
+    public ArtifactoryMaven3NativeConfigurator(ServerDetails details, ServerDetails resolverDetails, CredentialsConfig resolverCredentialsConfig) {
+        this.resolverDetails = resolverDetails != null ? resolverDetails : details;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
     }
 
-    public ServerDetails getdetails() {
-        return details;
+    public ServerDetails getDeployerDetails() {
+        return getResolverDetails();
     }
 
     public ServerDetails getResolverDetails() {
-        return getdetails();
+        return resolverDetails != null ? resolverDetails : details;
     }
 
     public String getDownloadReleaseRepositoryKey() {
-        return details != null ? details.getResolveReleaseRepository().getRepoKey() : null;
+        return getDeployerDetails() != null ? getDeployerDetails().getResolveReleaseRepository().getRepoKey() : null;
     }
 
     public String getDownloadSnapshotRepositoryKey() {
-        return details != null ? details.getResolveSnapshotRepositoryKey() : null;
+        return getDeployerDetails() != null ? getDeployerDetails().getResolveSnapshotRepositoryKey() : null;
     }
 
     public String getArtifactoryName() {
-        return details != null ? details.artifactoryName : null;
+        return getDeployerDetails() != null ? getDeployerDetails().artifactoryName : null;
     }
 
     @Override
@@ -125,8 +127,8 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
     }
 
     public List<VirtualRepository> getVirtualRepositoryList() {
-        String releaseRepoKey = details.getResolveReleaseRepository().getKeyFromSelect();
-        String snapshotRepoKey = details.getResolveSnapshotRepository().getKeyFromSelect();
+        String releaseRepoKey = getDeployerDetails().getResolveReleaseRepository().getKeyFromSelect();
+        String snapshotRepoKey = getDeployerDetails().getResolveSnapshotRepository().getKeyFromSelect();
 
         // Add the releases repo to the reposities list, in case it is not there:
         List<VirtualRepository> repos = RepositoriesUtils.collectVirtualRepositories(null, releaseRepoKey);

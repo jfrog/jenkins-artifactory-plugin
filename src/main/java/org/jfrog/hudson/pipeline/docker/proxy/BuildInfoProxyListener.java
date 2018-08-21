@@ -3,8 +3,8 @@ package org.jfrog.hudson.pipeline.docker.proxy;
 import hudson.Extension;
 import hudson.model.Computer;
 import hudson.model.TaskListener;
-import hudson.remoting.Callable;
 import hudson.slaves.ComputerListener;
+import jenkins.security.MasterToSlaveCallable;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 
@@ -28,7 +28,7 @@ public class BuildInfoProxyListener extends ComputerListener implements Serializ
             final String privateKey = c.getNode().getRootPath() + "/" + CertManager.DEFAULT_RELATIVE_KEY_PATH;
             final String agentName = c.getNode().getDisplayName();
 
-            c.getChannel().call(new Callable<Boolean, IOException>() {
+            c.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
                 public Boolean call() throws IOException {
                     BuildInfoProxy.start(port, publicKey, privateKey, agentName);
                     return true;

@@ -50,7 +50,7 @@ public class PublisherContext {
     private Boolean deployIvy;
     private String artifactsPattern = "";
     private String ivyPattern = "";
-    private String matrixParams;
+    private String deploymentProperties;
     private boolean maven2Compatible;
     private boolean enableIssueTrackerIntegration;
     private boolean aggregateBuildIssues;
@@ -81,8 +81,8 @@ public class PublisherContext {
         return getCleanString(artifactsPattern);
     }
 
-    public String getMatrixParams() {
-        return matrixParams;
+    public String getDeploymentProperties() {
+        return deploymentProperties;
     }
 
     public String getIvyPattern() {
@@ -341,8 +341,8 @@ public class PublisherContext {
             return this;
         }
 
-        public Builder matrixParams(String matrixParams) {
-            publisher.matrixParams = matrixParams;
+        public Builder deploymentProperties(String deploymentProperties) {
+            publisher.deploymentProperties = deploymentProperties;
             return this;
         }
 

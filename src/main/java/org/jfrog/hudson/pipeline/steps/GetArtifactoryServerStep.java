@@ -94,10 +94,6 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
             return "Get Artifactory server from Jenkins config";
         }
 
-        public ListBoxModel doFillArtifactoryServerIDItems() {
-            return Utils.getServerListBox();
-        }
-
         @Override
         public boolean isAdvanced() {
             return true;

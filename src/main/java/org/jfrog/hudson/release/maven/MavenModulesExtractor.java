@@ -2,6 +2,7 @@ package org.jfrog.hudson.release.maven;
 
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * @author Alexei Vainshtein
  */
-public class MavenModulesExtractor implements FilePath.FileCallable<List<String>> {
+public class MavenModulesExtractor extends MasterToSlaveFileCallable<List<String>> {
 
     // This method is invoked by the FilePath object on the server that this job runs on.
     // This is needed when running on slaves.

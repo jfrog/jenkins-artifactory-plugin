@@ -42,7 +42,7 @@
         <f:entry title="${title}"
                  help="${helpUrl}">
             <j:choose>
-                <j:when test="${s.name==instance.details.artifactoryName ||
+                <j:when test="${s.name==instance.deployerDetails.artifactoryName ||
                                 s.name==instance.resolverDetails.artifactoryName}">
                     <input type="text" name="keyFromText" style="float: left; width: 85%; display: none;"
                            class="setting-input"

@@ -6,7 +6,6 @@ import hudson.Launcher;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.remoting.Callable;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
@@ -22,7 +21,6 @@ import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.ResolverContext;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
-import java.io.File;
 import java.io.IOException;
 
 /**
@@ -69,9 +67,8 @@ public class MavenGradleEnvExtractor {
                         resolverCredentials.getCredentials(build.getParent()), resolver);
             }
 
-            createProjectTempDir(launcher, tempDir.getRemote());
             ArtifactoryClientConfiguration configuration = ExtractorUtils.getArtifactoryClientConfiguration(
-                    env, build, buildInfo, buildListener, publisherContext, resolverContext, tempDir);
+                    env, build, buildInfo, buildListener, publisherContext, resolverContext);
             addPipelineInfoToConfiguration(env, configuration, tempDir);
             ExtractorUtils.persistConfiguration(configuration, env, tempDir, launcher);
             String propertiesFilePath = configuration.getPropertiesFile();
@@ -96,22 +93,5 @@ public class MavenGradleEnvExtractor {
         configuration.info.setGeneratedBuildInfoFilePath(buildInfoTempFile);
         env.put(BuildInfoFields.DEPLOYABLE_ARTIFACTS, deployableArtifactsFile);
         configuration.info.setDeployableArtifactsFilePath(deployableArtifactsFile);
-    }
-
-    /**
-     * Create the <PROJECT_PATH@tmp> directory in case it doesn't exists.
-     * @param launcher
-     * @param tempDirPath
-     * @throws Exception
-     */
-    private static void createProjectTempDir(Launcher launcher, final String tempDirPath) throws Exception {
-        launcher.getChannel().call(new Callable<Boolean, IOException>() {
-            public Boolean call() throws IOException {
-                File tempDirFile = new File(tempDirPath);
-                tempDirFile.mkdir();
-                tempDirFile.deleteOnExit();
-                return true;
-            }
-        });
     }
 }

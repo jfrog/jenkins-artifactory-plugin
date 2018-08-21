@@ -8,19 +8,20 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.*;
 import hudson.plugins.git.util.BuildData;
-import hudson.remoting.Callable;
 import hudson.remoting.Channel;
 import hudson.remoting.LocalChannel;
 import hudson.remoting.VirtualChannel;
 import hudson.util.ArgumentListBuilder;
-import hudson.util.ListBoxModel;
+import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
+import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.Vcs;
+import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.docker.proxy.CertManager;
@@ -42,10 +43,9 @@ import java.util.*;
  */
 public class Utils {
 
-    public static final String BUILD_INFO_DELIMITER = ".";
-    public static final String CONAN_USER_HOME = "CONAN_USER_HOME";
-    private static final String UNIX_GLOB_CHARS = "*?[]";
-    public static final String BUILD_INFO = "buildInfo";
+    public static final String CONAN_USER_HOME = "CONAN_USER_HOME"; // Conan user home environment variable name
+    public static final String BUILD_INFO = "buildInfo"; // The build info argument used in pipeline
+    private static final String UNIX_SPECIAL_CHARS = "`^<>| ,;!?'\"()[]{}$*\\&#"; // Unix special characters to escape in '/bin/sh' execution
 
     /**
      * Prepares Artifactory server either from serverID or from ArtifactoryServer.
@@ -74,16 +74,6 @@ public class Utils {
             return null;
         }
         return server;
-    }
-
-    public static ListBoxModel getServerListBox() {
-        ListBoxModel r = new ListBoxModel();
-        List<org.jfrog.hudson.ArtifactoryServer> servers = RepositoriesUtils.getArtifactoryServers();
-        r.add("", "");
-        for (org.jfrog.hudson.ArtifactoryServer server : servers) {
-            r.add(server.getName() + Utils.BUILD_INFO_DELIMITER + server.getUrl(), server.getName());
-        }
-        return r;
     }
 
     public static BuildInfo prepareBuildinfo(Run build, BuildInfo buildinfo) {
@@ -143,7 +133,7 @@ public class Utils {
         }
         FilePath dotGitPath = new FilePath(filePath, ".git");
         if (dotGitPath.exists()) {
-            return dotGitPath.act(new FilePath.FileCallable<String>() {
+            return dotGitPath.act(new MasterToSlaveFileCallable<String>() {
                 public String invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
                     FileRepository repository = new FileRepository(f);
                     Ref head = repository.getRef("HEAD");
@@ -241,7 +231,7 @@ public class Utils {
     }
 
     public static String createTempJsonFile(Launcher launcher, final String name, final String dir) throws Exception {
-        return launcher.getChannel().call(new Callable<String, Exception>() {
+        return launcher.getChannel().call(new MasterToSlaveCallable<String, Exception>() {
             public String call() throws IOException {
                 File tempFile = File.createTempFile(name, ".json", new File(dir));
                 tempFile.deleteOnExit();
@@ -285,10 +275,10 @@ public class Utils {
         }
     }
 
-    private static String escapeUnixArgument(String arg) {
+    static String escapeUnixArgument(String arg) {
         StringBuilder res = new StringBuilder();
         for (char c : arg.toCharArray()) {
-            if (UNIX_GLOB_CHARS.indexOf(c) >= 0) {
+            if (UNIX_SPECIAL_CHARS.indexOf(c) >= 0) {
                 res.append("\\");
             }
             res.append(c);
@@ -367,6 +357,13 @@ public class Utils {
         }
         buildInfo.setCpsScript(cpsScript);
         return buildInfo;
+    }
+
+    public static ProxyConfiguration getProxyConfiguration(org.jfrog.hudson.ArtifactoryServer server) {
+        if (server.isBypassProxy()) {
+            return null;
+        }
+        return org.jfrog.hudson.ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
     }
 
 }

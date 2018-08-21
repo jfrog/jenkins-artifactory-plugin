@@ -3,7 +3,7 @@
          xmlns:r="/lib/jfrog"
          xmlns:st="jelly:stapler">
     <f:section title="${%Artifactory Configuration}">
-        <f:dropdownList name="details" title="${%Artifactory server}">
+        <f:dropdownList name="deployerDetails" title="${%Artifactory server}">
             <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
                 <f:dropdownListBlock value="${s.name}" title="${s.url}" selected="${s.name==instance.artifactoryName}">
                     <f:nested>
@@ -13,7 +13,7 @@
                         <r:dynamicRepos id="ivyFreeRepositoryKeys-${s.url}"
                                         title="Publishing repository"
                                         field="deployReleaseRepository"
-                                        repositoryConf="${instance.details.deployReleaseRepository}"
+                                        repositoryConf="${instance.deployerDetails.deployReleaseRepository}"
                                         repositories="${instance.releaseRepositoryList}"/>
 
                         <script>
@@ -69,7 +69,7 @@
                         <table style="width:100%">
                             <f:optionalBlock name="runChecks"
                                              checked="${instance.runChecks}"
-                                             title="Run Artifactory license checks (requires Artifactory Pro)"
+                                             title="Run Artifactory license checks (deprecated)"
                                              inline="true"
                                              help="/plugin/artifactory/help/common/help-runChecks.html">
                                 <f:entry title="${%Send license violation notifications to: }"
@@ -208,9 +208,9 @@
                     </f:block>
                     <f:block>
                         <table style="width:100%">
-                            <f:optionalBlock field="notM2Compatible" negative="true"
-                                             help="/plugin/artifactory/help/common/help-m2Compatible.html"
-                                             inline="true" checked="${!instance.notM2Compatible}"
+                            <f:optionalBlock field="useMavenPatterns"
+                                             help="/plugin/artifactory/help/common/help-useMavenPatterns.html"
+                                             inline="true" checked="${instance.useMavenPatterns}"
                                              title="Use Maven compatible patterns">
                             </f:optionalBlock>
                         </table>
@@ -255,9 +255,9 @@
                     </f:block>
                     <f:block>
                         <table style="width:100%">
-                            <f:entry title="Deployment properties" field="matrixParams"
-                                     help="/plugin/artifactory/help/common/help-matrixParams.html">
-                                <f:textbox value="${instance.matrixParams}"/>
+                            <f:entry title="Deployment properties" field="deploymentProperties"
+                                     help="/plugin/artifactory/help/common/help-deploymentProperties.html">
+                                <f:textbox value="${instance.deploymentProperties}"/>
                             </f:entry>
                         </table>
                     </f:block>

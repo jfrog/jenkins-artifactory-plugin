@@ -19,7 +19,7 @@
          xmlns:r="/lib/jfrog"
          xmlns:st="jelly:stapler">
     <f:section title="${%Artifactory Configuration}">
-        <f:dropdownList name="details" title="${%Artifactory server}">
+        <f:dropdownList name="deployerDetails" title="${%Artifactory server}">
             <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
                 <f:dropdownListBlock value="${s.name}" title="${s.url}" selected="${s.name==instance.artifactoryName}">
                     <f:nested>
@@ -29,14 +29,14 @@
                         <r:dynamicRepos id="maven3RepositoryKeys-${s.url}"
                                         title="Target releases repository"
                                         field="deployReleaseRepository"
-                                        repositoryConf="${instance.details.deployReleaseRepository}"
+                                        repositoryConf="${instance.deployerDetails.deployReleaseRepository}"
                                         repositories="${instance.releaseRepositoryList}"
                                         helpUrl="/plugin/artifactory/help/common/help-deployReleases.html"/>
 
                         <r:dynamicRepos id="maven3SnapshotsRepositoryKeys-${s.url}"
                                         title="Target snapshots repository"
                                         field="deploySnapshotRepository"
-                                        repositoryConf="${instance.details.deploySnapshotRepository}"
+                                        repositoryConf="${instance.deployerDetails.deploySnapshotRepository}"
                                         repositories="${instance.snapshotRepositoryList}"
                                         helpUrl="/plugin/artifactory/help/common/help-deploySnapshots.html"/>
 
@@ -182,9 +182,9 @@
                     </f:block>
                     <f:block>
                         <table style="width:100%">
-                            <f:entry title="Deployment properties" field="matrixParams"
-                                     help="/plugin/artifactory/help/common/help-matrixParams.html">
-                                <f:textbox value="${instance.matrixParams}"/>
+                            <f:entry title="Deployment properties" field="deploymentProperties"
+                                     help="/plugin/artifactory/help/common/help-deploymentProperties.html">
+                                <f:textbox value="${instance.deploymentProperties}"/>
                             </f:entry>
                         </table>
                     </f:block>
@@ -234,7 +234,7 @@
                         <table style="width:100%">
                             <f:optionalBlock name="runChecks"
                                              checked="${instance.runChecks}"
-                                             title="Run Artifactory license checks (requires Artifactory Pro)"
+                                             title="Run Artifactory license checks (deprecated)"
                                              inline="true"
                                              help="/plugin/artifactory/help/common/help-runChecks.html">
                                 <f:entry title="${%Send license violation notifications to: }"

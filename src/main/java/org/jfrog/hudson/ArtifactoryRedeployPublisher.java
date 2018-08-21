@@ -73,7 +73,9 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     /**
      * Repository URL and repository to deploy artifacts to.
      */
-    private final ServerDetails details;
+    @Deprecated
+    private ServerDetails details = null;
+    private final ServerDetails deployerDetails;
     /**
      * If checked (default) deploy maven artifacts
      */
@@ -95,7 +97,9 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     private final boolean discardOldBuilds;
     private final boolean discardBuildArtifacts;
     private final boolean asyncBuildRetention;
-    private final String matrixParams;
+    @Deprecated
+    private final String matrixParams = null;
+    private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean allowPromotionOfNonStagedBuilds;
     private final boolean allowBintrayPushOfNonStageBuilds;
@@ -128,13 +132,13 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     // NOTE: The following getters are used by jelly. Do not remove them
 
     @DataBoundConstructor
-    public ArtifactoryRedeployPublisher(ServerDetails details, boolean deployArtifacts,
+    public ArtifactoryRedeployPublisher(ServerDetails details, ServerDetails deployerDetails, boolean deployArtifacts,
                                         IncludesExcludes artifactDeploymentPatterns, CredentialsConfig deployerCredentialsConfig,
                                         boolean includeEnvVars, IncludesExcludes envVarsPatterns,
                                         boolean deployBuildInfo, boolean evenIfUnstable, boolean runChecks,
                                         String violationRecipients, boolean includePublishArtifacts, String scopes,
                                         boolean disableLicenseAutoDiscovery, boolean discardOldBuilds, boolean passIdentifiedDownstream,
-                                        boolean discardBuildArtifacts, boolean asyncBuildRetention, String matrixParams, boolean enableIssueTrackerIntegration,
+                                        boolean discardBuildArtifacts, boolean asyncBuildRetention, String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration,
                                         boolean aggregateBuildIssues, String aggregationBuildStatus,
                                         boolean recordAllDependencies, boolean allowPromotionOfNonStagedBuilds,
                                         String defaultPromotionTargetRepository,
@@ -144,7 +148,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
                                         boolean blackDuckIncludePublishedArtifacts, boolean autoCreateMissingComponentRequests,
                                         boolean autoDiscardStaleComponentRequests, boolean filterExcludedArtifactsFromBuild,
                                         String customBuildName, boolean overrideBuildName) {
-        this.details = details;
+        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.deployArtifacts = deployArtifacts;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
@@ -160,7 +164,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.matrixParams = matrixParams;
+        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
@@ -188,12 +192,12 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         return deployArtifacts;
     }
 
-    public String getMatrixParams() {
-        return matrixParams;
+    public String getDeploymentProperties() {
+        return deploymentProperties != null ? deploymentProperties : matrixParams;
     }
 
-    public ServerDetails getDetails() {
-        return details;
+    public ServerDetails getDeployerDetails() {
+        return deployerDetails != null ? deployerDetails : details;
     }
 
     public IncludesExcludes getArtifactDeploymentPatterns() {
@@ -272,7 +276,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     public String getArtifactoryName() {
-        return details != null ? details.artifactoryName : null;
+        return getDeployerDetails() != null ? getDeployerDetails().artifactoryName : null;
     }
 
     public String getArtifactoryUrl() {
@@ -284,20 +288,20 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
      * @return The release versions deployment repository.
      */
     public String getRepositoryKey() {
-        return details != null ?
-                details.getDeployReleaseRepositoryKey() : null;
+        return getDeployerDetails() != null ?
+                getDeployerDetails().getDeployReleaseRepositoryKey() : null;
     }
 
     /**
      * @return The snapshots deployment repository. If not defined the releases deployment repository will be returned
      */
     public String getSnapshotsRepositoryKey() {
-        return details != null ?
-                details.getDeploySnapshotRepositoryKey() : null;
+        return getDeployerDetails() != null ?
+                getDeployerDetails().getDeploySnapshotRepositoryKey() : null;
     }
 
     public String getUserPluginKey() {
-        return details != null ? details.getUserPluginKey() : null;
+        return getDeployerDetails() != null ? getDeployerDetails().getUserPluginKey() : null;
     }
 
     public boolean isEnableIssueTrackerIntegration() {
@@ -382,11 +386,11 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
-        if (details != null) {
+        if (getDeployerDetails() != null) {
             if (isOverrideBuildName()) {
-                return new ArtifactoryProjectAction(details.getArtifactoryName(), getCustomBuildName());
+                return new ArtifactoryProjectAction(getDeployerDetails().getArtifactoryName(), getCustomBuildName());
             }
-            return new ArtifactoryProjectAction(details.getArtifactoryName(), project);
+            return new ArtifactoryProjectAction(getDeployerDetails().getArtifactoryName(), project);
         }
         return null;
     }
@@ -529,15 +533,15 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     public List<Repository> getReleaseRepositoryList() {
-        return RepositoriesUtils.collectRepositories(details.getDeployReleaseRepositoryKey());
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeployReleaseRepositoryKey());
     }
 
     public List<Repository> getSnapshotRepositoryList() {
-        return RepositoriesUtils.collectRepositories(details.getDeploySnapshotRepositoryKey());
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeploySnapshotRepositoryKey());
     }
 
     public PluginSettings getSelectedStagingPlugin() throws Exception {
-        return details.getStagingPlugin();
+        return getDeployerDetails().getStagingPlugin();
     }
 
 

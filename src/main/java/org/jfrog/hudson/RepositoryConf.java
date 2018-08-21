@@ -33,7 +33,7 @@ public class RepositoryConf {
      */
     public String getRepoKey() {
         String repoKey;
-        if (dynamicMode) {
+        if (isDynamicMode()) {
             repoKey = keyFromText;
         } else {
             repoKey = keyFromSelect;
@@ -58,7 +58,8 @@ public class RepositoryConf {
      * @return true if dynamic mode is used, false otherwise.
      */
     public boolean isDynamicMode() {
-        return dynamicMode;
+        // In Jenkins Job DSL we want to allow to not populate dynamicMode
+        return dynamicMode || (StringUtils.isBlank(keyFromSelect) && StringUtils.isNotBlank(keyFromText));
     }
 
     // null object

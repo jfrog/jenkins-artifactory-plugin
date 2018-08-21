@@ -15,22 +15,11 @@ import org.jfrog.hudson.util.publisher.PublisherContext;
 public class MavenDeployer extends Deployer {
     private String snapshotRepo;
     private String releaseRepo;
-    private boolean evenIfUnstable;
+    private boolean deployEvenIfUnstable = false;
     public final static MavenDeployer EMPTY_DEPLOYER;
 
     static {
         EMPTY_DEPLOYER = createEmptyDeployer();
-    }
-
-    @Whitelisted
-    public boolean isEvenIfUnstable() {
-        return evenIfUnstable;
-    }
-
-    @Whitelisted
-    public Deployer setEvenIfUnstable(boolean evenIfUnstable) {
-        this.evenIfUnstable = evenIfUnstable;
-        return this;
     }
 
     @Whitelisted
@@ -55,6 +44,20 @@ public class MavenDeployer extends Deployer {
         return snapshotRepo;
     }
 
+    @Whitelisted
+    public Deployer setDeployEvenIfUnstable(boolean deployEvenIfUnstable) {
+        this.deployEvenIfUnstable = deployEvenIfUnstable;
+        return this;
+    }
+
+    /**
+     * @return  True if should deploy artifacts even when the build is unstable (test failures).
+     */
+    @Whitelisted
+    public boolean isDeployEvenIfUnstable() {
+        return deployEvenIfUnstable;
+    }
+
     @Override
     public ServerDetails getDetails() {
         RepositoryConf snapshotRepositoryConf = new RepositoryConf(snapshotRepo, snapshotRepo, false);
@@ -68,10 +71,11 @@ public class MavenDeployer extends Deployer {
                 .deployerOverrider(this)
                 .serverDetails(getDetails())
                 .deployArtifacts(isDeployArtifacts())
+                .evenIfUnstable(isDeployEvenIfUnstable())
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .includeEnvVars(isIncludeEnvVars())
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
-                .matrixParams(ExtractorUtils.buildPropertiesString(getProperties()))
+                .deploymentProperties(ExtractorUtils.buildPropertiesString(getProperties()))
                 .includesExcludes(getArtifactsIncludeExcludeForDeyployment());
     }
 
@@ -90,6 +94,7 @@ public class MavenDeployer extends Deployer {
         dummy.setReleaseRepo("empty_repo");
         dummy.setSnapshotRepo("empty_repo");
         dummy.setDeployArtifacts(false);
+        dummy.setDeployEvenIfUnstable(false);
         return dummy;
     }
 }

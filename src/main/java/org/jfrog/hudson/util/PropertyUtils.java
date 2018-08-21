@@ -19,6 +19,7 @@ package org.jfrog.hudson.util;
 import com.google.common.collect.Maps;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.IOUtils;
 import org.jfrog.hudson.release.gradle.GradleModule;
 
@@ -74,7 +75,7 @@ public class PropertyUtils {
      */
     private static Properties loadGradleProperties(FilePath gradlePropertiesFilePath)
             throws IOException, InterruptedException {
-        return gradlePropertiesFilePath.act(new FilePath.FileCallable<Properties>() {
+        return gradlePropertiesFilePath.act(new MasterToSlaveFileCallable<Properties>() {
             public Properties invoke(File gradlePropertiesFile, VirtualChannel channel) throws IOException, InterruptedException {
                 Properties gradleProps = new Properties();
                 if (gradlePropertiesFile.exists()) {

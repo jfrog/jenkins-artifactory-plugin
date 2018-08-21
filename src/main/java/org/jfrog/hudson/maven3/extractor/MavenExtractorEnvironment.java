@@ -182,7 +182,7 @@ public class MavenExtractorEnvironment extends Environment {
 
     private PublisherContext createPublisherContext(ArtifactoryRedeployPublisher publisher, AbstractBuild build) {
         ReleaseAction release = ActionableHelper.getLatestAction(build, ReleaseAction.class);
-        ServerDetails server = publisher.getDetails();
+        ServerDetails server = publisher.getDeployerDetails();
         if (release != null) {
             // staging build might change the target deployment repository
             String stagingRepoKey = release.getStagingRepositoryKey();
@@ -204,7 +204,7 @@ public class MavenExtractorEnvironment extends Environment {
                 .recordAllDependencies(publisher.isRecordAllDependencies())
                 .includeEnvVars(publisher.isIncludeEnvVars()).envVarsPatterns(publisher.getEnvVarsPatterns())
                 .discardBuildArtifacts(publisher.isDiscardBuildArtifacts()).asyncBuildRetention(publisher.isAsyncBuildRetention())
-                .matrixParams(publisher.getMatrixParams()).evenIfUnstable(publisher.isEvenIfUnstable())
+                .deploymentProperties(publisher.getDeploymentProperties()).evenIfUnstable(publisher.isEvenIfUnstable())
                 .enableIssueTrackerIntegration(publisher.isEnableIssueTrackerIntegration())
                 .aggregateBuildIssues(publisher.isAggregateBuildIssues())
                 .aggregationBuildStatus(publisher.getAggregationBuildStatus())
@@ -227,7 +227,7 @@ public class MavenExtractorEnvironment extends Environment {
     public static class ArtifactoryPlexusContributor extends PlexusModuleContributorFactory {
 
         private static final String INCLUDED_FILES = "*.jar";
-        private static final String EXCLUDED_FILES = "classes.jar, *ivy*, *gradle*";
+        private static final String EXCLUDED_FILES = "classes.jar, *ivy*, *gradle*, artifactory*.jar";
 
         @Override
         public PlexusModuleContributor createFor(AbstractBuild<?, ?> context) throws IOException, InterruptedException {

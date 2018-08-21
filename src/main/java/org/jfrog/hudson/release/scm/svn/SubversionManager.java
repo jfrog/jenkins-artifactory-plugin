@@ -22,6 +22,7 @@ import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import hudson.scm.SubversionSCM;
+import jenkins.MasterToSlaveFileCallable;
 import org.jfrog.hudson.release.scm.AbstractScmManager;
 import org.tmatesoft.svn.core.*;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
@@ -168,7 +169,7 @@ public class SubversionManager extends AbstractScmManager<SubversionSCM> {
         return sap;
     }
 
-    private static class SVNCommitWorkingCopyCallable implements FilePath.FileCallable<Object> {
+    private static class SVNCommitWorkingCopyCallable extends MasterToSlaveFileCallable<Void> {
         private static final long serialVersionUID = 1L;
         private final String commitMessage;
         private final SubversionSCM.ModuleLocation location;
@@ -183,7 +184,7 @@ public class SubversionManager extends AbstractScmManager<SubversionSCM> {
             buildListener = listener;
         }
 
-        public Object invoke(File ws, VirtualChannel channel) throws IOException, InterruptedException {
+        public Void invoke(File ws, VirtualChannel channel) throws IOException, InterruptedException {
             File workingCopy = new File(ws, location.getLocalDir()).getCanonicalFile();
             try {
                 ISVNAuthenticationManager sam = SVNWCUtil.createDefaultAuthenticationManager();
@@ -208,7 +209,7 @@ public class SubversionManager extends AbstractScmManager<SubversionSCM> {
     /**
      * Creates a tag directly from the working copy.
      */
-    private static class SVNCreateTagCallable implements FilePath.FileCallable<Object> {
+    private static class SVNCreateTagCallable extends MasterToSlaveFileCallable<Void> {
         private final String tagUrl;
         private final String commitMessage;
         private final SubversionSCM.ModuleLocation location;
@@ -224,7 +225,7 @@ public class SubversionManager extends AbstractScmManager<SubversionSCM> {
             buildListener = listener;
         }
 
-        public Object invoke(File ws, VirtualChannel channel) throws IOException, InterruptedException {
+        public Void invoke(File ws, VirtualChannel channel) throws IOException, InterruptedException {
             File workingCopy = new File(ws, location.getLocalDir()).getCanonicalFile();
             try {
                 SVNURL svnUrl = SVNURL.parseURIEncoded(tagUrl);
@@ -256,7 +257,7 @@ public class SubversionManager extends AbstractScmManager<SubversionSCM> {
         }
     }
 
-    private static class RevertWorkingCopyCallable implements FilePath.FileCallable<Object> {
+    private static class RevertWorkingCopyCallable extends MasterToSlaveFileCallable<Void> {
         private final SubversionSCM.ModuleLocation location;
         private final ISVNAuthenticationProvider authProvider;
         private final TaskListener listener;
@@ -269,7 +270,7 @@ public class SubversionManager extends AbstractScmManager<SubversionSCM> {
         }
 
 
-        public Object invoke(File ws, VirtualChannel channel) throws IOException, InterruptedException {
+        public Void invoke(File ws, VirtualChannel channel) throws IOException, InterruptedException {
             File workingCopy = new File(ws, location.getLocalDir()).getCanonicalFile();
             try {
                 log(listener, "Reverting working copy: " + workingCopy);
@@ -285,7 +286,7 @@ public class SubversionManager extends AbstractScmManager<SubversionSCM> {
         }
     }
 
-    private static class CleanupCallable implements FilePath.FileCallable<Object> {
+    private static class CleanupCallable extends MasterToSlaveFileCallable<Void> {
         private final SubversionSCM.ModuleLocation location;
         private final ISVNAuthenticationProvider authProvider;
         private final TaskListener listener;
@@ -297,7 +298,7 @@ public class SubversionManager extends AbstractScmManager<SubversionSCM> {
             this.listener = listener;
         }
 
-        public Object invoke(File ws, VirtualChannel channel) throws IOException, InterruptedException {
+        public Void invoke(File ws, VirtualChannel channel) throws IOException, InterruptedException {
             File workingCopy = new File(ws, location.getLocalDir()).getCanonicalFile();
             try {
                 log(listener, "Cleanup working copy: " + workingCopy);

@@ -122,7 +122,6 @@ public class Maven3Builder extends Builder {
         } catch (IOException e) {
             Util.displayIOException(e, listener);
             e.printStackTrace(listener.fatalError("command execution failed"));
-            build.setResult(Result.FAILURE);
             return false;
         } finally {
             ActionableHelper.deleteFilePath(workDir, classworldsConfPath);

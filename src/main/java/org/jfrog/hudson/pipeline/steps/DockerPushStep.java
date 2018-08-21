@@ -121,7 +121,7 @@ public class DockerPushStep extends AbstractStepImpl {
 
             String imageId = DockerAgentUtils.getImageIdFromAgent(launcher, step.getImage(), step.getHost());
             DockerAgentUtils.pushImage(launcher, log, step.getImage(), username, password, step.getHost());
-            DockerImage image = new DockerImage(imageId, step.getImage(), step.getTargetRepo(), buildInfo.hashCode());
+            DockerImage image = new DockerImage(imageId, step.getImage(), step.getTargetRepo(), buildInfo.hashCode(), step.properties);
 
             String parentId = DockerAgentUtils.getParentIdFromAgent(launcher, imageId, step.getHost());
             if (!StringUtils.isEmpty(parentId)) {
@@ -134,7 +134,7 @@ public class DockerPushStep extends AbstractStepImpl {
             ArtifactoryConfigurator config = new ArtifactoryConfigurator(Utils.prepareArtifactoryServer(null, server));
             Module module = image.generateBuildInfoModule(build, listener, config, buildInfo.getName(), buildInfo.getNumber(), timestamp);
 
-            if (module.getArtifacts().size() == 0) {
+            if (module.getArtifacts() == null || module.getArtifacts().size() == 0) {
                 log.warn("Could not find docker image: " + step.getImage() + "in Artifactory.");
             }
 

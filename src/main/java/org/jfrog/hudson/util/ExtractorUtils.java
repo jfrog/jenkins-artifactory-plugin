@@ -27,6 +27,7 @@ import hudson.model.*;
 import hudson.slaves.SlaveComputer;
 import hudson.util.IOUtils;
 import jenkins.model.Jenkins;
+import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.jfrog.build.api.BuildInfoConfigProperties;
@@ -54,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.io.File;
 import java.util.*;
 
 /**
@@ -141,25 +143,29 @@ public class ExtractorUtils {
      */
     public static ArtifactoryClientConfiguration addBuilderInfoArguments(Map<String, String> env, Run build, TaskListener listener,
                                                                          PublisherContext publisherContext, ResolverContext resolverContext, FilePath ws, hudson.Launcher launcher)
-            throws IOException, InterruptedException {
+            throws Exception {
         ArtifactoryClientConfiguration configuration = getArtifactoryClientConfiguration(env, build,
-                null, listener, publisherContext, resolverContext, ws);
+                null, listener, publisherContext, resolverContext);
         if (isMavenResolutionConfigured(resolverContext)) {
             env.put(BuildInfoConfigProperties.PROP_ARTIFACTORY_RESOLUTION_ENABLED, Boolean.TRUE.toString());
         }
-        persistConfiguration(configuration, env, ws, launcher);
+
+        // Create tempdir for properties file
+        FilePath tempDir = createAndGetTempDir(launcher, ws);
+
+        persistConfiguration(configuration, env, tempDir, launcher);
         return configuration;
     }
 
     public static ArtifactoryClientConfiguration getArtifactoryClientConfiguration(Map<String, String> env, Run build,
-                                                                                   BuildInfo pipelineBuildInfo, TaskListener listener, PublisherContext publisherContext, ResolverContext resolverContext, FilePath ws) throws UnsupportedEncodingException {
+                                                                                   BuildInfo pipelineBuildInfo, TaskListener listener, PublisherContext publisherContext, ResolverContext resolverContext) throws UnsupportedEncodingException {
         ArtifactoryClientConfiguration configuration = new ArtifactoryClientConfiguration(new NullLog());
         if (build instanceof AbstractBuild) {
             addBuildRootIfNeeded((AbstractBuild) build, configuration);
         }
 
         if (publisherContext != null) {
-            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration, ws);
+            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration);
             publisherContext.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
         }
 
@@ -246,7 +252,7 @@ public class ExtractorUtils {
      * Set all the parameters relevant for publishing artifacts and build info
      */
     private static void setPublisherInfo(Map<String, String> env, Run build, BuildInfo pipelineBuildInfo, PublisherContext context,
-                                         ArtifactoryClientConfiguration configuration, FilePath ws) {
+                                         ArtifactoryClientConfiguration configuration) {
         configuration.setActivateRecorder(Boolean.TRUE);
         String buildName;
         String buildNumber;
@@ -406,7 +412,7 @@ public class ExtractorUtils {
             configuration.setEnvVarsIncludePatterns(Util.replaceMacro(envVarsPatterns.getIncludePatterns(), env));
             configuration.setEnvVarsExcludePatterns(Util.replaceMacro(envVarsPatterns.getExcludePatterns(), env));
         }
-        addMatrixParams(context, configuration.publisher, env);
+        addDeploymentProperties(context, configuration.publisher, env);
     }
 
     private static void setRetryParams(ArtifactoryClientConfiguration configuration, ArtifactoryServer artifactoryServer) {
@@ -520,12 +526,12 @@ public class ExtractorUtils {
         }
     }
 
-    private static void addMatrixParams(PublisherContext context,
-                                        ArtifactoryClientConfiguration.PublisherHandler publisher,
-                                        Map<String, String> env) {
-        String matrixParams = Util.replaceMacro(context.getMatrixParams(), env);
+    private static void addDeploymentProperties(PublisherContext context,
+                                                ArtifactoryClientConfiguration.PublisherHandler publisher,
+                                                Map<String, String> env) {
+        String deploymentProperties = Util.replaceMacro(context.getDeploymentProperties(), env);
         ArrayListMultimap<String, String> params = ArrayListMultimap.create();
-        SpecsHelper.fillPropertiesMap(matrixParams, params);
+        SpecsHelper.fillPropertiesMap(deploymentProperties, params);
         publisher.addMatrixParams(params);
     }
 
@@ -601,5 +607,24 @@ public class ExtractorUtils {
                 (resolverContext.getResolverOverrider() instanceof ArtifactoryMaven3Configurator ||
                         resolverContext.getResolverOverrider() instanceof ArtifactoryMaven3NativeConfigurator ||
                         resolverContext.getResolverOverrider() instanceof MavenResolver);
+    }
+
+    /**
+     * Create a temporary directory under a given workspace
+     * @param launcher
+     * @param ws
+     * @throws Exception
+     */
+    public static FilePath createAndGetTempDir(hudson.Launcher launcher, FilePath ws) throws Exception {
+        final FilePath tempDirPath = new FilePath(ws.getParent(), ws.getName() + "@tmp");
+        launcher.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
+            public Boolean call() {
+                File tempDirFile = new File(tempDirPath.getRemote());
+                tempDirFile.mkdir();
+                tempDirFile.deleteOnExit();
+                return true;
+            }
+        });
+        return tempDirPath;
     }
 }

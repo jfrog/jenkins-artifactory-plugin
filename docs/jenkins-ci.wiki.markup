@@ -121,7 +121,7 @@ h1. Working With the Pipeline Jenkins Plugin
 
 The Artifactory plugin support Artifactory operations as part of the Jenkins Pipeline script DSL [Read detailed instructions here|Artifactory - Working With the Pipeline Jenkins Plugin].
 
-h1. Push to Bintray
+h1. Push to Bintray (deprecated)
 
 !p2b2.JPG|border=1,width=245,height=176!
 From Artifactory 3.5.3, Bintray users can use this feature to promote the build directly from Jenkins.

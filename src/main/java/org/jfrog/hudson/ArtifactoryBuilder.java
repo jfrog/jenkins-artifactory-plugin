@@ -17,8 +17,7 @@
 package org.jfrog.hudson;
 
 import hudson.Extension;
-import hudson.model.Descriptor;
-import hudson.model.Item;
+import hudson.model.*;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -31,6 +30,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
 import org.jfrog.hudson.pipeline.docker.proxy.CertManager;
 import org.jfrog.hudson.util.Credentials;
@@ -205,8 +205,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         @SuppressWarnings({"unchecked"})
         @Override
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
-            useCredentialsPlugin = (Boolean) o.get("useCredentialsPlugin");
-            pushToBintrayEnabled = (Boolean) o.get("pushToBintrayEnabled");
+            boolean useCredentialsPlugin = (Boolean)o.get("useCredentialsPlugin");
+            this.pushToBintrayEnabled = (Boolean)o.get("pushToBintrayEnabled");
 
             try {
                 configureProxy((JSONObject) o.get("buildInfoProxyEnabled"));
@@ -231,9 +231,55 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             if (isServerDuplicated(artifactoryServers)) {
                 throw new FormException("The Artifactory server ID you have entered is already configured", "Server ID");
             }
+
             setArtifactoryServers(artifactoryServers);
+
+            if (useCredentialsPlugin && !this.useCredentialsPlugin) {
+                resetJobsCredentials();
+                resetServersCredentials();
+            }
+            this.useCredentialsPlugin = useCredentialsPlugin;
             save();
             return super.configure(req, o);
+        }
+
+        private void resetServersCredentials() {
+            for (ArtifactoryServer server : artifactoryServers) {
+                if (server.getResolverCredentialsConfig() != null) {
+                    server.getResolverCredentialsConfig().deleteCredentials();
+                }
+                if (server.getDeployerCredentialsConfig() != null) {
+                    server.getDeployerCredentialsConfig().deleteCredentials();
+                }
+            }
+        }
+
+        private void resetJobsCredentials() {
+            List<AbstractProject> jobs = Jenkins.getInstance().getAllItems(AbstractProject.class);
+            for(AbstractProject job : jobs) {
+                if (!(job instanceof BuildableItemWithBuildWrappers)) {
+                    continue;
+                }
+                ResolverOverrider resolver = ActionableHelper.getResolverOverrider(job);
+                if (resolver != null) {
+                    if (resolver.getResolverCredentialsConfig() != null) {
+                        resolver.getResolverCredentialsConfig().deleteCredentials();
+                    }
+                }
+                DeployerOverrider deployer = ActionableHelper.getDeployerOverrider(job);
+                if (deployer != null) {
+                    if (deployer.getDeployerCredentialsConfig() != null) {
+                        deployer.getDeployerCredentialsConfig().deleteCredentials();
+                    }
+                }
+                if (resolver != null || deployer != null) {
+                    try {
+                        job.save();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
         }
 
         private synchronized void configureProxy(JSONObject proxyConfig) throws IOException, InterruptedException {

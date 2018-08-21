@@ -6,7 +6,7 @@
         <table style="width:100%" id="pushToBintrayTable" >
             <f:optionalBlock field="allowBintrayPushOfNonStageBuilds"
                 help="/plugin/artifactory/help/common/help-allowPushToBintrayOfNonStagedBuilds.html"
-                    title="Allow push to Bintray for non-staged builds"
+                    title="Allow push to Bintray for non-staged builds (deprecated)"
                         inline="true">
             </f:optionalBlock>
         </table>

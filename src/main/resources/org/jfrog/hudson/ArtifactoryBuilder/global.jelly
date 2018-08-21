@@ -10,7 +10,7 @@
             help="/plugin/artifactory/help/ArtifactoryBuilder/help-pushToBintrayEnabled.html"  >
                 <input id="pushToBintrayEnabled" type="checkbox"
                     name="pushToBintrayEnabled" value="${descriptor.pushToBintrayEnabled}"
-                        field="pushToBintrayEnabled">Enable Push to Bintray
+                        field="pushToBintrayEnabled">Enable Push to Bintray (deprecated)
                 </input>
         </f:entry>
         <f:entry

@@ -12,9 +12,11 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.build.api.util.Log;
+import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.client.artifactoryXrayResponse.ArtifactoryXrayResponse;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryXrayClient;
 import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.XrayScanConfig;
 import org.jfrog.hudson.pipeline.types.XrayScanResult;
@@ -69,6 +71,10 @@ public class XrayScanBuildStep extends AbstractStepImpl {
             CredentialsConfig credentialsConfig = server.createCredentialsConfig();
             ArtifactoryXrayClient client = new ArtifactoryXrayClient(server.getUrl(), credentialsConfig.provideUsername(build.getParent()),
                     credentialsConfig.providePassword(build.getParent()), log);
+            ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(Utils.prepareArtifactoryServer(null, server));
+            if (proxyConfiguration != null) {
+                client.setProxyConfiguration(proxyConfiguration);
+            }
 
             ArtifactoryXrayResponse buildScanResult = client.xrayScanBuild(xrayScanConfig.getBuildName(), xrayScanConfig.getBuildNumber(), "jenkins");
             XrayScanResult xrayScanResult = new XrayScanResult(buildScanResult);

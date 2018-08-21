@@ -3,9 +3,7 @@ package org.jfrog.hudson.pipeline.executors;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 import org.jfrog.build.api.Dependency;
-import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.generic.FilesResolverCallable;
@@ -41,15 +39,8 @@ public class GenericDownloadExecutor {
                 ws.act(new FilesResolverCallable(new JenkinsBuildInfoLog(listener),
                         preferredResolver.provideUsername(build.getParent()),
                         preferredResolver.providePassword(build.getParent()),
-                        server.getUrl(), spec, getProxyConfiguration()));
+                        server.getUrl(), spec, Utils.getProxyConfiguration(server)));
         new BuildInfoAccessor(this.buildInfo).appendPublishedDependencies(resolvedDependencies);
         return this.buildInfo;
-    }
-
-    private ProxyConfiguration getProxyConfiguration() {
-        if (server.isBypassProxy()) {
-            return null;
-        }
-        return ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
     }
 }

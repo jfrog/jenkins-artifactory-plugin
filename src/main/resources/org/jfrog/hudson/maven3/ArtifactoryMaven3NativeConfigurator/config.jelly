@@ -3,7 +3,7 @@
          xmlns:r="/lib/jfrog"
          xmlns:st="jelly:stapler"
         >
-    <f:dropdownList name="details" title="${%Artifactory server}">
+    <f:dropdownList name="resolverDetails" title="${%Artifactory server}">
         <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
             <f:dropdownListBlock value="${s.name}" title="${s.url}" selected="${s.name==instance.artifactoryName}">
                 <f:nested>
@@ -14,13 +14,13 @@
                                     title="Resolution releases repository"
                                     field="resolveReleaseRepository"
                                     repositories="${instance.virtualRepositoryList}"
-                                    repositoryConf="${instance.details.resolveReleaseRepository}"/>
+                                    repositoryConf="${instance.resolverDetails.resolveReleaseRepository}"/>
 
                     <r:dynamicRepos id="maven3NativeSnapshotRepositoryKeys-${s.url}"
                                     title="Resolution snapshots repository"
                                     field="resolveSnapshotRepository"
                                     repositories="${instance.virtualRepositoryList}"
-                                    repositoryConf="${instance.details.resolveSnapshotRepository}"/>
+                                    repositoryConf="${instance.resolverDetails.resolveSnapshotRepository}"/>
                     <script>
                         var maven3NativeResolveBind =
                         <st:bind value="${descriptor}"/>

@@ -29,10 +29,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.util.FileChecksumCalculator;
-import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.action.ActionableHelper;
@@ -68,7 +68,7 @@ public class ArtifactsDeployer {
     private final boolean downstreamIdentifier;
     private final boolean isArchiveJenkinsVersion;
     private final EnvVars env;
-    private final String[] matrixParams;
+    private final String[] deploymentProperties;
     private final AbstractBuild<?, ?> rootBuild;
 
     public ArtifactsDeployer(ArtifactoryRedeployPublisher artifactoryPublisher, ArtifactoryBuildInfoClient client,
@@ -101,7 +101,7 @@ public class ArtifactsDeployer {
         } else {
             this.patterns = IncludeExcludePatterns.EMPTY;
         }
-        this.matrixParams = StringUtils.split(Util.replaceMacro(artifactoryPublisher.getMatrixParams(), env), "; ");
+        this.deploymentProperties = StringUtils.split(Util.replaceMacro(artifactoryPublisher.getDeploymentProperties(), env), "; ");
         debuggingLogger.fine("Getting root build");
         this.rootBuild = BuildUniqueIdentifierHelper.getRootBuild(mavenModuleSetBuild);
         this.isArchiveJenkinsVersion = Hudson.getVersion().isNewerThan(new VersionNumber(
@@ -184,18 +184,18 @@ public class ArtifactsDeployer {
         if (StringUtils.isNotBlank(revision)) {
             builder.addProperty(BuildInfoFields.VCS_REVISION, revision);
         }
-        addMatrixParams(builder);
+        addDeploymentProperties(builder);
         DeployDetails deployDetails = builder.build();
         logDeploymentPath(deployDetails, artifactPath);
         client.deployArtifact(deployDetails);
     }
 
-    private void addMatrixParams(DeployDetails.Builder builder) {
-        if (matrixParams == null) {
+    private void addDeploymentProperties(DeployDetails.Builder builder) {
+        if (deploymentProperties == null) {
             return;
         }
-        for (String matrixParam : matrixParams) {
-            String[] split = StringUtils.split(matrixParam, '=');
+        for (String property : deploymentProperties) {
+            String[] split = StringUtils.split(property, '=');
             if (split.length == 2) {
                 String value = split[1];
                 builder.addProperty(split[0], value);

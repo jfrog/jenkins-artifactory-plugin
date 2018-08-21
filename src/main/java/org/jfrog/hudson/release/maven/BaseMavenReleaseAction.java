@@ -95,7 +95,7 @@ public abstract class BaseMavenReleaseAction extends ReleaseAction<MavenModuleSe
 
     @Override
     protected String getSelectedStagingPluginName() {
-        return getPublisher().getDetails().getUserPluginKey();
+        return getPublisher().getDeployerDetails().getUserPluginKey();
     }
 
     @Override

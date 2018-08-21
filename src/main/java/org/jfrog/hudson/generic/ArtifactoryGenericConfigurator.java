@@ -49,16 +49,20 @@ import java.util.List;
 public class ArtifactoryGenericConfigurator extends BuildWrapper implements DeployerOverrider, ResolverOverrider,
         BuildInfoAwareConfigurator, MultiConfigurationAware {
 
-    private final ServerDetails details;
+    @Deprecated
+    private final ServerDetails details = null;
+    private final ServerDetails deployerDetails;
     private final ServerDetails resolverDetails;
     private final CredentialsConfig deployerCredentialsConfig;
     private final CredentialsConfig resolverCredentialsConfig;
-    private final boolean useSpecs;
+    private final Boolean useSpecs;
     private final SpecConfiguration uploadSpec;
     private final SpecConfiguration downloadSpec;
     private final String deployPattern;
     private final String resolvePattern;
-    private final String matrixParams;
+    @Deprecated
+    private final String matrixParams = null;
+    private final String deploymentProperties;
     private final boolean deployBuildInfo;
     /**
      * Include environment variables in the generated build info
@@ -87,9 +91,9 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     private Credentials overridingResolverCredentials;
 
     @DataBoundConstructor
-    public ArtifactoryGenericConfigurator(ServerDetails details, ServerDetails resolverDetails,
+    public ArtifactoryGenericConfigurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
                                           CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
-                                          String deployPattern, String resolvePattern, String matrixParams,
+                                          String deployPattern, String resolvePattern, String matrixParams, String deploymentProperties,
                                           boolean useSpecs, SpecConfiguration uploadSpec, SpecConfiguration downloadSpec,
                                           boolean deployBuildInfo,
                                           boolean includeEnvVars, IncludesExcludes envVarsPatterns,
@@ -100,7 +104,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                                           String artifactoryCombinationFilter,
                                           String customBuildName,
                                           boolean overrideBuildName) {
-        this.details = details;
+        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -109,7 +113,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         this.useSpecs = useSpecs;
         this.uploadSpec = uploadSpec;
         this.downloadSpec = downloadSpec;
-        this.matrixParams = matrixParams;
+        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
         this.deployBuildInfo = deployBuildInfo;
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
@@ -123,7 +127,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public String getArtifactoryName() {
-        return details != null ? details.artifactoryName : null;
+        return getDeployerDetails() != null ? getDeployerDetails().artifactoryName : null;
     }
 
     public String getArtifactoryResolverName() {
@@ -140,7 +144,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public String getRepositoryKey() {
-        return details.getDeployReleaseRepository().getRepoKey();
+        return getDeployerDetails().getDeployReleaseRepository().getRepoKey();
     }
 
     public String getDefaultPromotionTargetRepository() {
@@ -148,8 +152,8 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         return null;
     }
 
-    public ServerDetails getDetails() {
-        return details;
+    public ServerDetails getDeployerDetails() {
+        return deployerDetails != null ? deployerDetails : details;
     }
 
     public ServerDetails getResolverDetails() {
@@ -173,7 +177,8 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public boolean isUseSpecs() {
-        return useSpecs;
+        // useSpecs may be null in Jenkins Job DSL
+        return useSpecs == null || useSpecs;
     }
 
     public SpecConfiguration getUploadSpec() {
@@ -184,8 +189,8 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         return downloadSpec;
     }
 
-    public String getMatrixParams() {
-        return matrixParams;
+    public String getDeploymentProperties() {
+        return deploymentProperties != null ? deploymentProperties : matrixParams;
     }
 
     public boolean isDeployBuildInfo() {
@@ -303,10 +308,10 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public List<Repository> getReleaseRepositoryList() {
-        if (details.getDeploySnapshotRepository() == null) {
+        if (getDeployerDetails().getDeploySnapshotRepository() == null) {
             return Lists.newArrayList();
         }
-        return RepositoriesUtils.collectRepositories(details.getDeploySnapshotRepository().getKeyFromSelect());
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeploySnapshotRepository().getKeyFromSelect());
     }
 
     @Override
@@ -370,8 +375,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     private Environment createEnvironmentOnSuccessfulSetup() {
         return new Environment() {
             @Override
-            public boolean tearDown(AbstractBuild build, BuildListener listener)
-                    throws IOException, InterruptedException {
+            public boolean tearDown(AbstractBuild build, BuildListener listener) {
                 Result result = build.getResult();
                 if (result != null && result.isWorseThan(Result.SUCCESS)) {
                     return true;    // build failed. Don't publish
@@ -380,7 +384,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                 ArtifactoryServer server = getArtifactoryServer();
                 CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(ArtifactoryGenericConfigurator.this, server);
                 ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideUsername(build.getProject()),
-                        preferredDeployer.providePassword(build.getProject()), server.createProxyConfiguration(Jenkins.getInstance().proxy));
+                        preferredDeployer.providePassword(build.getProject()), ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy));
                 server.setLog(listener, client);
                 try {
                     boolean isFiltered = false;

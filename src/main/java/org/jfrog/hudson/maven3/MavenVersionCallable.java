@@ -18,7 +18,7 @@ package org.jfrog.hudson.maven3;
 
 import hudson.maven.MavenEmbedderException;
 import hudson.maven.MavenEmbedderUtils;
-import hudson.remoting.Callable;
+import jenkins.security.MasterToSlaveCallable;
 import org.kohsuke.stapler.framework.io.IOException2;
 
 import java.io.File;
@@ -30,7 +30,7 @@ import java.io.IOException;
  *
  * @author Tomer Cohen
  */
-public class MavenVersionCallable implements Callable<Boolean, IOException> {
+public class MavenVersionCallable extends MasterToSlaveCallable<Boolean, IOException> {
 
     private final String mavenHome;
     private final String version;

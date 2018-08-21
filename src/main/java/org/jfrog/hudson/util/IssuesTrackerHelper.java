@@ -29,7 +29,7 @@ public class IssuesTrackerHelper {
     private boolean aggregateBuildIssues;
     private String aggregationBuildStatus;
     private String affectedIssues;
-    private String matrixParams;
+    private String deploymentProperties;
 
     public IssuesTrackerHelper(Run build, TaskListener listener, boolean aggregateBuildIssues,
                                String aggregationBuildStatus) {
@@ -43,7 +43,7 @@ public class IssuesTrackerHelper {
         try {
             issueTrackerVersion = getJiraVersion(site);
             StringBuilder affectedIssuesBuilder = new StringBuilder();
-            StringBuilder matrixParamsBuilder = new StringBuilder();
+            StringBuilder deploymentPropertiesBuilder = new StringBuilder();
             Set<String> issueIds = Sets.newHashSet(manuallyCollectIssues(build, site, listener));
             for (String issueId : issueIds) {
                 if (!site.existsIssue(issueId)) {
@@ -52,17 +52,17 @@ public class IssuesTrackerHelper {
 
                 if (affectedIssuesBuilder.length() > 0) {
                     affectedIssuesBuilder.append(",");
-                    matrixParamsBuilder.append(",");
+                    deploymentPropertiesBuilder.append(",");
                 }
 
                 URL url = site.getUrl(issueId);
                 JiraIssue issue = site.getIssue(issueId);
                 affectedIssuesBuilder.append(issueId).append(">>").append(url.toString()).append(">>").append(
                         issue.getSummary());
-                matrixParamsBuilder.append(issueId);
+                deploymentPropertiesBuilder.append(issueId);
             }
             affectedIssues = affectedIssuesBuilder.toString();
-            matrixParams = matrixParamsBuilder.toString();
+            deploymentProperties = deploymentPropertiesBuilder.toString();
         } catch (Exception e) {
             listener.getLogger()
                     .print("[Warning] Error while trying to collect issue tracker and change information: " +
@@ -94,7 +94,7 @@ public class IssuesTrackerHelper {
             configuration.info.issues.setAggregationBuildStatus("");
         }
         configuration.info.issues.setAffectedIssues(affectedIssues);
-        configuration.publisher.addMatrixParam(IssuesTrackerFields.AFFECTED_ISSUES, matrixParams);
+        configuration.publisher.addMatrixParam(IssuesTrackerFields.AFFECTED_ISSUES, deploymentProperties);
     }
 
     /**

@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.remoting.Callable;
+import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Model;
@@ -90,7 +90,7 @@ public class MavenDescriptorStep extends AbstractStepImpl {
             dryRun = step.isDryRun();
             this.version = step.getVersion();
             this.versionPerModule = step.getVersionPerModule();
-            Boolean call = launcher.getChannel().call(new Callable<Boolean, IOException>() {
+            Boolean call = launcher.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
                 public Boolean call() throws IOException {
                     return transformPoms();
                 }

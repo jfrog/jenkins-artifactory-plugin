@@ -20,6 +20,7 @@ import com.google.common.collect.Maps;
 import hudson.FilePath;
 import hudson.maven.ModuleName;
 import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.util.Map;
  *
  * @author Yossi Shaul
  */
-public class PomTransformer implements FilePath.FileCallable<Boolean> {
+public class PomTransformer extends MasterToSlaveFileCallable<Boolean> {
 
     private final String scmUrl;
     private final ModuleName currentModule;

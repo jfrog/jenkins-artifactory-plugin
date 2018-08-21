@@ -27,6 +27,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.release.scm.AbstractScmCoordinator;
 import org.jfrog.hudson.release.scm.ScmCoordinator;
+import org.jfrog.hudson.release.scm.git.GitCoordinator;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -175,6 +176,15 @@ public class GradleReleaseWrapper {
         scmCoordinator.prepare();
         // TODO: replace the versioning mode with something else
         if (!releaseAction.getVersioning().equals(ReleaseAction.VERSIONING.NONE)) {
+            if (scmCoordinator instanceof GitCoordinator) {
+                try {
+                    ((GitCoordinator) scmCoordinator).pushDryRun();
+                } catch (Exception e) {
+                    log(listener, "ERROR: " + e.getMessage());
+                    throw new Run.RunnerAbortedException();
+                }
+            }
+
             scmCoordinator.beforeReleaseVersionChange();
             // change to release properties values
             boolean modified = changeProperties(build, releaseAction, true, listener);

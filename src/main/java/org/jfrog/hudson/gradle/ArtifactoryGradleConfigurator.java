@@ -88,15 +88,21 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final boolean enableIssueTrackerIntegration;
     private final boolean aggregateBuildIssues;
     private final String artifactPattern;
-    private final boolean notM2Compatible;
+    @Deprecated
+    private final Boolean notM2Compatible = null;
+    private final Boolean useMavenPatterns;
     private final IncludesExcludes artifactDeploymentPatterns;
     private final boolean discardOldBuilds;
     private final boolean passIdentifiedDownstream;
     private final GradleReleaseWrapper releaseWrapper;
     private final boolean discardBuildArtifacts;
     private final boolean asyncBuildRetention;
-    private final String matrixParams;
-    private final boolean skipInjectInitScript;
+    @Deprecated
+    private final String matrixParams = null;
+    private final String deploymentProperties;
+    @Deprecated
+    private final Boolean skipInjectInitScript = null;
+    private final Boolean useArtifactoryGradlePlugin;
     private final boolean allowPromotionOfNonStagedBuilds;
     private final boolean allowBintrayPushOfNonStageBuilds;
     private final boolean blackDuckRunChecks;
@@ -105,7 +111,9 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final boolean filterExcludedArtifactsFromBuild;
     private final ServerDetails resolverDetails;
     private String defaultPromotionTargetRepository;
-    private ServerDetails details;
+    @Deprecated
+    private ServerDetails details = null;
+    private ServerDetails deployerDetails;
     private boolean deployArtifacts;
     private IncludesExcludes envVarsPatterns;
     private String aggregationBuildStatus;
@@ -130,17 +138,17 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private Credentials overridingResolverCredentials;
 
     @DataBoundConstructor
-    public ArtifactoryGradleConfigurator(ServerDetails details, ServerDetails resolverDetails,
+    public ArtifactoryGradleConfigurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
                                          CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                          boolean deployMaven, boolean deployIvy, boolean deployArtifacts,
                                          String remotePluginLocation, boolean includeEnvVars,
                                          IncludesExcludes envVarsPatterns, boolean deployBuildInfo, boolean runChecks,
                                          String violationRecipients, boolean includePublishArtifacts, String scopes,
                                          boolean disableLicenseAutoDiscovery, String ivyPattern, String artifactPattern,
-                                         boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
+                                         Boolean useMavenPatterns, Boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
                                          boolean discardOldBuilds, boolean passIdentifiedDownstream,
                                          GradleReleaseWrapper releaseWrapper, boolean discardBuildArtifacts, boolean asyncBuildRetention,
-                                         String matrixParams, boolean skipInjectInitScript,
+                                         String matrixParams, String deploymentProperties, Boolean skipInjectInitScript, Boolean useArtifactoryGradlePlugin,
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean allowPromotionOfNonStagedBuilds,
                                          String defaultPromotionTargetRepository,
@@ -152,7 +160,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                          boolean autoDiscardStaleComponentRequests,
                                          boolean filterExcludedArtifactsFromBuild, String artifactoryCombinationFilter,
                                          String customBuildName, boolean overrideBuildName) {
-        this.details = details;
+        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -174,15 +182,15 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.artifactPattern = cleanString(artifactPattern);
-        this.notM2Compatible = notM2Compatible;
+        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.discardOldBuilds = discardOldBuilds;
         this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.releaseWrapper = releaseWrapper;
         this.asyncBuildRetention = asyncBuildRetention;
         this.discardBuildArtifacts = discardBuildArtifacts;
-        this.matrixParams = matrixParams;
-        this.skipInjectInitScript = skipInjectInitScript;
+        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.useArtifactoryGradlePlugin = useArtifactoryGradlePlugin != null ? useArtifactoryGradlePlugin : skipInjectInitScript;
         this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
         this.allowPromotionOfNonStagedBuilds = allowPromotionOfNonStagedBuilds;
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
@@ -204,16 +212,16 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return releaseWrapper;
     }
 
-    public ServerDetails getDetails() {
-        return details;
+    public ServerDetails getDeployerDetails() {
+        return deployerDetails != null ? deployerDetails : details;
     }
 
     public ServerDetails getResolverDetails() {
         return resolverDetails;
     }
 
-    public String getMatrixParams() {
-        return matrixParams;
+    public String getDeploymentProperties() {
+        return deploymentProperties != null ? deploymentProperties : matrixParams;
     }
 
     public boolean isPassIdentifiedDownstream() {
@@ -232,8 +240,14 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return asyncBuildRetention;
     }
 
-    public boolean isSkipInjectInitScript() {
-        return skipInjectInitScript;
+    public boolean isUseArtifactoryGradlePlugin() {
+        if (useArtifactoryGradlePlugin != null) {
+            return useArtifactoryGradlePlugin;
+        }
+        if (skipInjectInitScript != null) {
+            return skipInjectInitScript;
+        }
+        return false;
     }
 
     public boolean isOverridingDefaultDeployer() {
@@ -297,19 +311,19 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public String getRepositoryKey() {
-        return details != null ? details.getDeployReleaseRepository().getRepoKey() : null;
+        return getDeployerDetails() != null ? getDeployerDetails().getDeployReleaseRepository().getRepoKey() : null;
     }
 
     public String getUserPluginKey() {
-        return details != null ? details.getUserPluginKey() : null;
+        return getDeployerDetails() != null ? getDeployerDetails().getUserPluginKey() : null;
     }
 
     public String getDownloadReleaseRepositoryKey() {
-        return details != null ? details.getResolveReleaseRepository().getRepoKey() : null;
+        return getDeployerDetails() != null ? getDeployerDetails().getResolveReleaseRepository().getRepoKey() : null;
     }
 
     public String getArtifactoryName() {
-        return details != null ? details.artifactoryName : null;
+        return getDeployerDetails() != null ? getDeployerDetails().artifactoryName : null;
     }
 
     public String getArtifactoryResolverName() {
@@ -333,12 +347,11 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return deployIvy;
     }
 
-    public boolean isNotM2Compatible() {
-        return notM2Compatible;
-    }
-
-    public boolean isM2Compatible() {
-        return !notM2Compatible;
+    public boolean isUseMavenPatterns() {
+        if (useMavenPatterns != null) {
+            return useMavenPatterns;
+        }
+        return notM2Compatible != null && !notM2Compatible;
     }
 
     public boolean isEnableIssueTrackerIntegration() {
@@ -501,7 +514,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                     concurrentBuild.putParam("tasks", tasks);
 
                     // Override the build switches:
-                    if (!skipInjectInitScript) {
+                    if (!isUseArtifactoryGradlePlugin()) {
                         setTargetsField(gradleBuild, "switches", switches + " " + "${ARTIFACTORY_INIT_SCRIPT}");
                     }
                     // Override the build tasks:
@@ -552,7 +565,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 }
                 env.put("ARTIFACTORY_TASKS", tasks + " " + ArtifactoryTask.ARTIFACTORY_PUBLISH_TASK_NAME);
 
-                ServerDetails serverDetails = getDetails();
+                ServerDetails serverDetails = getDeployerDetails();
                 serverDetails = releaseActionOverride(env, serverDetails);
                 finalPublisherBuilder.serverDetails(serverDetails);
 
@@ -673,8 +686,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
                 .includeEnvVars(isIncludeEnvVars()).envVarsPatterns(getEnvVarsPatterns())
                 .discardBuildArtifacts(isDiscardBuildArtifacts()).asyncBuildRetention(isAsyncBuildRetention())
-                .matrixParams(getMatrixParams()).artifactsPattern(getArtifactPattern()).ivyPattern(getIvyPattern())
-                .deployIvy(isDeployIvy()).deployMaven(isDeployMaven()).maven2Compatible(isM2Compatible())
+                .deploymentProperties(getDeploymentProperties()).artifactsPattern(getArtifactPattern()).ivyPattern(getIvyPattern())
+                .deployIvy(isDeployIvy()).deployMaven(isDeployMaven()).maven2Compatible(isUseMavenPatterns())
                 .enableIssueTrackerIntegration(isEnableIssueTrackerIntegration())
                 .aggregateBuildIssues(isAggregateBuildIssues())
                 .aggregationBuildStatus(getAggregationBuildStatus())
@@ -722,7 +735,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public List<Repository> getReleaseRepositories() {
-        return RepositoriesUtils.collectRepositories(details.getDeployReleaseRepository().getKeyFromSelect());
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeployReleaseRepository().getKeyFromSelect());
     }
 
     public List<VirtualRepository> getVirtualRepositories() {
@@ -746,8 +759,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return artifactoryServer.getStagingUserPluginInfo(this, null);
     }
 
-    public PluginSettings getSelectedStagingPlugin() throws Exception {
-        return details.getStagingPlugin();
+    public PluginSettings getSelectedStagingPlugin() {
+        return getDeployerDetails().getStagingPlugin();
     }
 
     private boolean isMultiConfProject(AbstractBuild build) {

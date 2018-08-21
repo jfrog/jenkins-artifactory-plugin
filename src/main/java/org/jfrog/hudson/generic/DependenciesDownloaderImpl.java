@@ -4,6 +4,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Dependency;
@@ -144,7 +145,7 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         });
     }
 
-    private static class DownloadFileCallable implements FilePath.FileCallable<Map<String, String>> {
+    private static class DownloadFileCallable extends MasterToSlaveFileCallable<Map<String, String>> {
         private Log log;
 
         public DownloadFileCallable(Log log) {

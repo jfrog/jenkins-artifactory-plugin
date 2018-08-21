@@ -10,6 +10,7 @@ import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -18,9 +19,9 @@ import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.client.DeployDetails;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.util.PublishedItemsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.UploadSpecHelper;
@@ -76,7 +77,7 @@ public class GenericArtifactsDeployer {
             String spec = SpecUtils.getSpecStringFromSpecConf(configurator.getUploadSpec(), build, listener);
             artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, spec, artifactoryServer,
                     credentialsConfig.getCredentials(build.getParent()), propertiesToAdd,
-                    artifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
+                    ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
         } else {
             String deployPattern = Util.replaceMacro(configurator.getDeployPattern(), env);
             deployPattern = StringUtils.replace(deployPattern, "\r\n", "\n");
@@ -88,7 +89,7 @@ public class GenericArtifactsDeployer {
             String repositoryKey = Util.replaceMacro(configurator.getRepositoryKey(), env);
             artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, pairs, artifactoryServer,
                     credentialsConfig.getCredentials(build.getParent()), repositoryKey, propertiesToAdd,
-                    artifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
+                    ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
         }
     }
 
@@ -108,18 +109,18 @@ public class GenericArtifactsDeployer {
             properties.put(BuildInfoFields.VCS_REVISION, revision);
         }
 
-        addMatrixParams(properties);
+        addDeploymentProperties(properties);
 
         return properties;
     }
 
-    private void addMatrixParams(Multimap<String, String> properties) {
-        String[] matrixParams = StringUtils.split(configurator.getMatrixParams(), ";");
-        if (matrixParams == null) {
+    private void addDeploymentProperties(Multimap<String, String> properties) {
+        String[] deploymentProperties = StringUtils.split(configurator.getDeploymentProperties(), ";");
+        if (deploymentProperties == null) {
             return;
         }
-        for (String matrixParam : matrixParams) {
-            String[] split = StringUtils.split(matrixParam, '=');
+        for (String property : deploymentProperties) {
+            String[] split = StringUtils.split(property, '=');
             if (split.length == 2) {
                 String value = Util.replaceMacro(split[1], env);
                 //Space is not allowed in property key
@@ -128,7 +129,7 @@ public class GenericArtifactsDeployer {
         }
     }
 
-    public static class FilesDeployerCallable implements FilePath.FileCallable<List<Artifact>> {
+    public static class FilesDeployerCallable extends MasterToSlaveFileCallable<List<Artifact>> {
 
         private String repositoryKey;
         private TaskListener listener;
@@ -188,7 +189,9 @@ public class GenericArtifactsDeployer {
                 SpecsHelper specsHelper = new SpecsHelper(log);
                 try {
                     return specsHelper.uploadArtifactsBySpec(spec, workspace, buildProperties, client);
-                } catch (NoSuchAlgorithmException e) {
+                } catch (InterruptedException e) {
+                    throw e;
+                } catch (Exception e) {
                     throw new RuntimeException("Failed uploading artifacts by spec", e);
                 } finally {
                     client.close();

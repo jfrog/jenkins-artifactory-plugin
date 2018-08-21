@@ -224,7 +224,7 @@ public abstract class BaseGradleReleaseAction extends ReleaseAction<AbstractProj
 
     @Override
     protected String getSelectedStagingPluginName() {
-        return getWrapper().getDetails().getUserPluginKey();
+        return getWrapper().getDeployerDetails().getUserPluginKey();
     }
 
     @Override

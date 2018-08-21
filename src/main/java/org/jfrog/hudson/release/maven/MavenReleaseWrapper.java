@@ -38,6 +38,7 @@ import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.release.scm.AbstractScmCoordinator;
 import org.jfrog.hudson.release.scm.ScmCoordinator;
+import org.jfrog.hudson.release.scm.git.GitCoordinator;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -164,13 +165,22 @@ public class MavenReleaseWrapper extends BuildWrapper {
         scmCoordinator = AbstractScmCoordinator.createScmCoordinator(build, listener, releaseAction);
         scmCoordinator.prepare();
         if (!releaseAction.getVersioning().equals(ReleaseAction.VERSIONING.NONE)) {
+            try {
+                if (scmCoordinator instanceof GitCoordinator) {
+                    ((GitCoordinator) scmCoordinator).pushDryRun();
+                }
+            } catch (Exception e) {
+                log(listener, "ERROR: " + e.getMessage());
+                return null;
+            }
+
             scmCoordinator.beforeReleaseVersionChange();
             // change to release version
             String vcsUrl = releaseAction.isCreateVcsTag() && AbstractScmCoordinator.isSvn(build.getProject())
                     ? releaseAction.getTagUrl() : null;
             boolean modified;
             try {
-                log(listener, "Changing POMs to release version");
+                log(listener, "Chֹanging POMs to release version");
                 modified = changeVersions(mavenBuild, releaseAction, true, vcsUrl);
             } catch (SnapshotNotAllowedException e) {
                 log(listener, "ERROR: " + e.getMessage());
