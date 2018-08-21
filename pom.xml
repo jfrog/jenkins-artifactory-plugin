@@ -31,8 +31,8 @@
 
     <properties>
         <jenkins.version>1.642.3</jenkins.version>
-        <jenkins-test-harness.version>2.33</jenkins-test-harness.version>
         <java.level>7</java.level>
+        <enforcer.skip>true</enforcer.skip>
         <findbugs.failOnError>false</findbugs.failOnError>
         <buildinfo.version>2.11.x-SNAPSHOT</buildinfo.version>
         <buildinfo.maven3.version>2.11.x-SNAPSHOT</buildinfo.maven3.version>
@@ -448,6 +448,28 @@
                         <goals>
                             <goal>verify</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration combine.children="append">
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>com.thoughtworks.xstream:xstream</exclude>
+                                        <exclude>org.slf4j:slf4j-jdk14:*:jar:compile</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
