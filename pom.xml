@@ -466,6 +466,7 @@
                             <rules>
                                 <bannedDependencies>
                                     <excludes>
+                                        <!-- HAP-211 -->
                                         <exclude>com.thoughtworks.xstream:xstream</exclude>
                                         <exclude>org.slf4j:slf4j-jdk14:*:jar:compile</exclude>
                                     </excludes>
