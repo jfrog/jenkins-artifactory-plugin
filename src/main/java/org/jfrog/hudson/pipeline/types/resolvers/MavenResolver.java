@@ -19,8 +19,9 @@ public class MavenResolver extends Resolver {
     }
 
     @Whitelisted
-    public void setSnapshotRepo(Object snapshotRepo) {
+    public MavenResolver setSnapshotRepo(Object snapshotRepo) {
         this.snapshotRepo = Utils.parseJenkinsArg(snapshotRepo);
+        return this;
     }
 
     @Whitelisted
@@ -29,8 +30,9 @@ public class MavenResolver extends Resolver {
     }
 
     @Whitelisted
-    public void setReleaseRepo(Object releaseRepo) {
+    public MavenResolver setReleaseRepo(Object releaseRepo) {
         this.releaseRepo = Utils.parseJenkinsArg(releaseRepo);
+        return this;
     }
 
     public ServerDetails getResolverDetails() {

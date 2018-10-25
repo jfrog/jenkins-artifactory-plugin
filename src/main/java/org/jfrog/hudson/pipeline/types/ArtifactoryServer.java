@@ -20,6 +20,8 @@ import static org.jfrog.hudson.pipeline.Utils.appendBuildInfo;
  * Created by romang on 4/21/16.
  */
 public class ArtifactoryServer implements Serializable {
+    public static final long serialVersionUID = 1L;
+
     public static final String SPEC = "spec";
     public static final String SERVER = "server";
     public static final String BUILD_NAME = "buildName";
@@ -250,6 +252,22 @@ public class ArtifactoryServer implements Serializable {
         this.password = "";
         this.username = "";
         this.usesCredentialsId = true;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public boolean isUsesCredentialsId() {
+        return usesCredentialsId;
+    }
+
+    public void setUsesCredentialsId(boolean usesCredentialsId) {
+        this.usesCredentialsId = usesCredentialsId;
     }
 
     @Whitelisted

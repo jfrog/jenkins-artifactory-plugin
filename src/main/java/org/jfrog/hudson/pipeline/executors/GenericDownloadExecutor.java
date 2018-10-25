@@ -18,22 +18,28 @@ import java.util.List;
 /**
  * Created by romang on 4/19/16.
  */
-public class GenericDownloadExecutor {
+public class GenericDownloadExecutor implements Executor {
     private final Run build;
     private transient FilePath ws;
     private BuildInfo buildInfo;
     private ArtifactoryServer server;
     private TaskListener listener;
+    private String spec;
 
-    public GenericDownloadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo) {
+    public GenericDownloadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, String spec) {
         this.build = build;
         this.server = server;
         this.listener = listener;
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.ws = ws;
+        this.spec = spec;
     }
 
-    public BuildInfo execution(String spec) throws IOException, InterruptedException {
+    public BuildInfo getBuildInfo() {
+        return buildInfo;
+    }
+
+    public void execute() throws IOException, InterruptedException {
         CredentialsConfig preferredResolver = server.getDeployerCredentialsConfig();
         List<Dependency> resolvedDependencies =
                 ws.act(new FilesResolverCallable(new JenkinsBuildInfoLog(listener),
@@ -41,6 +47,5 @@ public class GenericDownloadExecutor {
                         preferredResolver.providePassword(build.getParent()),
                         server.getUrl(), spec, Utils.getProxyConfiguration(server)));
         new BuildInfoAccessor(this.buildInfo).appendPublishedDependencies(resolvedDependencies);
-        return this.buildInfo;
     }
 }

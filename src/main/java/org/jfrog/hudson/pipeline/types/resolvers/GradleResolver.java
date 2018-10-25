@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.types.resolvers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
@@ -31,6 +32,7 @@ public class GradleResolver extends Resolver {
         return new ServerDetails(this.server.getServerName(), this.server.getUrl(), releaesRepositoryConf, snapshotRepositoryConf, releaesRepositoryConf, snapshotRepositoryConf, "", "");
     }
 
+    @JsonIgnore
     public ResolverContext getResolverContext(Run build) {
         ResolverContext resolverContext = null;
         if (StringUtils.isNotBlank(repo)) {

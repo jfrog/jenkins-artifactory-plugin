@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.types.deployers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.RepositoryConf;
@@ -29,13 +30,13 @@ public class MavenDeployer extends Deployer {
     }
 
     @Whitelisted
-    public Deployer setReleaseRepo(Object releaseRepo) {
+    public MavenDeployer setReleaseRepo(Object releaseRepo) {
         this.releaseRepo = Utils.parseJenkinsArg(releaseRepo);
         return this;
     }
 
     @Whitelisted
-    public Deployer setSnapshotRepo(Object snapshotRepo) {
+    public MavenDeployer setSnapshotRepo(Object snapshotRepo) {
         this.snapshotRepo = Utils.parseJenkinsArg(snapshotRepo);
         return this;
     }
@@ -47,7 +48,7 @@ public class MavenDeployer extends Deployer {
 
     @Whitelisted
     public Deployer setDeployEvenIfUnstable(Object deployEvenIfUnstable) {
-        this.deployEvenIfUnstable = Boolean.getBoolean(Utils.parseJenkinsArg(deployEvenIfUnstable));
+        this.deployEvenIfUnstable = Boolean.parseBoolean(Utils.parseJenkinsArg(deployEvenIfUnstable));
         return this;
     }
 
@@ -60,6 +61,7 @@ public class MavenDeployer extends Deployer {
     }
 
     @Override
+    @JsonIgnore
     public ServerDetails getDetails() {
         RepositoryConf snapshotRepositoryConf = new RepositoryConf(snapshotRepo, snapshotRepo, false);
         RepositoryConf releaesRepositoryConf = new RepositoryConf(releaseRepo, releaseRepo, false);
@@ -67,6 +69,7 @@ public class MavenDeployer extends Deployer {
     }
 
     @Override
+    @JsonIgnore
     public PublisherContext.Builder getContextBuilder() {
         return new PublisherContext.Builder().artifactoryServer(getArtifactoryServer())
                 .deployerOverrider(this)

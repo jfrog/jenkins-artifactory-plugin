@@ -32,10 +32,9 @@ import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.IncludesExcludes;
 import org.jfrog.hudson.util.RepositoriesUtils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -367,6 +366,9 @@ public class Utils {
     }
 
     public static String parseJenkinsArg(Object arg) {
+        if (arg == null) {
+            return null;
+        }
         if (arg instanceof Map) {
             return ((List)((Map) arg).get("values")).get(0).toString();
         }

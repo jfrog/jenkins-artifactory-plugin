@@ -19,7 +19,7 @@ import java.io.IOException;
 /**
  * Created by romang on 6/21/16.
  */
-public class PromotionExecutor {
+public class PromotionExecutor implements Executor{
 
     private final ArtifactoryServer server;
     private final TaskListener listener;
@@ -36,11 +36,11 @@ public class PromotionExecutor {
         this.promotionConfig = promotionConfig;
     }
 
-    public void execution() throws IOException {
+    public void execute() throws IOException {
         ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(server);
         CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, server);
         ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideUsername(build.getParent()), deployerConfig.providePassword(build.getParent()),
-                server.createProxyConfiguration(Jenkins.getInstance().proxy));
+                ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy));
 
         PromotionBuilder promotionBuilder = new PromotionBuilder()
                 .status(promotionConfig.getStatus())
