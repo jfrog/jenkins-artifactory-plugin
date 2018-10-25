@@ -36,7 +36,7 @@ public class MavenBuild implements Serializable {
     }
 
     @Whitelisted
-    public Deployer getDeployer() {
+    public MavenDeployer getDeployer() {
         return this.deployer;
     }
 
