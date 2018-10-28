@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import hudson.FilePath;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.pipeline.declarative.types.BuildFile;
 
 import java.io.IOException;
 
@@ -13,13 +14,10 @@ public class DeclarativePipelineUtils {
      * Create pipeline build data in @tmp directory.
      * The build data can be one of 'artifactoryMaven', 'mavenDeploy', 'mavenResolve', 'buildInfo' and other declarative pipeline steps.
      * @param buildNumber - The build number
-     * @param stepName - The step name - On of 'artifactoryMaven', 'mavenDeploy', 'mavenResolve', 'buildInfo' and other declarative pipeline steps.
-     * @param stepId - The step id from the user.
-     * @param content - The content of the data file.
      * @throws Exception - In case of missing permissions.
      */
-    public static void writeBuildDataFile(FilePath ws, String buildNumber, String stepName, String stepId, String content) throws Exception {
-        getTempDirPath(ws).act(new CreateBuildFileCallable(buildNumber, stepName, stepId, content));
+    public static void writeBuildDataFile(FilePath ws, String buildNumber, BuildFile buildFile) throws Exception {
+        getTempDirPath(ws).act(new CreateBuildFileCallable(buildNumber, buildFile));
     }
 
     /**
@@ -41,7 +39,7 @@ public class DeclarativePipelineUtils {
         return stepName + "_" + stepId;
     }
 
-    public static String getBuildNumber(StepContext getContext) throws IOException, InterruptedException {
+    public static String getBuildNumberFromStep(StepContext getContext) throws IOException, InterruptedException {
         WorkflowRun workflowRun = getContext.get(WorkflowRun.class);
         if (workflowRun == null) {
             throw new IOException("Step has no workflow");

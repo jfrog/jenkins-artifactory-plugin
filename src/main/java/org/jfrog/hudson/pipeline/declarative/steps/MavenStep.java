@@ -117,7 +117,7 @@ public class MavenStep extends AbstractStepImpl {
         }
 
         private void setMavenBuild() throws IOException, InterruptedException {
-            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
+            String buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
             setMavenDeployer(buildNumber);
             setMavenResolver(buildNumber);
         }
@@ -127,8 +127,7 @@ public class MavenStep extends AbstractStepImpl {
                 JsonNode jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, MavenDeployStep.STEP_NAME, step.getDeployerId());
                 MavenDeployer mavenDeployer = step.getMavenBuild().getDeployer();
                 mavenDeployer.setSnapshotRepo(jsonNode.get("snapshotRepo").asText()).setReleaseRepo(jsonNode.get("releaseRepo").asText());
-                JsonNode serverId = jsonNode.get("serverId");
-                mavenDeployer.setServer(getArtifactoryServer(buildNumber, serverId));
+                mavenDeployer.setServer(getArtifactoryServer(buildNumber, jsonNode));
             }
         }
 
@@ -137,16 +136,16 @@ public class MavenStep extends AbstractStepImpl {
                 JsonNode jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, MavenResolveStep.STEP_NAME, step.getResolverId());
                 MavenResolver mavenResolver = step.getMavenBuild().getResolver();
                 mavenResolver.setSnapshotRepo(jsonNode.get("snapshotRepo").asText()).setReleaseRepo(jsonNode.get("releaseRepo").asText());
-                JsonNode serverId = jsonNode.get("serverId");
-                mavenResolver.setServer(getArtifactoryServer(buildNumber, serverId));
+                mavenResolver.setServer(getArtifactoryServer(buildNumber, jsonNode));
             }
         }
 
-        private ArtifactoryServer getArtifactoryServer(String buildNumber, JsonNode serverId) throws IOException, InterruptedException {
+        private ArtifactoryServer getArtifactoryServer(String buildNumber, JsonNode jsonNode) throws IOException, InterruptedException {
+            JsonNode serverId = jsonNode.get("serverId");
             if (serverId.isNull()) {
                 return null;
             }
-            JsonNode jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, CreateServerStep.STEP_NAME, serverId.asText());
+            jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, CreateServerStep.STEP_NAME, serverId.asText());
             if (jsonNode.isNull()) {
                 GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, getContext(), serverId.asText());
                 getArtifactoryServerExecutor.execute();
@@ -154,12 +153,12 @@ public class MavenStep extends AbstractStepImpl {
             }
             String url = jsonNode.get("url").asText();
             JsonNode credentialsIdJson = jsonNode.get("credentialsId");
-            if (credentialsIdJson.isNull()) {
+            if (credentialsIdJson == null || credentialsIdJson.isNull()) {
                 String username = jsonNode.get("username").asText();
                 String password = jsonNode.get("password").asText();
                 return new ArtifactoryServer(url, username, password);
             }
-            String credentialsId = jsonNode.get("credentialsId").asText();
+            String credentialsId = credentialsIdJson.asText();
             return new ArtifactoryServer(url, credentialsId);
         }
     }

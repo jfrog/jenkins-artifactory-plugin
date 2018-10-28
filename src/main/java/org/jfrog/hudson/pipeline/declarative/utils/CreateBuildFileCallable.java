@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.utils;
 
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
+import org.jfrog.hudson.pipeline.declarative.types.BuildFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,25 +14,21 @@ import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUti
 
 public class CreateBuildFileCallable extends MasterToSlaveFileCallable<Void> {
     private String buildNumber;
-    private String stepName;
-    private String stepId;
-    private String content;
+    private BuildFile buildFile;
 
-    CreateBuildFileCallable(String buildNumber, String stepName, String stepId, String content) {
+    CreateBuildFileCallable(String buildNumber, BuildFile buildFile) {
         this.buildNumber = buildNumber;
-        this.stepName = stepName;
-        this.stepId = stepId;
-        this.content = content;
+        this.buildFile = buildFile;
     }
 
     @Override
     public Void invoke(File file, VirtualChannel virtualChannel) throws IOException {
         Path buildDir = Files.createDirectories(file.toPath().resolve(buildNumber));
-        File buildFile = Files.createFile(buildDir.resolve(getBuildDataFileName(stepName, stepId))).toFile();
-        try (PrintWriter out = new PrintWriter(buildFile)) {
-            out.println(content);
+        file = Files.createFile(buildDir.resolve(getBuildDataFileName(buildFile.getStepName(), buildFile.getId()))).toFile();
+        try (PrintWriter out = new PrintWriter(file)) {
+            out.println(buildFile.getJsonObject());
         }
-        buildFile.deleteOnExit();
+        file.deleteOnExit();
         return null;
     }
 }
