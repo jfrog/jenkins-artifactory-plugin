@@ -21,12 +21,10 @@ import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.ResolverContext;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
-import java.io.IOException;
-
 /**
  * Created by Tamirh on 04/08/2016.
  */
-public class MavenGradleEnvExtractor {
+public class MavenGradleEnvExtractor implements Executor {
 
     private Deployer publisher;
     private Resolver resolver;
@@ -34,31 +32,29 @@ public class MavenGradleEnvExtractor {
     private BuildInfo buildInfo;
     private TaskListener buildListener;
     private Launcher launcher;
+    private FilePath tempDir;
+    private EnvVars env;
 
-    public MavenGradleEnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher)
-            throws IOException, InterruptedException {
+    public MavenGradleEnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher, FilePath tempDir, EnvVars env) {
         this.build = build;
         this.buildInfo = buildInfo;
         this.buildListener = buildListener;
         this.publisher = publisher;
         this.resolver = resolver;
         this.launcher = launcher;
+        this.tempDir = tempDir;
+        this.env = env;
     }
 
-    protected PublisherContext createPublisherContext() {
-        return publisher.getContextBuilder().build();
-    }
-
-    public void buildEnvVars(FilePath tempDir, EnvVars env) throws Exception {
+    public void execute() {
         env.put(ExtractorUtils.EXTRACTOR_USED, "true");
         ReleaseAction release = ActionableHelper.getLatestAction(build, ReleaseAction.class);
         if (release != null) {
             release.addVars(env);
         }
         try {
-            PublisherContext publisherContext = null;
             // publisher should never be null or empty
-            publisherContext = createPublisherContext();
+            PublisherContext publisherContext = createPublisherContext();
             ResolverContext resolverContext = null;
             if (resolver != null && !resolver.isEmpty()) {
                 CredentialsConfig resolverCredentials = CredentialManager.getPreferredResolver(resolver,
@@ -76,6 +72,10 @@ public class MavenGradleEnvExtractor {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private PublisherContext createPublisherContext() {
+        return publisher.getContextBuilder().build();
     }
 
     private void addPipelineInfoToConfiguration(EnvVars env, ArtifactoryClientConfiguration configuration, FilePath tempDir) {

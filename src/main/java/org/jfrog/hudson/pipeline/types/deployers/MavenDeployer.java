@@ -29,13 +29,13 @@ public class MavenDeployer extends Deployer {
     }
 
     @Whitelisted
-    public Deployer setReleaseRepo(Object releaseRepo) {
+    public MavenDeployer setReleaseRepo(Object releaseRepo) {
         this.releaseRepo = Utils.parseJenkinsArg(releaseRepo);
         return this;
     }
 
     @Whitelisted
-    public Deployer setSnapshotRepo(Object snapshotRepo) {
+    public MavenDeployer setSnapshotRepo(Object snapshotRepo) {
         this.snapshotRepo = Utils.parseJenkinsArg(snapshotRepo);
         return this;
     }

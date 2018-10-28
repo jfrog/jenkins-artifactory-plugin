@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.declarative;
+package org.jfrog.hudson.pipeline.declarative.steps;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
@@ -6,7 +6,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 public class MavenDeployStep extends MavenDeployerResolver {
 
-    private static final String STEP_NAME = "rtMavenDeployer";
+    static final String STEP_NAME = "rtMavenDeployer";
 
     @DataBoundConstructor
     public MavenDeployStep(String id, String releaseRepo, String snapshotRepo, String serverId) {

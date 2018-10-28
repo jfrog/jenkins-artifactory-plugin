@@ -1,52 +1,57 @@
-package org.jfrog.hudson.pipeline.declarative;
+package org.jfrog.hudson.pipeline.declarative.steps;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.FilePath;
-import net.sf.json.JSONObject;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import static org.jfrog.hudson.pipeline.declarative.utils.Utils.createTempBuildDataFile;
+import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.writeBuildDataFile;
 
 public class CreateServerStep extends AbstractStepImpl {
 
-    private static final String STEP_NAME = "rtServer";
-    private JSONObject jsonObject;
+    public static final String STEP_NAME = "rtServer";
+    private ObjectNode jsonObject;
 
     @DataBoundConstructor
     public CreateServerStep(String id, String url, String username, String password, String credentialsId) {
-        jsonObject = new JSONObject();
-        jsonObject.element("id", id);
-        jsonObject.element("stepName", STEP_NAME);
+        jsonObject = Utils.mapper().createObjectNode();
+        jsonObject.put("stepName", STEP_NAME).
+                put("id", id).
+                put("url", url).
+                put("username", username).
+                put("password", password).
+                put("credentialsId", credentialsId);
     }
 
     @DataBoundSetter
     public void setUrl(String url) {
-        jsonObject.element("url", url);
+        jsonObject.put("url", url);
     }
 
     @DataBoundSetter
     public void setUsername(String username) {
-        jsonObject.element("username", username);
+        jsonObject.put("username", username);
     }
 
     @DataBoundSetter
     public void setPassword(String password) {
-        jsonObject.element("password", password);
+        jsonObject.put("password", password);
     }
 
     @DataBoundSetter
     public void setCredentialsId(String credentialsId) {
-        jsonObject.element("credentialsId", credentialsId);
+        jsonObject.put("credentialsId", credentialsId);
     }
 
-    private JSONObject getJsonObject() {
+    private ObjectNode getJsonObject() {
         return jsonObject;
     }
 
@@ -61,9 +66,9 @@ public class CreateServerStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            String buildNumber = getContext().get(WorkflowRun.class).getId();
-            JSONObject jsonObject = step.getJsonObject();
-            createTempBuildDataFile(ws, buildNumber, jsonObject.getString("stepName"), jsonObject.getString("id"), jsonObject.toString());
+            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
+            ObjectNode jsonObject = step.getJsonObject();
+            writeBuildDataFile(ws, buildNumber, jsonObject.get("stepName").asText(), jsonObject.get("id").asText(), jsonObject.toString());
             return null;
         }
     }

@@ -1,31 +1,32 @@
-package org.jfrog.hudson.pipeline.declarative;
+package org.jfrog.hudson.pipeline.declarative.steps;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import hudson.FilePath;
-import net.sf.json.JSONObject;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import static org.jfrog.hudson.pipeline.declarative.utils.Utils.createTempBuildDataFile;
+import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.writeBuildDataFile;
 
 public class MavenDeployerResolver extends AbstractStepImpl {
 
-    private JSONObject mavenJson;
+    private ObjectNode mavenJson;
 
     @DataBoundConstructor
     public MavenDeployerResolver(String stepName, String id, String releaseRepo, String snapshotRepo, String serverId) {
-        mavenJson = new JSONObject();
-        mavenJson.element("id", id);
-        mavenJson.element("stepName", stepName);
-        mavenJson.element("releaseRepo", releaseRepo);
-        mavenJson.element("snapshotRepo", snapshotRepo);
-        mavenJson.element("serverId", serverId);
+        mavenJson = Utils.mapper().createObjectNode();
+        mavenJson.put("id", id).
+                put("stepName", stepName).
+                put("snapshotRepo", snapshotRepo).
+                put("releaseRepo", releaseRepo).
+                put("serverId", serverId);
     }
 
-    private JSONObject getMavenJson() {
+    private ObjectNode getMavenJson() {
         return this.mavenJson;
     }
 
@@ -40,9 +41,9 @@ public class MavenDeployerResolver extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            String buildNumber = getContext().get(WorkflowRun.class).getId();
-            JSONObject mavenJson = step.getMavenJson();
-            createTempBuildDataFile(ws, buildNumber, mavenJson.getString("stepName"), mavenJson.getString("id"), mavenJson.toString());
+            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
+            ObjectNode mavenJson = step.getMavenJson();
+            writeBuildDataFile(ws, buildNumber, mavenJson.get("stepName").asText(), mavenJson.get("id").asText(), mavenJson.toString());
             return null;
         }
     }

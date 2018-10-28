@@ -66,7 +66,7 @@ public class PromoteBuildStep extends AbstractStepImpl {
                 return false;
             }
 
-            new PromotionExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), build, listener, getContext(), promotionConfig).execution();
+            new PromotionExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), build, listener, getContext(), promotionConfig).execute();
             return true;
         }
     }

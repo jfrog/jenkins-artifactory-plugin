@@ -111,11 +111,11 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
             String revision = Utils.extractVcsRevision(new FilePath(ws, step.getRootDir()));
             extendedEnv = new EnvVars(env);
             extendedEnv.put(ExtractorUtils.GIT_COMMIT, revision);
-            MavenGradleEnvExtractor envExtractor = new MavenGradleEnvExtractor(build,
-                    buildInfo, deployer, step.getGradleBuild().getResolver(), listener, launcher);
             tempDir = ExtractorUtils.createAndGetTempDir(launcher, ws);
+            MavenGradleEnvExtractor envExtractor = new MavenGradleEnvExtractor(build,
+                    buildInfo, deployer, step.getGradleBuild().getResolver(), listener, launcher, tempDir, extendedEnv);
+            envExtractor.execute();
             ArgumentListBuilder args = getGradleExecutor();
-            envExtractor.buildEnvVars(tempDir, extendedEnv);
             exe(args);
             String generatedBuildPath = extendedEnv.get(BuildInfoFields.GENERATED_BUILD_INFO);
             buildInfo.append(Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath));

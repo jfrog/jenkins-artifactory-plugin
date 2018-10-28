@@ -21,7 +21,7 @@ import java.io.IOException;
  * Created by yahavi on 12/04/2017.
  */
 
-public class DistributionExecutor {
+public class DistributionExecutor implements Executor {
 
     private final ArtifactoryServer server;
     private final TaskListener listener;
@@ -38,11 +38,11 @@ public class DistributionExecutor {
         this.distributionConfig = distributionConfig;
     }
 
-    public void execution() throws IOException {
+    public void execute() throws IOException {
         ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(server);
         CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, server);
         ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideUsername(build.getParent()), deployerConfig.providePassword(build.getParent()),
-                server.createProxyConfiguration(Jenkins.getInstance().proxy));
+                ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy));
 
         DistributionBuilder distributionBuilder = new DistributionBuilder()
                 .publish(distributionConfig.isPublish())

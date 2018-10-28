@@ -70,7 +70,7 @@ public class DistributeBuildStep extends AbstractStepImpl {
                 return false;
             }
 
-            new DistributionExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), build, listener, getContext(), distributionConfig).execution();
+            new DistributionExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), build, listener, getContext(), distributionConfig).execute();
             return true;
         }
     }

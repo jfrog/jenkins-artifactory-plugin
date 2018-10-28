@@ -9,13 +9,15 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public class CreateBuildFileCallable extends MasterToSlaveFileCallable<String> {
+import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.getBuildDataFileName;
+
+public class CreateBuildFileCallable extends MasterToSlaveFileCallable<Void> {
     private String buildNumber;
     private String stepName;
     private String stepId;
     private String content;
 
-    public CreateBuildFileCallable(String buildNumber, String stepName, String stepId, String content) {
+    CreateBuildFileCallable(String buildNumber, String stepName, String stepId, String content) {
         this.buildNumber = buildNumber;
         this.stepName = stepName;
         this.stepId = stepId;
@@ -23,13 +25,13 @@ public class CreateBuildFileCallable extends MasterToSlaveFileCallable<String> {
     }
 
     @Override
-    public String invoke(File file, VirtualChannel virtualChannel) throws IOException {
+    public Void invoke(File file, VirtualChannel virtualChannel) throws IOException {
         Path buildDir = Files.createDirectories(file.toPath().resolve(buildNumber));
-        File buildFile = Files.createFile(buildDir.resolve(stepName + "_" + stepId)).toFile();
+        File buildFile = Files.createFile(buildDir.resolve(getBuildDataFileName(stepName, stepId))).toFile();
         try (PrintWriter out = new PrintWriter(buildFile)) {
             out.println(content);
         }
         buildFile.deleteOnExit();
-        return buildFile.getAbsolutePath();
+        return null;
     }
 }

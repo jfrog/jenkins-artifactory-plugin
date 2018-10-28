@@ -6,7 +6,6 @@ import hudson.FilePath;
 import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.Artifact;
@@ -28,31 +27,36 @@ import java.util.List;
 /**
  * Created by romang on 4/24/16.
  */
-public class GenericUploadExecutor {
+public class GenericUploadExecutor implements Executor {
     private transient FilePath ws;
     private transient Run build;
     private transient TaskListener listener;
     private BuildInfo buildinfo;
     private ArtifactoryServer server;
     private StepContext context;
+    private String spec;
 
-    public GenericUploadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, StepContext context) {
+    public GenericUploadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, StepContext context, String spec) {
         this.server = server;
         this.listener = listener;
         this.build = build;
         this.buildinfo = Utils.prepareBuildinfo(build, buildInfo);
         this.ws = ws;
         this.context = context;
+        this.spec = spec;
     }
 
-    public BuildInfo execution(String spec) throws IOException, InterruptedException {
+    public BuildInfo getBuildInfo() {
+        return buildinfo;
+    }
+
+    public void execute() throws IOException, InterruptedException {
         Credentials credentials = new Credentials(server.getDeployerCredentialsConfig().provideUsername(build.getParent()),
                 server.getDeployerCredentialsConfig().providePassword(build.getParent()));
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(server);
         List<Artifact> artifactsToDeploy = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
                 server, credentials, getPropertiesMap(), proxyConfiguration));
         new BuildInfoAccessor(buildinfo).appendDeployedArtifacts(artifactsToDeploy);
-        return buildinfo;
     }
 
     private ArrayListMultimap<String, String> getPropertiesMap() throws IOException, InterruptedException {
