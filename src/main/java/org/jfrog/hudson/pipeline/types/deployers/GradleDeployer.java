@@ -26,11 +26,11 @@ public class GradleDeployer extends Deployer {
 
     @Override
     public ServerDetails getDetails() {
-        RepositoryConf releaesRepositoryConf = new RepositoryConf(repo, repo, false);
+        RepositoryConf releaseRepositoryConf = new RepositoryConf(repo, repo, false);
         if (server != null) {
-            return new ServerDetails(server.getServerName(), server.getUrl(), releaesRepositoryConf, null, releaesRepositoryConf, null, "", "");
+            return new ServerDetails(server.getServerName(), server.getUrl(), releaseRepositoryConf, null, releaseRepositoryConf, null, "", "");
         }
-        return new ServerDetails("", "", releaesRepositoryConf, null, releaesRepositoryConf, null, "", "");
+        return new ServerDetails("", "", releaseRepositoryConf, null, releaseRepositoryConf, null, "", "");
     }
 
     @Whitelisted

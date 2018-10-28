@@ -1,23 +1,29 @@
-package org.jfrog.hudson.pipeline.declarative.steps;
+package org.jfrog.hudson.pipeline.declarative.steps.maven;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
-public class MavenDeployStep extends MavenDeployerResolver {
+public class MavenDeployerStep extends MavenDeployerResolver {
 
     static final String STEP_NAME = "rtMavenDeployer";
 
     @DataBoundConstructor
-    public MavenDeployStep(String id, String releaseRepo, String snapshotRepo, String serverId) {
+    public MavenDeployerStep(String id, String releaseRepo, String snapshotRepo, String serverId) {
         super(STEP_NAME, id, releaseRepo, snapshotRepo, serverId);
+    }
+
+    @DataBoundSetter
+    public void setDeployEvenIfUnstable(String deployEvenIfUnstable) {
+        buildDataFile.put("deployEvenIfUnstable", deployEvenIfUnstable);
     }
 
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(MavenDeployStep.Execution.class);
+            super(MavenDeployerStep.Execution.class);
         }
 
         @Override
@@ -27,7 +33,7 @@ public class MavenDeployStep extends MavenDeployerResolver {
 
         @Override
         public String getDisplayName() {
-            return "deploy maven artifacts";
+            return "set maven deployer";
         }
 
         @Override

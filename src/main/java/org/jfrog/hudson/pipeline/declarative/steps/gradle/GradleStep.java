@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.steps;
+package org.jfrog.hudson.pipeline.declarative.steps.gradle;
 
 import com.google.inject.Inject;
 import hudson.EnvVars;
@@ -15,31 +15,76 @@ import org.jfrog.hudson.pipeline.executors.GradleExecutor;
 import org.jfrog.hudson.pipeline.types.GradleBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
-/**
- * Created by Tamirh on 04/08/2016.
- */
-public class ArtifactoryGradleBuild extends AbstractStepImpl {
+public class GradleStep extends AbstractStepImpl {
 
     private GradleBuild gradleBuild;
-    private String tasks;
-    private String buildFile;
-    private String rootDir;
-    private String switches;
     private BuildInfo buildInfo;
+    private String deployerId;
+    private String resolverId;
+    private String buildFile;
+    private String switches;
+    private String rootDir;
+    private String tasks;
 
     @DataBoundConstructor
-    public ArtifactoryGradleBuild(GradleBuild gradleBuild, String rootDir, String buildFile, String tasks, String switches, BuildInfo buildInfo) {
-        this.gradleBuild = gradleBuild;
-        this.tasks = tasks;
-        this.rootDir = rootDir;
-        this.buildFile = buildFile;
-        this.switches = switches;
+    public GradleStep() {
+        this.gradleBuild = new GradleBuild();
+    }
+
+    @DataBoundSetter
+    public void setBuildInfo(BuildInfo buildInfo) {
         this.buildInfo = buildInfo;
     }
 
+    @DataBoundSetter
+    public void setDeployerId(String deployerId) {
+        this.deployerId = deployerId;
+    }
+
+    @DataBoundSetter
+    public void setResolverId(String resolverId) {
+        this.resolverId = resolverId;
+    }
+
+    @DataBoundSetter
+    public void setTasks(String tasks) {
+        this.tasks = tasks;
+    }
+
+    @DataBoundSetter
+    public void setBuildFile(String buildFile) {
+        this.buildFile = buildFile;
+    }
+
+    @DataBoundSetter
+    public void setRootDir(String rootDir) {
+        this.rootDir = rootDir;
+    }
+
+    @DataBoundSetter
+    public void setSwitches(String switches) {
+        this.switches = switches;
+    }
+
+    @DataBoundSetter
+    public void setTool(String tool) {
+        gradleBuild.setTool(tool);
+    }
+
+    @DataBoundSetter
+    public void setUseWrapper(boolean useWrapper) {
+        gradleBuild.setUseWrapper(useWrapper);
+    }
+
+    @DataBoundSetter
+    public void setUsesPlugin(boolean usesPlugin) {
+        gradleBuild.setUsesPlugin(usesPlugin);
+    }
+
     private GradleBuild getGradleBuild() {
-        return gradleBuild;
+        return this.gradleBuild;
     }
 
     private String getSwitches() {
@@ -75,7 +120,7 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
         private transient Launcher launcher;
 
         @Inject(optional = true)
-        private transient ArtifactoryGradleBuild step;
+        private transient GradleStep step;
 
         @StepContextParameter
         private transient FilePath ws;
@@ -85,7 +130,8 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            GradleExecutor gradleExecutor = new GradleExecutor(build, step.getGradleBuild(), step.getTasks(), step.getBuildFile(), step.getRootDir(), step.getSwitches(), step.getBuildInfo(), env, ws, listener, launcher);
+            GradleBuild gradleBuild = step.getGradleBuild();
+            GradleExecutor gradleExecutor = new GradleExecutor(build, gradleBuild, step.getTasks(), step.getBuildFile(), step.getRootDir(), step.getSwitches(), step.getBuildInfo(), env, ws, listener, launcher);
             gradleExecutor.execute();
             return gradleExecutor.getBuildInfo();
         }
@@ -95,12 +141,12 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(ArtifactoryGradleBuild.Execution.class);
+            super(GradleStep.Execution.class);
         }
 
         @Override
         public String getFunctionName() {
-            return "ArtifactoryGradleBuild";
+            return "rtGradle";
         }
 
         @Override

@@ -1,23 +1,23 @@
-package org.jfrog.hudson.pipeline.declarative.steps;
+package org.jfrog.hudson.pipeline.declarative.steps.gradle;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class MavenResolveStep extends MavenDeployerResolver {
+public class GradleResolverStep extends GradleDeployerResolver {
 
-    static final String STEP_NAME = "rtMavenResolver";
+    static final String STEP_NAME = "rtGradleResolver";
 
     @DataBoundConstructor
-    public MavenResolveStep(String id, String releaseRepo, String snapshotRepo, String serverId) {
-        super(STEP_NAME, id, releaseRepo, snapshotRepo, serverId);
+    public GradleResolverStep(String id, String repo, String serverId) {
+        super(STEP_NAME, id, repo, serverId);
     }
 
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(MavenResolveStep.Execution.class);
+            super(GradleResolverStep.Execution.class);
         }
 
         @Override
@@ -27,7 +27,7 @@ public class MavenResolveStep extends MavenDeployerResolver {
 
         @Override
         public String getDisplayName() {
-            return "resolve maven artifacts";
+            return "set gradle resolver";
         }
 
         @Override

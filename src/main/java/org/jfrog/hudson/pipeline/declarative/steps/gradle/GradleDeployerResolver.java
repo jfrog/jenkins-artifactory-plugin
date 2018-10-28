@@ -1,30 +1,34 @@
-package org.jfrog.hudson.pipeline.declarative.steps;
+package org.jfrog.hudson.pipeline.declarative.steps.gradle;
 
 import com.google.inject.Inject;
 import hudson.FilePath;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.declarative.types.BuildFile;
+import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.writeBuildDataFile;
 
-public class MavenDeployerResolver extends AbstractStepImpl {
+public class GradleDeployerResolver extends AbstractStepImpl {
 
-    private BuildFile buildFile;
+    BuildDataFile buildDataFile;
 
     @DataBoundConstructor
-    public MavenDeployerResolver(String stepName, String id, String releaseRepo, String snapshotRepo, String serverId) {
-        buildFile = new BuildFile(stepName, id);
-        buildFile.put("snapshotRepo", snapshotRepo).
-                put("releaseRepo", releaseRepo).
-                put("serverId", serverId);
+    public GradleDeployerResolver(String stepName, String stepId, String repo, String serverId) {
+        buildDataFile = new BuildDataFile(stepName, stepId);
+        buildDataFile.put("repo", repo).put("serverId", serverId);
     }
 
-    private BuildFile getBuildFile() {
-        return buildFile;
+    @DataBoundSetter
+    public void setRepo(String repo) {
+        buildDataFile.put("repo", repo);
+    }
+
+    private BuildDataFile getBuildDataFile() {
+        return buildDataFile;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
@@ -34,13 +38,13 @@ public class MavenDeployerResolver extends AbstractStepImpl {
         private transient FilePath ws;
 
         @Inject(optional = true)
-        private transient MavenDeployerResolver step;
+        private transient GradleDeployerResolver step;
 
         @Override
         protected Void run() throws Exception {
             String buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
-            BuildFile buildFile = step.getBuildFile();
-            writeBuildDataFile(ws, buildNumber, buildFile);
+            BuildDataFile buildDataFile = step.getBuildDataFile();
+            writeBuildDataFile(ws, buildNumber, buildDataFile);
             return null;
         }
     }

@@ -7,7 +7,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.declarative.types.BuildFile;
+import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -16,36 +16,36 @@ import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUti
 
 public class CreateServerStep extends AbstractStepImpl {
 
-    static final String STEP_NAME = "rtServer";
-    private BuildFile buildFile;
+    public static final String STEP_NAME = "rtServer";
+    private BuildDataFile buildDataFile;
 
     @DataBoundConstructor
     public CreateServerStep(String id) {
-        buildFile = new BuildFile(STEP_NAME, id);
+        buildDataFile = new BuildDataFile(STEP_NAME, id);
     }
 
     @DataBoundSetter
     public void setUrl(String url) {
-        buildFile.put("url", url);
+        buildDataFile.put("url", url);
     }
 
     @DataBoundSetter
     public void setUsername(String username) {
-        buildFile.put("username", username);
+        buildDataFile.put("username", username);
     }
 
     @DataBoundSetter
     public void setPassword(String password) {
-        buildFile.put("password", password);
+        buildDataFile.put("password", password);
     }
 
     @DataBoundSetter
     public void setCredentialsId(String credentialsId) {
-        buildFile.put("credentialsId", credentialsId);
+        buildDataFile.put("credentialsId", credentialsId);
     }
 
-    private BuildFile getBuildFile() {
-        return buildFile;
+    private BuildDataFile getBuildDataFile() {
+        return buildDataFile;
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<Void> {
@@ -60,8 +60,8 @@ public class CreateServerStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             String buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
-            BuildFile buildFile = step.getBuildFile();
-            writeBuildDataFile(ws, buildNumber, buildFile);
+            BuildDataFile buildDataFile = step.getBuildDataFile();
+            writeBuildDataFile(ws, buildNumber, buildDataFile);
             return null;
         }
     }
