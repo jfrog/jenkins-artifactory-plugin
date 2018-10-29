@@ -13,11 +13,8 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.declarative.steps.CreateServerStep;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
-import org.jfrog.hudson.pipeline.executors.GetArtifactoryServerExecutor;
 import org.jfrog.hudson.pipeline.executors.MavenExecutor;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.MavenBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.MavenDeployer;
@@ -27,6 +24,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 import java.util.Objects;
+
+import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.getArtifactoryServer;
 
 public class MavenStep extends AbstractStepImpl {
 
@@ -124,11 +123,11 @@ public class MavenStep extends AbstractStepImpl {
 
         private void setMavenBuild() throws IOException, InterruptedException {
             String buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
-            setMavenDeployer(buildNumber);
-            setMavenResolver(buildNumber);
+            setDeployer(buildNumber);
+            setResolver(buildNumber);
         }
 
-        private void setMavenDeployer(String buildNumber) throws IOException, InterruptedException {
+        private void setDeployer(String buildNumber) throws IOException, InterruptedException {
             if (StringUtils.isBlank(step.getDeployerId())) {
                 return;
             }
@@ -146,10 +145,10 @@ public class MavenStep extends AbstractStepImpl {
             if (deployEvenIfUnstable != null && !deployEvenIfUnstable.isNull()) {
                 mavenDeployer.setDeployEvenIfUnstable(deployEvenIfUnstable.asText());
             }
-            mavenDeployer.setServer(getArtifactoryServer(buildNumber, jsonNode));
+            mavenDeployer.setServer(getArtifactoryServer(build, ws, getContext(), buildNumber, jsonNode));
         }
 
-        private void setMavenResolver(String buildNumber) throws IOException, InterruptedException {
+        private void setResolver(String buildNumber) throws IOException, InterruptedException {
             if (StringUtils.isBlank(step.getResolverId())) {
                 return;
             }
@@ -164,30 +163,9 @@ public class MavenStep extends AbstractStepImpl {
             if (releaseRepo != null && !releaseRepo.isNull()) {
                 mavenResolver.setReleaseRepo(releaseRepo.asText());
             }
-            mavenResolver.setServer(getArtifactoryServer(buildNumber, jsonNode));
+            mavenResolver.setServer(getArtifactoryServer(build, ws, getContext(), buildNumber, jsonNode));
         }
 
-        private ArtifactoryServer getArtifactoryServer(String buildNumber, JsonNode jsonNode) throws IOException, InterruptedException {
-            JsonNode serverId = jsonNode.get("serverId");
-            if (serverId.isNull()) {
-                return null;
-            }
-            jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, CreateServerStep.STEP_NAME, serverId.asText());
-            if (jsonNode.isNull()) {
-                GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, getContext(), serverId.asText());
-                getArtifactoryServerExecutor.execute();
-                return getArtifactoryServerExecutor.getArtifactoryServer();
-            }
-            String url = jsonNode.get("url").asText();
-            JsonNode credentialsIdJson = jsonNode.get("credentialsId");
-            if (credentialsIdJson == null || credentialsIdJson.isNull()) {
-                String username = jsonNode.get("username").asText();
-                String password = jsonNode.get("password").asText();
-                return new ArtifactoryServer(url, username, password);
-            }
-            String credentialsId = credentialsIdJson.asText();
-            return new ArtifactoryServer(url, credentialsId);
-        }
     }
 
     @Extension

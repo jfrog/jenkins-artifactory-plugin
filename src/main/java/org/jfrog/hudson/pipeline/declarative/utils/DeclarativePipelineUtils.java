@@ -2,9 +2,13 @@ package org.jfrog.hudson.pipeline.declarative.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import hudson.FilePath;
+import hudson.model.Run;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.pipeline.declarative.steps.CreateServerStep;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
+import org.jfrog.hudson.pipeline.executors.GetArtifactoryServerExecutor;
+import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 
 import java.io.IOException;
 
@@ -48,5 +52,31 @@ public class DeclarativePipelineUtils {
             throw new IOException("Step has no workflow");
         }
         return workflowRun.getId();
+    }
+
+    public static ArtifactoryServer getArtifactoryServer(Run build, FilePath ws, StepContext context, String buildNumber, JsonNode jsonNode) throws IOException, InterruptedException {
+        JsonNode serverId = jsonNode.get("serverId");
+        if (serverId.isNull()) {
+            return null;
+        }
+        jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, CreateServerStep.STEP_NAME, serverId.asText());
+        if (jsonNode.isNull()) {
+            GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, context, serverId.asText());
+            getArtifactoryServerExecutor.execute();
+            return getArtifactoryServerExecutor.getArtifactoryServer();
+        }
+        String url = jsonNode.get("url").asText();
+        JsonNode credentialsIdJson = jsonNode.get("credentialsId");
+        if (credentialsIdJson == null || credentialsIdJson.isNull()) {
+            String username = jsonNode.get("username").asText();
+            String password = jsonNode.get("password").asText();
+            return new ArtifactoryServer(url, username, password);
+        }
+        String credentialsId = credentialsIdJson.asText();
+        return new ArtifactoryServer(url, credentialsId);
+    }
+
+    public static boolean isJsonNodeNotNull(JsonNode jsonNode) {
+        return jsonNode != null && !jsonNode.isNull();
     }
 }

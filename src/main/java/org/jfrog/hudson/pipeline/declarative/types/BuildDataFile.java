@@ -31,4 +31,9 @@ public class BuildDataFile implements Serializable {
     public String getId() {
         return jsonObject.get("stepId").asText();
     }
+
+    @Override
+    public String toString() {
+        return jsonObject.toString();
+    }
 }

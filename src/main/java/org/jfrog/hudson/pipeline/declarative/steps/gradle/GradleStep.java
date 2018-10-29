@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.declarative.steps.gradle;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -7,15 +8,24 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.pipeline.executors.GradleExecutor;
 import org.jfrog.hudson.pipeline.types.GradleBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.types.deployers.GradleDeployer;
+import org.jfrog.hudson.pipeline.types.resolvers.GradleResolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+
+import java.io.IOException;
+
+import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.getArtifactoryServer;
+import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.isJsonNodeNotNull;
 
 public class GradleStep extends AbstractStepImpl {
 
@@ -83,6 +93,14 @@ public class GradleStep extends AbstractStepImpl {
         gradleBuild.setUsesPlugin(usesPlugin);
     }
 
+    private String getDeployerId() {
+        return this.deployerId;
+    }
+
+    private String getResolverId() {
+        return this.resolverId;
+    }
+
     private GradleBuild getGradleBuild() {
         return this.gradleBuild;
     }
@@ -107,7 +125,7 @@ public class GradleStep extends AbstractStepImpl {
         return rootDir;
     }
 
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
+    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
         private static final long serialVersionUID = 1L;
 
         @StepContextParameter
@@ -129,11 +147,47 @@ public class GradleStep extends AbstractStepImpl {
         private transient EnvVars env;
 
         @Override
-        protected BuildInfo run() throws Exception {
-            GradleBuild gradleBuild = step.getGradleBuild();
-            GradleExecutor gradleExecutor = new GradleExecutor(build, gradleBuild, step.getTasks(), step.getBuildFile(), step.getRootDir(), step.getSwitches(), step.getBuildInfo(), env, ws, listener, launcher);
+        protected Void run() throws Exception {
+            setGradleBuild();
+            GradleExecutor gradleExecutor = new GradleExecutor(build, step.getGradleBuild(), step.getTasks(), step.getBuildFile(), step.getRootDir(), step.getSwitches(), step.getBuildInfo(), env, ws, listener, launcher);
             gradleExecutor.execute();
-            return gradleExecutor.getBuildInfo();
+            return null;
+        }
+
+        private void setGradleBuild() throws IOException, InterruptedException {
+            String buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
+            setDeployer(buildNumber);
+            setResolver(buildNumber);
+        }
+
+        private void setDeployer(String buildNumber) throws IOException, InterruptedException {
+            if (StringUtils.isBlank(step.getDeployerId())) {
+                return;
+            }
+            JsonNode jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, GradleDeployerStep.STEP_NAME, step.getDeployerId());
+            GradleDeployer deployer = step.getGradleBuild().getDeployer();
+
+            JsonNode repo = jsonNode.get("repo");
+            if (isJsonNodeNotNull(repo)) {
+                deployer.setRepo(repo.asText());
+            }
+
+            deployer.setServer(getArtifactoryServer(build, ws, getContext(), buildNumber, jsonNode));
+        }
+
+        private void setResolver(String buildNumber) throws IOException, InterruptedException {
+            if (StringUtils.isBlank(step.getResolverId())) {
+                return;
+            }
+            JsonNode jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, GradleResolverStep.STEP_NAME, step.getResolverId());
+            GradleResolver resolver = step.getGradleBuild().getResolver();
+
+            JsonNode repo = jsonNode.get("repo");
+            if (isJsonNodeNotNull(repo)) {
+                resolver.setRepo(repo.asText());
+            }
+
+            resolver.setServer(getArtifactoryServer(build, ws, getContext(), buildNumber, jsonNode));
         }
     }
 
