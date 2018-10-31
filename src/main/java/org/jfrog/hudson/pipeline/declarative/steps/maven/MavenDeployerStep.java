@@ -6,6 +6,7 @@ import org.jfrog.hudson.pipeline.types.deployers.MavenDeployer;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+@SuppressWarnings("unused")
 public class MavenDeployerStep extends MavenDeployerResolver {
 
     static final String STEP_NAME = "rtMavenDeployer";
@@ -20,7 +21,6 @@ public class MavenDeployerStep extends MavenDeployerResolver {
     }
 
     @DataBoundSetter
-    @SuppressWarnings("unused")
     public void setDeployEvenIfUnstable(String deployEvenIfUnstable) {
         mavenDeployer.setDeployEvenIfUnstable(deployEvenIfUnstable);
     }

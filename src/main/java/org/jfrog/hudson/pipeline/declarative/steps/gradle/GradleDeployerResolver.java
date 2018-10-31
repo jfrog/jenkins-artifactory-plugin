@@ -26,10 +26,6 @@ public class GradleDeployerResolver extends AbstractStepImpl {
         buildDataFile.put("repo", repo);
     }
 
-    private BuildDataFile getBuildDataFile() {
-        return buildDataFile;
-    }
-
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
         private static final long serialVersionUID = 1L;
 
@@ -42,7 +38,7 @@ public class GradleDeployerResolver extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             String buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
-            BuildDataFile buildDataFile = step.getBuildDataFile();
+            BuildDataFile buildDataFile = step.buildDataFile;
             writeBuildDataFile(ws, buildNumber, buildDataFile);
             return null;
         }

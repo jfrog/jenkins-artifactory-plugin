@@ -55,14 +55,10 @@ public class DeclarativePipelineUtils {
         return workflowRun.getId();
     }
 
-    public static ArtifactoryServer getArtifactoryServer(TaskListener listener, Run build, FilePath ws, StepContext context, String buildNumber, BuildDataFile buildDataFile) throws IOException, InterruptedException {
-        JsonNode serverId = buildDataFile.get("serverId");
-        if (serverId.isNull()) {
-            return null;
-        }
-        buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, CreateServerStep.STEP_NAME, serverId.asText());
+    public static ArtifactoryServer getArtifactoryServer(TaskListener listener, Run build, FilePath ws, StepContext context, String buildNumber, String serverId) throws IOException, InterruptedException {
+        BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, CreateServerStep.STEP_NAME, serverId);
         if (buildDataFile == null) {
-            GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, context, serverId.asText());
+            GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, context, serverId);
             getArtifactoryServerExecutor.execute();
             return getArtifactoryServerExecutor.getArtifactoryServer();
         }
@@ -75,9 +71,5 @@ public class DeclarativePipelineUtils {
         }
         String credentialsId = credentialsIdJson.asText();
         return new ArtifactoryServer(url, credentialsId);
-    }
-
-    public static boolean isJsonNodeNotNull(JsonNode jsonNode) {
-        return jsonNode != null && !jsonNode.isNull();
     }
 }

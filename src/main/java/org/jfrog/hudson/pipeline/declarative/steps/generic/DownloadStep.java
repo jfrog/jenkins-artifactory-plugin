@@ -1,50 +1,27 @@
-package org.jfrog.hudson.pipeline.steps;
+package org.jfrog.hudson.pipeline.declarative.steps.generic;
 
 import com.google.inject.Inject;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.executors.GenericDownloadExecutor;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class DownloadStep extends AbstractStepImpl {
-
-    private BuildInfo buildInfo;
-    private String spec;
-    private ArtifactoryServer server;
+@SuppressWarnings("unused")
+public class DownloadStep extends GenericStep {
 
     @DataBoundConstructor
-    public DownloadStep(String spec, BuildInfo buildInfo, ArtifactoryServer server) {
-        this.spec = spec;
-        this.buildInfo = buildInfo;
-        this.server = server;
+    public DownloadStep(String serverId) {
+        super(serverId);
     }
 
-    public BuildInfo getBuildInfo() {
-        return buildInfo;
-    }
-
-    public String getSpec() {
-        return spec;
-    }
-
-    public ArtifactoryServer getServer() {
-        return server;
-    }
-
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends GenericStep.Execution {
         @StepContextParameter
         private transient FilePath ws;
 
@@ -58,16 +35,16 @@ public class DownloadStep extends AbstractStepImpl {
         private transient EnvVars env;
 
         @Inject(optional = true)
-        private transient DownloadStep step;
+        private transient GenericStep step;
 
         @Override
-        protected BuildInfo run() throws Exception {
-            GenericDownloadExecutor genericDownloadExecutor = new GenericDownloadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()),
-                    this.listener, this.build, this.ws, step.getBuildInfo(), Util.replaceMacro(step.getSpec(), env));
+        protected Void run() throws Exception {
+            setGenericParameters(listener, build, ws, env, step);
+            GenericDownloadExecutor genericDownloadExecutor = new GenericDownloadExecutor(artifactoryServer, listener, build, ws, step.buildInfo, spec);
             genericDownloadExecutor.execute();
             BuildInfo buildInfo = genericDownloadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
-            return buildInfo;
+            return null;
         }
     }
 
@@ -79,9 +56,8 @@ public class DownloadStep extends AbstractStepImpl {
         }
 
         @Override
-        // The step is invoked by ArtifactoryServer by the step name
         public String getFunctionName() {
-            return "artifactoryDownload";
+            return "rtDownload";
         }
 
         @Override
@@ -94,5 +70,4 @@ public class DownloadStep extends AbstractStepImpl {
             return true;
         }
     }
-
 }

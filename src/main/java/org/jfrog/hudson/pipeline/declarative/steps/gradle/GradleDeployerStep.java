@@ -6,6 +6,7 @@ import org.jfrog.hudson.pipeline.types.deployers.GradleDeployer;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+@SuppressWarnings("unused")
 public class GradleDeployerStep extends GradleDeployerResolver {
 
     static final String STEP_NAME = "rtGradleDeployer";
@@ -20,31 +21,26 @@ public class GradleDeployerStep extends GradleDeployerResolver {
     }
 
     @DataBoundSetter
-    @SuppressWarnings("unused")
     public void setDeployMavenDescriptors(String deployMavenDescriptors) {
         gradleDeployer.setDeployMavenDescriptors(deployMavenDescriptors);
     }
 
     @DataBoundSetter
-    @SuppressWarnings("unused")
     public void setDeployIvyDescriptors(String deployIvyDescriptors) {
         gradleDeployer.setDeployIvyDescriptors(deployIvyDescriptors);
     }
 
     @DataBoundSetter
-    @SuppressWarnings("unused")
     public void setIvyPattern(String ivyPattern) {
         gradleDeployer.setIvyPattern(ivyPattern);
     }
 
     @DataBoundSetter
-    @SuppressWarnings("unused")
     public void setArtifactPattern(String artifactPattern) {
         gradleDeployer.setArtifactPattern(artifactPattern);
     }
 
     @DataBoundSetter
-    @SuppressWarnings("unused")
     public void setMavenCompatible(String mavenCompatible) {
         gradleDeployer.setMavenCompatible(mavenCompatible);
     }
