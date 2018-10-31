@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.declarative.utils;
 import com.fasterxml.jackson.databind.JsonNode;
 import hudson.FilePath;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.declarative.steps.CreateServerStep;
@@ -34,8 +35,8 @@ public class DeclarativePipelineUtils {
      * @param stepId - The step id specified in the pipeline.
      * @throws IOException - In case of no read permissions.
      */
-    public static JsonNode readBuildDataFile(FilePath ws, final String buildNumber, final String stepName, final String stepId) throws IOException, InterruptedException {
-        return getTempDirPath(ws).act(new ReadBuildDataFileCallable(buildNumber, stepName, stepId));
+    public static BuildDataFile readBuildDataFile(TaskListener listener, FilePath ws, final String buildNumber, final String stepName, final String stepId) throws IOException, InterruptedException {
+        return getTempDirPath(ws).act(new ReadBuildDataFileCallable(listener, buildNumber, stepName, stepId));
     }
 
     private static FilePath getTempDirPath(FilePath ws) {
@@ -54,22 +55,22 @@ public class DeclarativePipelineUtils {
         return workflowRun.getId();
     }
 
-    public static ArtifactoryServer getArtifactoryServer(Run build, FilePath ws, StepContext context, String buildNumber, JsonNode jsonNode) throws IOException, InterruptedException {
-        JsonNode serverId = jsonNode.get("serverId");
+    public static ArtifactoryServer getArtifactoryServer(TaskListener listener, Run build, FilePath ws, StepContext context, String buildNumber, BuildDataFile buildDataFile) throws IOException, InterruptedException {
+        JsonNode serverId = buildDataFile.get("serverId");
         if (serverId.isNull()) {
             return null;
         }
-        jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, CreateServerStep.STEP_NAME, serverId.asText());
-        if (jsonNode.isNull()) {
+        buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, CreateServerStep.STEP_NAME, serverId.asText());
+        if (buildDataFile == null) {
             GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, context, serverId.asText());
             getArtifactoryServerExecutor.execute();
             return getArtifactoryServerExecutor.getArtifactoryServer();
         }
-        String url = jsonNode.get("url").asText();
-        JsonNode credentialsIdJson = jsonNode.get("credentialsId");
+        String url = buildDataFile.get("url").asText();
+        JsonNode credentialsIdJson = buildDataFile.get("credentialsId");
         if (credentialsIdJson == null || credentialsIdJson.isNull()) {
-            String username = jsonNode.get("username").asText();
-            String password = jsonNode.get("password").asText();
+            String username = buildDataFile.get("username").asText();
+            String password = buildDataFile.get("password").asText();
             return new ArtifactoryServer(url, username, password);
         }
         String credentialsId = credentialsIdJson.asText();

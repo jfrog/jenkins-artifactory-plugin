@@ -2,41 +2,51 @@ package org.jfrog.hudson.pipeline.declarative.steps.gradle;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jfrog.hudson.pipeline.types.deployers.GradleDeployer;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 public class GradleDeployerStep extends GradleDeployerResolver {
 
     static final String STEP_NAME = "rtGradleDeployer";
+    private GradleDeployer gradleDeployer;
 
     @DataBoundConstructor
-    public GradleDeployerStep(String id, String repo, String serverId) {
-        super(STEP_NAME, id, repo, serverId);
+    public GradleDeployerStep(String id, String serverId, String repo) {
+        super(STEP_NAME, id, serverId);
+        gradleDeployer = new GradleDeployer();
+        gradleDeployer.setRepo(repo);
+        buildDataFile.putPOJO(gradleDeployer);
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setDeployMavenDescriptors(String deployMavenDescriptors) {
-        buildDataFile.put("deployMavenDescriptors", deployMavenDescriptors);
+        gradleDeployer.setDeployMavenDescriptors(deployMavenDescriptors);
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setDeployIvyDescriptors(String deployIvyDescriptors) {
-        buildDataFile.put("deployIvyDescriptors", deployIvyDescriptors);
+        gradleDeployer.setDeployIvyDescriptors(deployIvyDescriptors);
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setIvyPattern(String ivyPattern) {
-        buildDataFile.put("ivyPattern", ivyPattern);
+        gradleDeployer.setIvyPattern(ivyPattern);
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setArtifactPattern(String artifactPattern) {
-        buildDataFile.put("artifactPattern", artifactPattern);
+        gradleDeployer.setArtifactPattern(artifactPattern);
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setMavenCompatible(String mavenCompatible) {
-        buildDataFile.put("mavenCompatible", mavenCompatible);
+        gradleDeployer.setMavenCompatible(mavenCompatible);
     }
 
     @Extension

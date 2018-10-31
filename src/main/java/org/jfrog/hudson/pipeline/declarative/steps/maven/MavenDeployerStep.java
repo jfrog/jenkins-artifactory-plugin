@@ -13,13 +13,14 @@ public class MavenDeployerStep extends MavenDeployerResolver {
 
     @DataBoundConstructor
     public MavenDeployerStep(String id, String releaseRepo, String snapshotRepo, String serverId) {
-        super(STEP_NAME, id, releaseRepo, snapshotRepo, serverId);
+        super(STEP_NAME, id, serverId);
         mavenDeployer = new MavenDeployer();
-        mavenDeployer.setReleaseRepo(releaseRepo);
-        mavenDeployer.setSnapshotRepo(snapshotRepo);
+        mavenDeployer.setReleaseRepo(releaseRepo).setSnapshotRepo(snapshotRepo);
+        buildDataFile.putPOJO(mavenDeployer);
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setDeployEvenIfUnstable(String deployEvenIfUnstable) {
         mavenDeployer.setDeployEvenIfUnstable(deployEvenIfUnstable);
     }

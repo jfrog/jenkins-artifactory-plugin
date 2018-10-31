@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.types.deployers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.RepositoryConf;
@@ -25,6 +26,7 @@ public class GradleDeployer extends Deployer {
     }
 
     @Override
+    @JsonIgnore
     public ServerDetails getDetails() {
         RepositoryConf releaseRepositoryConf = new RepositoryConf(repo, repo, false);
         if (server != null) {
@@ -40,7 +42,7 @@ public class GradleDeployer extends Deployer {
 
     @Whitelisted
     public void setDeployMavenDescriptors(Object deployMavenDescriptors) {
-        this.deployMavenDescriptors = Boolean.getBoolean(Utils.parseJenkinsArg(deployMavenDescriptors));
+        this.deployMavenDescriptors = Boolean.parseBoolean(Utils.parseJenkinsArg(deployMavenDescriptors));
     }
 
     @Whitelisted
@@ -50,7 +52,7 @@ public class GradleDeployer extends Deployer {
 
     @Whitelisted
     public void setDeployIvyDescriptors(Object deployIvyDescriptors) {
-        this.deployIvyDescriptors = Boolean.getBoolean(Utils.parseJenkinsArg(deployIvyDescriptors));
+        this.deployIvyDescriptors = Boolean.parseBoolean(Utils.parseJenkinsArg(deployIvyDescriptors));
     }
 
     @Whitelisted
@@ -80,7 +82,7 @@ public class GradleDeployer extends Deployer {
 
     @Whitelisted
     public void setMavenCompatible(Object mavenCompatible) {
-        this.mavenCompatible = Boolean.getBoolean(Utils.parseJenkinsArg(mavenCompatible));
+        this.mavenCompatible = Boolean.parseBoolean(Utils.parseJenkinsArg(mavenCompatible));
     }
 
     @Whitelisted
@@ -106,6 +108,7 @@ public class GradleDeployer extends Deployer {
         return repo;
     }
 
+    @JsonIgnore
     public PublisherContext.Builder getContextBuilder() {
         return new PublisherContext.Builder()
                 .artifactoryServer(getArtifactoryServer())

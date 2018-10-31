@@ -16,11 +16,8 @@ public class MavenDeployerResolver extends AbstractStepImpl {
     BuildDataFile buildDataFile;
 
     @DataBoundConstructor
-    public MavenDeployerResolver(String stepName, String id, String releaseRepo, String snapshotRepo, String serverId) {
-        buildDataFile = new BuildDataFile(stepName, id);
-        buildDataFile.put("snapshotRepo", snapshotRepo).
-                put("releaseRepo", releaseRepo).
-                put("serverId", serverId);
+    public MavenDeployerResolver(String stepName, String id, String serverId) {
+        buildDataFile = new BuildDataFile(stepName, id).put("serverId", serverId);
     }
 
     private BuildDataFile getBuildDataFile() {

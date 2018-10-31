@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.declarative.steps.maven;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -13,6 +12,8 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.pipeline.executors.MavenExecutor;
 import org.jfrog.hudson.pipeline.types.MavenBuild;
@@ -27,6 +28,7 @@ import java.util.Objects;
 
 import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.getArtifactoryServer;
 
+@SuppressWarnings("unused")
 public class MavenStep extends AbstractStepImpl {
 
     private MavenBuild mavenBuild;
@@ -44,26 +46,31 @@ public class MavenStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setBuildInfo(BuildInfo buildInfo) {
         this.buildInfo = buildInfo;
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setDeployerId(String deployerId) {
         this.deployerId = deployerId;
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setResolverId(String resolverId) {
         this.resolverId = resolverId;
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setTool(String tool) {
         mavenBuild.setTool(tool);
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setOptions(String options) {
         mavenBuild.setOpts(options);
     }
@@ -131,41 +138,21 @@ public class MavenStep extends AbstractStepImpl {
             if (StringUtils.isBlank(step.getDeployerId())) {
                 return;
             }
-            JsonNode jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, MavenDeployerStep.STEP_NAME, step.getDeployerId());
-            MavenDeployer mavenDeployer = step.getMavenBuild().getDeployer();
-            JsonNode snapshotRepo = jsonNode.get("snapshotRepo");
-            if (snapshotRepo != null && !snapshotRepo.isNull()) {
-                mavenDeployer.setSnapshotRepo(snapshotRepo.asText());
-            }
-            JsonNode releaseRepo = jsonNode.get("releaseRepo");
-            if (releaseRepo != null && !releaseRepo.isNull()) {
-                mavenDeployer.setReleaseRepo(releaseRepo.asText());
-            }
-            JsonNode deployEvenIfUnstable = jsonNode.get("deployEvenIfUnstable");
-            if (deployEvenIfUnstable != null && !deployEvenIfUnstable.isNull()) {
-                mavenDeployer.setDeployEvenIfUnstable(deployEvenIfUnstable.asText());
-            }
-            mavenDeployer.setServer(getArtifactoryServer(build, ws, getContext(), buildNumber, jsonNode));
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, MavenDeployerStep.STEP_NAME, step.getDeployerId());
+            MavenDeployer mavenDeployer = Utils.mapper().treeToValue(buildDataFile.get(MavenDeployerStep.STEP_NAME), MavenDeployer.class);
+            step.getMavenBuild().setDeployer(mavenDeployer);
+            mavenDeployer.setServer(getArtifactoryServer(listener, build, ws, getContext(), buildNumber, buildDataFile));
         }
 
         private void setResolver(String buildNumber) throws IOException, InterruptedException {
             if (StringUtils.isBlank(step.getResolverId())) {
                 return;
             }
-            JsonNode jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, MavenResolverStep.STEP_NAME, step.getResolverId());
-            MavenResolver mavenResolver = step.getMavenBuild().getResolver();
-
-            JsonNode snapshotRepo = jsonNode.get("snapshotRepo");
-            if (snapshotRepo != null && !snapshotRepo.isNull()) {
-                mavenResolver.setSnapshotRepo(snapshotRepo.asText());
-            }
-            JsonNode releaseRepo = jsonNode.get("releaseRepo");
-            if (releaseRepo != null && !releaseRepo.isNull()) {
-                mavenResolver.setReleaseRepo(releaseRepo.asText());
-            }
-            mavenResolver.setServer(getArtifactoryServer(build, ws, getContext(), buildNumber, jsonNode));
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, MavenResolverStep.STEP_NAME, step.getResolverId());
+            MavenResolver mavenResolver = Utils.mapper().treeToValue(buildDataFile.get(MavenResolverStep.STEP_NAME), MavenResolver.class);
+            step.getMavenBuild().setResolver(mavenResolver);
+            mavenResolver.setServer(getArtifactoryServer(listener, build, ws, getContext(), buildNumber, buildDataFile));
         }
-
     }
 
     @Extension
@@ -177,17 +164,12 @@ public class MavenStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "rtMaven";
+            return "rtMavenRun";
         }
 
         @Override
         public String getDisplayName() {
             return "run Artifactory maven";
-        }
-
-        @Override
-        public boolean takesImplicitBlockArgument() {
-            return true;
         }
 
         @Override

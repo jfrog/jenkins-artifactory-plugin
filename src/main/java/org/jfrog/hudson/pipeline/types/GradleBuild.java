@@ -51,9 +51,17 @@ public class GradleBuild implements Serializable {
         return this.deployer;
     }
 
+    public void setDeployer(GradleDeployer deployer) {
+        this.deployer = deployer;
+    }
+
     @Whitelisted
     public GradleResolver getResolver() {
         return this.resolver;
+    }
+
+    public void setResolver(GradleResolver resolver) {
+        this.resolver = resolver;
     }
 
     @Whitelisted

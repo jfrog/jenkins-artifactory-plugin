@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.steps.maven;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jfrog.hudson.pipeline.types.resolvers.MavenResolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class MavenResolverStep extends MavenDeployerResolver {
@@ -10,7 +11,10 @@ public class MavenResolverStep extends MavenDeployerResolver {
 
     @DataBoundConstructor
     public MavenResolverStep(String id, String releaseRepo, String snapshotRepo, String serverId) {
-        super(STEP_NAME, id, releaseRepo, snapshotRepo, serverId);
+        super(STEP_NAME, id, serverId);
+        MavenResolver mavenDeployer = new MavenResolver();
+        mavenDeployer.setReleaseRepo(releaseRepo).setSnapshotRepo(snapshotRepo);
+        buildDataFile.putPOJO(mavenDeployer);
     }
 
     @Extension

@@ -17,9 +17,8 @@ public class GradleDeployerResolver extends AbstractStepImpl {
     BuildDataFile buildDataFile;
 
     @DataBoundConstructor
-    public GradleDeployerResolver(String stepName, String stepId, String repo, String serverId) {
-        buildDataFile = new BuildDataFile(stepName, stepId);
-        buildDataFile.put("repo", repo).put("serverId", serverId);
+    public GradleDeployerResolver(String stepName, String stepId, String serverId) {
+        buildDataFile = new BuildDataFile(stepName, stepId).put("serverId", serverId);
     }
 
     @DataBoundSetter

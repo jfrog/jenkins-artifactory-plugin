@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.steps.gradle;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jfrog.hudson.pipeline.types.resolvers.GradleResolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class GradleResolverStep extends GradleDeployerResolver {
@@ -9,8 +10,11 @@ public class GradleResolverStep extends GradleDeployerResolver {
     static final String STEP_NAME = "rtGradleResolver";
 
     @DataBoundConstructor
-    public GradleResolverStep(String id, String repo, String serverId) {
-        super(STEP_NAME, id, repo, serverId);
+    public GradleResolverStep(String id, String serverId, String repo) {
+        super(STEP_NAME, id, serverId);
+        GradleResolver gradleResolver = new GradleResolver();
+        gradleResolver.setRepo(repo);
+        buildDataFile.putPOJO(gradleResolver);
     }
 
     @Extension

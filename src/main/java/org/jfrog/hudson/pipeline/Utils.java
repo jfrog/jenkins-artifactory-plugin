@@ -366,6 +366,9 @@ public class Utils {
     }
 
     public static String parseJenkinsArg(Object arg) {
+        if (arg == null) {
+            return null;
+        }
         if (arg instanceof Map) {
             return ((List)((Map) arg).get("values")).get(0).toString();
         }

@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.declarative.steps.gradle;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import hudson.EnvVars;
 import hudson.Extension;
@@ -13,6 +12,8 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.pipeline.executors.GradleExecutor;
 import org.jfrog.hudson.pipeline.types.GradleBuild;
@@ -25,8 +26,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.io.IOException;
 
 import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.getArtifactoryServer;
-import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.isJsonNodeNotNull;
 
+@SuppressWarnings("unused")
 public class GradleStep extends AbstractStepImpl {
 
     private GradleBuild gradleBuild;
@@ -44,51 +45,61 @@ public class GradleStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setBuildInfo(BuildInfo buildInfo) {
         this.buildInfo = buildInfo;
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setDeployerId(String deployerId) {
         this.deployerId = deployerId;
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setResolverId(String resolverId) {
         this.resolverId = resolverId;
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setTasks(String tasks) {
         this.tasks = tasks;
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setBuildFile(String buildFile) {
         this.buildFile = buildFile;
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setRootDir(String rootDir) {
         this.rootDir = rootDir;
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setSwitches(String switches) {
         this.switches = switches;
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setTool(String tool) {
         gradleBuild.setTool(tool);
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setUseWrapper(boolean useWrapper) {
         gradleBuild.setUseWrapper(useWrapper);
     }
 
     @DataBoundSetter
+    @SuppressWarnings("unused")
     public void setUsesPlugin(boolean usesPlugin) {
         gradleBuild.setUsesPlugin(usesPlugin);
     }
@@ -164,30 +175,20 @@ public class GradleStep extends AbstractStepImpl {
             if (StringUtils.isBlank(step.getDeployerId())) {
                 return;
             }
-            JsonNode jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, GradleDeployerStep.STEP_NAME, step.getDeployerId());
-            GradleDeployer deployer = step.getGradleBuild().getDeployer();
-
-            JsonNode repo = jsonNode.get("repo");
-            if (isJsonNodeNotNull(repo)) {
-                deployer.setRepo(repo.asText());
-            }
-
-            deployer.setServer(getArtifactoryServer(build, ws, getContext(), buildNumber, jsonNode));
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, GradleDeployerStep.STEP_NAME, step.getDeployerId());
+            GradleDeployer deployer = Utils.mapper().treeToValue(buildDataFile.get(GradleDeployerStep.STEP_NAME), GradleDeployer.class);
+            deployer.setServer(getArtifactoryServer(listener, build, ws, getContext(), buildNumber, buildDataFile));
+            step.getGradleBuild().setDeployer(deployer);
         }
 
         private void setResolver(String buildNumber) throws IOException, InterruptedException {
             if (StringUtils.isBlank(step.getResolverId())) {
                 return;
             }
-            JsonNode jsonNode = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, GradleResolverStep.STEP_NAME, step.getResolverId());
-            GradleResolver resolver = step.getGradleBuild().getResolver();
-
-            JsonNode repo = jsonNode.get("repo");
-            if (isJsonNodeNotNull(repo)) {
-                resolver.setRepo(repo.asText());
-            }
-
-            resolver.setServer(getArtifactoryServer(build, ws, getContext(), buildNumber, jsonNode));
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, GradleResolverStep.STEP_NAME, step.getResolverId());
+            GradleResolver resolver = Utils.mapper().treeToValue(buildDataFile.get(GradleResolverStep.STEP_NAME), GradleResolver.class);
+            resolver.setServer(getArtifactoryServer(listener, build, ws, getContext(), buildNumber, buildDataFile));
+            step.getGradleBuild().setResolver(resolver);
         }
     }
 
@@ -200,7 +201,7 @@ public class GradleStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "rtGradle";
+            return "rtGradleRun";
         }
 
         @Override

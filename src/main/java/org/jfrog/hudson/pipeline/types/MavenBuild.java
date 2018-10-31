@@ -40,9 +40,17 @@ public class MavenBuild implements Serializable {
         return this.deployer;
     }
 
+    public void setDeployer(MavenDeployer deployer) {
+        this.deployer = deployer;
+    }
+
     @Whitelisted
     public MavenResolver getResolver() {
         return this.resolver;
+    }
+
+    public void setResolver(MavenResolver resolver) {
+        this.resolver = resolver;
     }
 
     @Whitelisted

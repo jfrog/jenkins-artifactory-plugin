@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.types.resolvers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.ResolverOverrider;
@@ -39,6 +40,7 @@ public abstract class Resolver implements ResolverOverrider, Serializable {
         return null;
     }
 
+    @JsonIgnore
     public CredentialsConfig getResolverCredentialsConfig() {
         try {
             return getArtifactoryServer().getDeployerCredentialsConfig();

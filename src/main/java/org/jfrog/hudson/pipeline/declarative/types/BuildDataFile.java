@@ -1,9 +1,10 @@
 package org.jfrog.hudson.pipeline.declarative.types;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.jfrog.hudson.pipeline.Utils;
 
-import java.io.Serializable;
+import java.io.*;
 
 /**
  * Data to transfer between different declarative pipeline steps.
@@ -24,6 +25,14 @@ public class BuildDataFile implements Serializable {
         return this;
     }
 
+    public void putPOJO(Object pojo) {
+        jsonObject.putPOJO(jsonObject.get("stepName").asText(), pojo);
+    }
+
+    public JsonNode get(String key) {
+        return jsonObject.get(key);
+    }
+
     public String getStepName() {
         return jsonObject.get("stepName").asText();
     }
@@ -32,8 +41,11 @@ public class BuildDataFile implements Serializable {
         return jsonObject.get("stepId").asText();
     }
 
-    @Override
-    public String toString() {
-        return jsonObject.toString();
+    private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
+        jsonObject = Utils.mapper().readValue((DataInput) stream, ObjectNode.class);
+    }
+
+    private void writeObject(ObjectOutputStream stream) throws IOException {
+        Utils.mapper().writeValue((DataOutput) stream, jsonObject);
     }
 }

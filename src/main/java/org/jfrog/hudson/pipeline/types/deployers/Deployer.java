@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.types.deployers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
 import hudson.FilePath;
@@ -51,7 +52,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
 
     // Shouldn't be whitelisted, the includeEnvVars value is taken from the buildInfo configurations.
     public Deployer setIncludeEnvVars(Object includeEnvVars) {
-        this.includeEnvVars = Boolean.getBoolean(Utils.parseJenkinsArg(includeEnvVars));
+        this.includeEnvVars = Boolean.parseBoolean(Utils.parseJenkinsArg(includeEnvVars));
         return this;
     }
 
@@ -77,7 +78,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
 
     @Whitelisted
     public Deployer setDeployArtifacts(Object deployArtifacts) {
-        this.deployArtifacts = Boolean.getBoolean(Utils.parseJenkinsArg(deployArtifacts));
+        this.deployArtifacts = Boolean.parseBoolean(Utils.parseJenkinsArg(deployArtifacts));
         return this;
     }
 
@@ -99,6 +100,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         return null;
     }
 
+    @JsonIgnore
     public CredentialsConfig getDeployerCredentialsConfig() {
         try {
             return getArtifactoryServer().getDeployerCredentialsConfig();
