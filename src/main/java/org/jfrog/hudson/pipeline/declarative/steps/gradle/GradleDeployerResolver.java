@@ -37,7 +37,7 @@ public class GradleDeployerResolver extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            String buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
+            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
             BuildDataFile buildDataFile = step.buildDataFile;
             writeBuildDataFile(ws, buildNumber, buildDataFile);
             return null;

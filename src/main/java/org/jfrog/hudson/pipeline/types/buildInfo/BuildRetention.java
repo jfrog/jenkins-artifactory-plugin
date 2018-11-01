@@ -12,6 +12,8 @@ import java.util.List;
  * Created by Tamirh on 14/07/2016.
  */
 public class BuildRetention implements Serializable {
+    public static final long serialVersionUID = 1L;
+
     private boolean deleteBuildArtifacts;
     private int maxBuilds;
     private List<String> doNotDiscardBuilds = Lists.newArrayList();

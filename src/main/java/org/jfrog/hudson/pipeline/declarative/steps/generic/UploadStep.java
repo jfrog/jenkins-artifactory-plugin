@@ -8,6 +8,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.pipeline.executors.GenericUploadExecutor;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
@@ -15,7 +16,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 @SuppressWarnings("unused")
 public class UploadStep extends GenericStep {
-    private BuildInfo buildInfo;
     private String spec;
     private String specPath;
     private String serverId;
@@ -43,11 +43,12 @@ public class UploadStep extends GenericStep {
 
         @Override
         protected Void run() throws Exception {
-            setGenericParameters(listener, build, ws, env, step);
-            GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(artifactoryServer, listener, build, ws, step.buildInfo, getContext(), spec);
+            setGenericParameters(listener, build, ws, env, step, getContext());
+            GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(artifactoryServer, listener, build, ws, buildInfo, getContext(), spec);
             genericUploadExecutor.execute();
             BuildInfo buildInfo = genericUploadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, getContext());
             return null;
         }
     }

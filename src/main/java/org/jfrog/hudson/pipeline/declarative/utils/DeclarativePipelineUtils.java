@@ -4,12 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.declarative.steps.BuildInfoStep;
 import org.jfrog.hudson.pipeline.declarative.steps.CreateServerStep;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.executors.GetArtifactoryServerExecutor;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 
 import java.io.IOException;
 
@@ -47,15 +51,24 @@ public class DeclarativePipelineUtils {
         return stepName + "_" + stepId;
     }
 
-    public static String getBuildNumberFromStep(StepContext getContext) throws IOException, InterruptedException {
-        WorkflowRun workflowRun = getContext.get(WorkflowRun.class);
+    public static String getBuildNumber(StepContext context) throws IOException, InterruptedException {
+        WorkflowRun workflowRun = context.get(WorkflowRun.class);
         if (workflowRun == null) {
             throw new IOException("Step has no workflow");
         }
         return workflowRun.getId();
     }
 
-    public static ArtifactoryServer getArtifactoryServer(TaskListener listener, Run build, FilePath ws, StepContext context, String buildNumber, String serverId) throws IOException, InterruptedException {
+    public static String getBuildName(StepContext context) throws IOException, InterruptedException {
+        WorkflowRun workflowRun = context.get(WorkflowRun.class);
+        if (workflowRun == null) {
+            throw new IOException("Step has no workflow");
+        }
+        return StringUtils.substringBefore(workflowRun.getExternalizableId(), "#");
+    }
+
+    public static ArtifactoryServer getArtifactoryServer(TaskListener listener, Run build, FilePath ws, StepContext context, String serverId) throws IOException, InterruptedException {
+        String buildNumber = getBuildNumber(context);
         BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, CreateServerStep.STEP_NAME, serverId);
         if (buildDataFile == null) {
             GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, context, serverId);
@@ -71,5 +84,30 @@ public class DeclarativePipelineUtils {
         }
         String credentialsId = credentialsIdJson.asText();
         return new ArtifactoryServer(url, credentialsId);
+    }
+
+    public static String getBuildInfoId(StepContext context, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {
+        return (StringUtils.isBlank(customBuildName) ? getBuildName(context) : customBuildName) + "_" +
+                (StringUtils.isBlank(customBuildNumber) ? getBuildNumber(context) : customBuildNumber);
+    }
+
+    public static BuildInfo getBuildInfo(TaskListener listener, FilePath ws, StepContext context, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {
+        String jobBuildNumber = getBuildNumber(context);
+        String buildInfoId = getBuildInfoId(context, customBuildName, customBuildNumber);
+
+        BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, jobBuildNumber, BuildInfoStep.STEP_NAME, buildInfoId);
+        if (buildDataFile == null) {
+            return null; // Build info doesn't exist. Will create a new build info later.
+        }
+        return Utils.mapper().treeToValue(buildDataFile.get(BuildInfoStep.STEP_NAME), BuildInfo.class);
+    }
+
+    public static void saveBuildInfo(BuildInfo buildInfo, FilePath ws, StepContext context) throws Exception {
+        String jobBuildNumber = getBuildNumber(context);
+        String buildInfoId = getBuildInfoId(context, buildInfo.getName(), buildInfo.getNumber());
+
+        BuildDataFile buildDataFile = new BuildDataFile(BuildInfoStep.STEP_NAME, buildInfoId);
+        buildDataFile.putPOJO(buildInfo);
+        writeBuildDataFile(ws, jobBuildNumber, buildDataFile);
     }
 }

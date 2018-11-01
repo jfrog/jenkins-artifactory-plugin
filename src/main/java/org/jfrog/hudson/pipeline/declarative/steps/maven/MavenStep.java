@@ -32,7 +32,8 @@ import java.util.Objects;
 public class MavenStep extends AbstractStepImpl {
 
     private MavenBuild mavenBuild;
-    private BuildInfo buildInfo;
+    private String customBuildNumber;
+    private String customBuildName;
     private String deployerId;
     private String resolverId;
     private String goals;
@@ -46,8 +47,13 @@ public class MavenStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setBuildInfo(BuildInfo buildInfo) {
-        this.buildInfo = buildInfo;
+    public void setBuildNumber(String customBuildNumber) {
+        this.customBuildNumber = customBuildNumber;
+    }
+
+    @DataBoundSetter
+    public void setBuildName(String customBuildName) {
+        this.customBuildName = customBuildName;
     }
 
     @DataBoundSetter
@@ -93,14 +99,17 @@ public class MavenStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, getContext(), step.customBuildName, step.customBuildNumber);
             setMavenBuild();
-            MavenExecutor mavenExecutor = new MavenExecutor(listener, launcher, build, ws, env, step.mavenBuild, step.pom, step.goals, step.buildInfo);
+            MavenExecutor mavenExecutor = new MavenExecutor(listener, launcher, build, ws, env, step.mavenBuild, step.pom, step.goals, buildInfo);
             mavenExecutor.execute();
+            buildInfo = mavenExecutor.getBuildInfo();
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, getContext());
             return null;
         }
 
         private void setMavenBuild() throws IOException, InterruptedException {
-            String buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
+            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
             setDeployer(buildNumber);
             setResolver(buildNumber);
         }
@@ -130,7 +139,7 @@ public class MavenStep extends AbstractStepImpl {
             if (serverId.isNull()) {
                 return null;
             }
-            return DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, getContext(), buildNumber, serverId.asText());
+            return DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, getContext(), serverId.asText());
         }
     }
 

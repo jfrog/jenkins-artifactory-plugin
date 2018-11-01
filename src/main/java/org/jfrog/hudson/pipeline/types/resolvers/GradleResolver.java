@@ -26,7 +26,6 @@ public class GradleResolver extends Resolver {
         this.repo = repo;
     }
 
-    @JsonIgnore
     public ServerDetails getResolverDetails() {
         RepositoryConf snapshotRepositoryConf = null;
         RepositoryConf releaesRepositoryConf = new RepositoryConf(repo, repo, false);

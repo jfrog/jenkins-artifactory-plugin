@@ -31,7 +31,8 @@ import java.io.IOException;
 public class GradleStep extends AbstractStepImpl {
 
     private GradleBuild gradleBuild;
-    private BuildInfo buildInfo;
+    private String customBuildNumber;
+    private String customBuildName;
     private String deployerId;
     private String resolverId;
     private String buildFile;
@@ -45,8 +46,13 @@ public class GradleStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setBuildInfo(BuildInfo buildInfo) {
-        this.buildInfo = buildInfo;
+    public void setBuildNumber(String customBuildNumber) {
+        this.customBuildNumber = customBuildNumber;
+    }
+
+    @DataBoundSetter
+    public void setBuildName(String customBuildName) {
+        this.customBuildName = customBuildName;
     }
 
     @DataBoundSetter
@@ -117,14 +123,17 @@ public class GradleStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, getContext(), step.customBuildName, step.customBuildNumber);
             setGradleBuild();
-            GradleExecutor gradleExecutor = new GradleExecutor(build, step.gradleBuild, step.tasks, step.buildFile, step.rootDir, step.switches, step.buildInfo, env, ws, listener, launcher);
+            GradleExecutor gradleExecutor = new GradleExecutor(build, step.gradleBuild, step.tasks, step.buildFile, step.rootDir, step.switches, buildInfo, env, ws, listener, launcher);
             gradleExecutor.execute();
+            buildInfo = gradleExecutor.getBuildInfo();
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, getContext());
             return null;
         }
 
         private void setGradleBuild() throws IOException, InterruptedException {
-            String buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
+            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
             setDeployer(buildNumber);
             setResolver(buildNumber);
         }
@@ -154,7 +163,7 @@ public class GradleStep extends AbstractStepImpl {
             if (serverId.isNull()) {
                 return null;
             }
-            return DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, getContext(), buildNumber, serverId.asText());
+            return DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, getContext(), serverId.asText());
         }
     }
 

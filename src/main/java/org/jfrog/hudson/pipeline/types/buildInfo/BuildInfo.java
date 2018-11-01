@@ -32,9 +32,10 @@ import java.util.*;
  * Created by romang on 4/26/16.
  */
 public class BuildInfo implements Serializable {
+    public static final long serialVersionUID = 1L;
 
-    private String buildName;
-    private String buildNumber;
+    private String name; // Build name
+    private String number; // Build number
     private Date startDate;
     private BuildRetention retention;
     private List<BuildDependency> buildDependencies = Collections.synchronizedList(new ArrayList<BuildDependency>());
@@ -47,33 +48,38 @@ public class BuildInfo implements Serializable {
     private Env env = new Env();
     private String agentName;
 
-    private DockerBuildInfoHelper dockerBuildInfoHelper = new DockerBuildInfoHelper(this);
+    private transient DockerBuildInfoHelper dockerBuildInfoHelper = new DockerBuildInfoHelper(this);
 
-    public BuildInfo(Run build) {
-        this.buildName = BuildUniqueIdentifierHelper.getBuildName(build);
-        this.buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
+    // Default constructor to allow serialization
+    public BuildInfo() {
         this.startDate = Calendar.getInstance().getTime();
         this.retention = new BuildRetention();
     }
 
+    public BuildInfo(Run build) {
+        this();
+        this.name = BuildUniqueIdentifierHelper.getBuildName(build);
+        this.number = BuildUniqueIdentifierHelper.getBuildNumber(build);
+    }
+
     @Whitelisted
     public void setName(String name) {
-        this.buildName = name;
+        this.name = name;
     }
 
     @Whitelisted
     public void setNumber(String number) {
-        this.buildNumber = number;
+        this.number = number;
     }
 
     @Whitelisted
     public String getName() {
-        return buildName;
+        return name;
     }
 
     @Whitelisted
     public String getNumber() {
-        return buildNumber;
+        return number;
     }
 
     @Whitelisted
@@ -202,7 +208,7 @@ public class BuildInfo implements Serializable {
             addDockerBuildInfoModules(dockerModules);
         }
 
-        addDefaultModuleToModules(buildName);
+        addDefaultModuleToModules(name);
         return new BuildInfoDeployer(config, client, build, listener, new BuildInfoAccessor(this));
     }
 
@@ -228,6 +234,42 @@ public class BuildInfo implements Serializable {
 
     public List<Module> getModules() {
         return modules;
+    }
+
+    public void setRetention(BuildRetention retention) {
+        this.retention = retention;
+    }
+
+    public void setBuildDependencies(List<BuildDependency> buildDependencies) {
+        this.buildDependencies = buildDependencies;
+    }
+
+    public List<Artifact> getDeployedArtifacts() {
+        return deployedArtifacts;
+    }
+
+    public void setDeployedArtifacts(List<Artifact> deployedArtifacts) {
+        this.deployedArtifacts = deployedArtifacts;
+    }
+
+    public void setDeployableArtifacts(List<DeployDetails> deployableArtifacts) {
+        this.deployableArtifacts = deployableArtifacts;
+    }
+
+    public List<Dependency> getPublishedDependencies() {
+        return publishedDependencies;
+    }
+
+    public void setPublishedDependencies(List<Dependency> publishedDependencies) {
+        this.publishedDependencies = publishedDependencies;
+    }
+
+    public void setModules(List<Module> modules) {
+        this.modules = modules;
+    }
+
+    public void setEnv(Env env) {
+        this.env = env;
     }
 
     public static class DeployPathsAndPropsCallable extends MasterToSlaveFileCallable<List<DeployDetails>> {

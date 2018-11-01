@@ -49,6 +49,7 @@ public abstract class Resolver implements ResolverOverrider, Serializable {
         }
     }
 
+    @JsonIgnore
     public abstract ServerDetails getResolverDetails();
     public abstract boolean isEmpty();
 }

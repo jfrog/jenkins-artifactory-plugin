@@ -26,13 +26,15 @@ public class CreateBuildDataFileCallable extends MasterToSlaveFileCallable<Void>
     @Override
     public Void invoke(File file, VirtualChannel virtualChannel) throws IOException {
         Path buildDir = Files.createDirectories(file.toPath().resolve(buildNumber));
-        file = Files.createFile(buildDir.resolve(getBuildDataFileName(buildDataFile.getStepName(), buildDataFile.getId()))).toFile();
+        file = buildDir.resolve(getBuildDataFileName(buildDataFile.getStepName(), buildDataFile.getId())).toFile();
+        if (file.createNewFile()) {
+            file.deleteOnExit();
+        }
         try (FileOutputStream fos = new FileOutputStream(file);
              ObjectOutputStream oos = new ObjectOutputStream(fos)
         ) {
             oos.writeObject(buildDataFile);
         }
-        file.deleteOnExit();
         return null;
     }
 }

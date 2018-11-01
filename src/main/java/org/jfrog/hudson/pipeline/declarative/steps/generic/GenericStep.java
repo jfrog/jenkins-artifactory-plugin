@@ -6,6 +6,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.SpecConfiguration;
 import org.jfrog.hudson.pipeline.Utils;
@@ -19,10 +20,11 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class GenericStep extends AbstractStepImpl {
-    protected BuildInfo buildInfo;
-    protected String spec;
-    protected String specPath;
     protected String serverId;
+    protected String spec;
+    private String customBuildNumber;
+    private String customBuildName;
+    private String specPath;
 
     @DataBoundConstructor
     public GenericStep(String serverId) {
@@ -39,18 +41,35 @@ public class GenericStep extends AbstractStepImpl {
         this.specPath = specPath;
     }
 
+    @DataBoundSetter
+    public void setBuildName(String buildName) {
+        this.customBuildName = buildName;
+    }
+
+    @DataBoundSetter
+    public void setBuildNumber(String buildNumber) {
+        this.customBuildNumber = buildNumber;
+    }
+
     public static abstract class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
-        protected static final long serialVersionUID = 1L;
+        public static final long serialVersionUID = 1L;
 
         protected String spec;
-        protected String buildNumber;
+        protected BuildInfo buildInfo;
         protected ArtifactoryServer artifactoryServer;
 
-        void setGenericParameters(TaskListener listener, Run build, FilePath ws, EnvVars env, GenericStep step) throws IOException, InterruptedException {
+        void setGenericParameters(TaskListener listener, Run build, FilePath ws, EnvVars env, GenericStep step, StepContext context) throws IOException, InterruptedException {
+            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
+
+            // Set spec
             SpecConfiguration specConfiguration = new SpecConfiguration(step.spec, step.specPath);
             spec = SpecUtils.getSpecStringFromSpecConf(specConfiguration, env, ws, listener.getLogger());
-            buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
-            org.jfrog.hudson.pipeline.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, getContext(), buildNumber, step.serverId);
+
+            // Set Build Info
+            buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, context, step.customBuildName, step.customBuildNumber);
+
+            // Set Artifactory server
+            org.jfrog.hudson.pipeline.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, getContext(), step.serverId);
             artifactoryServer = Utils.prepareArtifactoryServer(null, pipelineServer);
         }
     }

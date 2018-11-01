@@ -9,8 +9,6 @@ import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.writeBuildDataFile;
-
 public class MavenDeployerResolver extends AbstractStepImpl {
 
     BuildDataFile buildDataFile;
@@ -31,9 +29,9 @@ public class MavenDeployerResolver extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            String buildNumber = DeclarativePipelineUtils.getBuildNumberFromStep(getContext());
+            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
             BuildDataFile buildDataFile = step.buildDataFile;
-            writeBuildDataFile(ws, buildNumber, buildDataFile);
+            DeclarativePipelineUtils.writeBuildDataFile(ws, buildNumber, buildDataFile);
             return null;
         }
     }

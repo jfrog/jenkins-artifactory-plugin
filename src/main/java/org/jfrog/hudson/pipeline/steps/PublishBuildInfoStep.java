@@ -2,19 +2,15 @@ package org.jfrog.hudson.pipeline.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.executors.PublishBuildInfoExecutor;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class PublishBuildInfoStep extends AbstractStepImpl {
@@ -38,8 +34,6 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Boolean> {
         private static final long serialVersionUID = 1L;
-        @StepContextParameter
-        private transient FilePath ws;
 
         @StepContextParameter
         private transient Run build;
@@ -47,22 +41,12 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
         @StepContextParameter
         private transient TaskListener listener;
 
-        @StepContextParameter
-        private transient Launcher launcher;
-
         @Inject(optional = true)
         private transient PublishBuildInfoStep step;
 
         @Override
         protected Boolean run() throws Exception {
-            BuildInfoAccessor buildInfo = new BuildInfoAccessor(step.getBuildInfo());
-            org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, step.getServer());
-            ArtifactoryBuildInfoClient client = buildInfo.createArtifactoryClient(server, build, listener);
-            try {
-                buildInfo.createDeployer(build, listener, server, client).deploy();
-            } finally {
-                client.close();
-            }
+            new PublishBuildInfoExecutor(build, listener, step.getBuildInfo(), step.getServer()).execute();
             return true;
         }
     }
@@ -77,7 +61,7 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
         @Override
         // The step is invoked by ArtifactoryServer by the step name
         public String getFunctionName() {
-            return "publishBuildInfo";
+            return "parametrizedPublishBuildInfo";
         }
 
         @Override
