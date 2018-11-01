@@ -9,6 +9,7 @@ import java.io.Serializable;
  * @author Alexei Vainshtein
  */
 public class Connection implements Serializable {
+    public static final long serialVersionUID = 1L;
 
     private int connectionRetry = ActionableHelper.getDefaultConnectionRetries();
     private int timeout = 300;

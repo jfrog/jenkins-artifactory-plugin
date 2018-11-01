@@ -9,37 +9,57 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
+import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+@SuppressWarnings("unused")
 public class CreateServerStep extends AbstractStepImpl {
 
     public static final String STEP_NAME = "rtServer";
     private BuildDataFile buildDataFile;
+    private ArtifactoryServer server;
 
     @DataBoundConstructor
     public CreateServerStep(String id) {
         buildDataFile = new BuildDataFile(STEP_NAME, id);
+        server = new ArtifactoryServer();
+        buildDataFile.putPOJO(server);
     }
 
     @DataBoundSetter
     public void setUrl(String url) {
-        buildDataFile.put("url", url);
+        server.setUrl(url);
     }
 
     @DataBoundSetter
     public void setUsername(String username) {
-        buildDataFile.put("username", username);
+        server.setUsername(username);
     }
 
     @DataBoundSetter
     public void setPassword(String password) {
-        buildDataFile.put("password", password);
+        server.setPassword(password);
     }
 
     @DataBoundSetter
     public void setCredentialsId(String credentialsId) {
-        buildDataFile.put("credentialsId", credentialsId);
+        server.setCredentialsId(credentialsId);
+    }
+
+    @DataBoundSetter
+    public void setBypassProxy(boolean bypassProxy) {
+        server.setBypassProxy(bypassProxy);
+    }
+
+    @DataBoundSetter
+    public void setTimeout(int timeout) {
+        server.getConnection().setTimeout(timeout);
+    }
+
+    @DataBoundSetter
+    public void setRetry(int retry) {
+        server.getConnection().setRetry(retry);
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<Void> {

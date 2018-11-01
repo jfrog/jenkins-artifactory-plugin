@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.types;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -20,6 +21,8 @@ import static org.jfrog.hudson.pipeline.Utils.appendBuildInfo;
  * Created by romang on 4/21/16.
  */
 public class ArtifactoryServer implements Serializable {
+    public static final long serialVersionUID = 1L;
+
     public static final String SPEC = "spec";
     public static final String SERVER = "server";
     public static final String BUILD_NAME = "buildName";
@@ -27,8 +30,11 @@ public class ArtifactoryServer implements Serializable {
 
     private String serverName;
     private String url;
+    @JsonProperty("username") // ObjectMapper's TreeToValue doesn't deserialize 'username' without it
     private String username;
+    @JsonProperty("password") // ObjectMapper's TreeToValue doesn't deserialize 'password' without it
     private String password;
+    @JsonProperty("credentialsId") // ObjectMapper's TreeToValue doesn't deserialize 'credentialsId' without it
     private String credentialsId;
     private boolean bypassProxy;
     private transient CpsScript cpsScript;
@@ -250,6 +256,22 @@ public class ArtifactoryServer implements Serializable {
         this.password = "";
         this.username = "";
         this.usesCredentialsId = true;
+    }
+
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
+    public void setServerName(String serverName) {
+        this.serverName = serverName;
+    }
+
+    public boolean isUsesCredentialsId() {
+        return usesCredentialsId;
+    }
+
+    public void setUsesCredentialsId(boolean usesCredentialsId) {
+        this.usesCredentialsId = usesCredentialsId;
     }
 
     @Whitelisted
