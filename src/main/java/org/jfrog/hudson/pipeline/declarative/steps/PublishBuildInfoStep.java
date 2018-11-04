@@ -19,7 +19,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 @SuppressWarnings("unused")
 public class PublishBuildInfoStep extends AbstractStepImpl {
 
-    public static final String STEP_NAME = "publishBuildInfo";
+    public static final String STEP_NAME = "rtPublishBuildInfo";
     private String buildNumber;
     private String buildName;
     private String serverId;

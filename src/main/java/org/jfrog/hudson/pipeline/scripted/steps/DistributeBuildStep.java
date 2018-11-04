@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.steps;
+package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
@@ -11,19 +11,23 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.executors.PromotionExecutor;
+import org.jfrog.hudson.pipeline.executors.DistributionExecutor;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.PromotionConfig;
+import org.jfrog.hudson.pipeline.types.DistributionConfig;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class PromoteBuildStep extends AbstractStepImpl {
+/**
+ * Created by yahavi on 12/04/2017.
+ */
+
+public class DistributeBuildStep extends AbstractStepImpl {
 
     private ArtifactoryServer server;
-    private PromotionConfig promotionConfig;
+    private DistributionConfig distributionConfig;
 
     @DataBoundConstructor
-    public PromoteBuildStep(PromotionConfig promotionConfig, ArtifactoryServer server) {
-        this.promotionConfig = promotionConfig;
+    public DistributeBuildStep(DistributionConfig distributionConfig, ArtifactoryServer server) {
+        this.distributionConfig = distributionConfig;
         this.server = server;
     }
 
@@ -31,8 +35,8 @@ public class PromoteBuildStep extends AbstractStepImpl {
         return server;
     }
 
-    public PromotionConfig getPromotionConfig() {
-        return promotionConfig;
+    public DistributionConfig getDistributionConfig() {
+        return distributionConfig;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Boolean> {
@@ -45,28 +49,28 @@ public class PromoteBuildStep extends AbstractStepImpl {
         private transient TaskListener listener;
 
         @Inject(optional = true)
-        private transient PromoteBuildStep step;
+        private transient DistributeBuildStep step;
 
         @Override
         protected Boolean run() throws Exception {
-            PromotionConfig promotionConfig = step.getPromotionConfig();
+            DistributionConfig distributionConfig = step.getDistributionConfig();
 
-            if (StringUtils.isEmpty(promotionConfig.getBuildName())) {
-                getContext().onFailure(new MissingArgumentException("Promotion build name is mandatory"));
+            if (StringUtils.isEmpty(distributionConfig.getBuildName())) {
+                getContext().onFailure(new MissingArgumentException("Distribution build name is mandatory"));
                 return false;
             }
 
-            if (StringUtils.isEmpty(promotionConfig.getBuildNumber())) {
-                getContext().onFailure(new MissingArgumentException("Promotion build number is mandatory"));
+            if (StringUtils.isEmpty(distributionConfig.getBuildNumber())) {
+                getContext().onFailure(new MissingArgumentException("Distribution build number is mandatory"));
                 return false;
             }
 
-            if (StringUtils.isEmpty(promotionConfig.getTargetRepo())) {
-                getContext().onFailure(new MissingArgumentException("Promotion target repository is mandatory"));
+            if (StringUtils.isEmpty(distributionConfig.getTargetRepo())) {
+                getContext().onFailure(new MissingArgumentException("Distribution target repository is mandatory"));
                 return false;
             }
 
-            new PromotionExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), build, listener, getContext(), promotionConfig).execute();
+            new DistributionExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), build, listener, getContext(), distributionConfig).execute();
             return true;
         }
     }
@@ -75,18 +79,18 @@ public class PromoteBuildStep extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(PromoteBuildStep.Execution.class);
+            super(DistributeBuildStep.Execution.class);
         }
 
         @Override
         // The step is invoked by ArtifactoryServer by the step name
         public String getFunctionName() {
-            return "artifactoryPromoteBuild";
+            return "artifactoryDistributeBuild";
         }
 
         @Override
         public String getDisplayName() {
-            return "Promote build";
+            return "Distribute build";
         }
 
         @Override

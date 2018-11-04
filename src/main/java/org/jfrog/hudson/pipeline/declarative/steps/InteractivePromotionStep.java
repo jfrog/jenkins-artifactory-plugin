@@ -1,45 +1,37 @@
-package org.jfrog.hudson.pipeline.steps;
+package org.jfrog.hudson.pipeline.declarative.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.PromotionConfig;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
-/**
- * Created by yahavi on 13/03/2017.
- */
+import java.io.IOException;
 
-public class AddInteractivePromotionStep extends AbstractStepImpl {
-    private ArtifactoryServer server;
-    private PromotionConfig promotionConfig;
+public class InteractivePromotionStep extends PromoteBuildStep {
+    public static final String STEP_NAME = "rtInteractivePromotion";
+
     private String displayName;
 
     @DataBoundConstructor
-    public AddInteractivePromotionStep(PromotionConfig promotionConfig, ArtifactoryServer server, String displayName) {
-        this.promotionConfig = promotionConfig;
-        this.server = server;
+    public InteractivePromotionStep(String serverId, String targetRepo) {
+        super(serverId, targetRepo);
+    }
+
+    @DataBoundSetter
+    public void setDisplayName(String displayName) {
         this.displayName = displayName;
-    }
-
-    public ArtifactoryServer getServer() {
-        return this.server;
-    }
-
-    public PromotionConfig getPromotionConfig() {
-        return this.promotionConfig;
-    }
-
-    public String getDisplayName() {
-        return this.displayName;
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<Boolean> {
@@ -48,18 +40,25 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
         @StepContextParameter
         private transient Run build;
 
+        @StepContextParameter
+        private transient FilePath ws;
+
+        @StepContextParameter
+        private transient TaskListener listener;
+
         @Inject(optional = true)
-        private transient AddInteractivePromotionStep step;
+        private transient InteractivePromotionStep step;
 
         @Override
         protected Boolean run() throws Exception {
-            ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(Utils.prepareArtifactoryServer(null, step.getServer()));
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, getContext(), step.serverId);
+            ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(Utils.prepareArtifactoryServer(null, server));
             addPromotionAction(configurator);
             return true;
         }
 
-        private void addPromotionAction(ArtifactoryConfigurator configurator) {
-            PromotionConfig pipelinePromotionConfig = step.getPromotionConfig();
+        private void addPromotionAction(ArtifactoryConfigurator configurator) throws IOException, InterruptedException {
+            PromotionConfig pipelinePromotionConfig = step.preparePromotionConfig(getContext());
             org.jfrog.hudson.release.promotion.PromotionConfig promotionConfig = Utils.convertPromotionConfig(pipelinePromotionConfig);
 
             synchronized (build.getActions()) {
@@ -68,7 +67,7 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
                     action = new UnifiedPromoteBuildAction(this.build);
                     build.getActions().add(action);
                 }
-                action.addPromotionCandidate(promotionConfig, configurator, step.getDisplayName());
+                action.addPromotionCandidate(promotionConfig, configurator, step.displayName);
             }
         }
     }
@@ -77,12 +76,12 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(Execution.class);
+            super(InteractivePromotionStep.Execution.class);
         }
 
         @Override
         public String getFunctionName() {
-            return "addInteractivePromotion";
+            return STEP_NAME;
         }
 
         @Override

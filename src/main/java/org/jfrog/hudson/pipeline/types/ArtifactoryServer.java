@@ -147,7 +147,7 @@ public class ArtifactoryServer implements Serializable {
         stepVariables.put(SERVER, this);
 
         // Throws CpsCallableInvocation - Must be the last line in this method
-        cpsScript.invokeMethod("parametrizedPublishBuildInfo", stepVariables);
+        cpsScript.invokeMethod("publishBuildInfo", stepVariables);
     }
 
     @Whitelisted

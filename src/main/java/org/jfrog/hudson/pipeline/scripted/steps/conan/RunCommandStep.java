@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.steps.conan;
+package org.jfrog.hudson.pipeline.scripted.steps.conan;
 
 import com.google.inject.Inject;
 import hudson.EnvVars;

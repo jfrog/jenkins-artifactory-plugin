@@ -1,32 +1,25 @@
-package org.jfrog.hudson.pipeline.steps;
+package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
 import hudson.Extension;
-import hudson.FilePath;
-import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.executors.GenericUploadExecutor;
+import org.jfrog.hudson.pipeline.executors.PublishBuildInfoExecutor;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class UploadStep extends AbstractStepImpl {
+public class PublishBuildInfoStep extends AbstractStepImpl {
 
     private BuildInfo buildInfo;
-    private String spec;
     private ArtifactoryServer server;
 
     @DataBoundConstructor
-    public UploadStep(String spec, BuildInfo buildInfo, ArtifactoryServer server) {
-        this.spec = spec;
+    public PublishBuildInfoStep(BuildInfo buildInfo, ArtifactoryServer server) {
         this.buildInfo = buildInfo;
         this.server = server;
     }
@@ -35,18 +28,12 @@ public class UploadStep extends AbstractStepImpl {
         return buildInfo;
     }
 
-    public String getSpec() {
-        return spec;
-    }
-
     public ArtifactoryServer getServer() {
         return server;
     }
 
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
+    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Boolean> {
         private static final long serialVersionUID = 1L;
-        @StepContextParameter
-        private transient FilePath ws;
 
         @StepContextParameter
         private transient Run build;
@@ -54,19 +41,13 @@ public class UploadStep extends AbstractStepImpl {
         @StepContextParameter
         private transient TaskListener listener;
 
-        @StepContextParameter
-        private transient EnvVars env;
-
         @Inject(optional = true)
-        private transient UploadStep step;
+        private transient PublishBuildInfoStep step;
 
         @Override
-        protected BuildInfo run() throws Exception {
-            GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), getContext(), Util.replaceMacro(step.getSpec(), env));
-            genericUploadExecutor.execute();
-            BuildInfo buildInfo = genericUploadExecutor.getBuildInfo();
-            new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
-            return buildInfo;
+        protected Boolean run() throws Exception {
+            new PublishBuildInfoExecutor(build, listener, step.getBuildInfo(), step.getServer()).execute();
+            return true;
         }
     }
 
@@ -74,18 +55,18 @@ public class UploadStep extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(UploadStep.Execution.class);
+            super(PublishBuildInfoStep.Execution.class);
         }
 
         @Override
         // The step is invoked by ArtifactoryServer by the step name
         public String getFunctionName() {
-            return "artifactoryUpload";
+            return "publishBuildInfo";
         }
 
         @Override
         public String getDisplayName() {
-            return "Upload artifacts";
+            return "Publish build Info to Artifactory";
         }
 
         @Override
@@ -93,4 +74,5 @@ public class UploadStep extends AbstractStepImpl {
             return true;
         }
     }
+
 }

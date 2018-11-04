@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.steps;
+package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;

@@ -21,8 +21,7 @@ public class BuildRetention implements Serializable {
     private boolean async;
 
     public BuildRetention() {
-        this.maxDays = -1;
-        this.maxBuilds = -1;
+        clear();
     }
 
     public org.jfrog.build.api.BuildRetention createBuildRetention() {

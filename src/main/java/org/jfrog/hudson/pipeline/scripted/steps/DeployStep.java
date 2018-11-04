@@ -1,38 +1,41 @@
-package org.jfrog.hudson.pipeline.steps;
+package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.EnvVars;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.types.buildInfo.Env;
+import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.types.deployers.Deployer;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
- * Created by romang on 5/2/16.
+ * Created by yahavi on 11/05/2017.
  */
-public class CollectEnvStep extends AbstractStepImpl {
+public class DeployStep extends AbstractStepImpl {
 
-    private Env env;
+    private Deployer deployer;
+    private BuildInfo buildInfo;
 
     @DataBoundConstructor
-    public CollectEnvStep(Env env) {
-        this.env = env;
-    }
-
-    public Env getEnv() {
-        return env;
+    public DeployStep(Deployer deployer, BuildInfo buildInfo) {
+        this.deployer = deployer;
+        this.buildInfo = buildInfo;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Boolean> {
         private static final long serialVersionUID = 1L;
 
         @Inject(optional = true)
-        private transient CollectEnvStep step;
+        private transient DeployStep step;
+
+        @StepContextParameter
+        private transient FilePath ws;
 
         @StepContextParameter
         private transient EnvVars env;
@@ -45,7 +48,7 @@ public class CollectEnvStep extends AbstractStepImpl {
 
         @Override
         protected Boolean run() throws Exception {
-            step.getEnv().collectVariables(env, build, listener);
+            step.deployer.deployArtifacts(step.buildInfo, listener, ws);
             return true;
         }
     }
@@ -54,17 +57,17 @@ public class CollectEnvStep extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(CollectEnvStep.Execution.class);
+            super(DeployStep.Execution.class);
         }
 
         @Override
         public String getFunctionName() {
-            return "collectEnv";
+            return "deployArtifacts";
         }
 
         @Override
         public String getDisplayName() {
-            return "Collect environment variables and system properties";
+            return "Deploy artifacts";
         }
 
         @Override
@@ -72,6 +75,4 @@ public class CollectEnvStep extends AbstractStepImpl {
             return true;
         }
     }
-
 }
-

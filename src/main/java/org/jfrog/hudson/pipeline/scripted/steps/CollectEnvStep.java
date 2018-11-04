@@ -1,6 +1,7 @@
-package org.jfrog.hudson.pipeline.steps;
+package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -8,32 +9,33 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.executors.PublishBuildInfoExecutor;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.types.buildInfo.Env;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class PublishBuildInfoStep extends AbstractStepImpl {
+/**
+ * Created by romang on 5/2/16.
+ */
+public class CollectEnvStep extends AbstractStepImpl {
 
-    private BuildInfo buildInfo;
-    private ArtifactoryServer server;
+    private Env env;
 
     @DataBoundConstructor
-    public PublishBuildInfoStep(BuildInfo buildInfo, ArtifactoryServer server) {
-        this.buildInfo = buildInfo;
-        this.server = server;
+    public CollectEnvStep(Env env) {
+        this.env = env;
     }
 
-    public BuildInfo getBuildInfo() {
-        return buildInfo;
-    }
-
-    public ArtifactoryServer getServer() {
-        return server;
+    public Env getEnv() {
+        return env;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Boolean> {
         private static final long serialVersionUID = 1L;
+
+        @Inject(optional = true)
+        private transient CollectEnvStep step;
+
+        @StepContextParameter
+        private transient EnvVars env;
 
         @StepContextParameter
         private transient Run build;
@@ -41,12 +43,9 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
         @StepContextParameter
         private transient TaskListener listener;
 
-        @Inject(optional = true)
-        private transient PublishBuildInfoStep step;
-
         @Override
         protected Boolean run() throws Exception {
-            new PublishBuildInfoExecutor(build, listener, step.getBuildInfo(), step.getServer()).execute();
+            step.getEnv().collectVariables(env, build, listener);
             return true;
         }
     }
@@ -55,18 +54,17 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(PublishBuildInfoStep.Execution.class);
+            super(CollectEnvStep.Execution.class);
         }
 
         @Override
-        // The step is invoked by ArtifactoryServer by the step name
         public String getFunctionName() {
-            return "parametrizedPublishBuildInfo";
+            return "collectEnv";
         }
 
         @Override
         public String getDisplayName() {
-            return "Publish build Info to Artifactory";
+            return "Collect environment variables and system properties";
         }
 
         @Override
@@ -76,3 +74,4 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
     }
 
 }
+

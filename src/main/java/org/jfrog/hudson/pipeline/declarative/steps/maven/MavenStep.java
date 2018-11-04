@@ -22,6 +22,7 @@ import org.jfrog.hudson.pipeline.types.MavenBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.MavenDeployer;
 import org.jfrog.hudson.pipeline.types.resolvers.MavenResolver;
+import org.jfrog.hudson.util.PropertyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -119,9 +120,20 @@ public class MavenStep extends AbstractStepImpl {
                 return;
             }
             BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, MavenDeployerStep.STEP_NAME, step.deployerId);
-            MavenDeployer mavenDeployer = Utils.mapper().treeToValue(buildDataFile.get(MavenDeployerStep.STEP_NAME), MavenDeployer.class);
-            step.mavenBuild.setDeployer(mavenDeployer);
-            mavenDeployer.setServer(getArtifactoryServer(buildNumber, buildDataFile));
+            if (buildDataFile == null) {
+                throw new IOException("Deployer " + step.deployerId + " doesn't exist!");
+            }
+            MavenDeployer deployer = Utils.mapper().treeToValue(buildDataFile.get(MavenDeployerStep.STEP_NAME), MavenDeployer.class);
+            deployer.setServer(getArtifactoryServer(buildNumber, buildDataFile));
+            step.mavenBuild.setDeployer(deployer);
+            addProperties(buildDataFile);
+        }
+
+        private void addProperties(BuildDataFile buildDataFile) {
+            JsonNode propertiesNode = buildDataFile.get("properties");
+            if (propertiesNode != null) {
+                step.mavenBuild.getDeployer().getProperties().putAll(PropertyUtils.getDeploymentPropertiesMap(propertiesNode.asText(), env));
+            }
         }
 
         private void setResolver(String buildNumber) throws IOException, InterruptedException {
@@ -129,9 +141,12 @@ public class MavenStep extends AbstractStepImpl {
                 return;
             }
             BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, MavenResolverStep.STEP_NAME, step.resolverId);
-            MavenResolver mavenResolver = Utils.mapper().treeToValue(buildDataFile.get(MavenResolverStep.STEP_NAME), MavenResolver.class);
-            step.mavenBuild.setResolver(mavenResolver);
-            mavenResolver.setServer(getArtifactoryServer(buildNumber, buildDataFile));
+            if (buildDataFile == null) {
+                throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
+            }
+            MavenResolver resolver = Utils.mapper().treeToValue(buildDataFile.get(MavenResolverStep.STEP_NAME), MavenResolver.class);
+            resolver.setServer(getArtifactoryServer(buildNumber, buildDataFile));
+            step.mavenBuild.setResolver(resolver);
         }
 
         private ArtifactoryServer getArtifactoryServer(String buildNumber, BuildDataFile buildDataFile) throws IOException, InterruptedException {

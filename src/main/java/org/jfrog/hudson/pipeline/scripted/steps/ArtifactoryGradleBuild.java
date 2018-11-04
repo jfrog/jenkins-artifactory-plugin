@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.steps;
+package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.EnvVars;
@@ -11,43 +11,55 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.executors.MavenExecutor;
-import org.jfrog.hudson.pipeline.types.MavenBuild;
+import org.jfrog.hudson.pipeline.executors.GradleExecutor;
+import org.jfrog.hudson.pipeline.types.GradleBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * Created by Tamirh on 04/08/2016.
  */
-public class ArtifactoryMavenBuild extends AbstractStepImpl {
+public class ArtifactoryGradleBuild extends AbstractStepImpl {
 
-    private MavenBuild mavenBuild;
-    private String goal;
-    private String pom;
+    private GradleBuild gradleBuild;
+    private String tasks;
+    private String buildFile;
+    private String rootDir;
+    private String switches;
     private BuildInfo buildInfo;
 
     @DataBoundConstructor
-    public ArtifactoryMavenBuild(MavenBuild mavenBuild, String pom, String goals, BuildInfo buildInfo) {
-        this.mavenBuild = mavenBuild;
-        this.goal = goals == null ? "" : goals;
-        this.pom = pom == null ? "" : pom;
+    public ArtifactoryGradleBuild(GradleBuild gradleBuild, String rootDir, String buildFile, String tasks, String switches, BuildInfo buildInfo) {
+        this.gradleBuild = gradleBuild;
+        this.tasks = tasks;
+        this.rootDir = rootDir;
+        this.buildFile = buildFile;
+        this.switches = switches;
         this.buildInfo = buildInfo;
     }
 
-    private MavenBuild getMavenBuild() {
-        return mavenBuild;
+    private GradleBuild getGradleBuild() {
+        return gradleBuild;
     }
 
-    private String getGoal() {
-        return goal;
+    private String getSwitches() {
+        return switches;
     }
 
-    private String getPom() {
-        return pom;
+    private String getTasks() {
+        return tasks;
+    }
+
+    private String getBuildFile() {
+        return buildFile;
     }
 
     private BuildInfo getBuildInfo() {
         return buildInfo;
+    }
+
+    private String getRootDir() {
+        return rootDir;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
@@ -63,7 +75,7 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
         private transient Launcher launcher;
 
         @Inject(optional = true)
-        private transient ArtifactoryMavenBuild step;
+        private transient ArtifactoryGradleBuild step;
 
         @StepContextParameter
         private transient FilePath ws;
@@ -73,10 +85,9 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            MavenBuild mavenBuild = step.getMavenBuild();
-            MavenExecutor mavenExecutor = new MavenExecutor(listener, launcher, build, ws, env, mavenBuild, step.getPom(), step.getGoal(), step.getBuildInfo());
-            mavenExecutor.execute();
-            return mavenExecutor.getBuildInfo();
+            GradleExecutor gradleExecutor = new GradleExecutor(build, step.getGradleBuild(), step.getTasks(), step.getBuildFile(), step.getRootDir(), step.getSwitches(), step.getBuildInfo(), env, ws, listener, launcher);
+            gradleExecutor.execute();
+            return gradleExecutor.getBuildInfo();
         }
     }
 
@@ -84,17 +95,17 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(ArtifactoryMavenBuild.Execution.class);
+            super(ArtifactoryGradleBuild.Execution.class);
         }
 
         @Override
         public String getFunctionName() {
-            return "artifactoryMavenBuild";
+            return "ArtifactoryGradleBuild";
         }
 
         @Override
         public String getDisplayName() {
-            return "run Artifactory maven";
+            return "run Artifactory gradle";
         }
 
         @Override

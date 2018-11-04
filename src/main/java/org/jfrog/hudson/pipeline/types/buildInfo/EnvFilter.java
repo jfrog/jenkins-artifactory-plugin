@@ -12,7 +12,7 @@ public class EnvFilter extends Filter {
     private final String DEFAULT_EXCLUDE_PATTERN = "*password*,*secret*,*key*";
 
     public EnvFilter() {
-        this.patternFilter = new IncludeExcludePatterns("", DEFAULT_EXCLUDE_PATTERN);
+        reset();
     }
 
     @Whitelisted

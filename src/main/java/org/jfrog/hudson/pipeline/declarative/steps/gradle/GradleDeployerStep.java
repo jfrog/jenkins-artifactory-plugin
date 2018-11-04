@@ -21,6 +21,26 @@ public class GradleDeployerStep extends GradleDeployerResolver {
     }
 
     @DataBoundSetter
+    public void setIncludePattern(String includePattern) {
+        gradleDeployer.getArtifactDeploymentPatterns().addInclude(includePattern);
+    }
+
+    @DataBoundSetter
+    public void setExcludePattern(String excludePattern) {
+        gradleDeployer.getArtifactDeploymentPatterns().addExclude(excludePattern);
+    }
+
+    @DataBoundSetter
+    public void setIncludeEnvVars(boolean includeEnvVars) {
+        gradleDeployer.setIncludeEnvVars(includeEnvVars);
+    }
+
+    @DataBoundSetter
+    public void setCustomBuildName(String customBuildName) {
+        gradleDeployer.setCustomBuildName(customBuildName);
+    }
+
+    @DataBoundSetter
     public void setDeployMavenDescriptors(String deployMavenDescriptors) {
         gradleDeployer.setDeployMavenDescriptors(deployMavenDescriptors);
     }
@@ -43,6 +63,11 @@ public class GradleDeployerStep extends GradleDeployerResolver {
     @DataBoundSetter
     public void setMavenCompatible(String mavenCompatible) {
         gradleDeployer.setMavenCompatible(mavenCompatible);
+    }
+
+    @DataBoundSetter
+    public void setProperties(String properties) {
+        buildDataFile.put("properties", properties);
     }
 
     @Extension

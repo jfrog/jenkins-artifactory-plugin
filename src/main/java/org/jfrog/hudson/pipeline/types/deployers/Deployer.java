@@ -92,6 +92,10 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         return this.properties;
     }
 
+    public void setProperties(ArrayListMultimap<String, String> properties) {
+        this.properties = properties;
+    }
+
     public boolean isOverridingDefaultDeployer() {
         return false;
     }
@@ -117,6 +121,10 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
     @Whitelisted
     public Filter getArtifactDeploymentPatterns() {
         return artifactDeploymentPatterns;
+    }
+
+    public void setArtifactDeploymentPatterns(Filter artifactDeploymentPatterns) {
+        this.artifactDeploymentPatterns = artifactDeploymentPatterns;
     }
 
     public IncludesExcludes getArtifactsIncludeExcludeForDeyployment() {

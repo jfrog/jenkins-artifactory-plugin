@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.steps;
+package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.EnvVars;
@@ -12,9 +12,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.kohsuke.stapler.DataBoundConstructor;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by romang on 4/21/16.

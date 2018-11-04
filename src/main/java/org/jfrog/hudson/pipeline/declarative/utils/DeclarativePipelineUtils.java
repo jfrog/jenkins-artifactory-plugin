@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.declarative.utils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.FilePath;
 import hudson.model.Run;
@@ -75,7 +76,16 @@ public class DeclarativePipelineUtils {
             getArtifactoryServerExecutor.execute();
             return getArtifactoryServerExecutor.getArtifactoryServer();
         }
-        return Utils.mapper().treeToValue(buildDataFile.get(CreateServerStep.STEP_NAME), ArtifactoryServer.class);
+        JsonNode jsonNode = buildDataFile.get(CreateServerStep.STEP_NAME);
+        ArtifactoryServer server = Utils.mapper().treeToValue(jsonNode, ArtifactoryServer.class);
+        String credentialsId = jsonNode.get("credentialsId").asText();
+        if (!credentialsId.isEmpty()) {
+            server.setCredentialsId(credentialsId);
+        } else {
+            server.setUsername(jsonNode.get("username").asText());
+            server.setPassword(jsonNode.get("password").asText());
+        }
+        return server;
     }
 
     public static String getBuildInfoId(StepContext context, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {

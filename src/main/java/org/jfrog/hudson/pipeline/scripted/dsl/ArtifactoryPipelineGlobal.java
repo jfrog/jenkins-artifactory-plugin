@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.dsl;
+package org.jfrog.hudson.pipeline.scripted.dsl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;

@@ -15,11 +15,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.util.Date;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public class BuildInfoStep extends AbstractStepImpl {
 
-    public static final String STEP_NAME = "buildInfo";
+    public static final String STEP_NAME = "rtBuildInfo";
     private BuildInfo buildInfo;
 
     @DataBoundConstructor
@@ -43,23 +44,43 @@ public class BuildInfoStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setCapture(boolean capture) {
+    public void setCaptureEnv(boolean capture) {
         buildInfo.getEnv().setCapture(capture);
     }
 
     @DataBoundSetter
-    public void addIncludeEnv(String includePattern) {
+    public void setIncludeEnv(String includePattern) {
         buildInfo.getEnv().getFilter().addInclude(includePattern);
     }
 
     @DataBoundSetter
-    public void addExcludeEnv(String excludePattern) {
+    public void setExcludeEnv(String excludePattern) {
         buildInfo.getEnv().getFilter().addExclude(excludePattern);
     }
 
     @DataBoundSetter
-    public void resetEnvFilter() {
-        buildInfo.getEnv().getFilter().reset();
+    public void setMaxBuilds(int maxBuilds) {
+        buildInfo.getRetention().setMaxBuilds(maxBuilds);
+    }
+
+    @DataBoundSetter
+    public void setAsyncBuildRetention(boolean async) {
+        buildInfo.getRetention().setAsync(async);
+    }
+
+    @DataBoundSetter
+    public void setDeleteBuildArtifacts(boolean deleteBuildArtifact) {
+        buildInfo.getRetention().setDeleteBuildArtifacts(deleteBuildArtifact);
+    }
+
+    @DataBoundSetter
+    public void setMaxBuilds(List<String> buildNumbersNotToBeDiscarded) {
+        buildInfo.getRetention().setDoNotDiscardBuilds(buildNumbersNotToBeDiscarded);
+    }
+
+    @DataBoundSetter
+    public void setMaxDays(int days) {
+        buildInfo.getRetention().setMaxDays(days);
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<Void> {

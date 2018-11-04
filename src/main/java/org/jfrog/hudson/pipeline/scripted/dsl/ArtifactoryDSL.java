@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.dsl;
+package org.jfrog.hudson.pipeline.scripted.dsl;
 
 import groovy.lang.Binding;
 import hudson.Extension;
