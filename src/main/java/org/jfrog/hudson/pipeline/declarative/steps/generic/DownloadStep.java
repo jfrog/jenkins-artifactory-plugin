@@ -23,6 +23,7 @@ public class DownloadStep extends GenericStep {
     }
 
     public static class Execution extends GenericStep.Execution {
+
         @StepContextParameter
         private transient FilePath ws;
 

@@ -29,6 +29,9 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.io.IOException;
 import java.util.Objects;
 
+/**
+ * Run Maven-Artifactory task.
+ */
 @SuppressWarnings("unused")
 public class MavenStep extends AbstractStepImpl {
 

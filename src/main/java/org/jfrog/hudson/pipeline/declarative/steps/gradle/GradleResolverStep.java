@@ -5,6 +5,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jfrog.hudson.pipeline.types.resolvers.GradleResolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+@SuppressWarnings("unused")
 public class GradleResolverStep extends GradleDeployerResolver {
 
     static final String STEP_NAME = "rtGradleResolver";

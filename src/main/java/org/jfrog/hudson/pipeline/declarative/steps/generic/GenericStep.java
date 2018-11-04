@@ -18,8 +18,13 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 
+/**
+ * Use file spec to upload and download artifacts.
+ * Allows to use input spec from string parameter or from file.
+ */
 @SuppressWarnings("unused")
 public class GenericStep extends AbstractStepImpl {
+
     protected String serverId;
     protected String spec;
     private String customBuildNumber;

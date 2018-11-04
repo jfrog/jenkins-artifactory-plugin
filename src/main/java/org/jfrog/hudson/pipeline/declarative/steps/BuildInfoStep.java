@@ -17,6 +17,9 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Create build info.
+ */
 @SuppressWarnings("unused")
 public class BuildInfoStep extends AbstractStepImpl {
 

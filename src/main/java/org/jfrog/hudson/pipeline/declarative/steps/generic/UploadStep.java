@@ -16,9 +16,10 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 @SuppressWarnings("unused")
 public class UploadStep extends GenericStep {
-    private String spec;
+
     private String specPath;
     private String serverId;
+    private String spec;
 
     @DataBoundConstructor
     public UploadStep(String serverId) {

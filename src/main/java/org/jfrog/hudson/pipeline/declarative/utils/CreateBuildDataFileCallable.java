@@ -11,12 +11,13 @@ import java.nio.file.Path;
 import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.getBuildDataFileName;
 
 /**
- * Create pipeline build data in @tmp directory.
- * Used to pass data from different steps in declarative pipelines.
+ * Create pipeline build data in @tmp/build-number directory.
+ * Used to transfer data from different steps in declarative pipelines.
  */
 public class CreateBuildDataFileCallable extends MasterToSlaveFileCallable<Void> {
-    private String buildNumber;
+
     private BuildDataFile buildDataFile;
+    private String buildNumber;
 
     CreateBuildDataFileCallable(String buildNumber, BuildDataFile buildDataFile) {
         this.buildNumber = buildNumber;

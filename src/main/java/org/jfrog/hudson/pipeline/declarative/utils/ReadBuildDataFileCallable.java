@@ -14,10 +14,11 @@ import java.nio.file.Path;
 import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.getBuildDataFileName;
 
 /**
- *  Read pipeline build data from @tmp directory.
- *  Used to pass data from different steps in declarative pipelines.
+ *  Read pipeline build data from @tmp/build-number directory.
+ *  Used to transfer data from different steps in declarative pipelines.
  */
 public class ReadBuildDataFileCallable extends MasterToSlaveFileCallable<BuildDataFile> {
+
     private TaskListener listener;
     private String buildNumber;
     private String stepName;

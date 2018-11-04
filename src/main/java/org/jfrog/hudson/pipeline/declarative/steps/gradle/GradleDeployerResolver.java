@@ -12,6 +12,9 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.writeBuildDataFile;
 
+/**
+ * Base class for Gradle deployer and resolver.
+ */
 public class GradleDeployerResolver extends AbstractStepImpl {
 
     BuildDataFile buildDataFile;

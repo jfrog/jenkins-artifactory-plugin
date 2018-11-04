@@ -19,10 +19,10 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class PromoteBuildStep extends AbstractStepImpl {
-    public static final String STEP_NAME = "rtPromoteBuild";
 
-    protected String serverId;
+    public static final String STEP_NAME = "rtPromoteBuild";
     protected PromotionConfig promotionConfig;
+    protected String serverId;
 
     @DataBoundConstructor
     public PromoteBuildStep(String serverId, String targetRepo) {

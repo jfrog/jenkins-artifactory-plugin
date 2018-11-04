@@ -28,6 +28,9 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 
+/**
+ * Run Gradle-Artifactory task.
+ */
 @SuppressWarnings("unused")
 public class GradleStep extends AbstractStepImpl {
 

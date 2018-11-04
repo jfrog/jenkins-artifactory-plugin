@@ -13,7 +13,7 @@ import java.io.*;
 public class BuildDataFile implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private ObjectNode jsonObject;
+    private ObjectNode jsonObject; // Root node
 
     public BuildDataFile(String stepName, String stepId) {
         jsonObject = Utils.mapper().createObjectNode();
@@ -25,6 +25,10 @@ public class BuildDataFile implements Serializable {
         return this;
     }
 
+    /**
+     * Put serializable objects like MavenDeployer, MavenResolver, ArtifactoryServer, etc.
+     * @param pojo - Serializable object
+     */
     public void putPOJO(Object pojo) {
         jsonObject.putPOJO(jsonObject.get("stepName").asText(), pojo);
     }
@@ -41,10 +45,18 @@ public class BuildDataFile implements Serializable {
         return jsonObject.get("stepId").asText();
     }
 
+    /**
+     * For serialization.
+     * @param stream - The input stream to read the object from.
+     */
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         jsonObject = Utils.mapper().readValue((DataInput) stream, ObjectNode.class);
     }
 
+    /**
+     * For serialization.
+     * @param stream - The output stream to write the object to.
+     */
     private void writeObject(ObjectOutputStream stream) throws IOException {
         Utils.mapper().writeValue((DataOutput) stream, jsonObject);
     }

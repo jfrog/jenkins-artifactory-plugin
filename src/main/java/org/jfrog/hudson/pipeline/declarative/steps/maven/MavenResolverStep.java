@@ -5,6 +5,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jfrog.hudson.pipeline.types.resolvers.MavenResolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+@SuppressWarnings("unused")
 public class MavenResolverStep extends MavenDeployerResolver {
 
     static final String STEP_NAME = "rtMavenResolver";

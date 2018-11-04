@@ -19,9 +19,10 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 
+@SuppressWarnings("unused")
 public class InteractivePromotionStep extends PromoteBuildStep {
-    public static final String STEP_NAME = "rtInteractivePromotion";
 
+    public static final String STEP_NAME = "rtInteractivePromotion";
     private String displayName;
 
     @DataBoundConstructor

@@ -9,6 +9,10 @@ import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+/**
+ * Base class for Gradle deployer and resolver.
+ */
+@SuppressWarnings("unused")
 public class MavenDeployerResolver extends AbstractStepImpl {
 
     BuildDataFile buildDataFile;
