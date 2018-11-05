@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.declarative.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.model.Run;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
@@ -10,6 +11,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
+import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -65,15 +67,18 @@ public class CreateServerStep extends AbstractStepImpl {
     public static class Execution extends AbstractSynchronousStepExecution<Void> {
         private static final long serialVersionUID = 1L;
 
-        @Inject(optional = true)
-        private transient CreateServerStep step;
+        @StepContextParameter
+        private transient Run build;
 
         @StepContextParameter
         private transient FilePath ws;
 
+        @Inject(optional = true)
+        private transient CreateServerStep step;
+
         @Override
         protected Void run() throws Exception {
-            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
+            String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             DeclarativePipelineUtils.writeBuildDataFile(ws, buildNumber, step.buildDataFile);
             return null;
         }

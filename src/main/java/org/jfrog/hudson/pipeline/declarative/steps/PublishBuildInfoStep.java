@@ -56,9 +56,9 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, getContext(), step.buildName, step.buildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, build, step.buildName, step.buildNumber);
             if (buildInfo == null) {
-                throw new RuntimeException("Build " + DeclarativePipelineUtils.createBuildInfoId(getContext(), step.buildName, step.buildNumber) + " does not exist!");
+                throw new RuntimeException("Build " + DeclarativePipelineUtils.createBuildInfoId(build, step.buildName, step.buildNumber) + " does not exist!");
             }
             ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, getContext(), step.serverId);
             new PublishBuildInfoExecutor(build, listener, buildInfo, server).execute();

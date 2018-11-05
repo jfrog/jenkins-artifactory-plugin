@@ -22,6 +22,7 @@ import org.jfrog.hudson.pipeline.types.GradleBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.GradleDeployer;
 import org.jfrog.hudson.pipeline.types.resolvers.GradleResolver;
+import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.PropertyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -127,17 +128,17 @@ public class GradleStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, getContext(), step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, build, step.customBuildName, step.customBuildNumber);
             setGradleBuild();
             GradleExecutor gradleExecutor = new GradleExecutor(build, step.gradleBuild, step.tasks, step.buildFile, step.rootDir, step.switches, buildInfo, env, ws, listener, launcher);
             gradleExecutor.execute();
             buildInfo = gradleExecutor.getBuildInfo();
-            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, getContext());
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build);
             return null;
         }
 
         private void setGradleBuild() throws IOException, InterruptedException {
-            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
+            String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             setDeployer(buildNumber);
             setResolver(buildNumber);
         }

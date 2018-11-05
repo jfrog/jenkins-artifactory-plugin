@@ -25,10 +25,10 @@ public class DownloadStep extends GenericStep {
     public static class Execution extends GenericStep.Execution {
 
         @StepContextParameter
-        private transient FilePath ws;
+        private transient Run build;
 
         @StepContextParameter
-        private transient Run build;
+        private transient FilePath ws;
 
         @StepContextParameter
         private transient TaskListener listener;
@@ -46,7 +46,7 @@ public class DownloadStep extends GenericStep {
             genericDownloadExecutor.execute();
             BuildInfo buildInfo = genericDownloadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
-            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, getContext());
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build);
             return null;
         }
     }

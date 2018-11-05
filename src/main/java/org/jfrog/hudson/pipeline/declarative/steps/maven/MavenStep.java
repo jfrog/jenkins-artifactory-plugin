@@ -22,6 +22,7 @@ import org.jfrog.hudson.pipeline.types.MavenBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.MavenDeployer;
 import org.jfrog.hudson.pipeline.types.resolvers.MavenResolver;
+import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.PropertyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -103,17 +104,17 @@ public class MavenStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, getContext(), step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, build, step.customBuildName, step.customBuildNumber);
             setMavenBuild();
             MavenExecutor mavenExecutor = new MavenExecutor(listener, launcher, build, ws, env, step.mavenBuild, step.pom, step.goals, buildInfo);
             mavenExecutor.execute();
             buildInfo = mavenExecutor.getBuildInfo();
-            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, getContext());
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build);
             return null;
         }
 
         private void setMavenBuild() throws IOException, InterruptedException {
-            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
+            String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             setDeployer(buildNumber);
             setResolver(buildNumber);
         }

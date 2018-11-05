@@ -8,6 +8,7 @@ import java.io.Serializable;
 /**
  * Created by Tamirh on 14/08/2016.
  */
+@SuppressWarnings("unused")
 public class Filter implements Serializable {
     protected IncludeExcludePatterns patternFilter;
 
@@ -31,6 +32,10 @@ public class Filter implements Serializable {
     public Filter clear() {
         patternFilter = new IncludeExcludePatterns("", "");
         return this;
+    }
+
+    public void setPatternFilter(IncludeExcludePatterns patternFilter) {
+        this.patternFilter = patternFilter;
     }
 
     public IncludeExcludePatterns getPatternFilter() {

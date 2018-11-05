@@ -11,6 +11,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -100,11 +101,11 @@ public class BuildInfoStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            String buildName = StringUtils.isBlank(step.buildInfo.getName()) ? DeclarativePipelineUtils.getBuildName(getContext()) : step.buildInfo.getName();
-            String buildNumber = StringUtils.isBlank(step.buildInfo.getNumber()) ? DeclarativePipelineUtils.getBuildNumber(getContext()) : step.buildInfo.getNumber();
+            String buildName = StringUtils.isBlank(step.buildInfo.getName()) ? BuildUniqueIdentifierHelper.getBuildName(build) : step.buildInfo.getName();
+            String buildNumber = StringUtils.isBlank(step.buildInfo.getNumber()) ? BuildUniqueIdentifierHelper.getBuildNumber(build) : step.buildInfo.getNumber();
             step.buildInfo.setName(buildName);
             step.buildInfo.setNumber(buildNumber);
-            DeclarativePipelineUtils.saveBuildInfo(step.buildInfo, ws, getContext());
+            DeclarativePipelineUtils.saveBuildInfo(step.buildInfo, ws, build);
             return null;
         }
     }

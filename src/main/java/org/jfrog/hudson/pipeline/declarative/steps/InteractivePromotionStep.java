@@ -17,8 +17,6 @@ import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import java.io.IOException;
-
 @SuppressWarnings("unused")
 public class InteractivePromotionStep extends PromoteBuildStep {
 
@@ -58,8 +56,8 @@ public class InteractivePromotionStep extends PromoteBuildStep {
             return true;
         }
 
-        private void addPromotionAction(ArtifactoryConfigurator configurator) throws IOException, InterruptedException {
-            PromotionConfig pipelinePromotionConfig = step.preparePromotionConfig(getContext());
+        private void addPromotionAction(ArtifactoryConfigurator configurator) {
+            PromotionConfig pipelinePromotionConfig = step.preparePromotionConfig(build);
             org.jfrog.hudson.release.promotion.PromotionConfig promotionConfig = Utils.convertPromotionConfig(pipelinePromotionConfig);
 
             synchronized (build.getActions()) {

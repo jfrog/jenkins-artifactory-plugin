@@ -5,7 +5,6 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.declarative.steps.BuildInfoStep;
@@ -14,6 +13,7 @@ import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.executors.GetArtifactoryServerExecutor;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 
 import java.io.IOException;
 
@@ -52,32 +52,6 @@ public class DeclarativePipelineUtils {
     }
 
     /**
-     * Get the job build name.
-     * @param context - The job context.
-     * @return Job's build name.
-     */
-    public static String getBuildName(StepContext context) throws IOException, InterruptedException {
-        WorkflowRun workflowRun = context.get(WorkflowRun.class);
-        if (workflowRun == null) {
-            throw new IOException("Step has no workflow");
-        }
-        return StringUtils.substringBefore(workflowRun.getExternalizableId(), "#");
-    }
-
-    /**
-     * Get the job build number.
-     * @param context - The job context.
-     * @return Job's build number.
-     */
-    public static String getBuildNumber(StepContext context) throws IOException, InterruptedException {
-        WorkflowRun workflowRun = context.get(WorkflowRun.class);
-        if (workflowRun == null) {
-            throw new IOException("Step has no workflow");
-        }
-        return workflowRun.getId();
-    }
-
-    /**
      * Get Artifactory server from global server configuration or from previous rtServer{...} scope.
      * @param listener - Step's listener.
      * @param build - Step's build.
@@ -87,7 +61,7 @@ public class DeclarativePipelineUtils {
      * @return Artifactory server.
      */
     public static ArtifactoryServer getArtifactoryServer(TaskListener listener, Run build, FilePath ws, StepContext context, String serverId) throws IOException, InterruptedException {
-        String buildNumber = getBuildNumber(context);
+        String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, buildNumber, CreateServerStep.STEP_NAME, serverId);
         if (buildDataFile == null) {
             GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, context, serverId);
@@ -108,28 +82,28 @@ public class DeclarativePipelineUtils {
 
     /**
      * Create build info id: <buildname>_<buildnumber>.
-     * @param context - Step's context.
+     * @param build - Step's build.
      * @param customBuildName - Step's custom build name if exist.
      * @param customBuildNumber - Step's custom build number if exist.
      * @return build info id: <buildname>_<buildnumber>.
      */
-    public static String createBuildInfoId(StepContext context, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {
-        return (StringUtils.isBlank(customBuildName) ? getBuildName(context) : customBuildName) + "_" +
-                (StringUtils.isBlank(customBuildNumber) ? getBuildNumber(context) : customBuildNumber);
+    public static String createBuildInfoId(Run build, String customBuildName, String customBuildNumber) {
+        return (StringUtils.isBlank(customBuildName) ? BuildUniqueIdentifierHelper.getBuildName(build) : customBuildName) + "_" +
+                (StringUtils.isBlank(customBuildNumber) ? BuildUniqueIdentifierHelper.getBuildNumber(build) : customBuildNumber);
     }
 
     /**
      * Get build info as defined in previous rtBuildInfo{...} scope.
      * @param listener - Step's listener.
      * @param ws - Step's workspace.
-     * @param context - Step's context.
+     * @param build - Step's build.
      * @param customBuildName - Step's custom build name if exist.
      * @param customBuildNumber - Step's custom build number if exist.
      * @return build info object as defined in previous rtBuildInfo{...} scope or null.
      */
-    public static BuildInfo getBuildInfo(TaskListener listener, FilePath ws, StepContext context, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {
-        String jobBuildNumber = getBuildNumber(context);
-        String buildInfoId = createBuildInfoId(context, customBuildName, customBuildNumber);
+    public static BuildInfo getBuildInfo(TaskListener listener, FilePath ws, Run build, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {
+        String jobBuildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
+        String buildInfoId = createBuildInfoId(build, customBuildName, customBuildNumber);
 
         BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, jobBuildNumber, BuildInfoStep.STEP_NAME, buildInfoId);
         if (buildDataFile == null) {
@@ -142,11 +116,11 @@ public class DeclarativePipelineUtils {
      * Save build info in @tmp/build-number folder.
      * @param buildInfo - The build info object to save.
      * @param ws - Step's workspace.
-     * @param context - Step's context.
+     * @param build - Step's build.
      */
-    public static void saveBuildInfo(BuildInfo buildInfo, FilePath ws, StepContext context) throws Exception {
-        String jobBuildNumber = getBuildNumber(context);
-        String buildInfoId = createBuildInfoId(context, buildInfo.getName(), buildInfo.getNumber());
+    public static void saveBuildInfo(BuildInfo buildInfo, FilePath ws, Run build) throws Exception {
+        String jobBuildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
+        String buildInfoId = createBuildInfoId(build, buildInfo.getName(), buildInfo.getNumber());
 
         BuildDataFile buildDataFile = new BuildDataFile(BuildInfoStep.STEP_NAME, buildInfoId);
         buildDataFile.putPOJO(buildInfo);

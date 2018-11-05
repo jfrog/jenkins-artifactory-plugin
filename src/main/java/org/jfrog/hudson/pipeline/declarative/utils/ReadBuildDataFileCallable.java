@@ -38,7 +38,6 @@ public class ReadBuildDataFileCallable extends MasterToSlaveFileCallable<BuildDa
         if (!buildFile.exists()) {
             return null;
         }
-
         try (FileInputStream fos = new FileInputStream(buildFile);
              ObjectInputStream oos = new ObjectInputStream(fos)
         ) {

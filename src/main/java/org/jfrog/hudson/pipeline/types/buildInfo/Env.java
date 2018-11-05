@@ -16,9 +16,10 @@ import java.util.*;
 /**
  * Created by romang on 6/22/16.
  */
+@SuppressWarnings("unused")
 public class Env implements Serializable {
-    private Map<String, String> envVars = new HashMap<String, String>();
-    private Map<String, String> sysVars = new HashMap<String, String>();
+    private Map<String, String> envVars = new HashMap<>();
+    private Map<String, String> sysVars = new HashMap<>();
     private EnvFilter filter = new EnvFilter();
     private boolean capture = false; //By default don't collect
     private transient CpsScript cpsScript;
@@ -26,20 +27,16 @@ public class Env implements Serializable {
     public Env() {
     }
 
-
     /**
      * Collect environment variables and system properties under with filter constrains
-     *
-     * @param env
-     * @param build
-     * @param listener
-     * @throws Exception
      */
-    public void collectVariables(EnvVars env, Run build, TaskListener listener) throws Exception {
-        env.putAll(Utils.extractBuildParameters(build, listener));
+    public void collectVariables(EnvVars env, Run build, TaskListener listener) {
+        EnvVars buildParameters = Utils.extractBuildParameters(build, listener);
+        if (buildParameters != null) {
+            env.putAll(buildParameters);
+        }
         addAllWithFilter(envVars, env, filter.getPatternFilter());
-
-        Map<String, String> sysEnv = new HashMap<String, String>();
+        Map<String, String> sysEnv = new HashMap<>();
         Properties systemProperties = System.getProperties();
         Enumeration<?> enumeration = systemProperties.propertyNames();
         while (enumeration.hasMoreElements()) {
@@ -51,8 +48,6 @@ public class Env implements Serializable {
 
     /**
      * Append environment variables and system properties from othre PipelineEvn object
-     *
-     * @param env
      */
     protected void append(Env env) {
         addAllWithFilter(this.envVars, env.envVars, filter.getPatternFilter());
@@ -61,15 +56,10 @@ public class Env implements Serializable {
 
     /**
      * Adds all pairs from 'fromMap' to 'toMap' excluding once that matching the pattern
-     *
-     * @param toMap
-     * @param fromMap
-     * @param pattern
      */
     private void addAllWithFilter(Map<String, String> toMap, Map<String, String> fromMap, IncludeExcludePatterns pattern) {
-        Iterator entries = fromMap.entrySet().iterator();
-        while (entries.hasNext()) {
-            Map.Entry entry = (Map.Entry) entries.next();
+        for (Object o : fromMap.entrySet()) {
+            Map.Entry entry = (Map.Entry) o;
             String key = (String) entry.getKey();
             if (PatternMatcher.pathConflicts(key, pattern)) {
                 continue;
@@ -105,16 +95,28 @@ public class Env implements Serializable {
         cpsScript.invokeMethod("collectEnv", stepVariables);
     }
 
+    public void setFilter(EnvFilter filter) {
+        this.filter = filter;
+    }
+
     @Whitelisted
     public EnvFilter getFilter() {
         return filter;
     }
 
-    protected Map<String, String> getEnvVars() {
+    public void setEnvVars(Map<String, String> envVars) {
+        this.envVars = envVars;
+    }
+
+    public Map<String, String> getEnvVars() {
         return envVars;
     }
 
-    protected Map<String, String> getSysVars() {
+    public void setSysVars(Map<String, String> sysVars) {
+        this.sysVars = sysVars;
+    }
+
+    public Map<String, String> getSysVars() {
         return sysVars;
     }
 

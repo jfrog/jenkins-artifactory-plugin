@@ -12,6 +12,7 @@ import org.jfrog.hudson.SpecConfiguration;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.SpecUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -59,22 +60,22 @@ public class GenericStep extends AbstractStepImpl {
     public static abstract class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
         public static final long serialVersionUID = 1L;
 
-        protected String spec;
-        protected BuildInfo buildInfo;
         protected ArtifactoryServer artifactoryServer;
+        protected BuildInfo buildInfo;
+        protected String spec;
 
         void setGenericParameters(TaskListener listener, Run build, FilePath ws, EnvVars env, GenericStep step, StepContext context) throws IOException, InterruptedException {
-            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
+            String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
 
             // Set spec
             SpecConfiguration specConfiguration = new SpecConfiguration(step.spec, step.specPath);
             spec = SpecUtils.getSpecStringFromSpecConf(specConfiguration, env, ws, listener.getLogger());
 
             // Set Build Info
-            buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, context, step.customBuildName, step.customBuildNumber);
+            buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, build, step.customBuildName, step.customBuildNumber);
 
             // Set Artifactory server
-            org.jfrog.hudson.pipeline.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, getContext(), step.serverId);
+            org.jfrog.hudson.pipeline.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, context, step.serverId);
             artifactoryServer = Utils.prepareArtifactoryServer(null, pipelineServer);
         }
     }

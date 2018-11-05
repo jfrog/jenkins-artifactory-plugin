@@ -49,7 +49,7 @@ public class UploadStep extends GenericStep {
             genericUploadExecutor.execute();
             BuildInfo buildInfo = genericUploadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
-            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, getContext());
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build);
             return null;
         }
     }

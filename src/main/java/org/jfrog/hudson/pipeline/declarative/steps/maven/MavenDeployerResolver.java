@@ -2,11 +2,13 @@ package org.jfrog.hudson.pipeline.declarative.steps.maven;
 
 import com.google.inject.Inject;
 import hudson.FilePath;
+import hudson.model.Run;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
+import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -26,6 +28,9 @@ public class MavenDeployerResolver extends AbstractStepImpl {
         private static final long serialVersionUID = 1L;
 
         @StepContextParameter
+        private transient Run build;
+
+        @StepContextParameter
         private transient FilePath ws;
 
         @Inject(optional = true)
@@ -33,7 +38,7 @@ public class MavenDeployerResolver extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            String buildNumber = DeclarativePipelineUtils.getBuildNumber(getContext());
+            String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             BuildDataFile buildDataFile = step.buildDataFile;
             DeclarativePipelineUtils.writeBuildDataFile(ws, buildNumber, buildDataFile);
             return null;
