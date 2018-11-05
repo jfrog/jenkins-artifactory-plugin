@@ -22,7 +22,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 @SuppressWarnings("unused")
 public class PromoteBuildStep extends AbstractStepImpl {
 
-    public static final String STEP_NAME = "rtPromoteBuild";
+    public static final String STEP_NAME = "rtPromote";
     protected PromotionConfig promotionConfig;
     protected String serverId;
 

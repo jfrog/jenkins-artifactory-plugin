@@ -6,6 +6,8 @@ import org.jfrog.hudson.pipeline.types.deployers.MavenDeployer;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import java.util.List;
+
 @SuppressWarnings("unused")
 public class MavenDeployerStep extends MavenDeployerResolver {
 
@@ -21,13 +23,13 @@ public class MavenDeployerStep extends MavenDeployerResolver {
     }
 
     @DataBoundSetter
-    public void setIncludePattern(String includePattern) {
-        mavenDeployer.getArtifactDeploymentPatterns().addInclude(includePattern);
+    public void setIncludePatterns(List<String> includePatterns) {
+        includePatterns.forEach(pattern -> mavenDeployer.getArtifactDeploymentPatterns().addInclude(pattern));
     }
 
     @DataBoundSetter
-    public void setExcludePattern(String excludePattern) {
-        mavenDeployer.getArtifactDeploymentPatterns().addExclude(excludePattern);
+    public void setExcludePatterns(List<String> excludePatterns) {
+        excludePatterns.forEach(pattern -> mavenDeployer.getArtifactDeploymentPatterns().addExclude(pattern));
     }
 
     @DataBoundSetter
@@ -41,8 +43,8 @@ public class MavenDeployerStep extends MavenDeployerResolver {
     }
 
     @DataBoundSetter
-    public void setProperties(String properties) {
-        buildDataFile.put("properties", properties);
+    public void setProperties(List<String> properties) {
+        buildDataFile.put("properties", String.join(";", properties));
     }
 
     @DataBoundSetter

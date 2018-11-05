@@ -6,6 +6,8 @@ import org.jfrog.hudson.pipeline.types.deployers.GradleDeployer;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import java.util.List;
+
 @SuppressWarnings("unused")
 public class GradleDeployerStep extends GradleDeployerResolver {
 
@@ -21,13 +23,13 @@ public class GradleDeployerStep extends GradleDeployerResolver {
     }
 
     @DataBoundSetter
-    public void setIncludePattern(String includePattern) {
-        gradleDeployer.getArtifactDeploymentPatterns().addInclude(includePattern);
+    public void setIncludePatterns(List<String> includePatterns) {
+        includePatterns.forEach(pattern -> gradleDeployer.getArtifactDeploymentPatterns().addInclude(pattern));
     }
 
     @DataBoundSetter
-    public void setExcludePattern(String excludePattern) {
-        gradleDeployer.getArtifactDeploymentPatterns().addExclude(excludePattern);
+    public void setExcludePatterns(List<String> excludePatterns) {
+        excludePatterns.forEach(pattern -> gradleDeployer.getArtifactDeploymentPatterns().addExclude(pattern));
     }
 
     @DataBoundSetter
@@ -66,8 +68,8 @@ public class GradleDeployerStep extends GradleDeployerResolver {
     }
 
     @DataBoundSetter
-    public void setProperties(String properties) {
-        buildDataFile.put("properties", properties);
+    public void setProperties(List<String> properties) {
+        buildDataFile.put("properties", String.join(";", properties));
     }
 
     @Extension

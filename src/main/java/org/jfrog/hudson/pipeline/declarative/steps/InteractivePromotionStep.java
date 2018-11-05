@@ -20,12 +20,17 @@ import org.kohsuke.stapler.DataBoundSetter;
 @SuppressWarnings("unused")
 public class InteractivePromotionStep extends PromoteBuildStep {
 
-    public static final String STEP_NAME = "rtInteractivePromotion";
+    public static final String STEP_NAME = "rtAddInteractivePromotion";
     private String displayName;
 
     @DataBoundConstructor
-    public InteractivePromotionStep(String serverId, String targetRepo) {
-        super(serverId, targetRepo);
+    public InteractivePromotionStep(String serverId) {
+        super(serverId, "");
+    }
+
+    @DataBoundSetter
+    public void setTargetRepo(String targetRepo) {
+        promotionConfig.setTargetRepo(targetRepo);
     }
 
     @DataBoundSetter

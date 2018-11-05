@@ -53,13 +53,13 @@ public class BuildInfoStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setIncludeEnv(String includePattern) {
-        buildInfo.getEnv().getFilter().addInclude(includePattern);
+    public void setIncludeEnvPatterns(List<String> includeEnvPatterns) {
+        includeEnvPatterns.forEach(pattern -> buildInfo.getEnv().getFilter().addInclude(pattern));
     }
 
     @DataBoundSetter
-    public void setExcludeEnv(String excludePattern) {
-        buildInfo.getEnv().getFilter().addExclude(excludePattern);
+    public void setExcludeEnvPatterns(List<String> excludeEnvPatterns) {
+        excludeEnvPatterns.forEach(pattern -> buildInfo.getEnv().getFilter().addExclude(pattern));
     }
 
     @DataBoundSetter
@@ -78,7 +78,7 @@ public class BuildInfoStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setMaxBuilds(List<String> buildNumbersNotToBeDiscarded) {
+    public void setDoNotDiscardBuilds(List<String> buildNumbersNotToBeDiscarded) {
         buildInfo.getRetention().setDoNotDiscardBuilds(buildNumbersNotToBeDiscarded);
     }
 
