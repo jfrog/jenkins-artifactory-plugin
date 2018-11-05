@@ -30,7 +30,6 @@ import org.jfrog.hudson.util.ExtractorUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 
 /**
  * Created by Tamirh on 04/08/2016.
