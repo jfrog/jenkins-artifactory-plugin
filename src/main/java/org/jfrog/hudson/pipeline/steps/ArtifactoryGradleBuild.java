@@ -30,6 +30,7 @@ import org.jfrog.hudson.util.ExtractorUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 
 /**
  * Created by Tamirh on 04/08/2016.
@@ -207,7 +208,7 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
         }
 
         private String getGradleExe() throws IOException, InterruptedException {
-            if (!StringUtils.isEmpty(step.getGradleBuild().getTool())) {
+            if (StringUtils.isNotEmpty(step.getGradleBuild().getTool())) {
                 GradleInstallation gi = getGradleInstallation();
                 if (gi == null) {
                     listener.error("Couldn't find Gradle executable.");
@@ -223,12 +224,11 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
                 if (gradleExe != null) {
                     return gradleExe;
                 }
-                return extendedEnv.get("GRADLE_HOME") + "/bin/gradle";
             }
-            if (extendedEnv.get("GRADLE_HOME") == null) {
+            if (!extendedEnv.containsKey("GRADLE_HOME")) {
                 throw new RuntimeException("Couldn't find gradle installation");
             }
-            return extendedEnv.get("GRADLE_HOME");
+            return Paths.get(extendedEnv.get("GRADLE_HOME"), "bin", "gradle").toString();
         }
 
         private String createInitScript() throws Exception {
