@@ -114,6 +114,13 @@ public class ArtifactoryPipelineGlobal implements Serializable {
     }
 
     @Whitelisted
+    public NpmBuild newNpmBuild() {
+        NpmBuild npmBuild = (NpmBuild) cpsScript.invokeMethod("newNpmBuild", Maps.newLinkedHashMap());
+        npmBuild.setCpsScript(cpsScript);
+        return npmBuild;
+    }
+
+    @Whitelisted
     public ConanClient newConanClient(Map<String, Object> clientArgs) {
         ConanClient client = new ConanClient();
         String userPath = (String) clientArgs.get("userHome");

@@ -16,7 +16,7 @@ import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.hudson.maven3.Maven3Builder;
 import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.executors.MavenGradleEnvExtractor;
+import org.jfrog.hudson.pipeline.executors.EnvExtractor;
 import org.jfrog.hudson.pipeline.types.MavenBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.Deployer;
@@ -89,7 +89,7 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
             String revision = Utils.extractVcsRevision(new FilePath(ws, step.getPom()));
             extendedEnv = new EnvVars(env);
             extendedEnv.put(ExtractorUtils.GIT_COMMIT, revision);
-            MavenGradleEnvExtractor envExtractor = new MavenGradleEnvExtractor(build,
+            EnvExtractor envExtractor = new EnvExtractor(build,
                     buildInfo, deployer, step.getMavenBuild().getResolver(), listener, launcher);
             FilePath tempDir = ExtractorUtils.createAndGetTempDir(launcher, ws);
             envExtractor.buildEnvVars(tempDir, extendedEnv);

@@ -21,12 +21,10 @@ import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.ResolverContext;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
-import java.io.IOException;
-
 /**
  * Created by Tamirh on 04/08/2016.
  */
-public class MavenGradleEnvExtractor {
+public class EnvExtractor {
 
     private Deployer publisher;
     private Resolver resolver;
@@ -35,8 +33,7 @@ public class MavenGradleEnvExtractor {
     private TaskListener buildListener;
     private Launcher launcher;
 
-    public MavenGradleEnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher)
-            throws IOException, InterruptedException {
+    public EnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher) {
         this.build = build;
         this.buildInfo = buildInfo;
         this.buildListener = buildListener;
