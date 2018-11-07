@@ -88,8 +88,8 @@ public class DeclarativePipelineUtils {
      * @return build info id: <buildname>_<buildnumber>.
      */
     public static String createBuildInfoId(Run build, String customBuildName, String customBuildNumber) {
-        return (StringUtils.isBlank(customBuildName) ? BuildUniqueIdentifierHelper.getBuildName(build) : customBuildName) + "_" +
-                (StringUtils.isBlank(customBuildNumber) ? BuildUniqueIdentifierHelper.getBuildNumber(build) : customBuildNumber);
+        return StringUtils.defaultIfEmpty(customBuildName, BuildUniqueIdentifierHelper.getBuildName(build)) + "_" +
+                StringUtils.defaultIfEmpty(customBuildNumber, BuildUniqueIdentifierHelper.getBuildNumber(build));
     }
 
     /**
@@ -99,7 +99,7 @@ public class DeclarativePipelineUtils {
      * @param build - Step's build.
      * @param customBuildName - Step's custom build name if exist.
      * @param customBuildNumber - Step's custom build number if exist.
-     * @return build info object as defined in previous rtBuildInfo{...} scope or null.
+     * @return build info object as defined in previous rtBuildInfo{...} scope or a new build info.
      */
     public static BuildInfo getBuildInfo(TaskListener listener, FilePath ws, Run build, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {
         String jobBuildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
@@ -107,7 +107,14 @@ public class DeclarativePipelineUtils {
 
         BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(listener, ws, jobBuildNumber, BuildInfoStep.STEP_NAME, buildInfoId);
         if (buildDataFile == null) {
-            return null; // Build info doesn't exist. Will create a new build info later.
+            BuildInfo buildInfo = new BuildInfo(build);
+            if (StringUtils.isNotBlank(customBuildName)) {
+                buildInfo.setName(customBuildName);
+            }
+            if (StringUtils.isNotBlank(customBuildNumber)) {
+                buildInfo.setNumber(customBuildNumber);
+            }
+            return buildInfo;
         }
         return Utils.mapper().treeToValue(buildDataFile.get(BuildInfoStep.STEP_NAME), BuildInfo.class);
     }
