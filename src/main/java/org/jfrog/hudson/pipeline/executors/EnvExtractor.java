@@ -42,20 +42,19 @@ public class EnvExtractor {
         this.launcher = launcher;
     }
 
-    protected PublisherContext createPublisherContext() {
+    private PublisherContext createPublisherContext() {
         return publisher.getContextBuilder().build();
     }
 
-    public void buildEnvVars(FilePath tempDir, EnvVars env) throws Exception {
+    public void buildEnvVars(FilePath tempDir, EnvVars env) {
         env.put(ExtractorUtils.EXTRACTOR_USED, "true");
         ReleaseAction release = ActionableHelper.getLatestAction(build, ReleaseAction.class);
         if (release != null) {
             release.addVars(env);
         }
         try {
-            PublisherContext publisherContext = null;
             // publisher should never be null or empty
-            publisherContext = createPublisherContext();
+            PublisherContext publisherContext = createPublisherContext();
             ResolverContext resolverContext = null;
             if (resolver != null && !resolver.isEmpty()) {
                 CredentialsConfig resolverCredentials = CredentialManager.getPreferredResolver(resolver,

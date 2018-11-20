@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.steps.npm;
+package org.jfrog.hudson.pipeline.steps;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;

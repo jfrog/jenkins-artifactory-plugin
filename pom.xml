@@ -32,15 +32,17 @@
     <properties>
         <!-- Minimal version required by Pipeline dependencies in 2.14.0 -->
         <jenkins.version>1.642.3</jenkins.version>
-        <java.level>7</java.level>
+        <java.level>8</java.level>
         <!-- TODO: enforcer is full of upper bound dependency issues, including real ones -->
         <enforcer.skip>true</enforcer.skip>
         <findbugs.failOnError>false</findbugs.failOnError>
 
-        <buildinfo.version>2.12.1</buildinfo.version>
-        <buildinfo.maven3.version>2.12.1</buildinfo.maven3.version>
-        <buildinfo.gradle.version>4.8.1</buildinfo.gradle.version>
-        <buildinfo.ivy.version>2.12.1</buildinfo.ivy.version>
+        <buildinfo.version>2.12.x-SNAPSHOT</buildinfo.version>
+        <buildinfo.maven3.version>2.12.x-SNAPSHOT</buildinfo.maven3.version>
+        <buildinfo.gradle.version>4.8.x-SNAPSHOT</buildinfo.gradle.version>
+        <buildinfo.ivy.version>2.12.x-SNAPSHOT</buildinfo.ivy.version>
+        <buildinfo.npm.version>2.12.x-SNAPSHOT</buildinfo.npm.version>
+
     </properties>
 
     <developers>
@@ -283,6 +285,11 @@
                     <artifactId>jarjar-plugin</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jfrog.buildinfo</groupId>
+            <artifactId>build-info-extractor-npm</artifactId>
+            <version>${buildinfo.npm.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>

@@ -48,7 +48,7 @@ public class NpmBuild implements Serializable {
         appendBuildInfo(cpsScript, stepVariables);
 
         // Throws CpsCallableInvocation - Must be the last line in this method
-        cpsScript.invokeMethod("ArtifactoryNpmInstall", stepVariables);
+        cpsScript.invokeMethod("artifactoryNpmInstall", stepVariables);
     }
 
     @Whitelisted
