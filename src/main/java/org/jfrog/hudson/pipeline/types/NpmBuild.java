@@ -22,7 +22,7 @@ public class NpmBuild implements Serializable {
     private transient CpsScript cpsScript;
     private NpmDeployer deployer = new NpmDeployer();
     private NpmResolver resolver = new NpmResolver();
-    private String tool = "";
+    private String executablePath = "";
 
     public NpmBuild() {
     }
@@ -42,9 +42,19 @@ public class NpmBuild implements Serializable {
     }
 
     @Whitelisted
+    public String getExecutablePath() {
+        return executablePath;
+    }
+
+    @Whitelisted
+    public void setExecutablePath(String executablePath) {
+        this.executablePath = executablePath;
+    }
+
+    @Whitelisted
     public void install(Map<String, Object> args) {
         deployer.setCpsScript(cpsScript);
-        Map<String, Object> stepVariables = getRunArguments((String) args.get("rootDir"), (BuildInfo) args.get("buildInfo"));
+        Map<String, Object> stepVariables = getRunArguments((String) args.get("rootDir"), (String) args.get("installArgs"), (BuildInfo) args.get("buildInfo"));
         appendBuildInfo(cpsScript, stepVariables);
 
         // Throws CpsCallableInvocation - Must be the last line in this method
@@ -93,10 +103,11 @@ public class NpmBuild implements Serializable {
         }
     }
 
-    private Map<String, Object> getRunArguments(String rootDir, BuildInfo buildInfo) {
+    private Map<String, Object> getRunArguments(String rootDir, String installArgs, BuildInfo buildInfo) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("npmBuild", this);
         stepVariables.put("rootDir", rootDir);
+        stepVariables.put("installArgs", installArgs);
         stepVariables.put(BUILD_INFO, buildInfo);
         return stepVariables;
     }
