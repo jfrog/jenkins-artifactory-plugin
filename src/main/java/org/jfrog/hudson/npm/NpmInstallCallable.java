@@ -6,7 +6,7 @@ import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.jfrog.build.api.Dependency;
+import org.jfrog.build.api.Module;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
@@ -17,10 +17,9 @@ import org.jfrog.hudson.pipeline.types.resolvers.NpmResolver;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import java.io.File;
-import java.util.List;
 import java.util.Objects;
 
-public class NpmInstallCallable extends MasterToSlaveFileCallable<List<Dependency>> {
+public class NpmInstallCallable extends MasterToSlaveFileCallable<Module> {
 
     private transient Run build;
     private String executablePath;
@@ -37,7 +36,7 @@ public class NpmInstallCallable extends MasterToSlaveFileCallable<List<Dependenc
     }
 
     @Override
-    public List<Dependency> invoke(File file, VirtualChannel channel) {
+    public Module invoke(File file, VirtualChannel channel) {
         ArtifactoryServer server = resolver.getArtifactoryServer();
         CredentialsConfig preferredResolver = server.getResolverCredentialsConfig();
         String serverUrl = server.getUrl();
@@ -48,7 +47,7 @@ public class NpmInstallCallable extends MasterToSlaveFileCallable<List<Dependenc
         if (proxyConfig != null) {
             dependenciesClient.setProxyConfiguration(proxyConfig);
         }
-        NpmInstall npmInstall = new NpmInstall(installArgs, executablePath, dependenciesClient, resolver.getRepo(), file, logger);
+        NpmInstall npmInstall = new NpmInstall(dependenciesClient, resolver.getRepo(), installArgs, executablePath, logger, file);
         try {
             return npmInstall.execute();
         } catch (Exception e) {

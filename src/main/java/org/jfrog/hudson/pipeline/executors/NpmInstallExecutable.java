@@ -6,7 +6,7 @@ import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jfrog.build.api.BuildInfoFields;
-import org.jfrog.build.api.Dependency;
+import org.jfrog.build.api.Module;
 import org.jfrog.hudson.npm.NpmInstallCallable;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.NpmBuild;
@@ -14,7 +14,6 @@ import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.util.ExtractorUtils;
 
-import java.util.List;
 import java.util.Objects;
 
 public class NpmInstallExecutable {
@@ -49,12 +48,12 @@ public class NpmInstallExecutable {
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(launcher, ws);
         envExtractor.buildEnvVars(tempDir, extendedEnv);
 
-        List<Dependency> dependencies = ws.act(new NpmInstallCallable(build, npmBuild.getExecutablePath(), npmBuild.getResolver(), installArgs, listener));
-        if (dependencies == null) {
+        Module npmModule = ws.act(new NpmInstallCallable(build, npmBuild.getExecutablePath(), npmBuild.getResolver(), installArgs, listener));
+        if (npmModule == null) {
             throw new RuntimeException("npm build failed");
         }
 
-        new BuildInfoAccessor(buildInfo).appendPublishedDependencies(dependencies);
+        new BuildInfoAccessor(buildInfo).getModules().add(npmModule);
 
         // Read the deployable artifacts list from the 'json' file in the agent and append them to the buildInfo object.
         buildInfo.appendDeployableArtifacts(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), tempDir, listener);
