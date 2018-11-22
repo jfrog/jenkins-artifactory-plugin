@@ -42,13 +42,12 @@ public class NpmInstallCallable extends MasterToSlaveFileCallable<Module> {
         String serverUrl = server.getUrl();
         String username = preferredResolver.provideUsername(build.getParent());
         String password = preferredResolver.providePassword(build.getParent());
-        ArtifactoryDependenciesClient dependenciesClient = new ArtifactoryDependenciesClient(serverUrl, username, password, logger);
-        ProxyConfiguration proxyConfig = ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
-        if (proxyConfig != null) {
-            dependenciesClient.setProxyConfiguration(proxyConfig);
-        }
-        NpmInstall npmInstall = new NpmInstall(dependenciesClient, resolver.getRepo(), installArgs, executablePath, logger, file);
-        try {
+        try (ArtifactoryDependenciesClient dependenciesClient = new ArtifactoryDependenciesClient(serverUrl, username, password, logger)) {
+            ProxyConfiguration proxyConfig = ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
+            if (proxyConfig != null) {
+                dependenciesClient.setProxyConfiguration(proxyConfig);
+            }
+            NpmInstall npmInstall = new NpmInstall(dependenciesClient, resolver.getRepo(), installArgs, executablePath, logger, file);
             return npmInstall.execute();
         } catch (Exception e) {
             logger.error(ExceptionUtils.getStackTrace(e), e);

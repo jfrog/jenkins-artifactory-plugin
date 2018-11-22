@@ -29,15 +29,15 @@ public class NpmInstallExecutable {
     private Run build;
 
     public NpmInstallExecutable(TaskListener listener, EnvVars env, BuildInfo buildInfo, String installArgs, NpmBuild npmBuild, Launcher launcher, String rootDir, FilePath ws, Run build) {
-        this.listener = listener;
-        this.extendedEnv = new EnvVars(env);
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
+        this.rootDir = Objects.toString(rootDir, "");
+        this.extendedEnv = new EnvVars(env);
         this.installArgs = installArgs;
+        this.listener = listener;
         this.npmBuild = npmBuild;
         this.launcher = launcher;
-        this.rootDir = Objects.toString(rootDir, "");
-        this.ws = ws;
         this.build = build;
+        this.ws = ws;
     }
 
     public BuildInfo execute() throws Exception {
