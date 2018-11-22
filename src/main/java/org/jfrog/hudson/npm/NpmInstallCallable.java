@@ -28,11 +28,11 @@ public class NpmInstallCallable extends MasterToSlaveFileCallable<Module> {
     private Log logger;
 
     public NpmInstallCallable(Run build, String executablePath, NpmResolver resolver, String installArgs, TaskListener listener) {
-        this.build = build;
         this.executablePath = executablePath;
-        this.resolver = resolver;
         this.installArgs = Objects.toString(installArgs, "");
+        this.resolver = resolver;
         this.logger = new JenkinsBuildInfoLog(listener);
+        this.build = build;
     }
 
     @Override
@@ -47,8 +47,7 @@ public class NpmInstallCallable extends MasterToSlaveFileCallable<Module> {
             if (proxyConfig != null) {
                 dependenciesClient.setProxyConfiguration(proxyConfig);
             }
-            NpmInstall npmInstall = new NpmInstall(dependenciesClient, resolver.getRepo(), installArgs, executablePath, logger, file);
-            return npmInstall.execute();
+            return new NpmInstall(dependenciesClient, resolver.getRepo(), installArgs, executablePath, logger, file).execute();
         } catch (Exception e) {
             logger.error(ExceptionUtils.getStackTrace(e), e);
         }
