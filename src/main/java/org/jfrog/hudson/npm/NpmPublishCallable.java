@@ -1,5 +1,6 @@
 package org.jfrog.hudson.npm;
 
+import com.google.common.collect.ArrayListMultimap;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
@@ -22,12 +23,14 @@ import java.util.Objects;
 public class NpmPublishCallable extends MasterToSlaveFileCallable<Module> {
 
     private transient Run build;
+    private ArrayListMultimap<String, String> properties;
     private String executablePath;
     private NpmDeployer deployer;
     private String args;
     private Log logger;
 
-    public NpmPublishCallable(Run build, String executablePath, NpmDeployer deployer, String args, TaskListener listener) {
+    public NpmPublishCallable(ArrayListMultimap<String, String> properties, Run build, String executablePath, NpmDeployer deployer, String args, TaskListener listener) {
+        this.properties = properties;
         this.executablePath = executablePath;
         this.args = Objects.toString(args, "");
         this.deployer = deployer;
@@ -43,7 +46,7 @@ public class NpmPublishCallable extends MasterToSlaveFileCallable<Module> {
         String password = preferredDeployer.providePassword(build.getParent());
         ProxyConfiguration proxyConfig = ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
         try (ArtifactoryBuildInfoClient buildInfoClient = server.createArtifactoryClient(username, password, proxyConfig, logger)) {
-            return new NpmPublish(buildInfoClient, executablePath, file, deployer.getRepo(), args).execute();
+            return new NpmPublish(buildInfoClient, properties, executablePath, file, deployer.getRepo(), args).execute();
         } catch (Exception e) {
             logger.error(ExceptionUtils.getStackTrace(e), e);
         }

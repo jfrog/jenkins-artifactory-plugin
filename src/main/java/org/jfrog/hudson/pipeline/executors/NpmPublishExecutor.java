@@ -5,6 +5,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.Module;
 import org.jfrog.hudson.npm.NpmPublishCallable;
 import org.jfrog.hudson.pipeline.Utils;
@@ -18,6 +19,7 @@ import java.util.Objects;
 public class NpmPublishExecutor {
 
     private TaskListener listener;
+    private StepContext context;
     private EnvVars extendedEnv;
     private BuildInfo buildInfo;
     private String args;
@@ -27,8 +29,9 @@ public class NpmPublishExecutor {
     private FilePath ws;
     private Run build;
 
-    public NpmPublishExecutor(TaskListener listener, EnvVars env, BuildInfo buildInfo, String args, NpmBuild npmBuild, Launcher launcher, String rootDir, FilePath ws, Run build) {
+    public NpmPublishExecutor(TaskListener listener, StepContext context, EnvVars env, BuildInfo buildInfo, String args, NpmBuild npmBuild, Launcher launcher, String rootDir, FilePath ws, Run build) {
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
+        this.context = context;
         this.rootDir = Objects.toString(rootDir, "");
         this.extendedEnv = new EnvVars(env);
         this.args = args;
@@ -47,7 +50,7 @@ public class NpmPublishExecutor {
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(launcher, ws);
         envExtractor.buildEnvVars(tempDir, extendedEnv);
 
-        Module npmModule = ws.act(new NpmPublishCallable(build, npmBuild.getExecutablePath(), npmBuild.getDeployer(), args, listener));
+        Module npmModule = ws.act(new NpmPublishCallable(Utils.getPropertiesMap(buildInfo, build, context), build, npmBuild.getExecutablePath(), npmBuild.getDeployer(), args, listener));
         if (npmModule == null) {
             throw new RuntimeException("npm publish failed");
         }

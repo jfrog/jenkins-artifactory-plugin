@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -20,15 +21,20 @@ import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.Ref;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.Vcs;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.docker.proxy.CertManager;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.DistributionConfig;
 import org.jfrog.hudson.pipeline.types.PromotionConfig;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.IncludesExcludes;
 import org.jfrog.hudson.util.RepositoriesUtils;
 
@@ -371,5 +377,32 @@ public class Utils {
             return ((List)((Map) arg).get("values")).get(0).toString();
         }
         return arg.toString();
+    }
+
+    public static ArrayListMultimap<String, String> getPropertiesMap(BuildInfo buildInfo, Run build, StepContext context) throws IOException, InterruptedException {
+        ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+
+        if (buildInfo.getName() != null) {
+            properties.put("build.name", buildInfo.getName());
+        } else {
+            properties.put("build.name", BuildUniqueIdentifierHelper.getBuildName(build));
+        }
+        if (buildInfo.getNumber() != null) {
+            properties.put("build.number", buildInfo.getNumber());
+        } else {
+            properties.put("build.number", BuildUniqueIdentifierHelper.getBuildNumber(build));
+        }
+        properties.put("build.timestamp", build.getTimestamp().getTime().getTime() + "");
+        Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
+        if (parent != null) {
+            properties.put("build.parentName", ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
+            properties.put("build.parentNumber", parent.getUpstreamBuild() + "");
+        }
+        EnvVars env = context.get(EnvVars.class);
+        String revision = ExtractorUtils.getVcsRevision(env);
+        if (StringUtils.isNotBlank(revision)) {
+            properties.put(BuildInfoFields.VCS_REVISION, revision);
+        }
+        return properties;
     }
 }

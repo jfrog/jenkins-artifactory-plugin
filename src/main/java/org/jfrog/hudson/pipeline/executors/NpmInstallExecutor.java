@@ -41,7 +41,6 @@ public class NpmInstallExecutor {
     }
 
     public BuildInfo execute() throws Exception {
-        npmBuild.getDeployer().createPublisherBuildInfoDetails(buildInfo);
         String revision = Utils.extractVcsRevision(new FilePath(ws, rootDir));
         extendedEnv.put(ExtractorUtils.GIT_COMMIT, revision);
         EnvExtractor envExtractor = new EnvExtractor(build, buildInfo, npmBuild.getDeployer(), npmBuild.getResolver(), listener, launcher);
