@@ -1,61 +1,48 @@
 package org.jfrog.hudson.pipeline.executors;
 
-import hudson.EnvVars;
 import hudson.FilePath;
-import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.jfrog.build.api.BuildInfoFields;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Module;
 import org.jfrog.hudson.npm.NpmInstallCallable;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.NpmBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
-import org.jfrog.hudson.util.ExtractorUtils;
+import org.jfrog.hudson.pipeline.types.resolvers.NpmResolver;
 
-import java.util.Objects;
-
+/**
+ * Created by Yahav Itzhak on 25 Nov 2018.
+ */
 public class NpmInstallExecutor {
 
     private TaskListener listener;
-    private EnvVars extendedEnv;
     private BuildInfo buildInfo;
-    private String args;
     private NpmBuild npmBuild;
-    private Launcher launcher;
-    private String rootDir;
+    private String args;
     private FilePath ws;
     private Run build;
 
-    public NpmInstallExecutor(TaskListener listener, EnvVars env, BuildInfo buildInfo, String args, NpmBuild npmBuild, Launcher launcher, String rootDir, FilePath ws, Run build) {
-        this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
-        this.rootDir = Objects.toString(rootDir, "");
-        this.extendedEnv = new EnvVars(env);
-        this.args = args;
+    public NpmInstallExecutor(TaskListener listener, BuildInfo buildInfo, NpmBuild npmBuild, String args, String rootDir, FilePath ws, Run build) {
         this.listener = listener;
+        this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.npmBuild = npmBuild;
-        this.launcher = launcher;
+        this.args = args;
+        this.ws = StringUtils.isBlank(rootDir) ? ws : ws.child(rootDir);
         this.build = build;
-        this.ws = ws;
     }
 
     public BuildInfo execute() throws Exception {
-        String revision = Utils.extractVcsRevision(new FilePath(ws, rootDir));
-        extendedEnv.put(ExtractorUtils.GIT_COMMIT, revision);
-        EnvExtractor envExtractor = new EnvExtractor(build, buildInfo, npmBuild.getDeployer(), npmBuild.getResolver(), listener, launcher);
-        FilePath tempDir = ExtractorUtils.createAndGetTempDir(launcher, ws);
-        envExtractor.buildEnvVars(tempDir, extendedEnv);
-
-        Module npmModule = ws.act(new NpmInstallCallable(build, npmBuild.getExecutablePath(), npmBuild.getResolver(), args, listener));
+        NpmResolver resolver = npmBuild.getResolver();
+        if (resolver.isEmpty()) {
+            throw new IllegalStateException("Resolver must be configured with resolution repository and Artifactory server");
+        }
+        Module npmModule = ws.act(new NpmInstallCallable(build, listener, npmBuild.getExecutablePath(), resolver, args));
         if (npmModule == null) {
             throw new RuntimeException("npm build failed");
         }
-
         new BuildInfoAccessor(buildInfo).getModules().add(npmModule);
-
-        // Read the deployable artifacts list from the 'json' file in the agent and append them to the buildInfo object.
-        buildInfo.appendDeployableArtifacts(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), tempDir, listener);
         buildInfo.setAgentName(Utils.getAgentName(ws));
         return buildInfo;
     }

@@ -1,13 +1,9 @@
 package org.jfrog.hudson.pipeline.types.resolvers;
 
-import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
-import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
-import org.jfrog.hudson.util.CredentialManager;
-import org.jfrog.hudson.util.ResolverContext;
 
 public class NpmResolver extends Resolver {
     private String repo;
@@ -22,23 +18,14 @@ public class NpmResolver extends Resolver {
         this.repo = repo;
     }
 
+    @Override
     public ServerDetails getResolverDetails() {
         RepositoryConf snapshotRepositoryConf = null;
         RepositoryConf releaesRepositoryConf = new RepositoryConf(repo, repo, false);
         return new ServerDetails(this.server.getServerName(), this.server.getUrl(), releaesRepositoryConf, snapshotRepositoryConf, releaesRepositoryConf, snapshotRepositoryConf, "", "");
     }
 
-    public ResolverContext getResolverContext(Run build) {
-        ResolverContext resolverContext = null;
-        if (StringUtils.isNotBlank(repo)) {
-            CredentialsConfig resolverCredentials = CredentialManager.getPreferredResolver(
-                    this, getArtifactoryServer());
-            resolverContext = new ResolverContext(getArtifactoryServer(), getResolverDetails(),
-                    resolverCredentials.getCredentials(build.getParent()), this);
-        }
-        return resolverContext;
-    }
-
+    @Override
     public boolean isEmpty() {
         return server == null || StringUtils.isEmpty(repo);
     }

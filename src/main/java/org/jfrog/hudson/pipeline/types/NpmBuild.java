@@ -53,22 +53,21 @@ public class NpmBuild implements Serializable {
 
     @Whitelisted
     public void install(Map<String, Object> args) {
-        deployer.setCpsScript(cpsScript);
-        Map<String, Object> stepVariables = getRunArguments((String) args.get("rootDir"), (String) args.get("installArgs"), (BuildInfo) args.get("buildInfo"));
-        appendBuildInfo(cpsScript, stepVariables);
-
         // Throws CpsCallableInvocation - Must be the last line in this method
-        cpsScript.invokeMethod("artifactoryNpmInstall", stepVariables);
+        cpsScript.invokeMethod("artifactoryNpmInstall", prepareNpmStep(args));
     }
 
     @Whitelisted
     public void publish(Map<String, Object> args) {
-        deployer.setCpsScript(cpsScript);
-        Map<String, Object> stepVariables = getRunArguments((String) args.get("rootDir"), (String) args.get("publishArgs"), (BuildInfo) args.get("buildInfo"));
-        appendBuildInfo(cpsScript, stepVariables);
-
         // Throws CpsCallableInvocation - Must be the last line in this method
-        cpsScript.invokeMethod("artifactoryNpmPublish", stepVariables);
+        cpsScript.invokeMethod("artifactoryNpmPublish", prepareNpmStep(args));
+    }
+
+    private Map<String, Object> prepareNpmStep(Map<String, Object> args) {
+        deployer.setCpsScript(cpsScript);
+        Map<String, Object> stepVariables = getRunArguments((String) args.get("rootDir"), (String) args.get("args"), (BuildInfo) args.get("buildInfo"));
+        appendBuildInfo(cpsScript, stepVariables);
+        return stepVariables;
     }
 
     @Whitelisted

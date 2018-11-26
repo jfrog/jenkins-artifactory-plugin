@@ -19,6 +19,9 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import java.io.File;
 import java.util.Objects;
 
+/**
+ * Created by Yahav Itzhak on 25 Nov 2018.
+ */
 public class NpmInstallCallable extends MasterToSlaveFileCallable<Module> {
 
     private transient Run build;
@@ -27,12 +30,12 @@ public class NpmInstallCallable extends MasterToSlaveFileCallable<Module> {
     private NpmResolver resolver;
     private String args;
 
-    public NpmInstallCallable(Run build, String executablePath, NpmResolver resolver, String args, TaskListener listener) {
-        this.executablePath = executablePath;
-        this.args = Objects.toString(args, "");
-        this.resolver = resolver;
-        this.listener = listener;
+    public NpmInstallCallable(Run build, TaskListener listener, String executablePath, NpmResolver resolver, String args) {
         this.build = build;
+        this.listener = listener;
+        this.executablePath = executablePath;
+        this.resolver = resolver;
+        this.args = Objects.toString(args, "");
     }
 
     @Override

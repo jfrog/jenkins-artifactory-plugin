@@ -1,10 +1,8 @@
 package org.jfrog.hudson.pipeline.steps;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
@@ -16,19 +14,23 @@ import org.jfrog.hudson.pipeline.types.NpmBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+/**
+ * Created by Yahav Itzhak on 25 Nov 2018.
+ */
+@SuppressWarnings("unused")
 public class NpmPublishStep extends AbstractStepImpl {
 
     private BuildInfo buildInfo;
-    private String args;
     private NpmBuild npmBuild;
     private String rootDir;
+    private String args;
 
     @DataBoundConstructor
-    public NpmPublishStep(String args, NpmBuild npmBuild, String rootDir, BuildInfo buildInfo) {
-        this.args = args;
+    public NpmPublishStep(BuildInfo buildInfo, NpmBuild npmBuild, String rootDir, String args) {
         this.buildInfo = buildInfo;
         this.npmBuild = npmBuild;
         this.rootDir = rootDir;
+        this.args = args;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
@@ -38,13 +40,7 @@ public class NpmPublishStep extends AbstractStepImpl {
         private transient TaskListener listener;
 
         @StepContextParameter
-        private transient Launcher launcher;
-
-        @StepContextParameter
         private transient FilePath ws;
-
-        @StepContextParameter
-        private transient EnvVars env;
 
         @StepContextParameter
         private transient Run build;
@@ -54,7 +50,7 @@ public class NpmPublishStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            return new NpmPublishExecutor(listener, getContext(), env, step.buildInfo, step.args, step.npmBuild, launcher, step.rootDir, ws, build).execute();
+            return new NpmPublishExecutor(listener, getContext(), step.buildInfo, step.npmBuild, step.args, step.rootDir, ws, build).execute();
         }
     }
 
@@ -72,7 +68,7 @@ public class NpmPublishStep extends AbstractStepImpl {
 
         @Override
         public String getDisplayName() {
-            return "run Artifactory npm publish";
+            return "Run Artifactory npm publish";
         }
 
         @Override

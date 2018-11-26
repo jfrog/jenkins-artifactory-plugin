@@ -20,6 +20,9 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import java.io.File;
 import java.util.Objects;
 
+/**
+ * Created by Yahav Itzhak on 25 Nov 2018.
+ */
 public class NpmPublishCallable extends MasterToSlaveFileCallable<Module> {
 
     private transient Run build;
@@ -29,13 +32,13 @@ public class NpmPublishCallable extends MasterToSlaveFileCallable<Module> {
     private String args;
     private Log logger;
 
-    public NpmPublishCallable(ArrayListMultimap<String, String> properties, Run build, String executablePath, NpmDeployer deployer, String args, TaskListener listener) {
+    public NpmPublishCallable(Run build, ArrayListMultimap<String, String> properties, String executablePath, NpmDeployer deployer, String args, TaskListener listener) {
+        this.build = build;
         this.properties = properties;
         this.executablePath = executablePath;
-        this.args = Objects.toString(args, "");
         this.deployer = deployer;
+        this.args = Objects.toString(args, "");
         this.logger = new JenkinsBuildInfoLog(listener);
-        this.build = build;
     }
 
     @Override
