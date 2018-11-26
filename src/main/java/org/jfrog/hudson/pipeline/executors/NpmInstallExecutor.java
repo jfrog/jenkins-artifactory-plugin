@@ -16,23 +16,23 @@ import org.jfrog.hudson.util.ExtractorUtils;
 
 import java.util.Objects;
 
-public class NpmInstallExecutable {
+public class NpmInstallExecutor {
 
     private TaskListener listener;
     private EnvVars extendedEnv;
     private BuildInfo buildInfo;
-    private String installArgs;
+    private String args;
     private NpmBuild npmBuild;
     private Launcher launcher;
     private String rootDir;
     private FilePath ws;
     private Run build;
 
-    public NpmInstallExecutable(TaskListener listener, EnvVars env, BuildInfo buildInfo, String installArgs, NpmBuild npmBuild, Launcher launcher, String rootDir, FilePath ws, Run build) {
+    public NpmInstallExecutor(TaskListener listener, EnvVars env, BuildInfo buildInfo, String args, NpmBuild npmBuild, Launcher launcher, String rootDir, FilePath ws, Run build) {
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.rootDir = Objects.toString(rootDir, "");
         this.extendedEnv = new EnvVars(env);
-        this.installArgs = installArgs;
+        this.args = args;
         this.listener = listener;
         this.npmBuild = npmBuild;
         this.launcher = launcher;
@@ -48,7 +48,7 @@ public class NpmInstallExecutable {
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(launcher, ws);
         envExtractor.buildEnvVars(tempDir, extendedEnv);
 
-        Module npmModule = ws.act(new NpmInstallCallable(build, npmBuild.getExecutablePath(), npmBuild.getResolver(), installArgs, listener));
+        Module npmModule = ws.act(new NpmInstallCallable(build, npmBuild.getExecutablePath(), npmBuild.getResolver(), args, listener));
         if (npmModule == null) {
             throw new RuntimeException("npm build failed");
         }

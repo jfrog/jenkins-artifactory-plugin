@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.steps.npm;
+package org.jfrog.hudson.pipeline.steps;
 
 import com.google.inject.Inject;
 import hudson.EnvVars;
@@ -11,7 +11,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.executors.NpmInstallExecutable;
+import org.jfrog.hudson.pipeline.executors.NpmInstallExecutor;
 import org.jfrog.hudson.pipeline.types.NpmBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -20,13 +20,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class NpmInstallStep extends AbstractStepImpl {
 
     private BuildInfo buildInfo;
-    private String installArgs;
+    private String args;
     private NpmBuild npmBuild;
     private String rootDir;
 
     @DataBoundConstructor
-    public NpmInstallStep(String installArgs, NpmBuild npmBuild, String rootDir, BuildInfo buildInfo) {
-        this.installArgs = installArgs;
+    public NpmInstallStep(String args, NpmBuild npmBuild, String rootDir, BuildInfo buildInfo) {
+        this.args = args;
         this.buildInfo = buildInfo;
         this.npmBuild = npmBuild;
         this.rootDir = rootDir;
@@ -55,7 +55,7 @@ public class NpmInstallStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            return new NpmInstallExecutable(listener, env, step.buildInfo, step.installArgs, step.npmBuild, launcher, step.rootDir, ws, build).execute();
+            return new NpmInstallExecutor(listener, env, step.buildInfo, step.args, step.npmBuild, launcher, step.rootDir, ws, build).execute();
         }
     }
 

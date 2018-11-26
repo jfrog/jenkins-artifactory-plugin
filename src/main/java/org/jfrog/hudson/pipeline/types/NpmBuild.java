@@ -62,6 +62,16 @@ public class NpmBuild implements Serializable {
     }
 
     @Whitelisted
+    public void publish(Map<String, Object> args) {
+        deployer.setCpsScript(cpsScript);
+        Map<String, Object> stepVariables = getRunArguments((String) args.get("rootDir"), (String) args.get("publishArgs"), (BuildInfo) args.get("buildInfo"));
+        appendBuildInfo(cpsScript, stepVariables);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryNpmPublish", stepVariables);
+    }
+
+    @Whitelisted
     public void resolver(Map<String, Object> resolverArguments) throws Exception {
         Set<String> resolverArgumentsSet = resolverArguments.keySet();
         List<String> keysAsList = Arrays.asList("repo", "server");
@@ -103,12 +113,14 @@ public class NpmBuild implements Serializable {
         }
     }
 
-    private Map<String, Object> getRunArguments(String rootDir, String installArgs, BuildInfo buildInfo) {
+    private Map<String, Object> getRunArguments(String rootDir, String args, BuildInfo buildInfo) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("npmBuild", this);
         stepVariables.put("rootDir", rootDir);
-        stepVariables.put("installArgs", installArgs);
+        stepVariables.put("args", args);
         stepVariables.put(BUILD_INFO, buildInfo);
         return stepVariables;
     }
+
+
 }
