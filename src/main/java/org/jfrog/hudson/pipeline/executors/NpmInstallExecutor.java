@@ -42,7 +42,7 @@ public class NpmInstallExecutor {
         if (npmModule == null) {
             throw new RuntimeException("npm build failed");
         }
-        new BuildInfoAccessor(buildInfo).getModules().add(npmModule);
+        new BuildInfoAccessor(buildInfo).addModule(npmModule);
         buildInfo.setAgentName(Utils.getAgentName(ws));
         return buildInfo;
     }

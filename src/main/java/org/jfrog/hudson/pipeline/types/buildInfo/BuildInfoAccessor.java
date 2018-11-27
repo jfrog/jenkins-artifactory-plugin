@@ -4,6 +4,7 @@ import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
@@ -26,7 +27,7 @@ import java.util.Map;
  * Created by Tamirh on 16/05/2016.
  */
 public class BuildInfoAccessor {
-    BuildInfo buildInfo;
+    private BuildInfo buildInfo;
 
     public BuildInfoAccessor(BuildInfo buildInfo) {
         this.buildInfo = buildInfo;
@@ -88,5 +89,18 @@ public class BuildInfoAccessor {
 
     public List<Module> getModules() {
         return this.buildInfo.getModules();
+    }
+
+    public void addModule(Module other) {
+        List<Module> modules = getModules();
+        Module currentModule = modules.stream()
+                .filter(module -> StringUtils.equals(module.getId(), other.getId())) // Check if npm module exists
+                .findAny()
+                .orElse(null);
+        if (currentModule == null) {
+            modules.add(other); // Append new module
+        } else {
+            currentModule.append(other); // Append between 2 modules
+        }
     }
 }

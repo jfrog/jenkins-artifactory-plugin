@@ -64,6 +64,12 @@ public class NpmBuild implements Serializable {
     }
 
     private Map<String, Object> prepareNpmStep(Map<String, Object> args) {
+        Set<String> npmArgumentsSet = args.keySet();
+        List<String> keysAsList = Arrays.asList("rootDir", "args", "buildInfo");
+        if (!keysAsList.containsAll(npmArgumentsSet)) {
+            throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
+        }
+
         deployer.setCpsScript(cpsScript);
         Map<String, Object> stepVariables = getRunArguments((String) args.get("rootDir"), (String) args.get("args"), (BuildInfo) args.get("buildInfo"));
         appendBuildInfo(cpsScript, stepVariables);
