@@ -26,13 +26,13 @@ public class NpmPublishExecutor {
     private FilePath ws;
     private Run build;
 
-    public NpmPublishExecutor(TaskListener listener, StepContext context, BuildInfo buildInfo, NpmBuild npmBuild, String args, String rootDir, FilePath ws, Run build) {
+    public NpmPublishExecutor(TaskListener listener, StepContext context, BuildInfo buildInfo, NpmBuild npmBuild, String args, String path, FilePath ws, Run build) {
         this.listener = listener;
         this.context = context;
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.npmBuild = npmBuild;
         this.args = args;
-        this.ws = StringUtils.isBlank(rootDir) ? ws : ws.child(rootDir);
+        this.ws = StringUtils.isBlank(path) ? ws : ws.child(path.replaceFirst("^~", System.getProperty("user.home")));
         this.build = build;
     }
 

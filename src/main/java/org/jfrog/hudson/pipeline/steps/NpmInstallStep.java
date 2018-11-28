@@ -22,14 +22,14 @@ public class NpmInstallStep extends AbstractStepImpl {
 
     private BuildInfo buildInfo;
     private NpmBuild npmBuild;
-    private String rootDir;
+    private String path;
     private String args;
 
     @DataBoundConstructor
-    public NpmInstallStep(BuildInfo buildInfo, NpmBuild npmBuild, String rootDir, String args) {
+    public NpmInstallStep(BuildInfo buildInfo, NpmBuild npmBuild, String path, String args) {
         this.buildInfo = buildInfo;
         this.npmBuild = npmBuild;
-        this.rootDir = rootDir;
+        this.path = path;
         this.args = args;
     }
 
@@ -50,7 +50,7 @@ public class NpmInstallStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            return new NpmInstallExecutor(listener, step.buildInfo, step.npmBuild, step.args, step.rootDir, ws, build).execute();
+            return new NpmInstallExecutor(listener, step.buildInfo, step.npmBuild, step.args, step.path, ws, build).execute();
         }
     }
 

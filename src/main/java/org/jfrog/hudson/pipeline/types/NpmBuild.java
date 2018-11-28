@@ -65,13 +65,13 @@ public class NpmBuild implements Serializable {
 
     private Map<String, Object> prepareNpmStep(Map<String, Object> args) {
         Set<String> npmArgumentsSet = args.keySet();
-        List<String> keysAsList = Arrays.asList("rootDir", "args", "buildInfo");
+        List<String> keysAsList = Arrays.asList("path", "args", "buildInfo");
         if (!keysAsList.containsAll(npmArgumentsSet)) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
         }
 
         deployer.setCpsScript(cpsScript);
-        Map<String, Object> stepVariables = getRunArguments((String) args.get("rootDir"), (String) args.get("args"), (BuildInfo) args.get("buildInfo"));
+        Map<String, Object> stepVariables = getRunArguments((String) args.get("path"), (String) args.get("args"), (BuildInfo) args.get("buildInfo"));
         appendBuildInfo(cpsScript, stepVariables);
         return stepVariables;
     }
@@ -118,10 +118,10 @@ public class NpmBuild implements Serializable {
         }
     }
 
-    private Map<String, Object> getRunArguments(String rootDir, String args, BuildInfo buildInfo) {
+    private Map<String, Object> getRunArguments(String path, String args, BuildInfo buildInfo) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("npmBuild", this);
-        stepVariables.put("rootDir", rootDir);
+        stepVariables.put("path", path);
         stepVariables.put("args", args);
         stepVariables.put(BUILD_INFO, buildInfo);
         return stepVariables;
