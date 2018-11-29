@@ -8,8 +8,7 @@ import jenkins.model.Jenkins;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.client.ProxyConfiguration;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryDependenciesClientBuilder;
 import org.jfrog.build.extractor.npm.extractor.NpmInstall;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
@@ -43,11 +42,16 @@ public class NpmInstallCallable extends MasterToSlaveFileCallable<Module> {
         Log logger = new JenkinsBuildInfoLog(listener);
         ArtifactoryServer server = resolver.getArtifactoryServer();
         CredentialsConfig preferredResolver = server.getResolverCredentialsConfig();
-        String username = preferredResolver.provideUsername(build.getParent());
-        String password = preferredResolver.providePassword(build.getParent());
-        ProxyConfiguration proxyConfig = ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
-        try (ArtifactoryDependenciesClient dependenciesClient = server.createArtifactoryDependenciesClient(username, password, proxyConfig, listener)) {
-            return new NpmInstall(dependenciesClient, resolver.getRepo(), args, executablePath, logger, file.toPath()).execute();
+        ArtifactoryDependenciesClientBuilder clientBuilder = new ArtifactoryDependenciesClientBuilder()
+                .setArtifactoryUrl(server.getUrl())
+                .setUsername(preferredResolver.provideUsername(build.getParent()))
+                .setPassword(preferredResolver.providePassword(build.getParent()))
+                .setProxyConfiguration(ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy))
+                .setLog(logger)
+                .setConnectionRetry(server.getConnectionRetry())
+                .setConnectionTimeout(server.getTimeout());
+        try {
+            return new NpmInstall(clientBuilder, resolver.getRepo(), args, executablePath, logger, file.toPath()).execute();
         } catch (Exception e) {
             logger.error(ExceptionUtils.getStackTrace(e), e);
         }

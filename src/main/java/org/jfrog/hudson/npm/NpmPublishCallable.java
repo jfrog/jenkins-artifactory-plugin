@@ -9,8 +9,7 @@ import jenkins.model.Jenkins;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.client.ProxyConfiguration;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.build.extractor.npm.extractor.NpmPublish;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
@@ -45,11 +44,16 @@ public class NpmPublishCallable extends MasterToSlaveFileCallable<Module> {
     public Module invoke(File file, VirtualChannel channel) {
         ArtifactoryServer server = deployer.getArtifactoryServer();
         CredentialsConfig preferredDeployer = server.getDeployerCredentialsConfig();
-        String username = preferredDeployer.provideUsername(build.getParent());
-        String password = preferredDeployer.providePassword(build.getParent());
-        ProxyConfiguration proxyConfig = ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
-        try (ArtifactoryBuildInfoClient buildInfoClient = server.createArtifactoryClient(username, password, proxyConfig, logger)) {
-            return new NpmPublish(buildInfoClient, properties, executablePath, file.toPath(), deployer.getRepo(), args).execute();
+        ArtifactoryBuildInfoClientBuilder clientBuilder = new ArtifactoryBuildInfoClientBuilder()
+                .setArtifactoryUrl(server.getUrl())
+                .setUsername(preferredDeployer.provideUsername(build.getParent()))
+                .setPassword(preferredDeployer.providePassword(build.getParent()))
+                .setProxyConfiguration(ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy))
+                .setLog(logger)
+                .setConnectionRetry(server.getConnectionRetry())
+                .setConnectionTimeout(server.getTimeout());
+        try {
+            return new NpmPublish(clientBuilder, properties, executablePath, file.toPath(), deployer.getRepo(), args).execute();
         } catch (Exception e) {
             logger.error(ExceptionUtils.getStackTrace(e), e);
         }
