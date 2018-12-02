@@ -50,7 +50,7 @@ public class NpmInstallStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            return new NpmInstallExecutor(listener, step.buildInfo, step.npmBuild, step.args, step.path, ws, build).execute();
+            return new NpmInstallExecutor(step.buildInfo, step.npmBuild, step.args, ws, step.path, listener, build).execute();
         }
     }
 

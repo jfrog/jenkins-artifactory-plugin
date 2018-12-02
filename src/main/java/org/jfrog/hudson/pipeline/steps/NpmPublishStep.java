@@ -50,7 +50,7 @@ public class NpmPublishStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            return new NpmPublishExecutor(listener, getContext(), step.buildInfo, step.npmBuild, step.args, step.path, ws, build).execute();
+            return new NpmPublishExecutor(getContext(), step.buildInfo, step.npmBuild, step.args, step.path, ws, listener, build).execute();
         }
     }
 
