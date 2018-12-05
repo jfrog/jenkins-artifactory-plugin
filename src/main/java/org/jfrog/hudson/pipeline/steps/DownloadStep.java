@@ -21,18 +21,24 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class DownloadStep extends AbstractStepImpl {
 
     private BuildInfo buildInfo;
+    private boolean failNoOp;
     private String spec;
     private ArtifactoryServer server;
 
     @DataBoundConstructor
-    public DownloadStep(String spec, BuildInfo buildInfo, ArtifactoryServer server) {
+    public DownloadStep(String spec, BuildInfo buildInfo, boolean failNoOp, ArtifactoryServer server) {
         this.spec = spec;
         this.buildInfo = buildInfo;
+        this.failNoOp = failNoOp;
         this.server = server;
     }
 
     public BuildInfo getBuildInfo() {
         return buildInfo;
+    }
+
+    public boolean getFailNoOp() {
+        return failNoOp;
     }
 
     public String getSpec() {
@@ -63,7 +69,7 @@ public class DownloadStep extends AbstractStepImpl {
         @Override
         protected BuildInfo run() throws Exception {
             BuildInfo buildInfo = new GenericDownloadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()),
-                    this.listener, this.build, this.ws, step.getBuildInfo()).execution(Util.replaceMacro(step.getSpec(), env));
+                    this.listener, this.build, this.ws, step.getBuildInfo(), step.getFailNoOp()).execution(Util.replaceMacro(step.getSpec(), env));
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
             return buildInfo;
         }

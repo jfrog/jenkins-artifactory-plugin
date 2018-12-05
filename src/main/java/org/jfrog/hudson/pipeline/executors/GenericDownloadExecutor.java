@@ -22,14 +22,16 @@ public class GenericDownloadExecutor {
     private final Run build;
     private transient FilePath ws;
     private BuildInfo buildInfo;
+    private boolean failNoOp;
     private ArtifactoryServer server;
     private TaskListener listener;
 
-    public GenericDownloadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo) {
+    public GenericDownloadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, boolean failNoOp) {
         this.build = build;
         this.server = server;
         this.listener = listener;
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
+        this.failNoOp = failNoOp;
         this.ws = ws;
     }
 
@@ -40,6 +42,9 @@ public class GenericDownloadExecutor {
                         preferredResolver.provideUsername(build.getParent()),
                         preferredResolver.providePassword(build.getParent()),
                         server.getUrl(), spec, Utils.getProxyConfiguration(server)));
+        if (failNoOp && resolvedDependencies.size() <= 0) {
+            throw new RuntimeException("Fail-no-op: No files were affected in the download process.");
+        }
         new BuildInfoAccessor(this.buildInfo).appendPublishedDependencies(resolvedDependencies);
         return this.buildInfo;
     }

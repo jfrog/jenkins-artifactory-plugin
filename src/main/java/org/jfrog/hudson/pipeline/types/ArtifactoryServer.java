@@ -24,6 +24,7 @@ public class ArtifactoryServer implements Serializable {
     public static final String SERVER = "server";
     public static final String BUILD_NAME = "buildName";
     public static final String BUILD_NUMBER = "buildNumber";
+    public static final String FAIL_NO_OP = "failNoOp";
 
     private String serverName;
     private String url;
@@ -67,36 +68,23 @@ public class ArtifactoryServer implements Serializable {
         this.cpsScript = cpsScript;
     }
 
-    @Whitelisted
-    public void download(String spec) {
-        download(spec, null);
-    }
-
     private Map<String, Object> getDownloadUploadObjectMap(Map<String, Object> arguments) {
         if (!arguments.containsKey(SPEC)) {
-            throw new IllegalArgumentException(SPEC + " is a mandatory arguments");
+            throw new IllegalArgumentException(SPEC + " is a mandatory argument");
         }
 
-        List<String> keysAsList = Arrays.asList(SPEC, BUILD_INFO);
+        List<String> keysAsList = Arrays.asList(SPEC, BUILD_INFO, FAIL_NO_OP);
         if (!keysAsList.containsAll(arguments.keySet())) {
             throw new IllegalArgumentException("Only the following arguments are allowed, " + keysAsList.toString());
+        }
+
+        if (!(arguments.get(FAIL_NO_OP) instanceof Boolean)) {
+            arguments.put(FAIL_NO_OP,false);
         }
 
         Map<String, Object> stepVariables = Maps.newLinkedHashMap(arguments);
         stepVariables.put(SERVER, this);
         return stepVariables;
-    }
-
-    @Whitelisted
-    public void download(String spec, BuildInfo providedBuildInfo) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
-        stepVariables.put(SPEC, spec);
-        stepVariables.put(BUILD_INFO, providedBuildInfo);
-        stepVariables.put(SERVER, this);
-        appendBuildInfo(cpsScript, stepVariables);
-
-        // Throws CpsCallableInvocation - Must be the last line in this method
-        cpsScript.invokeMethod("artifactoryDownload", stepVariables);
     }
 
     @Whitelisted
@@ -109,8 +97,27 @@ public class ArtifactoryServer implements Serializable {
     }
 
     @Whitelisted
-    public void upload(String spec) {
-        upload(spec, null);
+    public void download(String spec) {
+        download(spec, null, false);
+    }
+
+    @Whitelisted
+    public void download(String spec, BuildInfo buildInfo) {
+        download(spec, buildInfo, false);
+    }
+
+    @Whitelisted
+    public void download(String spec, boolean failNoOp) {
+        download(spec, null, failNoOp);
+    }
+
+    @Whitelisted
+    public void download(String spec, BuildInfo buildInfo, boolean failNoOp) {
+        Map<String, Object> downloadArguments = Maps.newLinkedHashMap();
+        downloadArguments.put(SPEC, spec);
+        downloadArguments.put(BUILD_INFO, buildInfo);
+        downloadArguments.put(FAIL_NO_OP, failNoOp);
+        download(downloadArguments);
     }
 
     @Whitelisted
@@ -123,15 +130,27 @@ public class ArtifactoryServer implements Serializable {
     }
 
     @Whitelisted
-    public void upload(String spec, BuildInfo buildInfo) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
-        stepVariables.put(SPEC, spec);
-        stepVariables.put(BUILD_INFO, buildInfo);
-        stepVariables.put(SERVER, this);
-        appendBuildInfo(cpsScript, stepVariables);
+    public void upload(String spec) {
+        upload(spec, null, false);
+    }
 
-        // Throws CpsCallableInvocation - Must be the last line in this method
-        cpsScript.invokeMethod("artifactoryUpload", stepVariables);
+    @Whitelisted
+    public void upload(String spec, BuildInfo buildInfo) {
+        upload(spec, buildInfo, false);
+    }
+
+    @Whitelisted
+    public void upload(String spec, boolean failNoOp) {
+        upload(spec, null, failNoOp);
+    }
+
+    @Whitelisted
+    public void upload(String spec, BuildInfo buildInfo, boolean failNoOp) {
+        Map<String, Object> uploadArguments = Maps.newLinkedHashMap();
+        uploadArguments.put(SPEC, spec);
+        uploadArguments.put(BUILD_INFO, buildInfo);
+        uploadArguments.put(FAIL_NO_OP, failNoOp);
+        upload(uploadArguments);
     }
 
     @Whitelisted
