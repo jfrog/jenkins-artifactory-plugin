@@ -22,7 +22,7 @@ import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.gradle.GradleInitScriptWriter;
 import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.executors.EnvExtractor;
+import org.jfrog.hudson.pipeline.executors.MavenGradleEnvExtractor;
 import org.jfrog.hudson.pipeline.types.GradleBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.Deployer;
@@ -111,7 +111,7 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
             String revision = Utils.extractVcsRevision(new FilePath(ws, step.getRootDir()));
             extendedEnv = new EnvVars(env);
             extendedEnv.put(ExtractorUtils.GIT_COMMIT, revision);
-            EnvExtractor envExtractor = new EnvExtractor(build,
+            MavenGradleEnvExtractor envExtractor = new MavenGradleEnvExtractor(build,
                     buildInfo, deployer, step.getGradleBuild().getResolver(), listener, launcher);
             tempDir = ExtractorUtils.createAndGetTempDir(launcher, ws);
             ArgumentListBuilder args = getGradleExecutor();

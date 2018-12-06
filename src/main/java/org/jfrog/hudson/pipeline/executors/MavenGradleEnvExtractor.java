@@ -21,10 +21,12 @@ import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.ResolverContext;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
+import java.io.IOException;
+
 /**
  * Created by Tamirh on 04/08/2016.
  */
-public class EnvExtractor {
+public class MavenGradleEnvExtractor {
 
     private Deployer publisher;
     private Resolver resolver;
@@ -33,7 +35,8 @@ public class EnvExtractor {
     private TaskListener buildListener;
     private Launcher launcher;
 
-    public EnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher) {
+    public MavenGradleEnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher)
+            throws IOException, InterruptedException {
         this.build = build;
         this.buildInfo = buildInfo;
         this.buildListener = buildListener;
@@ -42,19 +45,20 @@ public class EnvExtractor {
         this.launcher = launcher;
     }
 
-    private PublisherContext createPublisherContext() {
+    protected PublisherContext createPublisherContext() {
         return publisher.getContextBuilder().build();
     }
 
-    public void buildEnvVars(FilePath tempDir, EnvVars env) {
+    public void buildEnvVars(FilePath tempDir, EnvVars env) throws Exception {
         env.put(ExtractorUtils.EXTRACTOR_USED, "true");
         ReleaseAction release = ActionableHelper.getLatestAction(build, ReleaseAction.class);
         if (release != null) {
             release.addVars(env);
         }
         try {
+            PublisherContext publisherContext = null;
             // publisher should never be null or empty
-            PublisherContext publisherContext = createPublisherContext();
+            publisherContext = createPublisherContext();
             ResolverContext resolverContext = null;
             if (resolver != null && !resolver.isEmpty()) {
                 CredentialsConfig resolverCredentials = CredentialManager.getPreferredResolver(resolver,
