@@ -71,7 +71,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         private int buildInfoProxyPort;
         private String buildInfoProxyCertPublic;
         private String buildInfoProxyCertPrivate;
-        @Deprecated
+        @Deprecated // Remains in code because it appears in ArtifactoryBuilder.xml of configuration done before the action was removed.
         private Boolean pushToBintrayEnabled = null;
 
         public DescriptorImpl() {

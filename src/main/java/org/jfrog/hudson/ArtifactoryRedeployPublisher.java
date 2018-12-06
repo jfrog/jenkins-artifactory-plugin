@@ -101,7 +101,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean allowPromotionOfNonStagedBuilds;
-    @Deprecated
+    @Deprecated // Remains in code because it appears in config.xml of jobs that were created before the action was removed.
     private final Boolean allowBintrayPushOfNonStageBuilds = null;
     private final boolean filterExcludedArtifactsFromBuild;
     private final boolean recordAllDependencies;

@@ -5,7 +5,9 @@ import org.jfrog.hudson.*;
 import java.util.List;
 
 /**
- * This Class and Action have been deprecated.
+ * This Class and Action has been deprecated.
+ * The deprecated class remains in code because it appears in config.xml of jobs that were created before the action has
+ * been officially removed.
  */
 @Deprecated
 public class BintrayPublishAction {

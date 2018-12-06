@@ -103,7 +103,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final Boolean skipInjectInitScript = null;
     private final Boolean useArtifactoryGradlePlugin;
     private final boolean allowPromotionOfNonStagedBuilds;
-    @Deprecated
+    @Deprecated  // Remains in code because it appears in config.xml of jobs that were created before the action was removed.
     private final Boolean allowBintrayPushOfNonStageBuilds = null;
     private final boolean blackDuckRunChecks;
     private final String blackDuckAppName;
