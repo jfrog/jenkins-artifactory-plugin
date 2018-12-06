@@ -7,13 +7,6 @@
     <f:section title="Artifactory">
 
         <f:entry
-            help="/plugin/artifactory/help/ArtifactoryBuilder/help-pushToBintrayEnabled.html"  >
-                <input id="pushToBintrayEnabled" type="checkbox"
-                    name="pushToBintrayEnabled" value="${descriptor.pushToBintrayEnabled}"
-                        field="pushToBintrayEnabled">Enable Push to Bintray (deprecated)
-                </input>
-        </f:entry>
-        <f:entry
             help="/plugin/artifactory/help/ArtifactoryBuilder/help-useCredentialsPlugin.html">
                 <input id="useCredentialsPlugin" type="checkbox" onclick="updateViewForCredentialsMethod(this.checked)"
                    name="useCredentialsPlugin" value="${descriptor.useCredentialsPlugin}"

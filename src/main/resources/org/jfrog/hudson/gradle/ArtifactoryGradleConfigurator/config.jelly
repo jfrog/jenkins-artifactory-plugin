@@ -160,8 +160,6 @@
                                     <f:textbox value="${instance.defaultPromotionTargetRepository}"/>
                                 </f:entry>
                             </table>
-                            <r:bintray configurationFieldName="pushToBintrayEnabledConfig"
-                                elementId="pushToBintrayEnabled"/>
                         </f:block>
                         <f:block>
                             <table style="width:100%">

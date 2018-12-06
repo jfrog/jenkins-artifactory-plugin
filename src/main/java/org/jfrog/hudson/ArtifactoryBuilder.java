@@ -67,11 +67,12 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         private boolean useCredentialsPlugin;
         private List<ArtifactoryServer> artifactoryServers;
-        private boolean pushToBintrayEnabled = true;
         private boolean buildInfoProxyEnabled = false;
         private int buildInfoProxyPort;
         private String buildInfoProxyCertPublic;
         private String buildInfoProxyCertPrivate;
+        @Deprecated
+        private Boolean pushToBintrayEnabled = null;
 
         public DescriptorImpl() {
             super(ArtifactoryBuilder.class);
@@ -206,7 +207,6 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         @Override
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
             boolean useCredentialsPlugin = (Boolean)o.get("useCredentialsPlugin");
-            this.pushToBintrayEnabled = (Boolean)o.get("pushToBintrayEnabled");
 
             try {
                 configureProxy((JSONObject) o.get("buildInfoProxyEnabled"));
@@ -314,11 +314,6 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         @SuppressWarnings({"UnusedDeclaration"})
         public void setUseCredentialsPlugin(boolean useCredentialsPlugin) {
             this.useCredentialsPlugin = useCredentialsPlugin;
-        }
-
-        // global.jelly uses this method to retrieve the value of pushToBintrayEnabled to determine if the checkbox should be checked.
-        public boolean isPushToBintrayEnabled() {
-            return pushToBintrayEnabled;
         }
 
         @SuppressWarnings({"UnusedDeclaration"})

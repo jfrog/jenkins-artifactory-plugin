@@ -38,7 +38,6 @@ import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
 import org.jfrog.hudson.action.ArtifactoryProjectAction;
 import org.jfrog.hudson.maven2.ArtifactsDeployer;
 import org.jfrog.hudson.maven2.MavenBuildInfoDeployer;
@@ -102,7 +101,8 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean allowPromotionOfNonStagedBuilds;
-    private final boolean allowBintrayPushOfNonStageBuilds;
+    @Deprecated
+    private final Boolean allowBintrayPushOfNonStageBuilds = null;
     private final boolean filterExcludedArtifactsFromBuild;
     private final boolean recordAllDependencies;
     private String defaultPromotionTargetRepository;
@@ -142,7 +142,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
                                         boolean aggregateBuildIssues, String aggregationBuildStatus,
                                         boolean recordAllDependencies, boolean allowPromotionOfNonStagedBuilds,
                                         String defaultPromotionTargetRepository,
-                                        boolean allowBintrayPushOfNonStageBuilds,
+                                        Boolean allowBintrayPushOfNonStageBuilds,
                                         boolean blackDuckRunChecks, String blackDuckAppName, String blackDuckAppVersion,
                                         String blackDuckReportRecipients, String blackDuckScopes,
                                         boolean blackDuckIncludePublishedArtifacts, boolean autoCreateMissingComponentRequests,
@@ -182,7 +182,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.blackDuckIncludePublishedArtifacts = blackDuckIncludePublishedArtifacts;
         this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
         this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
-        this.allowBintrayPushOfNonStageBuilds = allowBintrayPushOfNonStageBuilds;
         this.customBuildName = customBuildName;
         this.overrideBuildName = overrideBuildName;
     }
@@ -328,10 +327,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
     }
 
-    public boolean isAllowBintrayPushOfNonStageBuilds() {
-        return allowBintrayPushOfNonStageBuilds;
-    }
-
     public boolean isRecordAllDependencies() {
         return recordAllDependencies;
     }
@@ -467,12 +462,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
         if (isAllowPromotionOfNonStagedBuilds()) {
             build.getActions().add(new UnifiedPromoteBuildAction(build, this));
-        }
-        // Checks if Push to Bintray is disabled.
-        if (PluginsUtils.isPushToBintrayEnabled()) {
-            if (isAllowBintrayPushOfNonStageBuilds()) {
-                build.getActions().add(new BintrayPublishAction<ArtifactoryRedeployPublisher>(build, this));
-            }
         }
     }
 
@@ -666,10 +655,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
         public boolean isUseCredentialsPlugin() {
             return PluginsUtils.isUseCredentialsPlugin();
-        }
-
-        public boolean isPushToBintrayEnabled() {
-            return PluginsUtils.isPushToBintrayEnabled();
         }
     }
 

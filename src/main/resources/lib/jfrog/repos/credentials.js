@@ -60,8 +60,4 @@ document.addEventListener('DOMContentLoaded', function (event) {
     var useCredentialsPluginInput = document.getElementById('useCredentialsPlugin');
     useCredentialsPluginInput.checked = JSON.parse(useCredentialsPluginInput.value);
     updateViewForCredentialsMethod(useCredentialsPluginInput.checked);
-
-    var pushToBintrayEnabledCheckBox = document.getElementById('pushToBintrayEnabled');
-    pushToBintrayEnabledCheckBox.checked = JSON.parse(pushToBintrayEnabledCheckBox.value);
-
 });

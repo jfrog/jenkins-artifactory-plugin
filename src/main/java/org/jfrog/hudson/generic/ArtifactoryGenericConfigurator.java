@@ -23,7 +23,6 @@ import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
 import org.jfrog.hudson.*;
-import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.util.*;
@@ -412,12 +411,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                             // add the result action (prefer always the same index)
                             build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                             build.getActions().add(new UnifiedPromoteBuildAction(build, ArtifactoryGenericConfigurator.this));
-                            // Checks if Push to Bintray is disabled.
-                            if (PluginsUtils.isPushToBintrayEnabled()) {
-                                build.getActions().add(new BintrayPublishAction<ArtifactoryGenericConfigurator>(build,
-                                        ArtifactoryGenericConfigurator.this));
-                            }
-
                         }
                     }
 

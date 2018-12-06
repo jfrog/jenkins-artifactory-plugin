@@ -200,8 +200,6 @@
                             <f:textbox value="${instance.defaultPromotionTargetRepository}"/>
                         </f:entry>
                     </table>
-                     <r:bintray configurationFieldName="pushToBintrayEnabledConfig"
-                        elementId="pushToBintrayEnabled"/>
                 </f:block>
                 <f:block>
                     <table style="width:100%">
@@ -357,17 +355,6 @@
             }
         }
 
-         function updateViewPushToBintrayCheckBox() {
-            try {
-                var pushToBintrayEnabledFlag = JSON.parse(document.getElementById('pushToBintrayEnabled').value);
-                var pushToBintrayEnabledCheckBox = document.getElementById('pushToBintrayTable');
-                pushToBintrayEnabledCheckBox.style.display = pushToBintrayEnabledFlag ? '' : 'none';
-            } catch (exception) {
-                setTimeout(updateViewPushToBintrayCheckBox, 0);
-            }
-         }
-
-        updateViewPushToBintrayCheckBox();
         updateViewWithCredentials();
     </script>
 </j:jelly>

@@ -23,7 +23,7 @@
     </parent>
 
     <artifactId>artifactory</artifactId>
-    <version>2.16.x-SNAPSHOT</version>
+    <version>2.16.x-SNAPSHOT-ROBI-DELETION-0</version>
     <packaging>hpi</packaging>
     <name>Jenkins Artifactory Plugin</name>
     <description>Integrates Artifactory to Jenkins</description>

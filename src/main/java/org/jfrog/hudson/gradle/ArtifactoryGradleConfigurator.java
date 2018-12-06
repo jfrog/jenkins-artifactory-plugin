@@ -37,7 +37,6 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask;
 import org.jfrog.hudson.*;
-import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.action.ArtifactoryProjectAction;
 import org.jfrog.hudson.release.ReleaseAction;
@@ -104,7 +103,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final Boolean skipInjectInitScript = null;
     private final Boolean useArtifactoryGradlePlugin;
     private final boolean allowPromotionOfNonStagedBuilds;
-    private final boolean allowBintrayPushOfNonStageBuilds;
+    @Deprecated
+    private final Boolean allowBintrayPushOfNonStageBuilds = null;
     private final boolean blackDuckRunChecks;
     private final String blackDuckAppName;
     private final String blackDuckAppVersion;
@@ -152,7 +152,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean allowPromotionOfNonStagedBuilds,
                                          String defaultPromotionTargetRepository,
-                                         boolean allowBintrayPushOfNonStageBuilds, boolean blackDuckRunChecks,
+                                         Boolean allowBintrayPushOfNonStageBuilds, boolean blackDuckRunChecks,
                                          String blackDuckAppName, String blackDuckAppVersion,
                                          String blackDuckReportRecipients, String blackDuckScopes,
                                          boolean blackDuckIncludePublishedArtifacts,
@@ -195,7 +195,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         this.allowPromotionOfNonStagedBuilds = allowPromotionOfNonStagedBuilds;
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
         this.blackDuckRunChecks = blackDuckRunChecks;
-        this.allowBintrayPushOfNonStageBuilds = allowBintrayPushOfNonStageBuilds;
         this.blackDuckAppName = blackDuckAppName;
         this.blackDuckAppVersion = blackDuckAppVersion;
         this.blackDuckReportRecipients = blackDuckReportRecipients;
@@ -376,10 +375,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
 
     public void setDefaultPromotionTargetRepository(String defaultPromotionTargetRepository) {
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
-    }
-
-    public boolean isAllowBintrayPushOfNonStageBuilds() {
-        return allowBintrayPushOfNonStageBuilds;
     }
 
     public boolean isBlackDuckRunChecks() {
@@ -633,14 +628,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                             if (isAllowPromotionOfNonStagedBuilds()) {
                                 build.getActions()
                                         .add(new UnifiedPromoteBuildAction(build, ArtifactoryGradleConfigurator.this));
-                            }
-                            // Checks if Push to Bintray is disabled.
-                            if (PluginsUtils.isPushToBintrayEnabled()) {
-                                if (isAllowBintrayPushOfNonStageBuilds()) {
-                                    build.getActions()
-                                            .add(new BintrayPublishAction<ArtifactoryGradleConfigurator>(build,
-                                                    ArtifactoryGradleConfigurator.this));
-                                }
                             }
                         }
                     }
@@ -913,10 +900,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
             return "Gradle-Artifactory Integration";
         }
 
-        public boolean isPushToBintrayEnabled() {
-            return PluginsUtils.isPushToBintrayEnabled();
-        }
-
         @Override
         public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
             req.bindParameters(this, "gradle");
@@ -995,15 +978,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 if (successRun) {
                     // add a stage action
                     run.addAction(new UnifiedPromoteBuildAction(run, wrapper));
-                }
-            }
-            // Checks if Push to Bintray is disabled.
-            if (PluginsUtils.isPushToBintrayEnabled()) {
-                if (!wrapper.isAllowBintrayPushOfNonStageBuilds()) {
-                    if (successRun) {
-                        // add push to bintray action
-                        run.addAction(new BintrayPublishAction<ArtifactoryGradleConfigurator>(run, wrapper));
-                    }
                 }
             }
 

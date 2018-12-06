@@ -38,7 +38,7 @@ public class ArtifactoryRedeployPublisherITest {
         ArtifactoryRedeployPublisher before = new ArtifactoryRedeployPublisher(null, null, true,
                 new IncludesExcludes("", ""),
                 null, false, new IncludesExcludes("", ""), true, true, false, "", false, "", true,
-                true, false, true, false,"", "", true, true, "Released", false, false, null, false, false, null, null, null, null, false, false, false, false, "", false);
+                true, false, true, false,"", "", true, true, "Released", false, false, null, null, false, null, null, null, null, false, false, false, false, "", false);
         project.getPublishersList().add(before);
 
         // submit the configuration form
