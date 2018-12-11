@@ -96,45 +96,6 @@ public class AbstractBuildInfoDeployer {
 
         addBuildInfoProperties(builder);
 
-        LicenseControl licenseControl = new LicenseControl(configurator.isRunChecks());
-        if (configurator.isRunChecks()) {
-            if (StringUtils.isNotBlank(configurator.getViolationRecipients())) {
-                licenseControl.setLicenseViolationsRecipientsList(
-                        Util.replaceMacro(configurator.getViolationRecipients(), env)
-                );
-            }
-            if (StringUtils.isNotBlank(configurator.getScopes())) {
-                licenseControl.setScopesList(
-                        Util.replaceMacro(configurator.getScopes(), env)
-                );
-            }
-        }
-        licenseControl.setIncludePublishedArtifacts(configurator.isIncludePublishArtifacts());
-        licenseControl.setAutoDiscover(configurator.isLicenseAutoDiscovery());
-        builder.licenseControl(licenseControl);
-
-        BlackDuckProperties blackDuckProperties = new BlackDuckProperties();
-        blackDuckProperties.setRunChecks(configurator.isBlackDuckRunChecks());
-        blackDuckProperties.setAppName(
-                Util.replaceMacro(configurator.getBlackDuckAppName(), env)
-        );
-        blackDuckProperties.setAppVersion(
-                Util.replaceMacro(configurator.getBlackDuckAppVersion(), env)
-        );
-        blackDuckProperties.setReportRecipients(
-                Util.replaceMacro(configurator.getBlackDuckReportRecipients(), env)
-        );
-        blackDuckProperties.setScopes(
-                Util.replaceMacro(configurator.getBlackDuckScopes(), env)
-        );
-        blackDuckProperties.setIncludePublishedArtifacts(configurator.isBlackDuckIncludePublishedArtifacts());
-        blackDuckProperties.setAutoCreateMissingComponentRequests(configurator.isAutoCreateMissingComponentRequests());
-        blackDuckProperties.setAutoDiscardStaleComponentRequests(configurator.isAutoDiscardStaleComponentRequests());
-
-        Governance governance = new Governance();
-        governance.setBlackDuckProperties(blackDuckProperties);
-        builder.governance(governance);
-
         if ((Jenkins.getInstance().getPlugin("jira") != null) && configurator.isEnableIssueTrackerIntegration()) {
             new IssuesTrackerHelper(build, listener, configurator.isAggregateBuildIssues(),
                     configurator.getAggregationBuildStatus()).setIssueTrackerInfo(builder);

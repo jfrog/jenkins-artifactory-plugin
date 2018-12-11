@@ -70,12 +70,6 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private boolean deployBuildInfo;
     private boolean includeEnvVars;
     private IncludesExcludes envVarsPatterns;
-    private boolean runChecks;
-    private String violationRecipients;
-    private boolean includePublishArtifacts;
-    private String scopes;
-    private boolean licenseAutoDiscovery;
-    private boolean disableLicenseAutoDiscovery;
     private boolean discardOldBuilds;
     private boolean asyncBuildRetention;
     @Deprecated
@@ -86,16 +80,37 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private String artifactPattern;
     private boolean enableIssueTrackerIntegration;
     private boolean aggregateBuildIssues;
-    private boolean blackDuckRunChecks;
-    private String blackDuckAppName;
-    private String blackDuckAppVersion;
-    private String blackDuckReportRecipients; //csv
-    private String blackDuckScopes; //csv
-    private boolean blackDuckIncludePublishedArtifacts;
-    private boolean autoCreateMissingComponentRequests;
-    private boolean autoDiscardStaleComponentRequests;
     private String customBuildName;
     private boolean overrideBuildName;
+    // All following deprecated values remain in code because they appear in config.xml of jobs that were created before the action was removed.
+    @Deprecated
+    private Boolean runChecks = null;
+    @Deprecated
+    private String violationRecipients = null;
+    @Deprecated
+    private Boolean includePublishArtifacts = null;
+    @Deprecated
+    private String scopes = null;
+    @Deprecated
+    private Boolean licenseAutoDiscovery = null;
+    @Deprecated
+    private Boolean disableLicenseAutoDiscovery = null;
+    @Deprecated
+    private Boolean blackDuckRunChecks = null;
+    @Deprecated
+    private String blackDuckAppName = null;
+    @Deprecated
+    private String blackDuckAppVersion = null;
+    @Deprecated
+    private String blackDuckReportRecipients = null;
+    @Deprecated
+    private String blackDuckScopes = null;
+    @Deprecated
+    private Boolean blackDuckIncludePublishedArtifacts = null;
+    @Deprecated
+    private Boolean autoCreateMissingComponentRequests = null;
+    @Deprecated
+    private Boolean autoDiscardStaleComponentRequests = null;
 
     /**
      * @deprecated: Use org.jfrog.hudson.ivy.ArtifactoryIvyConfigurator#getDeployerCredentialsConfig()()
@@ -107,13 +122,13 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     public ArtifactoryIvyConfigurator(ServerDetails details, ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
                                       boolean deployArtifacts, IncludesExcludes artifactDeploymentPatterns, boolean deployBuildInfo,
                                       boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                      boolean runChecks, String violationRecipients, boolean includePublishArtifacts,
-                                      String scopes, boolean disableLicenseAutoDiscovery, Boolean useMavenPatterns, Boolean notM2Compatible, String ivyPattern,
+                                      Boolean runChecks, String violationRecipients, Boolean includePublishArtifacts,
+                                      String scopes, Boolean disableLicenseAutoDiscovery, Boolean useMavenPatterns, Boolean notM2Compatible, String ivyPattern,
                                       String artifactPattern, boolean discardOldBuilds, boolean discardBuildArtifacts, boolean asyncBuildRetention,
                                       String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
-                                      String aggregationBuildStatus, boolean blackDuckRunChecks, String blackDuckAppName, String blackDuckAppVersion,
-                                      String blackDuckReportRecipients, String blackDuckScopes, boolean blackDuckIncludePublishedArtifacts,
-                                      boolean autoCreateMissingComponentRequests, boolean autoDiscardStaleComponentRequests,
+                                      String aggregationBuildStatus, Boolean blackDuckRunChecks, String blackDuckAppName, String blackDuckAppVersion,
+                                      String blackDuckReportRecipients, String blackDuckScopes, Boolean blackDuckIncludePublishedArtifacts,
+                                      Boolean autoCreateMissingComponentRequests, Boolean autoDiscardStaleComponentRequests,
                                       boolean filterExcludedArtifactsFromBuild,
                                       String customBuildName, boolean overrideBuildName) {
         this.deployerDetails = deployerDetails != null ? deployerDetails : details;
@@ -123,11 +138,6 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         this.deployBuildInfo = deployBuildInfo;
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
-        this.runChecks = runChecks;
-        this.violationRecipients = violationRecipients;
-        this.includePublishArtifacts = includePublishArtifacts;
-        this.scopes = scopes;
-        this.disableLicenseAutoDiscovery = disableLicenseAutoDiscovery;
         this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
         this.ivyPattern = ivyPattern;
         this.aggregationBuildStatus = aggregationBuildStatus;
@@ -137,17 +147,8 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
         this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
-        this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
-        this.blackDuckRunChecks = blackDuckRunChecks;
-        this.blackDuckAppName = blackDuckAppName;
-        this.blackDuckAppVersion = blackDuckAppVersion;
-        this.blackDuckReportRecipients = blackDuckReportRecipients;
-        this.blackDuckScopes = blackDuckScopes;
-        this.blackDuckIncludePublishedArtifacts = blackDuckIncludePublishedArtifacts;
-        this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
-        this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
         this.customBuildName = customBuildName;
         this.overrideBuildName = overrideBuildName;
     }
@@ -218,38 +219,6 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         return notM2Compatible != null && !notM2Compatible;
     }
 
-    public boolean isIncludePublishArtifacts() {
-        return includePublishArtifacts;
-    }
-
-    public void setIncludePublishArtifacts(boolean includePublishArtifacts) {
-        this.includePublishArtifacts = includePublishArtifacts;
-    }
-
-    public boolean isRunChecks() {
-        return runChecks;
-    }
-
-    public void setRunChecks(boolean runChecks) {
-        this.runChecks = runChecks;
-    }
-
-    public boolean isDisableLicenseAutoDiscovery() {
-        return disableLicenseAutoDiscovery;
-    }
-
-    public String getScopes() {
-        return scopes;
-    }
-
-    public boolean isLicenseAutoDiscovery() {
-        return licenseAutoDiscovery;
-    }
-
-    public void setLicenseAutoDiscovery(boolean licenseAutoDiscovery) {
-        this.licenseAutoDiscovery = licenseAutoDiscovery;
-    }
-
     public boolean isDeployArtifacts() {
         return deployArtifacts;
     }
@@ -288,14 +257,6 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         return server != null ? server.getUrl() : null;
     }
 
-    public String getViolationRecipients() {
-        return violationRecipients;
-    }
-
-    public void setViolationRecipients(String violationRecipients) {
-        this.violationRecipients = violationRecipients;
-    }
-
     public boolean isEnableIssueTrackerIntegration() {
         return enableIssueTrackerIntegration;
     }
@@ -318,50 +279,6 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
 
     public void setAggregationBuildStatus(String aggregationBuildStatus) {
         this.aggregationBuildStatus = aggregationBuildStatus;
-    }
-
-    public boolean isBlackDuckRunChecks() {
-        return blackDuckRunChecks;
-    }
-
-    public void setBlackDuckRunChecks(boolean blackDuckRunChecks) {
-        this.blackDuckRunChecks = blackDuckRunChecks;
-    }
-
-    public String getBlackDuckAppName() {
-        return blackDuckAppName;
-    }
-
-    public void setBlackDuckAppName(String blackDuckAppName) {
-        this.blackDuckAppName = blackDuckAppName;
-    }
-
-    public String getBlackDuckAppVersion() {
-        return blackDuckAppVersion;
-    }
-
-    public void setBlackDuckAppVersion(String blackDuckAppVersion) {
-        this.blackDuckAppVersion = blackDuckAppVersion;
-    }
-
-    public String getBlackDuckReportRecipients() {
-        return blackDuckReportRecipients;
-    }
-
-    public String getBlackDuckScopes() {
-        return blackDuckScopes;
-    }
-
-    public boolean isBlackDuckIncludePublishedArtifacts() {
-        return blackDuckIncludePublishedArtifacts;
-    }
-
-    public boolean isAutoCreateMissingComponentRequests() {
-        return autoCreateMissingComponentRequests;
-    }
-
-    public boolean isAutoDiscardStaleComponentRequests() {
-        return autoDiscardStaleComponentRequests;
     }
 
     public boolean isFilterExcludedArtifactsFromBuild() {
@@ -394,9 +311,8 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         final FilePath actualDependencyDir =
                 PluginDependencyHelper.getActualDependencyDirectory(localDependencyFile, ActionableHelper.getNode(launcher).getRootPath());
         final PublisherContext context = new PublisherContext.Builder().artifactoryServer(getArtifactoryServer())
-                .serverDetails(getDeployerDetails()).deployerOverrider(ArtifactoryIvyConfigurator.this).runChecks(isRunChecks())
-                .includePublishArtifacts(isIncludePublishArtifacts()).violationRecipients(getViolationRecipients())
-                .scopes(getScopes()).licenseAutoDiscovery(licenseAutoDiscovery).discardOldBuilds(isDiscardOldBuilds())
+                .serverDetails(getDeployerDetails()).deployerOverrider(ArtifactoryIvyConfigurator.this)
+                .discardOldBuilds(isDiscardOldBuilds())
                 .deployArtifacts(isDeployArtifacts()).includesExcludes(getArtifactDeploymentPatterns())
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
                 .includeEnvVars(isIncludeEnvVars()).envVarsPatterns(getEnvVarsPatterns())
@@ -404,9 +320,6 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
                 .deploymentProperties(getDeploymentProperties()).artifactsPattern(getArtifactPattern()).ivyPattern(getIvyPattern()).maven2Compatible(isUseMavenPatterns())
                 .enableIssueTrackerIntegration(isEnableIssueTrackerIntegration())
                 .aggregateBuildIssues(isAggregateBuildIssues()).aggregationBuildStatus(getAggregationBuildStatus())
-                .integrateBlackDuck(isBlackDuckRunChecks(), getBlackDuckAppName(), getBlackDuckAppVersion(),
-                        getBlackDuckReportRecipients(), getBlackDuckScopes(), isBlackDuckIncludePublishedArtifacts(),
-                        isAutoCreateMissingComponentRequests(), isAutoDiscardStaleComponentRequests())
                 .filterExcludedArtifactsFromBuild(isFilterExcludedArtifactsFromBuild())
                 .artifactoryPluginVersion(artifactoryPluginVersion)
                 .overrideBuildName(isOverrideBuildName())
@@ -524,10 +437,6 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
 
         public FormValidation doCheckArtifactoryName(@QueryParameter String value) {
             return FormValidations.validateInternetAddress(value);
-        }
-
-        public FormValidation doCheckViolationRecipients(@QueryParameter String value) {
-            return FormValidations.validateEmails(value);
         }
 
         /**

@@ -194,10 +194,7 @@ public class MavenExtractorEnvironment extends Environment {
         }
 
         PublisherContext context = new PublisherContext.Builder().artifactoryServer(publisher.getArtifactoryServer())
-                .serverDetails(server).deployerOverrider(publisher).runChecks(publisher.isRunChecks())
-                .includePublishArtifacts(publisher.isIncludePublishArtifacts())
-                .violationRecipients(publisher.getViolationRecipients()).scopes(publisher.getScopes())
-                .licenseAutoDiscovery(publisher.isLicenseAutoDiscovery())
+                .serverDetails(server).deployerOverrider(publisher)
                 .discardOldBuilds(publisher.isDiscardOldBuilds()).deployArtifacts(publisher.isDeployArtifacts())
                 .includesExcludes(publisher.getArtifactDeploymentPatterns())
                 .skipBuildInfoDeploy(!publisher.isDeployBuildInfo())
@@ -208,11 +205,6 @@ public class MavenExtractorEnvironment extends Environment {
                 .enableIssueTrackerIntegration(publisher.isEnableIssueTrackerIntegration())
                 .aggregateBuildIssues(publisher.isAggregateBuildIssues())
                 .aggregationBuildStatus(publisher.getAggregationBuildStatus())
-                .integrateBlackDuck(publisher.isBlackDuckRunChecks(), publisher.getBlackDuckAppName(),
-                        publisher.getBlackDuckAppVersion(), publisher.getBlackDuckReportRecipients(),
-                        publisher.getBlackDuckScopes(), publisher.isBlackDuckIncludePublishedArtifacts(),
-                        publisher.isAutoCreateMissingComponentRequests(),
-                        publisher.isAutoDiscardStaleComponentRequests())
                 .filterExcludedArtifactsFromBuild(publisher.isFilterExcludedArtifactsFromBuild())
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .overrideBuildName(publisher.isOverrideBuildName())

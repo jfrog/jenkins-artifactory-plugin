@@ -121,20 +121,4 @@ public class PluginsUtils {
         }
         return mapper;
     }
-
-    public static int getProxyPort() {
-        try {
-            return getDescriptor().getBuildInfoProxyPort();
-        } catch (IllegalStateException e) {
-            return 0;
-        }
-    }
-
-    public static boolean isProxyEnabled() {
-        try {
-            return getDescriptor().isBuildInfoProxyEnabled();
-        } catch (IllegalStateException e) {
-            return false;
-        }
-    }
 }

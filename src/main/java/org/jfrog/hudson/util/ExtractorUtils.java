@@ -338,31 +338,6 @@ public class ExtractorUtils {
             configuration.publisher.setSnapshotRepoKey(snapshotRepoKey);
         }
 
-        configuration.info.licenseControl.setRunChecks(context.isRunChecks());
-        configuration.info.licenseControl.setIncludePublishedArtifacts(context.isIncludePublishArtifacts());
-        configuration.info.licenseControl.setAutoDiscover(context.isLicenseAutoDiscovery());
-        if (context.isRunChecks()) {
-            if (StringUtils.isNotBlank(context.getViolationRecipients())) {
-                configuration.info.licenseControl.setViolationRecipients(
-                        Util.replaceMacro(context.getViolationRecipients(), env)
-                );
-            }
-            if (StringUtils.isNotBlank(context.getScopes())) {
-                configuration.info.licenseControl.setScopes(Util.replaceMacro(context.getScopes(), env));
-            }
-        }
-
-        configuration.info.blackDuckProperties.setRunChecks(context.isBlackDuckRunChecks());
-        configuration.info.blackDuckProperties.setAppName(Util.replaceMacro(context.getBlackDuckAppName(), env));
-        configuration.info.blackDuckProperties.setAppVersion(Util.replaceMacro(context.getBlackDuckAppVersion(), env));
-        configuration.info.blackDuckProperties.setReportRecipients(
-                Util.replaceMacro(context.getBlackDuckReportRecipients(), env)
-        );
-        configuration.info.blackDuckProperties.setScopes(Util.replaceMacro(context.getBlackDuckScopes(), env));
-        configuration.info.blackDuckProperties.setIncludePublishedArtifacts(context.isBlackDuckIncludePublishedArtifacts());
-        configuration.info.blackDuckProperties.setAutoCreateMissingComponentRequests(context.isAutoCreateMissingComponentRequests());
-        configuration.info.blackDuckProperties.setAutoDiscardStaleComponentRequests(context.isAutoDiscardStaleComponentRequests());
-
         if (context.isDiscardOldBuilds()) {
             BuildRetention buildRetention = BuildRetentionFactory.createBuildRetention(build, context.isDiscardBuildArtifacts());
             if (buildRetention.getCount() > -1) {
