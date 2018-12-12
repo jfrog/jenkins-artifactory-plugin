@@ -52,7 +52,7 @@ public class GenericUploadExecutor {
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(server);
         List<Artifact> deployedArtifacts = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
                 server, credentials, getPropertiesMap(), proxyConfiguration));
-        if (failNoOp && deployedArtifacts.size() <= 0) {
+        if (failNoOp && deployedArtifacts.isEmpty()) {
             throw new RuntimeException("Fail-no-op: No files were affected in the upload process.");
         }
         new BuildInfoAccessor(buildInfo).appendDeployedArtifacts(deployedArtifacts);

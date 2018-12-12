@@ -42,7 +42,7 @@ public class GenericDownloadExecutor {
                         preferredResolver.provideUsername(build.getParent()),
                         preferredResolver.providePassword(build.getParent()),
                         server.getUrl(), spec, Utils.getProxyConfiguration(server)));
-        if (failNoOp && resolvedDependencies.size() <= 0) {
+        if (failNoOp && resolvedDependencies.isEmpty()) {
             throw new RuntimeException("Fail-no-op: No files were affected in the download process.");
         }
         new BuildInfoAccessor(this.buildInfo).appendPublishedDependencies(resolvedDependencies);
