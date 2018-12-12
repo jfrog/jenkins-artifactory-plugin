@@ -55,21 +55,6 @@ public class CreateArtifactoryServerStep extends AbstractStepImpl {
         @Inject(optional = true)
         private transient CreateArtifactoryServerStep step;
 
-        @StepContextParameter
-        private transient Run build;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @StepContextParameter
-        private transient Launcher launcher;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient EnvVars env;
-
         @Override
         protected ArtifactoryServer run() throws Exception {
             String artifactoryUrl = step.getUrl();

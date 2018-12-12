@@ -38,12 +38,6 @@ public class DeployStep extends AbstractStepImpl {
         private transient FilePath ws;
 
         @StepContextParameter
-        private transient EnvVars env;
-
-        @StepContextParameter
-        private transient Run build;
-
-        @StepContextParameter
         private transient TaskListener listener;
 
         @Override

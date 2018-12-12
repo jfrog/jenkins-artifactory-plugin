@@ -38,8 +38,6 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Boolean> {
         private static final long serialVersionUID = 1L;
-        @StepContextParameter
-        private transient FilePath ws;
 
         @StepContextParameter
         private transient Run build;

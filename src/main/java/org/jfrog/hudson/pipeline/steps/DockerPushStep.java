@@ -90,9 +90,6 @@ public class DockerPushStep extends AbstractStepImpl {
         @StepContextParameter
         private transient Launcher launcher;
 
-        @StepContextParameter
-        private transient FilePath ws;
-
         @Override
         protected BuildInfo run() throws Exception {
             if (step.getImage() == null) {

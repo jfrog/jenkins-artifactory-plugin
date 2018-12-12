@@ -22,9 +22,6 @@ public class CreateBuildInfoStep extends AbstractStepImpl {
         @StepContextParameter
         private transient Run build;
 
-        @Inject(optional = true)
-        private transient CreateBuildInfoStep step;
-
         @Override
         protected BuildInfo run() throws Exception {
             return new BuildInfo(build);
