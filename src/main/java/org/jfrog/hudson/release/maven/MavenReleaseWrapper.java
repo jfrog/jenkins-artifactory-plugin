@@ -38,7 +38,6 @@ import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.release.scm.AbstractScmCoordinator;
 import org.jfrog.hudson.release.scm.ScmCoordinator;
 import org.jfrog.hudson.release.scm.git.GitCoordinator;
-import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;

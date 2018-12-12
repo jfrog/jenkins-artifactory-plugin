@@ -17,7 +17,10 @@
 package org.jfrog.hudson;
 
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.AbstractProject;
+import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.Descriptor;
+import hudson.model.Item;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -26,7 +29,6 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
@@ -37,10 +39,8 @@ import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import javax.servlet.ServletException;
-import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;

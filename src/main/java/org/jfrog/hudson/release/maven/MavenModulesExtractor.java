@@ -1,6 +1,5 @@
 package org.jfrog.hudson.release.maven;
 
-import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.maven.model.Model;

@@ -3,7 +3,6 @@ package org.jfrog.hudson.pipeline.steps;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;

@@ -1,7 +1,5 @@
 package org.jfrog.hudson.release;
 
-import org.apache.commons.lang.StringUtils;
-
 import java.io.Serializable;
 
 /**

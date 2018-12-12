@@ -32,7 +32,6 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
@@ -47,7 +46,6 @@ import org.jfrog.hudson.util.converters.DeployerResolverOverriderConverter;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 

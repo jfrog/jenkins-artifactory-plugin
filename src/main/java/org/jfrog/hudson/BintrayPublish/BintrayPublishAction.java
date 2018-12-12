@@ -1,7 +1,8 @@
 package org.jfrog.hudson.BintrayPublish;
 
-import hudson.model.*;
-import org.jfrog.hudson.*;
+import hudson.model.AbstractBuild;
+import org.jfrog.hudson.BuildInfoAwareConfigurator;
+
 import java.util.List;
 
 /**

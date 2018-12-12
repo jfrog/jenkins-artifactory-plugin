@@ -25,7 +25,6 @@ import hudson.model.listeners.RunListener;
 import org.jfrog.hudson.BuildInfoResultAction;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
-import org.jfrog.hudson.util.plugins.PluginsUtils;
 
 
 /**

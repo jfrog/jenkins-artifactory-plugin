@@ -6,7 +6,6 @@ import hudson.FilePath;
 import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.Artifact;
