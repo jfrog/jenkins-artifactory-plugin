@@ -78,10 +78,6 @@ public class ArtifactoryServer implements Serializable {
             throw new IllegalArgumentException("Only the following arguments are allowed, " + keysAsList.toString());
         }
 
-        if (!(arguments.get(FAIL_NO_OP) instanceof Boolean)) {
-            arguments.put(FAIL_NO_OP,false);
-        }
-
         Map<String, Object> stepVariables = Maps.newLinkedHashMap(arguments);
         stepVariables.put(SERVER, this);
         return stepVariables;
