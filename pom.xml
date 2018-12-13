@@ -32,7 +32,7 @@
     <properties>
         <!-- Minimal version required by Pipeline dependencies in 2.14.0 -->
         <jenkins.version>1.642.3</jenkins.version>
-        <java.level>7</java.level>
+        <java.level>8</java.level>
         <!-- TODO: enforcer is full of upper bound dependency issues, including real ones -->
         <enforcer.skip>true</enforcer.skip>
         <findbugs.failOnError>false</findbugs.failOnError>
