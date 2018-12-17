@@ -20,8 +20,7 @@ import jenkins.plugins.nodejs.tools.NodeJSInstallation;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.Ref;
+import org.jenkinsci.plugins.gitclient.Git;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.BuildInfoFields;
@@ -144,9 +143,7 @@ public class Utils {
         if (dotGitPath.exists()) {
             return dotGitPath.act(new MasterToSlaveFileCallable<String>() {
                 public String invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                    FileRepository repository = new FileRepository(f);
-                    Ref head = repository.getRef("HEAD");
-                    return head.getObjectId().getName();
+                    return Git.with(TaskListener.NULL, new EnvVars()).in(f).getClient().revParse("HEAD").getName();
                 }
             });
         }
