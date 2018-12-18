@@ -99,35 +99,6 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private String artifactoryCombinationFilter;
     private String customBuildName;
     private boolean overrideBuildName;
-    // All following deprecated values remain in code because they appear in config.xml of jobs that were created before the action was removed.
-    @Deprecated
-    private final String violationRecipients = null;
-    @Deprecated
-    private final Boolean includePublishArtifacts = null;
-    @Deprecated
-    private final String scopes = null;
-    @Deprecated
-    private final Boolean licenseAutoDiscovery = null;
-    @Deprecated
-    private final Boolean disableLicenseAutoDiscovery = null;
-    @Deprecated
-    private final Boolean runChecks = null;
-    @Deprecated
-    private Boolean blackDuckRunChecks = null;
-    @Deprecated
-    private String blackDuckAppName = null;
-    @Deprecated
-    private String blackDuckAppVersion = null;
-    @Deprecated
-    private String blackDuckReportRecipients = null;
-    @Deprecated
-    private String blackDuckScopes = null;
-    @Deprecated
-    private Boolean blackDuckIncludePublishedArtifacts = null;
-    @Deprecated
-    private Boolean autoCreateMissingComponentRequests = null;
-    @Deprecated
-    private Boolean autoDiscardStaleComponentRequests = null;
 
     @Deprecated
     private Credentials overridingDeployerCredentials;
@@ -136,15 +107,13 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     public ArtifactoryIvyFreeStyleConfigurator(ServerDetails details, ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
                                                boolean deployArtifacts, String remotePluginLocation,
                                                boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                               boolean deployBuildInfo, Boolean runChecks, String violationRecipients,
-                                               Boolean includePublishArtifacts, String scopes, Boolean disableLicenseAutoDiscovery, String ivyPattern,
+                                               boolean deployBuildInfo, Boolean runChecks,
+                                               String ivyPattern,
                                                String artifactPattern, Boolean useMavenPatterns, Boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
                                                boolean discardOldBuilds, boolean asyncBuildRetention, boolean passIdentifiedDownstream, boolean discardBuildArtifacts,
                                                String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
-                                               String aggregationBuildStatus, Boolean blackDuckRunChecks, String blackDuckAppName,
-                                               String blackDuckAppVersion, String blackDuckReportRecipients, String blackDuckScopes,
-                                               Boolean blackDuckIncludePublishedArtifacts, Boolean autoCreateMissingComponentRequests,
-                                               Boolean autoDiscardStaleComponentRequests, boolean filterExcludedArtifactsFromBuild,
+                                               String aggregationBuildStatus,
+                                               boolean filterExcludedArtifactsFromBuild,
                                                String artifactoryCombinationFilter, String customBuildName, boolean overrideBuildName) {
         this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.deployerCredentialsConfig = deployerCredentialsConfig;

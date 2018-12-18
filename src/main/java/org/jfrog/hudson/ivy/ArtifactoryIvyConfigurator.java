@@ -82,35 +82,6 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private boolean aggregateBuildIssues;
     private String customBuildName;
     private boolean overrideBuildName;
-    // All following deprecated values remain in code because they appear in config.xml of jobs that were created before the action was removed.
-    @Deprecated
-    private Boolean runChecks = null;
-    @Deprecated
-    private String violationRecipients = null;
-    @Deprecated
-    private Boolean includePublishArtifacts = null;
-    @Deprecated
-    private String scopes = null;
-    @Deprecated
-    private Boolean licenseAutoDiscovery = null;
-    @Deprecated
-    private Boolean disableLicenseAutoDiscovery = null;
-    @Deprecated
-    private Boolean blackDuckRunChecks = null;
-    @Deprecated
-    private String blackDuckAppName = null;
-    @Deprecated
-    private String blackDuckAppVersion = null;
-    @Deprecated
-    private String blackDuckReportRecipients = null;
-    @Deprecated
-    private String blackDuckScopes = null;
-    @Deprecated
-    private Boolean blackDuckIncludePublishedArtifacts = null;
-    @Deprecated
-    private Boolean autoCreateMissingComponentRequests = null;
-    @Deprecated
-    private Boolean autoDiscardStaleComponentRequests = null;
 
     /**
      * @deprecated: Use org.jfrog.hudson.ivy.ArtifactoryIvyConfigurator#getDeployerCredentialsConfig()()
@@ -122,13 +93,10 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     public ArtifactoryIvyConfigurator(ServerDetails details, ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
                                       boolean deployArtifacts, IncludesExcludes artifactDeploymentPatterns, boolean deployBuildInfo,
                                       boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                      Boolean runChecks, String violationRecipients, Boolean includePublishArtifacts,
-                                      String scopes, Boolean disableLicenseAutoDiscovery, Boolean useMavenPatterns, Boolean notM2Compatible, String ivyPattern,
+                                      Boolean useMavenPatterns, Boolean notM2Compatible, String ivyPattern,
                                       String artifactPattern, boolean discardOldBuilds, boolean discardBuildArtifacts, boolean asyncBuildRetention,
                                       String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
-                                      String aggregationBuildStatus, Boolean blackDuckRunChecks, String blackDuckAppName, String blackDuckAppVersion,
-                                      String blackDuckReportRecipients, String blackDuckScopes, Boolean blackDuckIncludePublishedArtifacts,
-                                      Boolean autoCreateMissingComponentRequests, Boolean autoDiscardStaleComponentRequests,
+                                      String aggregationBuildStatus,
                                       boolean filterExcludedArtifactsFromBuild,
                                       String customBuildName, boolean overrideBuildName) {
         this.deployerDetails = deployerDetails != null ? deployerDetails : details;

@@ -56,33 +56,6 @@ public class PublisherContext {
     private String customBuildName;
     private boolean overrideBuildName;
     private int connectionRetry;
-    // All following deprecated values remain in code because they appear in config.xml of jobs that were created before the action was removed.
-    @Deprecated
-    private Boolean runChecks = null;
-    @Deprecated
-    private Boolean includePublishArtifacts = null;
-    @Deprecated
-    private String violationRecipients = null;
-    @Deprecated
-    private String scopes = null;
-    @Deprecated
-    private Boolean licenseAutoDiscovery = null;
-    @Deprecated
-    private Boolean blackDuckRunChecks = null;
-    @Deprecated
-    private String blackDuckAppName = null;
-    @Deprecated
-    private String blackDuckAppVersion = null;
-    @Deprecated
-    private String blackDuckReportRecipients = null;
-    @Deprecated
-    private String blackDuckScopes = null;
-    @Deprecated
-    private Boolean blackDuckIncludePublishedArtifacts = null;
-    @Deprecated
-    private Boolean autoCreateMissingComponentRequests = null;
-    @Deprecated
-    private Boolean autoDiscardStaleComponentRequests = null;
 
     private PublisherContext() {
     }

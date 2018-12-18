@@ -96,36 +96,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     private String artifactoryCombinationFilter;
     private String customBuildName;
     private boolean overrideBuildName;
-
-    // All following deprecated values remain in code because they appear in config.xml of jobs that were created before the action was removed.
-    @Deprecated
-    private final Boolean runChecks = null;
-    @Deprecated
-    private final String violationRecipients = null;
-    @Deprecated
-    private final Boolean includePublishArtifacts = null;
-    @Deprecated
-    private final String scopes = null;
-    @Deprecated
-    private Boolean licenseAutoDiscovery;
-    @Deprecated
-    private Boolean disableLicenseAutoDiscovery;
-    @Deprecated
-    private Boolean blackDuckRunChecks = null;
-    @Deprecated
-    private String blackDuckAppName = null;
-    @Deprecated
-    private String blackDuckAppVersion = null;
-    @Deprecated
-    private String blackDuckReportRecipients = null;
-    @Deprecated
-    private String blackDuckScopes = null;
-    @Deprecated
-    private Boolean blackDuckIncludePublishedArtifacts = null;
-    @Deprecated
-    private Boolean autoCreateMissingComponentRequests = null;
-    @Deprecated
-    private Boolean autoDiscardStaleComponentRequests = null;
     /**
      * @deprecated: Use org.jfrog.hudson.maven3.ArtifactoryMaven3Configurator#deployBuildInfo
      */
@@ -148,17 +118,10 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                                          boolean enableResolveArtifacts, IncludesExcludes artifactDeploymentPatterns,
                                          boolean deployArtifacts, boolean deployBuildInfo, boolean includeEnvVars,
                                          IncludesExcludes envVarsPatterns,
-                                         Boolean runChecks, String violationRecipients, Boolean includePublishArtifacts,
-                                         String scopes, Boolean disableLicenseAutoDiscovery, boolean discardOldBuilds,
+                                         boolean discardOldBuilds,
                                          boolean discardBuildArtifacts, boolean asyncBuildRetention, String matrixParams, String deploymentProperties,
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean recordAllDependencies,
-                                         Boolean blackDuckRunChecks, String blackDuckAppName,
-                                         String blackDuckAppVersion,
-                                         String blackDuckReportRecipients, String blackDuckScopes,
-                                         Boolean blackDuckIncludePublishedArtifacts,
-                                         Boolean autoCreateMissingComponentRequests,
-                                         Boolean autoDiscardStaleComponentRequests,
                                          boolean filterExcludedArtifactsFromBuild,
                                          String customBuildName,
                                          boolean overrideBuildName,

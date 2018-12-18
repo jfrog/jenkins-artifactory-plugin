@@ -65,17 +65,6 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         private boolean useCredentialsPlugin;
         private List<ArtifactoryServer> artifactoryServers;
-        // All the bellow deprecated parameters remain in code because they appear in ArtifactoryBuilder.xml if configuration was done before the functionality was removed.
-        @Deprecated
-        private Boolean buildInfoProxyEnabled = null;
-        @Deprecated
-        private Integer buildInfoProxyPort = null;
-        @Deprecated
-        private String buildInfoProxyCertPublic = null;
-        @Deprecated
-        private String buildInfoProxyCertPrivate = null;
-        @Deprecated
-        private Boolean pushToBintrayEnabled = null;
 
         public DescriptorImpl() {
             super(ArtifactoryBuilder.class);

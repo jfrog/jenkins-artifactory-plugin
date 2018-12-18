@@ -109,37 +109,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private String artifactoryCombinationFilter;
     private String customBuildName;
     private boolean overrideBuildName;
-    // All following deprecated values remain in code because they appear in config.xml of jobs that were created before the action was removed.
-    @Deprecated
-    private final Boolean runChecks = null;
-    @Deprecated
-    private final String violationRecipients = null;
-    @Deprecated
-    private final Boolean includePublishArtifacts = null;
-    @Deprecated
-    private final String scopes = null;
-    @Deprecated
-    private final Boolean licenseAutoDiscovery = null;
-    @Deprecated
-    private final Boolean disableLicenseAutoDiscovery = null;
-    @Deprecated
-    private final Boolean allowBintrayPushOfNonStageBuilds = null;
-    @Deprecated
-    private Boolean blackDuckRunChecks = null;
-    @Deprecated
-    private String blackDuckAppName = null;
-    @Deprecated
-    private String blackDuckAppVersion = null;
-    @Deprecated
-    private String blackDuckReportRecipients = null;
-    @Deprecated
-    private String blackDuckScopes = null;
-    @Deprecated
-    private Boolean blackDuckIncludePublishedArtifacts = null;
-    @Deprecated
-    private Boolean autoCreateMissingComponentRequests = null;
-    @Deprecated
-    private Boolean autoDiscardStaleComponentRequests = null;
 
     /**
      * @deprecated: Use org.jfrog.hudson.gradle.ArtifactoryGradleConfigurator#getDeployerCredentialsConfig()
@@ -157,9 +126,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                          CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                          boolean deployMaven, boolean deployIvy, boolean deployArtifacts,
                                          String remotePluginLocation, boolean includeEnvVars,
-                                         IncludesExcludes envVarsPatterns, boolean deployBuildInfo, Boolean runChecks,
-                                         String violationRecipients, Boolean includePublishArtifacts, String scopes,
-                                         Boolean disableLicenseAutoDiscovery, String ivyPattern, String artifactPattern,
+                                         IncludesExcludes envVarsPatterns, boolean deployBuildInfo,
+                                         String ivyPattern, String artifactPattern,
                                          Boolean useMavenPatterns, Boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
                                          boolean discardOldBuilds, boolean passIdentifiedDownstream,
                                          GradleReleaseWrapper releaseWrapper, boolean discardBuildArtifacts, boolean asyncBuildRetention,
@@ -167,12 +135,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean allowPromotionOfNonStagedBuilds,
                                          String defaultPromotionTargetRepository,
-                                         Boolean allowBintrayPushOfNonStageBuilds, Boolean blackDuckRunChecks,
-                                         String blackDuckAppName, String blackDuckAppVersion,
-                                         String blackDuckReportRecipients, String blackDuckScopes,
-                                         Boolean blackDuckIncludePublishedArtifacts,
-                                         Boolean autoCreateMissingComponentRequests,
-                                         Boolean autoDiscardStaleComponentRequests,
                                          boolean filterExcludedArtifactsFromBuild, String artifactoryCombinationFilter,
                                          String customBuildName, boolean overrideBuildName) {
         this.deployerDetails = deployerDetails != null ? deployerDetails : details;
