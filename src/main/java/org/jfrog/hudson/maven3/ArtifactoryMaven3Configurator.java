@@ -61,8 +61,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     /**
      * Repository URL and repository to deploy artifacts to
      */
-    @Deprecated
-    private ServerDetails details = null;
     private final ServerDetails deployerDetails;
     private final ServerDetails resolverDetails;
     private final CredentialsConfig deployerCredentialsConfig;
@@ -106,7 +104,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     private Credentials overridingResolverCredentials;
 
     @DataBoundConstructor
-    public ArtifactoryMaven3Configurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
+    public ArtifactoryMaven3Configurator(ServerDetails deployerDetails, ServerDetails resolverDetails,
                                          CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                          boolean enableResolveArtifacts, IncludesExcludes artifactDeploymentPatterns,
                                          boolean deployArtifacts, boolean deployBuildInfo, boolean includeEnvVars,
@@ -120,7 +118,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                                          boolean overrideBuildName,
                                          String artifactoryCombinationFilter
     ) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -145,7 +143,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public ServerDetails getResolverDetails() {

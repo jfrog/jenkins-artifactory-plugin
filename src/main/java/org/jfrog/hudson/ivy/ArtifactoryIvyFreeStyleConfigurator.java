@@ -85,8 +85,6 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean filterExcludedArtifactsFromBuild;
-    @Deprecated
-    private final ServerDetails details = null;
     private ServerDetails deployerDetails;
     private boolean deployArtifacts;
     private IncludesExcludes envVarsPatterns;
@@ -100,7 +98,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private Credentials overridingDeployerCredentials;
 
     @DataBoundConstructor
-    public ArtifactoryIvyFreeStyleConfigurator(ServerDetails details, ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
+    public ArtifactoryIvyFreeStyleConfigurator(ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
                                                boolean deployArtifacts, String remotePluginLocation,
                                                boolean includeEnvVars, IncludesExcludes envVarsPatterns,
                                                boolean deployBuildInfo, Boolean runChecks,
@@ -111,7 +109,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                                                String aggregationBuildStatus,
                                                boolean filterExcludedArtifactsFromBuild,
                                                String artifactoryCombinationFilter, String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.deployArtifacts = deployArtifacts;
         this.remotePluginLocation = remotePluginLocation;
@@ -144,7 +142,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public String getDeploymentProperties() {

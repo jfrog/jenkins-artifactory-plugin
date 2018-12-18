@@ -70,8 +70,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     /**
      * Repository URL and repository to deploy artifacts to.
      */
-    @Deprecated
-    private ServerDetails details = null;
     private final ServerDetails deployerDetails;
     /**
      * If checked (default) deploy maven artifacts
@@ -107,7 +105,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     // NOTE: The following getters are used by jelly. Do not remove them
 
     @DataBoundConstructor
-    public ArtifactoryRedeployPublisher(ServerDetails details, ServerDetails deployerDetails, boolean deployArtifacts,
+    public ArtifactoryRedeployPublisher(ServerDetails deployerDetails, boolean deployArtifacts,
                                         IncludesExcludes artifactDeploymentPatterns, CredentialsConfig deployerCredentialsConfig,
                                         boolean includeEnvVars, IncludesExcludes envVarsPatterns,
                                         boolean deployBuildInfo, boolean evenIfUnstable,
@@ -118,7 +116,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
                                         String defaultPromotionTargetRepository,
                                         boolean filterExcludedArtifactsFromBuild,
                                         String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.deployArtifacts = deployArtifacts;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
@@ -152,7 +150,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public IncludesExcludes getArtifactDeploymentPatterns() {

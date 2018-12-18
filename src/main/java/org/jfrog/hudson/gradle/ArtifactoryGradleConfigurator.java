@@ -94,8 +94,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final boolean filterExcludedArtifactsFromBuild;
     private final ServerDetails resolverDetails;
     private String defaultPromotionTargetRepository;
-    @Deprecated
-    private ServerDetails details = null;
     private ServerDetails deployerDetails;
     private boolean deployArtifacts;
     private IncludesExcludes envVarsPatterns;
@@ -116,7 +114,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private Credentials overridingResolverCredentials;
 
     @DataBoundConstructor
-    public ArtifactoryGradleConfigurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
+    public ArtifactoryGradleConfigurator(ServerDetails deployerDetails, ServerDetails resolverDetails,
                                          CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                          boolean deployMaven, boolean deployIvy, boolean deployArtifacts,
                                          String remotePluginLocation, boolean includeEnvVars,
@@ -131,7 +129,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                          String defaultPromotionTargetRepository,
                                          boolean filterExcludedArtifactsFromBuild, String artifactoryCombinationFilter,
                                          String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -169,7 +167,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public ServerDetails getResolverDetails() {
