@@ -81,21 +81,15 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final boolean enableIssueTrackerIntegration;
     private final boolean aggregateBuildIssues;
     private final String artifactPattern;
-    @Deprecated
-    private final Boolean notM2Compatible = null;
-    private final Boolean useMavenPatterns;
+    private final boolean useMavenPatterns;
     private final IncludesExcludes artifactDeploymentPatterns;
     private final boolean discardOldBuilds;
     private final boolean passIdentifiedDownstream;
     private final GradleReleaseWrapper releaseWrapper;
     private final boolean discardBuildArtifacts;
     private final boolean asyncBuildRetention;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
-    @Deprecated
-    private final Boolean skipInjectInitScript = null;
-    private final Boolean useArtifactoryGradlePlugin;
+    private final boolean useArtifactoryGradlePlugin;
     private final boolean allowPromotionOfNonStagedBuilds;
     private final boolean filterExcludedArtifactsFromBuild;
     private final ServerDetails resolverDetails;
@@ -128,10 +122,10 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                          String remotePluginLocation, boolean includeEnvVars,
                                          IncludesExcludes envVarsPatterns, boolean deployBuildInfo,
                                          String ivyPattern, String artifactPattern,
-                                         Boolean useMavenPatterns, Boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
+                                         boolean useMavenPatterns, IncludesExcludes artifactDeploymentPatterns,
                                          boolean discardOldBuilds, boolean passIdentifiedDownstream,
                                          GradleReleaseWrapper releaseWrapper, boolean discardBuildArtifacts, boolean asyncBuildRetention,
-                                         String matrixParams, String deploymentProperties, Boolean skipInjectInitScript, Boolean useArtifactoryGradlePlugin,
+                                         String deploymentProperties, boolean useArtifactoryGradlePlugin,
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean allowPromotionOfNonStagedBuilds,
                                          String defaultPromotionTargetRepository,
@@ -154,15 +148,15 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.artifactPattern = cleanString(artifactPattern);
-        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
+        this.useMavenPatterns = useMavenPatterns;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.discardOldBuilds = discardOldBuilds;
         this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.releaseWrapper = releaseWrapper;
         this.asyncBuildRetention = asyncBuildRetention;
         this.discardBuildArtifacts = discardBuildArtifacts;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
-        this.useArtifactoryGradlePlugin = useArtifactoryGradlePlugin != null ? useArtifactoryGradlePlugin : skipInjectInitScript;
+        this.deploymentProperties = deploymentProperties;
+        this.useArtifactoryGradlePlugin = useArtifactoryGradlePlugin;
         this.allowPromotionOfNonStagedBuilds = allowPromotionOfNonStagedBuilds;
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
@@ -183,7 +177,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public boolean isPassIdentifiedDownstream() {
@@ -203,13 +197,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public boolean isUseArtifactoryGradlePlugin() {
-        if (useArtifactoryGradlePlugin != null) {
-            return useArtifactoryGradlePlugin;
-        }
-        if (skipInjectInitScript != null) {
-            return skipInjectInitScript;
-        }
-        return false;
+        return useArtifactoryGradlePlugin;
     }
 
     public boolean isOverridingDefaultDeployer() {
@@ -278,10 +266,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public boolean isUseMavenPatterns() {
-        if (useMavenPatterns != null) {
-            return useMavenPatterns;
-        }
-        return notM2Compatible != null && !notM2Compatible;
+        return useMavenPatterns;
     }
 
     public boolean isEnableIssueTrackerIntegration() {

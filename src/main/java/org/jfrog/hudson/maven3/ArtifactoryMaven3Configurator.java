@@ -83,8 +83,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     private final boolean discardOldBuilds;
     private final boolean discardBuildArtifacts;
     private final boolean asyncBuildRetention;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean filterExcludedArtifactsFromBuild;
@@ -96,11 +94,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     private String artifactoryCombinationFilter;
     private String customBuildName;
     private boolean overrideBuildName;
-    /**
-     * @deprecated: Use org.jfrog.hudson.maven3.ArtifactoryMaven3Configurator#deployBuildInfo
-     */
-    @Deprecated
-    private transient boolean skipBuildInfoDeploy;
     /**
      * @deprecated: Use org.jfrog.hudson.maven3.ArtifactoryMaven3Configurator#getDeployerCredentialsConfig()()
      */
@@ -119,7 +112,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                                          boolean deployArtifacts, boolean deployBuildInfo, boolean includeEnvVars,
                                          IncludesExcludes envVarsPatterns,
                                          boolean discardOldBuilds,
-                                         boolean discardBuildArtifacts, boolean asyncBuildRetention, String matrixParams, String deploymentProperties,
+                                         boolean discardBuildArtifacts, boolean asyncBuildRetention, String deploymentProperties,
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean recordAllDependencies,
                                          boolean filterExcludedArtifactsFromBuild,
@@ -136,7 +129,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         this.discardOldBuilds = discardOldBuilds;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.aggregationBuildStatus = aggregationBuildStatus;
@@ -200,7 +193,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public IncludesExcludes getArtifactDeploymentPatterns() {

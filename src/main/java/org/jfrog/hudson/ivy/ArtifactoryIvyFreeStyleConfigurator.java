@@ -76,16 +76,12 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private final CredentialsConfig deployerCredentialsConfig;
     private final String ivyPattern;
     private final String artifactPattern;
-    @Deprecated
-    private final Boolean notM2Compatible = null;
-    private final Boolean useMavenPatterns;
+    private final boolean useMavenPatterns;
     private final IncludesExcludes artifactDeploymentPatterns;
     private final boolean discardOldBuilds;
     private final boolean asyncBuildRetention;
     private final boolean passIdentifiedDownstream;
     private final boolean discardBuildArtifacts;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean filterExcludedArtifactsFromBuild;
@@ -109,9 +105,9 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                                                boolean includeEnvVars, IncludesExcludes envVarsPatterns,
                                                boolean deployBuildInfo, Boolean runChecks,
                                                String ivyPattern,
-                                               String artifactPattern, Boolean useMavenPatterns, Boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
+                                               String artifactPattern, boolean useMavenPatterns, IncludesExcludes artifactDeploymentPatterns,
                                                boolean discardOldBuilds, boolean asyncBuildRetention, boolean passIdentifiedDownstream, boolean discardBuildArtifacts,
-                                               String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
+                                               String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                                String aggregationBuildStatus,
                                                boolean filterExcludedArtifactsFromBuild,
                                                String artifactoryCombinationFilter, String customBuildName, boolean overrideBuildName) {
@@ -126,12 +122,12 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.artifactPattern = clearApostrophes(artifactPattern);
-        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
+        this.useMavenPatterns = useMavenPatterns;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.discardOldBuilds = discardOldBuilds;
         this.asyncBuildRetention = asyncBuildRetention;
         this.passIdentifiedDownstream = passIdentifiedDownstream;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.discardBuildArtifacts = discardBuildArtifacts;
@@ -152,7 +148,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public boolean isPassIdentifiedDownstream() {
@@ -230,10 +226,8 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     }
 
     public boolean isUseMavenPatterns() {
-        if (useMavenPatterns != null) {
-            return useMavenPatterns;
-        }
-        return notM2Compatible != null && !notM2Compatible;
+        return useMavenPatterns;
+
     }
 
     public boolean isEnableIssueTrackerIntegration() {

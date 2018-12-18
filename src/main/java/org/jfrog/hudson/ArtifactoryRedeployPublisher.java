@@ -88,8 +88,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     private final boolean discardOldBuilds;
     private final boolean discardBuildArtifacts;
     private final boolean asyncBuildRetention;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean allowPromotionOfNonStagedBuilds;
@@ -101,11 +99,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     private boolean aggregateBuildIssues;
     private String customBuildName;
     private boolean overrideBuildName;
-    /**
-     * @deprecated: Use org.jfrog.hudson.ArtifactoryRedeployPublisher#deployBuildInfo
-     */
-    @Deprecated
-    private transient Boolean skipBuildInfoDeploy;
     /**
      * @deprecated: Use org.jfrog.hudson.ArtifactoryRedeployPublisher#getDeployerCredentialsConfig()()
      */
@@ -119,7 +112,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
                                         boolean includeEnvVars, IncludesExcludes envVarsPatterns,
                                         boolean deployBuildInfo, boolean evenIfUnstable,
                                         boolean discardOldBuilds, boolean passIdentifiedDownstream,
-                                        boolean discardBuildArtifacts, boolean asyncBuildRetention, String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration,
+                                        boolean discardBuildArtifacts, boolean asyncBuildRetention, String deploymentProperties, boolean enableIssueTrackerIntegration,
                                         boolean aggregateBuildIssues, String aggregationBuildStatus,
                                         boolean recordAllDependencies, boolean allowPromotionOfNonStagedBuilds,
                                         String defaultPromotionTargetRepository,
@@ -136,7 +129,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.deployBuildInfo = deployBuildInfo;
@@ -155,7 +148,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public ServerDetails getDeployerDetails() {

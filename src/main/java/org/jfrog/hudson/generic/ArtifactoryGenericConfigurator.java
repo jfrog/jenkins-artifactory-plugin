@@ -59,8 +59,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     private final SpecConfiguration downloadSpec;
     private final String deployPattern;
     private final String resolvePattern;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
     private final boolean deployBuildInfo;
     /**
@@ -92,7 +90,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     @DataBoundConstructor
     public ArtifactoryGenericConfigurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
                                           CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
-                                          String deployPattern, String resolvePattern, String matrixParams, String deploymentProperties,
+                                          String deployPattern, String resolvePattern, String deploymentProperties,
                                           boolean useSpecs, SpecConfiguration uploadSpec, SpecConfiguration downloadSpec,
                                           boolean deployBuildInfo,
                                           boolean includeEnvVars, IncludesExcludes envVarsPatterns,
@@ -112,7 +110,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         this.useSpecs = useSpecs;
         this.uploadSpec = uploadSpec;
         this.downloadSpec = downloadSpec;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.deployBuildInfo = deployBuildInfo;
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
@@ -189,7 +187,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public boolean isDeployBuildInfo() {

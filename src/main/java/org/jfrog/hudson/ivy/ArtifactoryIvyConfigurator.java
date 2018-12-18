@@ -59,8 +59,6 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private final CredentialsConfig deployerCredentialsConfig;
     private final IncludesExcludes artifactDeploymentPatterns;
     private final boolean discardBuildArtifacts;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
     private final boolean filterExcludedArtifactsFromBuild;
     @Deprecated
@@ -72,9 +70,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private IncludesExcludes envVarsPatterns;
     private boolean discardOldBuilds;
     private boolean asyncBuildRetention;
-    @Deprecated
-    private final Boolean notM2Compatible = null;
-    private final Boolean useMavenPatterns;
+    private final boolean useMavenPatterns;
     private String ivyPattern;
     private String aggregationBuildStatus;
     private String artifactPattern;
@@ -93,9 +89,9 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     public ArtifactoryIvyConfigurator(ServerDetails details, ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
                                       boolean deployArtifacts, IncludesExcludes artifactDeploymentPatterns, boolean deployBuildInfo,
                                       boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                      Boolean useMavenPatterns, Boolean notM2Compatible, String ivyPattern,
+                                      boolean useMavenPatterns, String ivyPattern,
                                       String artifactPattern, boolean discardOldBuilds, boolean discardBuildArtifacts, boolean asyncBuildRetention,
-                                      String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
+                                      String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                       String aggregationBuildStatus,
                                       boolean filterExcludedArtifactsFromBuild,
                                       String customBuildName, boolean overrideBuildName) {
@@ -106,7 +102,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         this.deployBuildInfo = deployBuildInfo;
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
-        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
+        this.useMavenPatterns = useMavenPatterns;
         this.ivyPattern = ivyPattern;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
@@ -114,7 +110,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         this.discardOldBuilds = discardOldBuilds;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.customBuildName = customBuildName;
@@ -133,7 +129,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public boolean isOverridingDefaultDeployer() {
@@ -181,10 +177,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     }
 
     public boolean isUseMavenPatterns() {
-        if (useMavenPatterns != null) {
-            return useMavenPatterns;
-        }
-        return notM2Compatible != null && !notM2Compatible;
+        return useMavenPatterns;
     }
 
     public boolean isDeployArtifacts() {
