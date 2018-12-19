@@ -8,6 +8,7 @@ import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.*;
@@ -27,6 +28,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by romang on 4/26/16.
@@ -37,13 +40,13 @@ public class BuildInfo implements Serializable {
     private String buildNumber;
     private Date startDate;
     private BuildRetention retention;
-    private List<BuildDependency> buildDependencies = Collections.synchronizedList(new ArrayList<BuildDependency>());
-    private List<Artifact> deployedArtifacts = Collections.synchronizedList(new ArrayList<Artifact>());
+    private List<BuildDependency> buildDependencies = Collections.synchronizedList(new ArrayList<>());
+    private List<Artifact> deployedArtifacts = Collections.synchronizedList(new ArrayList<>());
     // The candidates artifacts to be deployed in the 'deployArtifacts' step.
-    private List<DeployDetails> deployableArtifacts = Collections.synchronizedList(new ArrayList<DeployDetails>());
-    private List<Dependency> publishedDependencies = Collections.synchronizedList(new ArrayList<Dependency>());
+    private List<DeployDetails> deployableArtifacts = Collections.synchronizedList(new ArrayList<>());
+    private List<Dependency> publishedDependencies = Collections.synchronizedList(new ArrayList<>());
 
-    private List<Module> modules = Collections.synchronizedList(new ArrayList<Module>());
+    private List<Module> modules = Collections.synchronizedList(new ArrayList<>());
     private Env env = new Env();
     private String agentName;
 
@@ -84,6 +87,43 @@ public class BuildInfo implements Serializable {
     @Whitelisted
     public void setStartDate(Date date) {
         this.startDate = date;
+    }
+
+    @Whitelisted
+    public List<org.jfrog.hudson.pipeline.types.File> getArtifacts() {
+        Stream<Artifact> dependencyStream = Stream.concat(
+                // Add modules artifacts
+                modules.parallelStream().map(Module::getArtifacts).filter(Objects::nonNull).flatMap(List::stream),
+                // Add deployed artifact
+                deployedArtifacts.parallelStream()
+        );
+        return getBuildFilesList(dependencyStream);
+    }
+
+    @Whitelisted
+    public List<org.jfrog.hudson.pipeline.types.File> getDependencies() {
+        Stream<Dependency> dependencyStream = Stream.concat(
+                // Add modules artifacts
+                modules.parallelStream().map(Module::getDependencies).filter(Objects::nonNull).flatMap(List::stream),
+                // Add deployed artifact
+                publishedDependencies.parallelStream()
+        );
+        return getBuildFilesList(dependencyStream);
+    }
+
+    /**
+     * Return a list of 'Files' of downloaded or uploaded files. Filters build files without local and remote paths.
+     *
+     * @param buildFilesStream - Stream of build Artifacts or Dependencies.
+     * @return - List of build files.
+     */
+    private List<org.jfrog.hudson.pipeline.types.File> getBuildFilesList(Stream<? extends BaseBuildFileBean> buildFilesStream) {
+        return buildFilesStream
+                .filter(buildFile -> StringUtils.isNotBlank(buildFile.getLocalPath()))
+                .filter(buildFile -> StringUtils.isNotBlank(buildFile.getRemotePath()))
+                .map(org.jfrog.hudson.pipeline.types.File::new)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     @Whitelisted
@@ -134,9 +174,9 @@ public class BuildInfo implements Serializable {
     }
 
     @Whitelisted
-    public void retention(Map<String, Object> retentionArguments) throws Exception {
+    public void retention(Map<String, Object> retentionArguments) {
         Set<String> retentionArgumentsSet = retentionArguments.keySet();
-        List<String> keysAsList = Arrays.asList(new String[]{"maxDays", "maxBuilds", "deleteBuildArtifacts", "doNotDiscardBuilds", "async"});
+        List<String> keysAsList = Arrays.asList("maxDays", "maxBuilds", "deleteBuildArtifacts", "doNotDiscardBuilds", "async");
         if (!keysAsList.containsAll(retentionArgumentsSet)) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
         }
@@ -145,7 +185,7 @@ public class BuildInfo implements Serializable {
         this.retention = mapper.convertValue(retentionArguments, BuildRetention.class);
     }
 
-    protected void appendDeployedArtifacts(List<Artifact> artifacts) {
+    void appendDeployedArtifacts(List<Artifact> artifacts) {
         if (artifacts == null) {
             return;
         }
@@ -176,26 +216,26 @@ public class BuildInfo implements Serializable {
         buildDependencies.addAll(dependencies);
     }
 
-    protected void appendPublishedDependencies(List<Dependency> dependencies) {
+    void appendPublishedDependencies(List<Dependency> dependencies) {
         if (dependencies == null) {
             return;
         }
         publishedDependencies.addAll(dependencies);
     }
 
-    protected List<BuildDependency> getBuildDependencies() {
+    List<BuildDependency> getBuildDependencies() {
         return buildDependencies;
     }
 
-    protected Map<String, String> getEnvVars() {
+    Map<String, String> getEnvVars() {
         return env.getEnvVars();
     }
 
-    protected Map<String, String> getSysVars() {
+    Map<String, String> getSysVars() {
         return env.getSysVars();
     }
 
-    protected BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryBuildInfoClient client)
+    BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryBuildInfoClient client)
             throws InterruptedException, NoSuchAlgorithmException, IOException {
         if (BuildInfoProxy.isUp()) {
             List<Module> dockerModules = dockerBuildInfoHelper.generateBuildInfoModules(build, listener, config);
@@ -235,18 +275,17 @@ public class BuildInfo implements Serializable {
         private TaskListener listener;
         private ArrayListMultimap<String, String> propertiesMap;
 
-        public DeployPathsAndPropsCallable(String deployableArtifactsPath, TaskListener listener, BuildInfo buildInfo) {
+        DeployPathsAndPropsCallable(String deployableArtifactsPath, TaskListener listener, BuildInfo buildInfo) {
             this.deployableArtifactsPath = deployableArtifactsPath;
             this.listener = listener;
             this.propertiesMap = getbuildPropertiesMap(buildInfo);
         }
 
-        public List<DeployDetails> invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
+        public List<DeployDetails> invoke(File file, VirtualChannel virtualChannel) throws IOException {
+            List<DeployDetails> results = new ArrayList<>();
             try {
-                List<DeployDetails> results = new ArrayList<DeployDetails>();
-                List<DeployableArtifactDetail> deployableArtifacts = new ArrayList<DeployableArtifactDetail>();
                 File deployableArtifactsFile = new File(deployableArtifactsPath);
-                deployableArtifacts.addAll(DeployableArtifactsUtils.loadDeployableArtifactsFromFile(deployableArtifactsFile));
+                List<DeployableArtifactDetail> deployableArtifacts = DeployableArtifactsUtils.loadDeployableArtifactsFromFile(deployableArtifactsFile);
                 deployableArtifactsFile.delete();
                 for (DeployableArtifactDetail artifact : deployableArtifacts) {
                     DeployDetails.Builder builder = new DeployDetails.Builder()
@@ -259,9 +298,9 @@ public class BuildInfo implements Serializable {
                 }
                 return results;
             } catch (ClassNotFoundException e) {
-                listener.getLogger().println(e.getMessage());
-                return new ArrayList<DeployDetails>();
+                ExceptionUtils.printRootCauseStackTrace(e, listener.getLogger());
             }
+            return results;
         }
 
         private ArrayListMultimap<String, String> getbuildPropertiesMap(BuildInfo buildInfo) {
