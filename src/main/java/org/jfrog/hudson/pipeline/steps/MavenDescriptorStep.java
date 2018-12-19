@@ -28,9 +28,9 @@ import java.util.Map;
  * Created by tamirh on 20/11/2016.
  */
 public class MavenDescriptorStep extends AbstractStepImpl {
-    private String pomFile;
-    private String version;
-    private Map<String, String> versionPerModule;
+    private String pomFile = "pom.xml";
+    private String version = "";
+    private Map<String, String> versionPerModule = new HashedMap();
     private boolean failOnSnapshot;
     private boolean dryRun;
 
