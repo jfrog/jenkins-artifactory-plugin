@@ -81,7 +81,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final boolean enableIssueTrackerIntegration;
     private final boolean aggregateBuildIssues;
     private final String artifactPattern;
-    private final boolean useMavenPatterns;
+    private final Boolean useMavenPatterns;
     private final IncludesExcludes artifactDeploymentPatterns;
     private final boolean discardOldBuilds;
     private final boolean passIdentifiedDownstream;
@@ -89,7 +89,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final boolean discardBuildArtifacts;
     private final boolean asyncBuildRetention;
     private final String deploymentProperties;
-    private final boolean useArtifactoryGradlePlugin;
+    private final Boolean useArtifactoryGradlePlugin;
     private final boolean allowPromotionOfNonStagedBuilds;
     private final boolean filterExcludedArtifactsFromBuild;
     private final ServerDetails resolverDetails;
@@ -113,23 +113,35 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     @Deprecated
     private Credentials overridingResolverCredentials;
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private ServerDetails details = null;
+    @Deprecated
+    private final String matrixParams = null;
+    @Deprecated
+    private final Boolean notM2Compatible = null;
+    @Deprecated
+    private final Boolean skipInjectInitScript = null;
+
     @DataBoundConstructor
-    public ArtifactoryGradleConfigurator(ServerDetails deployerDetails, ServerDetails resolverDetails,
+    public ArtifactoryGradleConfigurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
                                          CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                          boolean deployMaven, boolean deployIvy, boolean deployArtifacts,
                                          String remotePluginLocation, boolean includeEnvVars,
                                          IncludesExcludes envVarsPatterns, boolean deployBuildInfo,
                                          String ivyPattern, String artifactPattern,
-                                         boolean useMavenPatterns, IncludesExcludes artifactDeploymentPatterns,
+                                         Boolean useMavenPatterns, Boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
                                          boolean discardOldBuilds, boolean passIdentifiedDownstream,
                                          GradleReleaseWrapper releaseWrapper, boolean discardBuildArtifacts, boolean asyncBuildRetention,
-                                         String deploymentProperties, boolean useArtifactoryGradlePlugin,
+                                         String matrixParams, String deploymentProperties, Boolean skipInjectInitScript, Boolean useArtifactoryGradlePlugin,
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean allowPromotionOfNonStagedBuilds,
                                          String defaultPromotionTargetRepository,
                                          boolean filterExcludedArtifactsFromBuild, String artifactoryCombinationFilter,
                                          String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails;
+        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -146,15 +158,15 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.artifactPattern = cleanString(artifactPattern);
-        this.useMavenPatterns = useMavenPatterns;
+        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.discardOldBuilds = discardOldBuilds;
         this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.releaseWrapper = releaseWrapper;
         this.asyncBuildRetention = asyncBuildRetention;
         this.discardBuildArtifacts = discardBuildArtifacts;
-        this.deploymentProperties = deploymentProperties;
-        this.useArtifactoryGradlePlugin = useArtifactoryGradlePlugin;
+        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.useArtifactoryGradlePlugin = useArtifactoryGradlePlugin != null ? useArtifactoryGradlePlugin : skipInjectInitScript;
         this.allowPromotionOfNonStagedBuilds = allowPromotionOfNonStagedBuilds;
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
@@ -167,7 +179,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails;
+        return deployerDetails != null ? deployerDetails : details;
     }
 
     public ServerDetails getResolverDetails() {
@@ -175,7 +187,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties;
+        return deploymentProperties != null ? deploymentProperties : matrixParams;
     }
 
     public boolean isPassIdentifiedDownstream() {
@@ -195,7 +207,13 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public boolean isUseArtifactoryGradlePlugin() {
-        return useArtifactoryGradlePlugin;
+        if (useArtifactoryGradlePlugin != null) {
+            return useArtifactoryGradlePlugin;
+        }
+        if (skipInjectInitScript != null) {
+            return skipInjectInitScript;
+        }
+        return false;
     }
 
     public boolean isOverridingDefaultDeployer() {
@@ -264,7 +282,10 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public boolean isUseMavenPatterns() {
-        return useMavenPatterns;
+        if (useMavenPatterns != null) {
+            return useMavenPatterns;
+        }
+        return notM2Compatible != null && !notM2Compatible;
     }
 
     public boolean isEnableIssueTrackerIntegration() {

@@ -103,14 +103,22 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     @Deprecated
     private Credentials overridingResolverCredentials;
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private ServerDetails details = null;
+    @Deprecated
+    private final String matrixParams = null;
+
     @DataBoundConstructor
-    public ArtifactoryMaven3Configurator(ServerDetails deployerDetails, ServerDetails resolverDetails,
+    public ArtifactoryMaven3Configurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
                                          CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                          boolean enableResolveArtifacts, IncludesExcludes artifactDeploymentPatterns,
                                          boolean deployArtifacts, boolean deployBuildInfo, boolean includeEnvVars,
                                          IncludesExcludes envVarsPatterns,
-                                         boolean discardOldBuilds,
-                                         boolean discardBuildArtifacts, boolean asyncBuildRetention, String deploymentProperties,
+                                         boolean discardOldBuilds, boolean discardBuildArtifacts,
+                                         boolean asyncBuildRetention, String matrixParams, String deploymentProperties,
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean recordAllDependencies,
                                          boolean filterExcludedArtifactsFromBuild,
@@ -118,7 +126,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                                          boolean overrideBuildName,
                                          String artifactoryCombinationFilter
     ) {
-        this.deployerDetails = deployerDetails;
+        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -127,7 +135,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         this.discardOldBuilds = discardOldBuilds;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.deploymentProperties = deploymentProperties;
+        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.aggregationBuildStatus = aggregationBuildStatus;
@@ -143,7 +151,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails;
+        return deployerDetails != null ? deployerDetails : details;
     }
 
     public ServerDetails getResolverDetails() {
@@ -191,7 +199,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties;
+        return deploymentProperties != null ? deploymentProperties : matrixParams;
     }
 
     public IncludesExcludes getArtifactDeploymentPatterns() {

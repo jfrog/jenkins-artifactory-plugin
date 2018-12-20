@@ -35,10 +35,10 @@ public class ArtifactoryRedeployPublisherITest {
     public void testConfigurationRoundTrip() throws Exception {
         MavenModuleSet project = j.createProject(MavenModuleSet.class);
 
-        ArtifactoryRedeployPublisher before = new ArtifactoryRedeployPublisher(null, true,
+        ArtifactoryRedeployPublisher before = new ArtifactoryRedeployPublisher(null, null, true,
                 new IncludesExcludes("", ""),
                 null, false, new IncludesExcludes("", ""), true, true,
-                true, false, true, false,"", true, true, "Released", false, false, null, false, "", false);
+                true, false, true, false,"", "", true, true, "Released", false, false, null, false, "", false);
         project.getPublishersList().add(before);
 
         // submit the configuration form

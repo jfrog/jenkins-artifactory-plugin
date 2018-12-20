@@ -24,6 +24,10 @@ public class RefreshServerResponse {
         this.repositories = repositories;
     }
 
+    public List<VirtualRepository> getVirtualRepositories() {
+        return virtualRepositories;
+    }
+
     public void setVirtualRepositories(List<VirtualRepository> virtualRepositories) {
         this.virtualRepositories = virtualRepositories;
     }

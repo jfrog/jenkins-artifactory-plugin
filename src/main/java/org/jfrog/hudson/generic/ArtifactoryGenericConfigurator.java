@@ -85,10 +85,18 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     @Deprecated
     private Credentials overridingResolverCredentials;
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private final ServerDetails details = null;
+    @Deprecated
+    private final String matrixParams = null;
+
     @DataBoundConstructor
-    public ArtifactoryGenericConfigurator(ServerDetails deployerDetails, ServerDetails resolverDetails,
+    public ArtifactoryGenericConfigurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
                                           CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
-                                          String deployPattern, String resolvePattern, String deploymentProperties,
+                                          String deployPattern, String resolvePattern, String matrixParams, String deploymentProperties,
                                           boolean useSpecs, SpecConfiguration uploadSpec, SpecConfiguration downloadSpec,
                                           boolean deployBuildInfo,
                                           boolean includeEnvVars, IncludesExcludes envVarsPatterns,
@@ -99,7 +107,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                                           String artifactoryCombinationFilter,
                                           String customBuildName,
                                           boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails;
+        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -108,7 +116,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         this.useSpecs = useSpecs;
         this.uploadSpec = uploadSpec;
         this.downloadSpec = downloadSpec;
-        this.deploymentProperties = deploymentProperties;
+        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
         this.deployBuildInfo = deployBuildInfo;
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
@@ -148,7 +156,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails;
+        return deployerDetails != null ? deployerDetails : details;
     }
 
     public ServerDetails getResolverDetails() {
@@ -185,7 +193,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties;
+        return deploymentProperties != null ? deploymentProperties : matrixParams;
     }
 
     public boolean isDeployBuildInfo() {

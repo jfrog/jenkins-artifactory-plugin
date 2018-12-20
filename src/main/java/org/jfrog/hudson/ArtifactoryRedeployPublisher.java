@@ -104,19 +104,25 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     private Credentials overridingDeployerCredentials;
     // NOTE: The following getters are used by jelly. Do not remove them
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private ServerDetails details = null;
+    @Deprecated
+    private final String matrixParams = null;
+
     @DataBoundConstructor
-    public ArtifactoryRedeployPublisher(ServerDetails deployerDetails, boolean deployArtifacts,
+    public ArtifactoryRedeployPublisher(ServerDetails details, ServerDetails deployerDetails, boolean deployArtifacts,
                                         IncludesExcludes artifactDeploymentPatterns, CredentialsConfig deployerCredentialsConfig,
                                         boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                        boolean deployBuildInfo, boolean evenIfUnstable,
-                                        boolean discardOldBuilds, boolean passIdentifiedDownstream,
-                                        boolean discardBuildArtifacts, boolean asyncBuildRetention, String deploymentProperties, boolean enableIssueTrackerIntegration,
+                                        boolean deployBuildInfo, boolean evenIfUnstable, boolean discardOldBuilds, boolean passIdentifiedDownstream,
+                                        boolean discardBuildArtifacts, boolean asyncBuildRetention, String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration,
                                         boolean aggregateBuildIssues, String aggregationBuildStatus,
                                         boolean recordAllDependencies, boolean allowPromotionOfNonStagedBuilds,
-                                        String defaultPromotionTargetRepository,
-                                        boolean filterExcludedArtifactsFromBuild,
+                                        String defaultPromotionTargetRepository, boolean filterExcludedArtifactsFromBuild,
                                         String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails;
+        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.deployArtifacts = deployArtifacts;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
@@ -127,7 +133,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.deploymentProperties = deploymentProperties;
+        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.deployBuildInfo = deployBuildInfo;
@@ -146,11 +152,11 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties;
+        return deploymentProperties != null ? deploymentProperties : matrixParams;
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails;
+        return deployerDetails != null ? deployerDetails : details;
     }
 
     public IncludesExcludes getArtifactDeploymentPatterns() {

@@ -68,7 +68,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private IncludesExcludes envVarsPatterns;
     private boolean discardOldBuilds;
     private boolean asyncBuildRetention;
-    private final boolean useMavenPatterns;
+    private final Boolean useMavenPatterns;
     private String ivyPattern;
     private String aggregationBuildStatus;
     private String artifactPattern;
@@ -83,24 +83,33 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     @Deprecated
     private Credentials overridingDeployerCredentials;
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private ServerDetails details = null;
+    @Deprecated
+    private final String matrixParams = null;
+    @Deprecated
+    private final Boolean notM2Compatible = null;
+
     @DataBoundConstructor
-    public ArtifactoryIvyConfigurator(ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
+    public ArtifactoryIvyConfigurator(ServerDetails details, ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
                                       boolean deployArtifacts, IncludesExcludes artifactDeploymentPatterns, boolean deployBuildInfo,
                                       boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                      boolean useMavenPatterns, String ivyPattern,
+                                      Boolean useMavenPatterns, Boolean notM2Compatible, String ivyPattern,
                                       String artifactPattern, boolean discardOldBuilds, boolean discardBuildArtifacts, boolean asyncBuildRetention,
-                                      String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
-                                      String aggregationBuildStatus,
-                                      boolean filterExcludedArtifactsFromBuild,
+                                      String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
+                                      String aggregationBuildStatus, boolean filterExcludedArtifactsFromBuild,
                                       String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails;
+        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
         this.deployArtifacts = deployArtifacts;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.deployBuildInfo = deployBuildInfo;
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
-        this.useMavenPatterns = useMavenPatterns;
+        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
         this.ivyPattern = ivyPattern;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
@@ -108,7 +117,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         this.discardOldBuilds = discardOldBuilds;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.deploymentProperties = deploymentProperties;
+        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.customBuildName = customBuildName;
@@ -123,11 +132,11 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails;
+        return deployerDetails != null ? deployerDetails : details;
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties;
+        return deploymentProperties != null ? deploymentProperties : matrixParams;
     }
 
     public boolean isOverridingDefaultDeployer() {
@@ -175,7 +184,10 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     }
 
     public boolean isUseMavenPatterns() {
-        return useMavenPatterns;
+        if (useMavenPatterns != null) {
+            return useMavenPatterns;
+        }
+        return notM2Compatible != null && !notM2Compatible;
     }
 
     public boolean isDeployArtifacts() {
