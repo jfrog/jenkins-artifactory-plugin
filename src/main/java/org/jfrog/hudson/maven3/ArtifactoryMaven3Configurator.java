@@ -158,6 +158,14 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         return resolverDetails;
     }
 
+    public String getDownloadReleaseRepositoryKey() {
+        return resolverDetails != null ? resolverDetails.getResolveReleaseRepositoryKey() : null;
+    }
+
+    public String getDownloadSnapshotRepositoryKey() {
+        return resolverDetails != null ? resolverDetails.getResolveReleaseRepositoryKey() : null;
+    }
+
     public boolean isDiscardOldBuilds() {
         return discardOldBuilds;
     }
@@ -194,6 +202,10 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         return resolverCredentialsConfig;
     }
 
+    public boolean isOverridingResolverCredentials() {
+        return resolverCredentialsConfig.isCredentialsProvided();
+    }
+
     public boolean isDeployArtifacts() {
         return deployArtifacts;
     }
@@ -204,6 +216,10 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
 
     public IncludesExcludes getArtifactDeploymentPatterns() {
         return artifactDeploymentPatterns;
+    }
+
+    public boolean isDeployBuildInfo() {
+        return deployBuildInfo;
     }
 
     public String getCustomBuildName() {
@@ -291,6 +307,23 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     public ArtifactoryServer getArtifactoryServer(String artifactoryServerName) {
         return RepositoriesUtils.getArtifactoryServer(artifactoryServerName, getDescriptor().getArtifactoryServers());
     }
+
+    public List<Repository> getReleaseRepositoryList() {
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeployReleaseRepository().getKeyFromSelect());
+    }
+
+    public List<Repository> getSnapshotRepositoryList() {
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeploySnapshotRepository().getKeyFromSelect());
+    }
+
+    public List<VirtualRepository> getResolveReleaseRepositoryList() {
+        return RepositoriesUtils.collectVirtualRepositories(null, resolverDetails.getResolveReleaseRepository().getKeyFromSelect());
+    }
+
+    public List<VirtualRepository> getResolveSnapshotRepositoryList() {
+        return RepositoriesUtils.collectVirtualRepositories(null, resolverDetails.getResolveSnapshotRepository().getKeyFromSelect());
+    }
+
 
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject project) {

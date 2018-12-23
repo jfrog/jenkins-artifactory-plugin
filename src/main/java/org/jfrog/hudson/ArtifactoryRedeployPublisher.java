@@ -234,6 +234,10 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
                 getDeployerDetails().getDeploySnapshotRepositoryKey() : null;
     }
 
+    public String getUserPluginKey() {
+        return getDeployerDetails() != null ? getDeployerDetails().getUserPluginKey() : null;
+    }
+
     public boolean isEnableIssueTrackerIntegration() {
         return enableIssueTrackerIntegration;
     }
@@ -252,6 +256,10 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
     public String getDefaultPromotionTargetRepository() {
         return defaultPromotionTargetRepository;
+    }
+
+    public void setDefaultPromotionTargetRepository(String defaultPromotionTargetRepository) {
+        this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
     }
 
     public boolean isRecordAllDependencies() {
@@ -369,6 +377,11 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         });
     }
 
+    private boolean isM2Build(AbstractBuild<?, ?> build) {
+        return build.getClass().getName().contains("MavenModuleSetBuild")
+                && ((MavenModuleSetBuild) build).getMavenVersionUsed().startsWith("2");
+    }
+
     private boolean isExtractorUsed(EnvVars env) {
         return Boolean.parseBoolean(env.get(ExtractorUtils.EXTRACTOR_USED));
     }
@@ -409,6 +422,14 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         } else {
             return Result.SUCCESS;
         }
+    }
+
+    public List<Repository> getReleaseRepositoryList() {
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeployReleaseRepositoryKey());
+    }
+
+    public List<Repository> getSnapshotRepositoryList() {
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeploySnapshotRepositoryKey());
     }
 
     public PluginSettings getSelectedStagingPlugin() throws Exception {

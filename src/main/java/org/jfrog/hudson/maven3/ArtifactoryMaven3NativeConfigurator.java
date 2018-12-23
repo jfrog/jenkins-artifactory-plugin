@@ -13,10 +13,7 @@ import hudson.util.XStream2;
 import net.sf.json.JSONObject;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.util.Credentials;
-import org.jfrog.hudson.util.MavenVersionHelper;
-import org.jfrog.hudson.util.RefreshServerResponse;
-import org.jfrog.hudson.util.RepositoriesUtils;
+import org.jfrog.hudson.util.*;
 import org.jfrog.hudson.util.converters.DeployerResolverOverriderConverter;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.AncestorInPath;
@@ -65,6 +62,14 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
 
     public ServerDetails getResolverDetails() {
         return resolverDetails;
+    }
+
+    public String getDownloadReleaseRepositoryKey() {
+        return getDeployerDetails() != null ? getDeployerDetails().getResolveReleaseRepository().getRepoKey() : null;
+    }
+
+    public String getDownloadSnapshotRepositoryKey() {
+        return getDeployerDetails() != null ? getDeployerDetails().getResolveSnapshotRepositoryKey() : null;
     }
 
     public String getArtifactoryName() {
@@ -125,9 +130,24 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
         return null;
     }
 
+    public List<VirtualRepository> getVirtualRepositoryList() {
+        String releaseRepoKey = getDeployerDetails().getResolveReleaseRepository().getKeyFromSelect();
+        String snapshotRepoKey = getDeployerDetails().getResolveSnapshotRepository().getKeyFromSelect();
+
+        // Add the releases repo to the reposities list, in case it is not there:
+        List<VirtualRepository> repos = RepositoriesUtils.collectVirtualRepositories(null, releaseRepoKey);
+
+        // Add the snapshots repo to the reposities list, in case it is not there:
+        return RepositoriesUtils.collectVirtualRepositories(repos, snapshotRepoKey);
+    }
+
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
+    }
+
+    private boolean isExtractorUsed(EnvVars env) {
+        return Boolean.parseBoolean(env.get(ExtractorUtils.EXTRACTOR_USED));
     }
 
     @Extension

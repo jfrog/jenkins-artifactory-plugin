@@ -253,6 +253,14 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return getDeployerDetails() != null ? getDeployerDetails().getDeployReleaseRepository().getRepoKey() : null;
     }
 
+    public String getUserPluginKey() {
+        return getDeployerDetails() != null ? getDeployerDetails().getUserPluginKey() : null;
+    }
+
+    public String getDownloadReleaseRepositoryKey() {
+        return getDeployerDetails() != null ? getDeployerDetails().getResolveReleaseRepository().getRepoKey() : null;
+    }
+
     public String getArtifactoryName() {
         return getDeployerDetails() != null ? getDeployerDetails().artifactoryName : null;
     }
@@ -300,6 +308,10 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
 
     public String getDefaultPromotionTargetRepository() {
         return defaultPromotionTargetRepository;
+    }
+
+    public void setDefaultPromotionTargetRepository(String defaultPromotionTargetRepository) {
+        this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
     }
 
     public boolean isFilterExcludedArtifactsFromBuild() {
@@ -608,6 +620,14 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 getDescriptor().getArtifactoryServers());
     }
 
+    public List<Repository> getReleaseRepositories() {
+        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeployReleaseRepository().getKeyFromSelect());
+    }
+
+    public List<VirtualRepository> getVirtualRepositories() {
+        return RepositoriesUtils.collectVirtualRepositories(null, resolverDetails.getResolveSnapshotRepository().getKeyFromSelect());
+    }
+
     public boolean isOverridingDefaultResolver() {
         return resolverCredentialsConfig != null && resolverCredentialsConfig.isCredentialsProvided();
     }
@@ -618,6 +638,11 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
 
     public CredentialsConfig getResolverCredentialsConfig() {
         return resolverCredentialsConfig;
+    }
+
+    public List<UserPluginInfo> getStagingUserPluginInfo() {
+        ArtifactoryServer artifactoryServer = getArtifactoryServer();
+        return artifactoryServer.getStagingUserPluginInfo(this, null);
     }
 
     public PluginSettings getSelectedStagingPlugin() {

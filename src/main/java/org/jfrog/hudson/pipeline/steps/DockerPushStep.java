@@ -42,6 +42,7 @@ public class DockerPushStep extends AbstractStepImpl {
     @DataBoundConstructor
     public DockerPushStep(String image, String host, String targetRepo,
                           BuildInfo buildInfo, ArrayListMultimap<String, String> properties, ArtifactoryServer server) {
+
         this.image = image;
         this.host = host;
         this.targetRepo = targetRepo;

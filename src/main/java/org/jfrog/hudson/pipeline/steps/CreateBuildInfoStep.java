@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.steps;
 
+import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.model.Run;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
@@ -23,6 +24,9 @@ public class CreateBuildInfoStep extends AbstractStepImpl {
 
         @StepContextParameter
         private transient Run build;
+
+        @Inject(optional = true)
+        private transient CreateBuildInfoStep step;
 
         @Override
         protected BuildInfo run() throws Exception {
