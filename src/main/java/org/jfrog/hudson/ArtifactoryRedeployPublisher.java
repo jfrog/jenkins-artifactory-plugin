@@ -122,7 +122,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
                                         boolean recordAllDependencies, boolean allowPromotionOfNonStagedBuilds,
                                         String defaultPromotionTargetRepository, boolean filterExcludedArtifactsFromBuild,
                                         String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.deployArtifacts = deployArtifacts;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
@@ -133,7 +133,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.deployBuildInfo = deployBuildInfo;
@@ -152,11 +152,11 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public IncludesExcludes getArtifactDeploymentPatterns() {

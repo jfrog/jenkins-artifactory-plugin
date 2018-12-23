@@ -141,7 +141,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                          String defaultPromotionTargetRepository,
                                          boolean filterExcludedArtifactsFromBuild, String artifactoryCombinationFilter,
                                          String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -158,15 +158,15 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.artifactPattern = cleanString(artifactPattern);
-        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
+        this.useMavenPatterns = useMavenPatterns;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.discardOldBuilds = discardOldBuilds;
         this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.releaseWrapper = releaseWrapper;
         this.asyncBuildRetention = asyncBuildRetention;
         this.discardBuildArtifacts = discardBuildArtifacts;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
-        this.useArtifactoryGradlePlugin = useArtifactoryGradlePlugin != null ? useArtifactoryGradlePlugin : skipInjectInitScript;
+        this.deploymentProperties = deploymentProperties;
+        this.useArtifactoryGradlePlugin = useArtifactoryGradlePlugin;
         this.allowPromotionOfNonStagedBuilds = allowPromotionOfNonStagedBuilds;
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
@@ -179,7 +179,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public ServerDetails getResolverDetails() {
@@ -187,7 +187,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public boolean isPassIdentifiedDownstream() {
@@ -209,9 +209,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     public boolean isUseArtifactoryGradlePlugin() {
         if (useArtifactoryGradlePlugin != null) {
             return useArtifactoryGradlePlugin;
-        }
-        if (skipInjectInitScript != null) {
-            return skipInjectInitScript;
         }
         return false;
     }
@@ -282,10 +279,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public boolean isUseMavenPatterns() {
-        if (useMavenPatterns != null) {
-            return useMavenPatterns;
-        }
-        return notM2Compatible != null && !notM2Compatible;
+        return useMavenPatterns;
     }
 
     public boolean isEnableIssueTrackerIntegration() {

@@ -55,7 +55,7 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
 
     @DataBoundConstructor
     public ArtifactoryMaven3NativeConfigurator(ServerDetails details, ServerDetails resolverDetails, CredentialsConfig resolverCredentialsConfig) {
-        this.resolverDetails = resolverDetails != null ? resolverDetails : details;
+        this.resolverDetails = resolverDetails;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
     }
 
@@ -64,7 +64,7 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
     }
 
     public ServerDetails getResolverDetails() {
-        return resolverDetails != null ? resolverDetails : details;
+        return resolverDetails;
     }
 
     public String getArtifactoryName() {

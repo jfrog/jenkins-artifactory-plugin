@@ -107,7 +107,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                                           String artifactoryCombinationFilter,
                                           String customBuildName,
                                           boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -116,7 +116,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         this.useSpecs = useSpecs;
         this.uploadSpec = uploadSpec;
         this.downloadSpec = downloadSpec;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.deployBuildInfo = deployBuildInfo;
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
@@ -156,7 +156,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public ServerDetails getResolverDetails() {
@@ -193,7 +193,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public boolean isDeployBuildInfo() {

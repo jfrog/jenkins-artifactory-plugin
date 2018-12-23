@@ -126,7 +126,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                                          boolean overrideBuildName,
                                          String artifactoryCombinationFilter
     ) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -135,7 +135,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         this.discardOldBuilds = discardOldBuilds;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.aggregationBuildStatus = aggregationBuildStatus;
@@ -151,7 +151,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public ServerDetails getResolverDetails() {
@@ -199,7 +199,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public IncludesExcludes getArtifactDeploymentPatterns() {
