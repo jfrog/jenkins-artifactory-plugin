@@ -63,7 +63,7 @@ public class PublisherContext {
     private boolean blackDuckIncludePublishedArtifacts;
     private boolean autoCreateMissingComponentRequests;
     private boolean autoDiscardStaleComponentRequests;
-    private boolean filterExcludedArtifactsFromBuild;
+    private boolean filterExcludedArtifactsFromBuild = true;
     private boolean recordAllDependencies;
     private String artifactoryPluginVersion;
     private String customBuildName;
