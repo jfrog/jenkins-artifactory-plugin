@@ -19,7 +19,7 @@ import java.io.IOException;
 /**
  * Created by romang on 6/21/16.
  */
-public class PromotionExecutor implements Executor{
+public class PromotionExecutor implements Executor {
 
     private final ArtifactoryServer server;
     private final TaskListener listener;
