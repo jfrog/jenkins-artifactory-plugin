@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 
 public class DeclarativePipelineUtils {
 
+    static final String PIPELINE_CACHE_DIR_NAME = "artifactory-pipeline-cache";
+
     /**
      * Create pipeline build data in @tmp/build-number directory.
      * Used to transfer data between different steps in declarative pipelines.
@@ -150,7 +152,7 @@ public class DeclarativePipelineUtils {
         }
         File[] buildDataDirs = tmpDir.listFiles(buildDataDir -> {
             long ageInMilliseconds = new Date().getTime() - buildDataDir.lastModified();
-            return ageInMilliseconds > TimeUnit.SECONDS.toMillis(10);
+            return ageInMilliseconds > TimeUnit.DAYS.toMillis(1);
         });
         if (buildDataDirs == null) {
             logger.info("Unable to clean old build data directories");

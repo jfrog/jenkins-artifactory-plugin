@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.declarative.utils;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 
 import java.io.File;
@@ -32,18 +33,19 @@ public class ReadBuildDataFileCallable extends MasterToSlaveFileCallable<BuildDa
     }
 
     @Override
-    public BuildDataFile invoke(File file, VirtualChannel virtualChannel) throws IOException {
-        Path buildDir = file.toPath().resolve(buildNumber);
-        File buildFile = buildDir.resolve(getBuildDataFileName(stepName, stepId)).toFile();
-        if (!buildFile.exists()) {
+    public BuildDataFile invoke(File tmpDir, VirtualChannel virtualChannel) throws IOException {
+        Path artifactoryPipelineCacheDir = tmpDir.toPath().resolve(DeclarativePipelineUtils.PIPELINE_CACHE_DIR_NAME);
+        Path buildDataDirPath = artifactoryPipelineCacheDir.resolve(buildNumber);
+        File buildDataFile = buildDataDirPath.resolve(getBuildDataFileName(stepName, stepId)).toFile();
+        if (!buildDataFile.exists()) {
             return null;
         }
-        try (FileInputStream fos = new FileInputStream(buildFile);
+        try (FileInputStream fos = new FileInputStream(buildDataFile);
              ObjectInputStream oos = new ObjectInputStream(fos)
         ) {
             return (BuildDataFile) oos.readObject();
         } catch (ClassNotFoundException e) {
-            listener.error(e.getMessage());
+            listener.error(ExceptionUtils.getRootCauseMessage(e));
             return null;
         }
     }

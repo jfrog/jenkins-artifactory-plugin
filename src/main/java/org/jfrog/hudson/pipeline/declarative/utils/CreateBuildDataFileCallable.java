@@ -32,8 +32,9 @@ public class CreateBuildDataFileCallable extends MasterToSlaveFileCallable<Void>
 
     @Override
     public Void invoke(File tmpDir, VirtualChannel virtualChannel) throws IOException {
-        DeclarativePipelineUtils.deleteOldBuildDataDirs(tmpDir, logger);
-        Path buildDataDirPath = Files.createDirectories(tmpDir.toPath().resolve(buildNumber));
+        Path artifactoryPipelineCacheDir = tmpDir.toPath().resolve(DeclarativePipelineUtils.PIPELINE_CACHE_DIR_NAME);
+        DeclarativePipelineUtils.deleteOldBuildDataDirs(artifactoryPipelineCacheDir.toFile(), logger);
+        Path buildDataDirPath = Files.createDirectories(artifactoryPipelineCacheDir.resolve(buildNumber));
         File buildDataFile = buildDataDirPath.resolve(getBuildDataFileName(this.buildDataFile.getStepName(), this.buildDataFile.getId())).toFile();
         if (buildDataFile.createNewFile()) {
             logger.debug(buildDataFile.getAbsolutePath() + " created");
