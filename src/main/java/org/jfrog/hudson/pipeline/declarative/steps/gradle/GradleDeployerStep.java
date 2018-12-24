@@ -43,12 +43,12 @@ public class GradleDeployerStep extends GradleDeployerResolver {
     }
 
     @DataBoundSetter
-    public void setDeployMavenDescriptors(String deployMavenDescriptors) {
+    public void setDeployMavenDescriptors(boolean deployMavenDescriptors) {
         gradleDeployer.setDeployMavenDescriptors(deployMavenDescriptors);
     }
 
     @DataBoundSetter
-    public void setDeployIvyDescriptors(String deployIvyDescriptors) {
+    public void setDeployIvyDescriptors(boolean deployIvyDescriptors) {
         gradleDeployer.setDeployIvyDescriptors(deployIvyDescriptors);
     }
 
@@ -63,7 +63,7 @@ public class GradleDeployerStep extends GradleDeployerResolver {
     }
 
     @DataBoundSetter
-    public void setMavenCompatible(String mavenCompatible) {
+    public void setMavenCompatible(boolean mavenCompatible) {
         gradleDeployer.setMavenCompatible(mavenCompatible);
     }
 
