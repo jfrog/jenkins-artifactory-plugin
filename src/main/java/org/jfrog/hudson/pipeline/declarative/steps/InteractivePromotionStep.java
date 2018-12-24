@@ -8,11 +8,11 @@ import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
-import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.PromotionConfig;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -90,7 +90,7 @@ public class InteractivePromotionStep extends PromoteBuildStep {
 
         @Override
         public String getDisplayName() {
-            return "Add Interactive promotion";
+            return "Add interactive promotion";
         }
 
         @Override

@@ -13,15 +13,15 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.executors.MavenExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.MavenBuild;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer;
+import org.jfrog.hudson.pipeline.common.types.resolvers.MavenResolver;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
-import org.jfrog.hudson.pipeline.executors.MavenExecutor;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.MavenBuild;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.deployers.MavenDeployer;
-import org.jfrog.hudson.pipeline.types.resolvers.MavenResolver;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.PropertyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -156,7 +156,7 @@ public class MavenStep extends AbstractStepImpl {
         private ArtifactoryServer getArtifactoryServer(String buildNumber, BuildDataFile buildDataFile) throws IOException, InterruptedException {
             JsonNode serverId = buildDataFile.get("serverId");
             if (serverId.isNull()) {
-                return null;
+                throw new IllegalArgumentException("server ID is missing");
             }
             return DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, getContext(), serverId.asText());
         }

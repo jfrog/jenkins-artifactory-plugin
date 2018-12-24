@@ -10,10 +10,10 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.executors.DistributionExecutor;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.DistributionConfig;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.executors.DistributionExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.DistributionConfig;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**

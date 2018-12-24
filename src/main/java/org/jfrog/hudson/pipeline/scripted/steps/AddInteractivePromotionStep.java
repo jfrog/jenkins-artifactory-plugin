@@ -7,10 +7,10 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.PromotionConfig;
+import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -87,7 +87,7 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
 
         @Override
         public String getDisplayName() {
-            return "Add Interactive promotion";
+            return "Add interactive promotion";
         }
 
         @Override

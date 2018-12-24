@@ -2,7 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.types;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.common.Utils;
 
 import java.io.*;
 

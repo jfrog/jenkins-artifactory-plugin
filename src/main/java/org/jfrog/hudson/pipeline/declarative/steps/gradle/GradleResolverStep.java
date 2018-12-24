@@ -2,7 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.steps.gradle;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jfrog.hudson.pipeline.types.resolvers.GradleResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.GradleResolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 @SuppressWarnings("unused")

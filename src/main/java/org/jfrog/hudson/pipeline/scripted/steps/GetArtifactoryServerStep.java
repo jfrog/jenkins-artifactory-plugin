@@ -7,7 +7,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.executors.GetArtifactoryServerExecutor;
+import org.jfrog.hudson.pipeline.common.executors.GetArtifactoryServerExecutor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -25,7 +25,7 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
         return artifactoryServerID;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<org.jfrog.hudson.pipeline.types.ArtifactoryServer> {
+    public static class Execution extends AbstractSynchronousStepExecution<org.jfrog.hudson.pipeline.common.types.ArtifactoryServer> {
 
         private static final long serialVersionUID = 1L;
 
@@ -36,7 +36,7 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
         private transient GetArtifactoryServerStep step;
 
         @Override
-        protected org.jfrog.hudson.pipeline.types.ArtifactoryServer run() throws Exception {
+        protected org.jfrog.hudson.pipeline.common.types.ArtifactoryServer run() throws Exception {
             String artifactoryServerID = step.getArtifactoryServerID();
             GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, getContext(), artifactoryServerID);
             getArtifactoryServerExecutor.execute();

@@ -8,9 +8,9 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.executors.PublishBuildInfoExecutor;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.executors.PublishBuildInfoExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class PublishBuildInfoStep extends AbstractStepImpl {

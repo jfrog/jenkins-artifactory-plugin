@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.model.Run;
 import org.jenkinsci.plugins.workflow.steps.*;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**

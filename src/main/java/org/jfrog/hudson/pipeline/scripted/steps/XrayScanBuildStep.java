@@ -16,10 +16,10 @@ import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.client.artifactoryXrayResponse.ArtifactoryXrayResponse;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryXrayClient;
 import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.XrayScanConfig;
-import org.jfrog.hudson.pipeline.types.XrayScanResult;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
+import org.jfrog.hudson.pipeline.common.types.XrayScanResult;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 

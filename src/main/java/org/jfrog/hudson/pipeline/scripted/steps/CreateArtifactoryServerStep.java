@@ -10,7 +10,7 @@ import hudson.model.TaskListener;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.*;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**

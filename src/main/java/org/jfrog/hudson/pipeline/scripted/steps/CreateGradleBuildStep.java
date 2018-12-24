@@ -4,7 +4,7 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jfrog.hudson.pipeline.types.GradleBuild;
+import org.jfrog.hudson.pipeline.common.types.GradleBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class CreateGradleBuildStep extends AbstractStepImpl {

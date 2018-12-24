@@ -2,7 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.steps.maven;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jfrog.hudson.pipeline.types.resolvers.MavenResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.MavenResolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 @SuppressWarnings("unused")

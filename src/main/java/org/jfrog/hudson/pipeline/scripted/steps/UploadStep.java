@@ -11,11 +11,11 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.executors.GenericUploadExecutor;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.executors.GenericUploadExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class UploadStep extends AbstractStepImpl {
@@ -23,16 +23,22 @@ public class UploadStep extends AbstractStepImpl {
     private BuildInfo buildInfo;
     private String spec;
     private ArtifactoryServer server;
+    private boolean failNoOp;
 
     @DataBoundConstructor
-    public UploadStep(String spec, BuildInfo buildInfo, ArtifactoryServer server) {
+    public UploadStep(String spec, BuildInfo buildInfo, boolean failNoOp, ArtifactoryServer server) {
         this.spec = spec;
         this.buildInfo = buildInfo;
+        this.failNoOp = failNoOp;
         this.server = server;
     }
 
     public BuildInfo getBuildInfo() {
         return buildInfo;
+    }
+
+    public boolean getFailNoOp() {
+        return failNoOp;
     }
 
     public String getSpec() {
@@ -62,7 +68,7 @@ public class UploadStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), getContext(), Util.replaceMacro(step.getSpec(), env));
+            GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), getContext(), Util.replaceMacro(step.getSpec(), env), step.getFailNoOp());
             genericUploadExecutor.execute();
             BuildInfo buildInfo = genericUploadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);

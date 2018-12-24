@@ -11,9 +11,9 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.executors.MavenExecutor;
-import org.jfrog.hudson.pipeline.types.MavenBuild;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.executors.MavenExecutor;
+import org.jfrog.hudson.pipeline.common.types.MavenBuild;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -22,14 +22,14 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class ArtifactoryMavenBuild extends AbstractStepImpl {
 
     private MavenBuild mavenBuild;
-    private String goal;
+    private String goals;
     private String pom;
     private BuildInfo buildInfo;
 
     @DataBoundConstructor
     public ArtifactoryMavenBuild(MavenBuild mavenBuild, String pom, String goals, BuildInfo buildInfo) {
         this.mavenBuild = mavenBuild;
-        this.goal = goals == null ? "" : goals;
+        this.goals = goals == null ? "" : goals;
         this.pom = pom == null ? "" : pom;
         this.buildInfo = buildInfo;
     }
@@ -38,8 +38,8 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
         return mavenBuild;
     }
 
-    private String getGoal() {
-        return goal;
+    private String getGoals() {
+        return goals;
     }
 
     private String getPom() {
@@ -74,7 +74,7 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
         @Override
         protected BuildInfo run() throws Exception {
             MavenBuild mavenBuild = step.getMavenBuild();
-            MavenExecutor mavenExecutor = new MavenExecutor(listener, launcher, build, ws, env, mavenBuild, step.getPom(), step.getGoal(), step.getBuildInfo());
+            MavenExecutor mavenExecutor = new MavenExecutor(listener, launcher, build, ws, env, mavenBuild, step.getPom(), step.getGoals(), step.getBuildInfo());
             mavenExecutor.execute();
             return mavenExecutor.getBuildInfo();
         }

@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.declarative.steps.generic;
 
+import com.google.inject.Inject;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Run;
@@ -9,9 +10,9 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.SpecConfiguration;
-import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.SpecUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -31,6 +32,7 @@ public class GenericStep extends AbstractStepImpl {
     private String customBuildNumber;
     private String customBuildName;
     private String specPath;
+    boolean failNoOp;
 
     @DataBoundConstructor
     public GenericStep(String serverId) {
@@ -57,8 +59,16 @@ public class GenericStep extends AbstractStepImpl {
         this.customBuildNumber = buildNumber;
     }
 
+    @DataBoundSetter
+    public void setFailNoOp(boolean failNoOp) {
+        this.failNoOp = failNoOp;
+    }
+
     public static abstract class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
         public static final long serialVersionUID = 1L;
+
+        @Inject(optional = true)
+        protected transient GenericStep step;
 
         protected ArtifactoryServer artifactoryServer;
         protected BuildInfo buildInfo;
@@ -75,7 +85,7 @@ public class GenericStep extends AbstractStepImpl {
             buildInfo = DeclarativePipelineUtils.getBuildInfo(listener, ws, build, step.customBuildName, step.customBuildNumber);
 
             // Set Artifactory server
-            org.jfrog.hudson.pipeline.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, context, step.serverId);
+            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(listener, build, ws, context, step.serverId);
             artifactoryServer = Utils.prepareArtifactoryServer(null, pipelineServer);
         }
     }

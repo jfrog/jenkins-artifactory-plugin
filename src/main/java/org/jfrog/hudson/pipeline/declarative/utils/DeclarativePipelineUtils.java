@@ -6,13 +6,13 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.declarative.steps.BuildInfoStep;
 import org.jfrog.hudson.pipeline.declarative.steps.CreateServerStep;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
-import org.jfrog.hudson.pipeline.executors.GetArtifactoryServerExecutor;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.executors.GetArtifactoryServerExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class DeclarativePipelineUtils {
 
     /**
      * Create pipeline build data in @tmp/build-number directory.
-     * Used to transfer data from different steps in declarative pipelines.
+     * Used to transfer data between different steps in declarative pipelines.
      * @param ws - The agent workspace.
      * @param buildNumber - The build number.
      * @param buildDataFile - The build data file to save.
@@ -33,7 +33,7 @@ public class DeclarativePipelineUtils {
 
     /**
      * Read pipeline build data from @tmp/build-number directory.
-     * Used to transfer data from different steps in declarative pipelines.
+     * Used to transfer data between different steps in declarative pipelines.
      * @param buildNumber - The build number.
      * @param stepName - The step name - One of 'artifactoryMaven', 'mavenDeploy', 'mavenResolve', 'buildInfo' and other declarative pipeline steps.
      * @param stepId - The step id specified in the pipeline.

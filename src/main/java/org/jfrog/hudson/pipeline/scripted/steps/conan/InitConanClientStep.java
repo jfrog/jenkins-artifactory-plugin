@@ -13,8 +13,8 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.types.ConanClient;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.types.ConanClient;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 

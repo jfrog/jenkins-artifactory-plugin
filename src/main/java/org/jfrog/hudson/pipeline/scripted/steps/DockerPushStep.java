@@ -15,14 +15,14 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.build.api.Module;
 import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.docker.DockerImage;
-import org.jfrog.hudson.pipeline.docker.utils.DockerAgentUtils;
-import org.jfrog.hudson.pipeline.docker.utils.DockerUtils;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
+import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.docker.DockerImage;
+import org.jfrog.hudson.pipeline.common.docker.utils.DockerAgentUtils;
+import org.jfrog.hudson.pipeline.common.docker.utils.DockerUtils;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 

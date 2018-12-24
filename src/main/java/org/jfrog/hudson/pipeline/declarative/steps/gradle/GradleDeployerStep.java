@@ -2,7 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.steps.gradle;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jfrog.hudson.pipeline.types.deployers.GradleDeployer;
+import org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 

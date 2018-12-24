@@ -13,10 +13,10 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
-import org.jfrog.hudson.pipeline.docker.utils.DockerAgentUtils;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.docker.proxy.BuildInfoProxy;
+import org.jfrog.hudson.pipeline.common.docker.utils.DockerAgentUtils;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 

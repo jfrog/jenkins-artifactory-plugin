@@ -13,9 +13,9 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.util.CredentialManager;
 import org.kohsuke.stapler.DataBoundConstructor;
 

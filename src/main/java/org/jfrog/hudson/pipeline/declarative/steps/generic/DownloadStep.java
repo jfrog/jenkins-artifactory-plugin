@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.declarative.steps.generic;
 
-import com.google.inject.Inject;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -8,10 +7,10 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
-import org.jfrog.hudson.pipeline.executors.GenericDownloadExecutor;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 @SuppressWarnings("unused")
@@ -36,13 +35,10 @@ public class DownloadStep extends GenericStep {
         @StepContextParameter
         private transient EnvVars env;
 
-        @Inject(optional = true)
-        private transient GenericStep step;
-
         @Override
         protected Void run() throws Exception {
             setGenericParameters(listener, build, ws, env, step, getContext());
-            GenericDownloadExecutor genericDownloadExecutor = new GenericDownloadExecutor(artifactoryServer, listener, build, ws, buildInfo, spec);
+            GenericDownloadExecutor genericDownloadExecutor = new GenericDownloadExecutor(artifactoryServer, listener, build, ws, buildInfo, spec, step.failNoOp);
             genericDownloadExecutor.execute();
             BuildInfo buildInfo = genericDownloadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
