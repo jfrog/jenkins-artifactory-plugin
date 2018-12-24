@@ -51,8 +51,8 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
     }
 
     // Shouldn't be whitelisted, the includeEnvVars value is taken from the buildInfo configurations.
-    public Deployer setIncludeEnvVars(Object includeEnvVars) {
-        this.includeEnvVars = Boolean.parseBoolean(Utils.parseJenkinsArg(includeEnvVars));
+    public Deployer setIncludeEnvVars(boolean includeEnvVars) {
+        this.includeEnvVars = includeEnvVars;
         return this;
     }
 
@@ -77,8 +77,8 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
     }
 
     @Whitelisted
-    public Deployer setDeployArtifacts(Object deployArtifacts) {
-        this.deployArtifacts = Boolean.parseBoolean(Utils.parseJenkinsArg(deployArtifacts));
+    public Deployer setDeployArtifacts(boolean deployArtifacts) {
+        this.deployArtifacts = deployArtifacts;
         return this;
     }
 

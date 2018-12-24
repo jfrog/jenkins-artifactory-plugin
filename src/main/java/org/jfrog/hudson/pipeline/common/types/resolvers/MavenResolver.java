@@ -4,7 +4,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
-import org.jfrog.hudson.pipeline.common.Utils;
 
 /**
  * Created by Tamirh on 04/08/2016.
@@ -19,8 +18,8 @@ public class MavenResolver extends Resolver {
     }
 
     @Whitelisted
-    public MavenResolver setSnapshotRepo(Object snapshotRepo) {
-        this.snapshotRepo = Utils.parseJenkinsArg(snapshotRepo);
+    public MavenResolver setSnapshotRepo(String snapshotRepo) {
+        this.snapshotRepo = snapshotRepo;
         return this;
     }
 
@@ -30,8 +29,8 @@ public class MavenResolver extends Resolver {
     }
 
     @Whitelisted
-    public MavenResolver setReleaseRepo(Object releaseRepo) {
-        this.releaseRepo = Utils.parseJenkinsArg(releaseRepo);
+    public MavenResolver setReleaseRepo(String releaseRepo) {
+        this.releaseRepo = releaseRepo;
         return this;
     }
 
