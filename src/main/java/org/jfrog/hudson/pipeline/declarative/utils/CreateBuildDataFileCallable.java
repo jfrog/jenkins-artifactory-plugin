@@ -2,9 +2,13 @@ package org.jfrog.hudson.pipeline.declarative.utils;
 
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
+import org.jfrog.build.api.util.Log;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -18,23 +22,26 @@ public class CreateBuildDataFileCallable extends MasterToSlaveFileCallable<Void>
 
     private BuildDataFile buildDataFile;
     private String buildNumber;
+    private Log logger;
 
-    CreateBuildDataFileCallable(String buildNumber, BuildDataFile buildDataFile) {
+    CreateBuildDataFileCallable(String buildNumber, BuildDataFile buildDataFile, Log logger) {
         this.buildNumber = buildNumber;
         this.buildDataFile = buildDataFile;
+        this.logger = logger;
     }
 
     @Override
-    public Void invoke(File file, VirtualChannel virtualChannel) throws IOException {
-        Path buildDir = Files.createDirectories(file.toPath().resolve(buildNumber));
-        file = buildDir.resolve(getBuildDataFileName(buildDataFile.getStepName(), buildDataFile.getId())).toFile();
-        if (file.createNewFile()) {
-            file.deleteOnExit();
+    public Void invoke(File tmpDir, VirtualChannel virtualChannel) throws IOException {
+        DeclarativePipelineUtils.deleteOldBuildDataDirs(tmpDir, logger);
+        Path buildDataDirPath = Files.createDirectories(tmpDir.toPath().resolve(buildNumber));
+        File buildDataFile = buildDataDirPath.resolve(getBuildDataFileName(this.buildDataFile.getStepName(), this.buildDataFile.getId())).toFile();
+        if (buildDataFile.createNewFile()) {
+            logger.debug(buildDataFile.getAbsolutePath() + " created");
+            buildDataFile.deleteOnExit();
         }
-        try (FileOutputStream fos = new FileOutputStream(file);
-             ObjectOutputStream oos = new ObjectOutputStream(fos)
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(buildDataFile))
         ) {
-            oos.writeObject(buildDataFile);
+            oos.writeObject(this.buildDataFile);
         }
         return null;
     }

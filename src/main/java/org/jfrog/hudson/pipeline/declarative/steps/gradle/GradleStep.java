@@ -14,15 +14,16 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
-import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.pipeline.common.executors.GradleExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.GradleBuild;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.GradleResolver;
+import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.PropertyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -133,7 +134,7 @@ public class GradleStep extends AbstractStepImpl {
             GradleExecutor gradleExecutor = new GradleExecutor(build, step.gradleBuild, step.tasks, step.buildFile, step.rootDir, step.switches, buildInfo, env, ws, listener, launcher);
             gradleExecutor.execute();
             buildInfo = gradleExecutor.getBuildInfo();
-            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build);
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 

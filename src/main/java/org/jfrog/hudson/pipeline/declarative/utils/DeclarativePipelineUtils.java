@@ -4,18 +4,24 @@ import com.fasterxml.jackson.databind.JsonNode;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.build.api.util.Log;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.declarative.steps.BuildInfoStep;
-import org.jfrog.hudson.pipeline.declarative.steps.CreateServerStep;
-import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.common.executors.GetArtifactoryServerExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.declarative.steps.BuildInfoStep;
+import org.jfrog.hudson.pipeline.declarative.steps.CreateServerStep;
+import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 public class DeclarativePipelineUtils {
 
@@ -27,8 +33,8 @@ public class DeclarativePipelineUtils {
      * @param buildDataFile - The build data file to save.
      * @throws Exception - In case of no write permissions.
      */
-    public static void writeBuildDataFile(FilePath ws, String buildNumber, BuildDataFile buildDataFile) throws Exception {
-        getTempDirPath(ws).act(new CreateBuildDataFileCallable(buildNumber, buildDataFile));
+    public static void writeBuildDataFile(FilePath ws, String buildNumber, BuildDataFile buildDataFile, Log logger) throws Exception {
+        getTempDirPath(ws).act(new CreateBuildDataFileCallable(buildNumber, buildDataFile, logger));
     }
 
     /**
@@ -125,12 +131,39 @@ public class DeclarativePipelineUtils {
      * @param ws - Step's workspace.
      * @param build - Step's build.
      */
-    public static void saveBuildInfo(BuildInfo buildInfo, FilePath ws, Run build) throws Exception {
+    public static void saveBuildInfo(BuildInfo buildInfo, FilePath ws, Run build, Log logger) throws Exception {
         String jobBuildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         String buildInfoId = createBuildInfoId(build, buildInfo.getName(), buildInfo.getNumber());
 
         BuildDataFile buildDataFile = new BuildDataFile(BuildInfoStep.STEP_NAME, buildInfoId);
         buildDataFile.putPOJO(buildInfo);
-        writeBuildDataFile(ws, jobBuildNumber, buildDataFile);
+        writeBuildDataFile(ws, jobBuildNumber, buildDataFile, logger);
+    }
+
+    /**
+     * Delete @tmp/<build-number> directories older than 1 day.
+     */
+    static void deleteOldBuildDataDirs(File tmpDir, Log logger) {
+        if (!tmpDir.exists()) {
+            // Before creation of the @tmp directory
+            return;
+        }
+        File[] buildDataDirs = tmpDir.listFiles(buildDataDir -> {
+            long ageInMilliseconds = new Date().getTime() - buildDataDir.lastModified();
+            return ageInMilliseconds > TimeUnit.SECONDS.toMillis(10);
+        });
+        if (buildDataDirs == null) {
+            logger.info("Unable to clean old build data directories");
+            return;
+        }
+
+        for (File buildDataDir : buildDataDirs) {
+            try {
+                FileUtils.deleteDirectory(buildDataDir);
+                logger.debug(buildDataDir.getAbsolutePath() + " deleted");
+            } catch (IOException e) {
+                logger.info(ExceptionUtils.getRootCauseMessage(e));
+            }
+        }
     }
 }

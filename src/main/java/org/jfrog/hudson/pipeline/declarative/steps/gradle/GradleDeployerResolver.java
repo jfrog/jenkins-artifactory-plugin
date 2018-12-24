@@ -3,11 +3,13 @@ package org.jfrog.hudson.pipeline.declarative.steps.gradle;
 import com.google.inject.Inject;
 import hudson.FilePath;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -35,10 +37,13 @@ public class GradleDeployerResolver extends AbstractStepImpl {
         private static final long serialVersionUID = 1L;
 
         @StepContextParameter
-        private transient Run build;
+        private transient TaskListener listener;
 
         @StepContextParameter
         private transient FilePath ws;
+
+        @StepContextParameter
+        private transient Run build;
 
         @Inject(optional = true)
         private transient GradleDeployerResolver step;
@@ -47,7 +52,7 @@ public class GradleDeployerResolver extends AbstractStepImpl {
         protected Void run() throws Exception {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             BuildDataFile buildDataFile = step.buildDataFile;
-            writeBuildDataFile(ws, buildNumber, buildDataFile);
+            writeBuildDataFile(ws, buildNumber, buildDataFile, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }

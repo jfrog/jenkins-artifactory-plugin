@@ -11,6 +11,7 @@ import org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 @SuppressWarnings("unused")
@@ -42,7 +43,7 @@ public class DownloadStep extends GenericStep {
             genericDownloadExecutor.execute();
             BuildInfo buildInfo = genericDownloadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
-            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build);
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }

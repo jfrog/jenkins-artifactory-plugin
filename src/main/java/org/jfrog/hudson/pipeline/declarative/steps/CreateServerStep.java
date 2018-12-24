@@ -4,14 +4,16 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
-import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -68,10 +70,13 @@ public class CreateServerStep extends AbstractStepImpl {
         private static final long serialVersionUID = 1L;
 
         @StepContextParameter
-        private transient Run build;
+        private transient TaskListener listener;
 
         @StepContextParameter
         private transient FilePath ws;
+
+        @StepContextParameter
+        private transient Run build;
 
         @Inject(optional = true)
         private transient CreateServerStep step;
@@ -79,7 +84,7 @@ public class CreateServerStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-            DeclarativePipelineUtils.writeBuildDataFile(ws, buildNumber, step.buildDataFile);
+            DeclarativePipelineUtils.writeBuildDataFile(ws, buildNumber, step.buildDataFile, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }

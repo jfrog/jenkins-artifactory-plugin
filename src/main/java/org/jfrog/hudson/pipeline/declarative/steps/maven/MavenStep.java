@@ -23,6 +23,7 @@ import org.jfrog.hudson.pipeline.common.types.resolvers.MavenResolver;
 import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.PropertyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -109,7 +110,7 @@ public class MavenStep extends AbstractStepImpl {
             MavenExecutor mavenExecutor = new MavenExecutor(listener, launcher, build, ws, env, step.mavenBuild, step.pom, step.goals, buildInfo);
             mavenExecutor.execute();
             buildInfo = mavenExecutor.getBuildInfo();
-            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build);
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 

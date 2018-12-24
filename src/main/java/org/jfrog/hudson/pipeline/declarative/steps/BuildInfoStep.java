@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Run;
+import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -12,6 +13,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -91,10 +93,13 @@ public class BuildInfoStep extends AbstractStepImpl {
         private static final long serialVersionUID = 1L;
 
         @StepContextParameter
-        private transient Run build;
+        private transient TaskListener listener;
 
         @StepContextParameter
         private transient FilePath ws;
+
+        @StepContextParameter
+        private transient Run build;
 
         @Inject(optional = true)
         private transient BuildInfoStep step;
@@ -105,7 +110,7 @@ public class BuildInfoStep extends AbstractStepImpl {
             String buildNumber = StringUtils.isBlank(step.buildInfo.getNumber()) ? BuildUniqueIdentifierHelper.getBuildNumber(build) : step.buildInfo.getNumber();
             step.buildInfo.setName(buildName);
             step.buildInfo.setNumber(buildNumber);
-            DeclarativePipelineUtils.saveBuildInfo(step.buildInfo, ws, build);
+            DeclarativePipelineUtils.saveBuildInfo(step.buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }
