@@ -94,13 +94,16 @@ public class BuildInfoAccessor {
     public void addModule(Module other) {
         List<Module> modules = getModules();
         Module currentModule = modules.stream()
-                .filter(module -> StringUtils.equals(module.getId(), other.getId())) // Check if npm module exists
+                // Check if there's already a module with the same name.
+                .filter(module -> StringUtils.equals(module.getId(), other.getId()))
                 .findAny()
                 .orElse(null);
         if (currentModule == null) {
-            modules.add(other); // Append new module
+            // Append new module.
+            modules.add(other);
         } else {
-            currentModule.append(other); // Append between 2 modules
+            // Append the other module into the existing module with the same name.
+            currentModule.append(other);
         }
     }
 }

@@ -7,6 +7,7 @@ import org.jfrog.build.api.Module;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryDependenciesClientBuilder;
 import org.jfrog.build.extractor.npm.extractor.NpmInstall;
+import org.jfrog.hudson.pipeline.Utils;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -18,10 +19,10 @@ import java.util.Objects;
 public class NpmInstallCallable extends MasterToSlaveFileCallable<Module> {
 
     private ArtifactoryDependenciesClientBuilder dependenciesClientBuilder;
-    private String resolutionRepository;
-    private String executablePath;
-    private String args;
-    private String path;
+    private String resolutionRepository; // Artifactory repository to download dependencies.
+    private String executablePath; // npm executable path. Can be empty.
+    private String args; // npm args.
+    private String path; // Path to package.json or path to the directory that contains package.json.
     private Log logger;
 
     public NpmInstallCallable(ArtifactoryDependenciesClientBuilder dependenciesClientBuilder, String resolutionRepository, String executablePath, String args, String path, Log logger) {
@@ -36,7 +37,7 @@ public class NpmInstallCallable extends MasterToSlaveFileCallable<Module> {
     @Override
     public Module invoke(File file, VirtualChannel channel) {
         Path basePath = file.toPath();
-        Path packagePath = StringUtils.isBlank(path) ? basePath : basePath.resolve(path.replaceFirst("^~", System.getProperty("user.home")));
+        Path packagePath = StringUtils.isBlank(path) ? basePath : basePath.resolve(Utils.replaceTildeWithUserHome(path));
         return new NpmInstall(dependenciesClientBuilder, resolutionRepository, args, executablePath, logger, packagePath).execute();
     }
 }

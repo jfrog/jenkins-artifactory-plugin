@@ -24,7 +24,7 @@ public class NpmDeployer extends Deployer {
 
     @Whitelisted
     public void deployArtifacts(BuildInfo buildInfo) {
-        throw new IllegalStateException("'deployArtifacts' is not supported in npm. Please use 'publish' instead.");
+        throw new IllegalStateException("The 'deployArtifacts' method is not supported for npm builds. Please use the 'publish' method instead.");
     }
 
     @Whitelisted

@@ -398,4 +398,8 @@ public class Utils {
         }
         return properties;
     }
+
+    public static String replaceTildeWithUserHome(String path) {
+        return path.replaceFirst("^~", System.getProperty("user.home"));
+    }
 }

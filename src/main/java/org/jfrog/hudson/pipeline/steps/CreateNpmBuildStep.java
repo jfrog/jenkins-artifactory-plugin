@@ -44,6 +44,4 @@ public class CreateNpmBuildStep extends AbstractStepImpl {
             return true;
         }
     }
-
 }
-
