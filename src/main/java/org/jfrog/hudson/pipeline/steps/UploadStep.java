@@ -23,16 +23,22 @@ public class UploadStep extends AbstractStepImpl {
     private BuildInfo buildInfo;
     private String spec;
     private ArtifactoryServer server;
+    private boolean failNoOp;
 
     @DataBoundConstructor
-    public UploadStep(String spec, BuildInfo buildInfo, ArtifactoryServer server) {
+    public UploadStep(String spec, BuildInfo buildInfo, boolean failNoOp, ArtifactoryServer server) {
         this.spec = spec;
         this.buildInfo = buildInfo;
+        this.failNoOp = failNoOp;
         this.server = server;
     }
 
     public BuildInfo getBuildInfo() {
         return buildInfo;
+    }
+
+    public boolean getFailNoOp() {
+        return failNoOp;
     }
 
     public String getSpec() {
@@ -62,7 +68,7 @@ public class UploadStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            BuildInfo buildInfo = new GenericUploadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), getContext()).execution(Util.replaceMacro(step.getSpec(), env));
+            BuildInfo buildInfo = new GenericUploadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), step.getFailNoOp(), getContext()).execution(Util.replaceMacro(step.getSpec(), env));
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
             return buildInfo;
         }

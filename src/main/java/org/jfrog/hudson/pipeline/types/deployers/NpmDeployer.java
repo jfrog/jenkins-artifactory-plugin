@@ -33,8 +33,8 @@ public class NpmDeployer extends Deployer {
     }
 
     @Whitelisted
-    public void setRepo(Object repo) {
-        this.repo = Utils.parseJenkinsArg(repo);
+    public void setRepo(String repo) {
+        this.repo = repo;
     }
 
     @Override

@@ -23,15 +23,17 @@ public class GenericUploadExecutor {
     private transient FilePath ws;
     private transient Run build;
     private transient TaskListener listener;
-    private BuildInfo buildinfo;
+    private BuildInfo buildInfo;
+    private boolean failNoOp;
     private ArtifactoryServer server;
     private StepContext context;
 
-    public GenericUploadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, StepContext context) {
+    public GenericUploadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, boolean failNoOp, StepContext context) {
         this.server = server;
         this.listener = listener;
         this.build = build;
-        this.buildinfo = Utils.prepareBuildinfo(build, buildInfo);
+        this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
+        this.failNoOp = failNoOp;
         this.ws = ws;
         this.context = context;
     }
@@ -40,9 +42,12 @@ public class GenericUploadExecutor {
         Credentials credentials = new Credentials(server.getDeployerCredentialsConfig().provideUsername(build.getParent()),
                 server.getDeployerCredentialsConfig().providePassword(build.getParent()));
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(server);
-        List<Artifact> artifactsToDeploy = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
-                server, credentials, Utils.getPropertiesMap(buildinfo, build, context), proxyConfiguration));
-        new BuildInfoAccessor(buildinfo).appendDeployedArtifacts(artifactsToDeploy);
-        return buildinfo;
+        List<Artifact> deployedArtifacts = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
+                server, credentials, Utils.getPropertiesMap(buildInfo, build, context), proxyConfiguration));
+        if (failNoOp && deployedArtifacts.isEmpty()) {
+            throw new RuntimeException("Fail-no-op: No files were affected in the upload process.");
+        }
+        new BuildInfoAccessor(buildInfo).appendDeployedArtifacts(deployedArtifacts);
+        return buildInfo;
     }
 }

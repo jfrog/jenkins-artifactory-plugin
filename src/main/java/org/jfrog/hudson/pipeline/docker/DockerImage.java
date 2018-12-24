@@ -128,33 +128,44 @@ public class DockerImage implements Serializable {
 
         ArtifactoryServer server = config.getArtifactoryServer();
         CredentialsConfig preferredResolver = server.getDeployerCredentialsConfig();
+        ArtifactoryDependenciesClient dependenciesClient = null;
+        ArtifactoryBuildInfoClient propertyChangeClient = null;
 
-        ArtifactoryDependenciesClient dependenciesClient = server.createArtifactoryDependenciesClient(
-                preferredResolver.provideUsername(build.getParent()), preferredResolver.providePassword(build.getParent()),
-                server.createProxyConfiguration(Jenkins.getInstance().proxy), listener);
+        try {
+            dependenciesClient = server.createArtifactoryDependenciesClient(
+                    preferredResolver.provideUsername(build.getParent()), preferredResolver.providePassword(build.getParent()),
+                    server.createProxyConfiguration(Jenkins.getInstance().proxy), listener);
 
-        CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(config, server);
-        ArtifactoryBuildInfoClient propertyChangeClient = server.createArtifactoryClient(
-                preferredDeployer.provideUsername(build.getParent()), preferredDeployer.providePassword(build.getParent()),
-                server.createProxyConfiguration(Jenkins.getInstance().proxy));
+            CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(config, server);
+            propertyChangeClient = server.createArtifactoryClient(
+                    preferredDeployer.provideUsername(build.getParent()), preferredDeployer.providePassword(build.getParent()),
+                    server.createProxyConfiguration(Jenkins.getInstance().proxy));
 
-        Module buildInfoModule = new Module();
-        buildInfoModule.setId(imageTag.substring(imageTag.indexOf("/") + 1));
+            Module buildInfoModule = new Module();
+            buildInfoModule.setId(imageTag.substring(imageTag.indexOf("/") + 1));
 
-        // If manifest and imagePath not found, return.
-        if ((StringUtils.isEmpty(manifest) || StringUtils.isEmpty(imagePath)) && !findAndSetManifestFromArtifactory(server, dependenciesClient, listener)) {
+            // If manifest and imagePath not found, return.
+            if ((StringUtils.isEmpty(manifest) || StringUtils.isEmpty(imagePath)) && !findAndSetManifestFromArtifactory(server, dependenciesClient, listener)) {
+                return buildInfoModule;
+            }
+
+            listener.getLogger().println("Fetching details of published docker layers from Artifactory...");
+            boolean includeVirtualReposSupported = propertyChangeClient.getArtifactoryVersion().isAtLeast(VIRTUAL_REPOS_SUPPORTED_VERSION);
+            DockerLayers layers = createLayers(dependenciesClient, includeVirtualReposSupported);
+
+            listener.getLogger().println("Tagging published docker layers with build properties in Artifactory...");
+            setDependenciesAndArtifacts(buildInfoModule, layers, artifactsPropsStr, buildInfoItemsProps,
+                    dependenciesClient, propertyChangeClient, server);
+            setBuildInfoModuleProps(buildInfoModule);
             return buildInfoModule;
+        } finally {
+            if (dependenciesClient != null) {
+                dependenciesClient.close();
+            }
+            if (propertyChangeClient != null) {
+                propertyChangeClient.close();
+            }
         }
-
-        listener.getLogger().println("Fetching details of published docker layers from Artifactory...");
-        boolean includeVirtualReposSupported = propertyChangeClient.getArtifactoryVersion().isAtLeast(VIRTUAL_REPOS_SUPPORTED_VERSION);
-        DockerLayers layers = createLayers(dependenciesClient, includeVirtualReposSupported);
-
-        listener.getLogger().println("Tagging published docker layers with build properties in Artifactory...");
-        setDependenciesAndArtifacts(buildInfoModule, layers, artifactsPropsStr, buildInfoItemsProps,
-                dependenciesClient, propertyChangeClient, server);
-        setBuildInfoModuleProps(buildInfoModule);
-        return buildInfoModule;
     }
 
     /**

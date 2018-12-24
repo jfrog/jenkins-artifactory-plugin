@@ -5,7 +5,6 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
@@ -29,14 +28,14 @@ public class MavenDeployer extends Deployer {
     }
 
     @Whitelisted
-    public Deployer setReleaseRepo(Object releaseRepo) {
-        this.releaseRepo = Utils.parseJenkinsArg(releaseRepo);
+    public Deployer setReleaseRepo(String releaseRepo) {
+        this.releaseRepo = releaseRepo;
         return this;
     }
 
     @Whitelisted
-    public Deployer setSnapshotRepo(Object snapshotRepo) {
-        this.snapshotRepo = Utils.parseJenkinsArg(snapshotRepo);
+    public Deployer setSnapshotRepo(String snapshotRepo) {
+        this.snapshotRepo = snapshotRepo;
         return this;
     }
 
@@ -46,8 +45,8 @@ public class MavenDeployer extends Deployer {
     }
 
     @Whitelisted
-    public Deployer setDeployEvenIfUnstable(Object deployEvenIfUnstable) {
-        this.deployEvenIfUnstable = Boolean.getBoolean(Utils.parseJenkinsArg(deployEvenIfUnstable));
+    public Deployer setDeployEvenIfUnstable(boolean deployEvenIfUnstable) {
+        this.deployEvenIfUnstable = deployEvenIfUnstable;
         return this;
     }
 
