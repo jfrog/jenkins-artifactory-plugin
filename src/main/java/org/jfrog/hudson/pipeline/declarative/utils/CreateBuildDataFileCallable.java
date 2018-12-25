@@ -15,7 +15,7 @@ import java.nio.file.Path;
 import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.getBuildDataFileName;
 
 /**
- * Create pipeline build data in @tmp/build-number directory.
+ * Create pipeline build data in @tmp/artifactory-pipeline-cache/build-number directory.
  * Used to transfer data between different steps in declarative pipelines.
  */
 public class CreateBuildDataFileCallable extends MasterToSlaveFileCallable<Void> {

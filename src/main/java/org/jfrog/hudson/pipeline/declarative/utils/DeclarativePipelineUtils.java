@@ -28,7 +28,7 @@ public class DeclarativePipelineUtils {
     static final String PIPELINE_CACHE_DIR_NAME = "artifactory-pipeline-cache";
 
     /**
-     * Create pipeline build data in @tmp/build-number directory.
+     * Create pipeline build data in @tmp/artifactory-pipeline-cache/build-number directory.
      * Used to transfer data between different steps in declarative pipelines.
      * @param ws - The agent workspace.
      * @param buildNumber - The build number.
@@ -40,7 +40,7 @@ public class DeclarativePipelineUtils {
     }
 
     /**
-     * Read pipeline build data from @tmp/build-number directory.
+     * Read pipeline build data from @tmp/artifactory-pipeline-cache/build-number directory.
      * Used to transfer data between different steps in declarative pipelines.
      * @param buildNumber - The build number.
      * @param stepName - The step name - One of 'artifactoryMaven', 'mavenDeploy', 'mavenResolve', 'buildInfo' and other declarative pipeline steps.
@@ -128,7 +128,7 @@ public class DeclarativePipelineUtils {
     }
 
     /**
-     * Save build info in @tmp/build-number folder.
+     * Save build info in @tmp/artifactory-pipeline-cache/build-number folder.
      * @param buildInfo - The build info object to save.
      * @param ws - Step's workspace.
      * @param build - Step's build.
@@ -143,7 +143,7 @@ public class DeclarativePipelineUtils {
     }
 
     /**
-     * Delete @tmp/<build-number> directories older than 1 day.
+     * Delete @tmp/artifactory-pipeline-cache/build-number directories older than 1 day.
      */
     static void deleteOldBuildDataDirs(File tmpDir, Log logger) {
         if (!tmpDir.exists()) {
