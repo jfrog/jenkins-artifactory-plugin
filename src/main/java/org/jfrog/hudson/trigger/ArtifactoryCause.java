@@ -15,7 +15,7 @@ public class ArtifactoryCause extends Cause {
 
     @Override
     public String getShortDescription() {
-        return "The build was triggered by Artifactory trigger." +
-                "\nThe artifact that triggered the build is: " + url;
+        return "The build was triggered by a change in Artifactory." +
+                "\nThe artifact which triggered the build is: " + url;
     }
 }
