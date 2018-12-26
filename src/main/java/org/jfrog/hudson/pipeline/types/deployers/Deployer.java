@@ -135,11 +135,10 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
 
     public ServerDetails getDetails() {
         RepositoryConf snapshotRepositoryConf = new RepositoryConf(snapshotRepo, snapshotRepo, false);
-        RepositoryConf releaesRepositoryConf = new RepositoryConf(releaseRepo, releaseRepo, false);
-        if (server != null) {
-            return new ServerDetails(server.getServerName(), server.getUrl(), releaesRepositoryConf, null, releaesRepositoryConf, null, "", "");
-        }
-        return new ServerDetails("", "", releaesRepositoryConf, snapshotRepositoryConf, releaesRepositoryConf, snapshotRepositoryConf, "", "");
+        RepositoryConf releaseRepositoryConf = new RepositoryConf(releaseRepo, releaseRepo, false);
+        String serverName = server == null ? "" : server.getServerName();
+        String url = server == null ? "" : server.getUrl();
+        return new ServerDetails(serverName, url, releaseRepositoryConf, snapshotRepositoryConf, releaseRepositoryConf, snapshotRepositoryConf, "", "");
     }
 
     public boolean isEmpty() {
