@@ -8,6 +8,9 @@ import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.*;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.types.packageManagerBuilds.GradleBuild;
+import org.jfrog.hudson.pipeline.types.packageManagerBuilds.MavenBuild;
+import org.jfrog.hudson.pipeline.types.packageManagerBuilds.NpmBuild;
 
 import java.io.Serializable;
 import java.util.Arrays;

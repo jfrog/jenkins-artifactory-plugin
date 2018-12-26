@@ -4,7 +4,6 @@ import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
@@ -27,7 +26,7 @@ import java.util.Map;
  * Created by Tamirh on 16/05/2016.
  */
 public class BuildInfoAccessor {
-    private BuildInfo buildInfo;
+    BuildInfo buildInfo;
 
     public BuildInfoAccessor(BuildInfo buildInfo) {
         this.buildInfo = buildInfo;

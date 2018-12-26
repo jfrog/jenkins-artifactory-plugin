@@ -23,7 +23,7 @@ import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.gradle.GradleInitScriptWriter;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.executors.MavenGradleEnvExtractor;
-import org.jfrog.hudson.pipeline.types.GradleBuild;
+import org.jfrog.hudson.pipeline.types.packageManagerBuilds.GradleBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.Deployer;
 import org.jfrog.hudson.util.ExtractorUtils;

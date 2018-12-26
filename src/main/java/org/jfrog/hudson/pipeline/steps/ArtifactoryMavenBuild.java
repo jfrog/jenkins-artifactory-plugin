@@ -17,7 +17,7 @@ import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.hudson.maven3.Maven3Builder;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.executors.MavenGradleEnvExtractor;
-import org.jfrog.hudson.pipeline.types.MavenBuild;
+import org.jfrog.hudson.pipeline.types.packageManagerBuilds.MavenBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.types.deployers.MavenDeployer;

@@ -1,9 +1,6 @@
 package org.jfrog.hudson.pipeline.types.deployers;
 
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
-import org.jfrog.hudson.RepositoryConf;
-import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.util.ExtractorUtils;
@@ -18,20 +15,6 @@ public class GradleDeployer extends Deployer {
     private String ivyPattern = "[organisation]/[module]/ivy-[revision].xml";
     private String artifactPattern = "[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
     private boolean mavenCompatible = true;
-    private String repo;
-
-    public GradleDeployer() {
-        super();
-    }
-
-    @Override
-    public ServerDetails getDetails() {
-        RepositoryConf releaesRepositoryConf = new RepositoryConf(repo, repo, false);
-        if (server != null) {
-            return new ServerDetails(server.getServerName(), server.getUrl(), releaesRepositoryConf, null, releaesRepositoryConf, null, "", "");
-        }
-        return new ServerDetails("", "", releaesRepositoryConf, null, releaesRepositoryConf, null, "", "");
-    }
 
     @Whitelisted
     public Boolean isDeployMavenDescriptors() {
@@ -90,20 +73,12 @@ public class GradleDeployer extends Deployer {
 
     @Whitelisted
     public String getRepo() {
-        return repo;
+        return releaseRepo;
     }
 
     @Whitelisted
     public void setRepo(String repo) {
-        this.repo = repo;
-    }
-
-    public boolean isEmpty() {
-        return server == null || StringUtils.isEmpty(repo);
-    }
-
-    public String getTargetRepository(String deployPath) {
-        return repo;
+        releaseRepo = snapshotRepo = repo;
     }
 
     public PublisherContext.Builder getContextBuilder() {

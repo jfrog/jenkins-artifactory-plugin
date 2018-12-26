@@ -4,7 +4,7 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jfrog.hudson.pipeline.types.MavenBuild;
+import org.jfrog.hudson.pipeline.types.packageManagerBuilds.MavenBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class CreateMavenBuildStep extends AbstractStepImpl {

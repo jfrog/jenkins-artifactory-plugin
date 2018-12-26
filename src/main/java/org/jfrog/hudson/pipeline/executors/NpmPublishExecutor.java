@@ -12,7 +12,8 @@ import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.npm.NpmPublishCallable;
 import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.types.NpmBuild;
+import org.jfrog.hudson.pipeline.types.deployers.Deployer;
+import org.jfrog.hudson.pipeline.types.packageManagerBuilds.NpmBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.deployers.NpmDeployer;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -43,7 +44,7 @@ public class NpmPublishExecutor {
     }
 
     public BuildInfo execute() throws Exception {
-        NpmDeployer deployer = npmBuild.getDeployer();
+        NpmDeployer deployer = (NpmDeployer) npmBuild.getDeployer();
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }
@@ -56,7 +57,7 @@ public class NpmPublishExecutor {
         return buildInfo;
     }
 
-    private ArtifactoryBuildInfoClientBuilder createArtifactoryClientBuilder(NpmDeployer deployer) {
+    private ArtifactoryBuildInfoClientBuilder createArtifactoryClientBuilder(Deployer deployer) {
         ArtifactoryServer server = deployer.getArtifactoryServer();
         CredentialsConfig preferredDeployer = server.getDeployerCredentialsConfig();
         return new ArtifactoryBuildInfoClientBuilder()

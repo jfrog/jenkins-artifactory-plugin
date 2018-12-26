@@ -1,9 +1,6 @@
 package org.jfrog.hudson.pipeline.types.deployers;
 
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
-import org.jfrog.hudson.RepositoryConf;
-import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
@@ -11,16 +8,6 @@ import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
 public class NpmDeployer extends Deployer {
-    private String repo;
-
-    @Override
-    public ServerDetails getDetails() {
-        RepositoryConf repositoryConf = new RepositoryConf(repo, repo, false);
-        if (server != null) {
-            return new ServerDetails(server.getServerName(), server.getUrl(), repositoryConf, null, repositoryConf, null, "", "");
-        }
-        return new ServerDetails("", "", repositoryConf, null, repositoryConf, null, "", "");
-    }
 
     @Whitelisted
     public void deployArtifacts(BuildInfo buildInfo) {
@@ -29,22 +16,12 @@ public class NpmDeployer extends Deployer {
 
     @Whitelisted
     public String getRepo() {
-        return repo;
+        return releaseRepo;
     }
 
     @Whitelisted
     public void setRepo(String repo) {
-        this.repo = repo;
-    }
-
-    @Override
-    public boolean isEmpty() {
-        return server == null || StringUtils.isEmpty(repo);
-    }
-
-    @Override
-    public String getTargetRepository(String deployPath) {
-        return repo;
+        releaseRepo = snapshotRepo = repo;
     }
 
     @Override

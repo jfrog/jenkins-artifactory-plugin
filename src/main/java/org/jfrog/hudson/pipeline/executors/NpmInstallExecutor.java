@@ -11,7 +11,7 @@ import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.npm.NpmInstallCallable;
 import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.types.NpmBuild;
+import org.jfrog.hudson.pipeline.types.packageManagerBuilds.NpmBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.types.resolvers.NpmResolver;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -40,7 +40,7 @@ public class NpmInstallExecutor {
     }
 
     public BuildInfo execute() throws Exception {
-        NpmResolver resolver = npmBuild.getResolver();
+        NpmResolver resolver = (NpmResolver) npmBuild.getResolver();
         if (resolver.isEmpty()) {
             throw new IllegalStateException("Resolver must be configured with resolution repository and Artifactory server");
         }
