@@ -5,7 +5,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jfrog.build.api.Module;
+import org.jfrog.build.api.Build;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.hudson.ArtifactoryServer;
@@ -14,7 +14,6 @@ import org.jfrog.hudson.npm.NpmPublishCallable;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.NpmBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.pipeline.types.deployers.NpmDeployer;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
@@ -48,11 +47,11 @@ public class NpmPublishExecutor {
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }
-        Module npmModule = ws.act(new NpmPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, build, context), npmBuild.getExecutablePath(), deployer, args, path, logger));
-        if (npmModule == null) {
+        Build build = ws.act(new NpmPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), npmBuild.getExecutablePath(), deployer, args, path, logger));
+        if (build == null) {
             throw new RuntimeException("npm publish failed");
         }
-        new BuildInfoAccessor(buildInfo).addModule(npmModule);
+        buildInfo.append(build);
         buildInfo.setAgentName(Utils.getAgentName(ws));
         return buildInfo;
     }

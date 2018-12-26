@@ -4,7 +4,7 @@ import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
-import org.jfrog.build.api.Module;
+import org.jfrog.build.api.Build;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryDependenciesClientBuilder;
 import org.jfrog.hudson.ArtifactoryServer;
@@ -13,7 +13,6 @@ import org.jfrog.hudson.npm.NpmInstallCallable;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.types.NpmBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.pipeline.types.resolvers.NpmResolver;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
@@ -45,11 +44,11 @@ public class NpmInstallExecutor {
         if (resolver.isEmpty()) {
             throw new IllegalStateException("Resolver must be configured with resolution repository and Artifactory server");
         }
-        Module npmModule = ws.act(new NpmInstallCallable(createArtifactoryClientBuilder(resolver), resolver.getRepo(), npmBuild.getExecutablePath(), args, path, logger));
-        if (npmModule == null) {
+        Build build = ws.act(new NpmInstallCallable(createArtifactoryClientBuilder(resolver), resolver.getRepo(), npmBuild.getExecutablePath(), args, path, logger));
+        if (build == null) {
             throw new RuntimeException("npm build failed");
         }
-        new BuildInfoAccessor(buildInfo).addModule(npmModule);
+        buildInfo.append(build);
         buildInfo.setAgentName(Utils.getAgentName(ws));
         return buildInfo;
     }

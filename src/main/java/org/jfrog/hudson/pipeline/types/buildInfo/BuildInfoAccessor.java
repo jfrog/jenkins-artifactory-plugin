@@ -90,20 +90,4 @@ public class BuildInfoAccessor {
     public List<Module> getModules() {
         return this.buildInfo.getModules();
     }
-
-    public void addModule(Module other) {
-        List<Module> modules = getModules();
-        Module currentModule = modules.stream()
-                // Check if there's already a module with the same name.
-                .filter(module -> StringUtils.equals(module.getId(), other.getId()))
-                .findAny()
-                .orElse(null);
-        if (currentModule == null) {
-            // Append new module.
-            modules.add(other);
-        } else {
-            // Append the other module into the existing module with the same name.
-            currentModule.append(other);
-        }
-    }
 }
