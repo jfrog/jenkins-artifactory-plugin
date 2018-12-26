@@ -3,7 +3,7 @@ package org.jfrog.hudson.pipeline.declarative.utils;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.hudson.pipeline.declarative.types.BuildDataFile;
+import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 
 import java.io.File;
 import java.io.FileOutputStream;
