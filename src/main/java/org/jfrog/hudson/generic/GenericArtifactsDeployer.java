@@ -108,25 +108,9 @@ public class GenericArtifactsDeployer {
         if (StringUtils.isNotBlank(revision)) {
             properties.put(BuildInfoFields.VCS_REVISION, revision);
         }
-
-        addDeploymentProperties(properties);
+        properties.putAll(PropertyUtils.getDeploymentPropertiesMap(configurator.getDeploymentProperties(), env));
 
         return properties;
-    }
-
-    private void addDeploymentProperties(Multimap<String, String> properties) {
-        String[] deploymentProperties = StringUtils.split(configurator.getDeploymentProperties(), ";");
-        if (deploymentProperties == null) {
-            return;
-        }
-        for (String property : deploymentProperties) {
-            String[] split = StringUtils.split(property, '=');
-            if (split.length == 2) {
-                String value = Util.replaceMacro(split[1], env);
-                //Space is not allowed in property key
-                properties.put(split[0].replace(" ", StringUtils.EMPTY), value);
-            }
-        }
     }
 
     public static class FilesDeployerCallable extends MasterToSlaveFileCallable<List<Artifact>> {
