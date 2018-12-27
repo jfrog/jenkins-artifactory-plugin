@@ -7,7 +7,6 @@ import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.util.FileChecksumCalculator;
@@ -15,7 +14,6 @@ import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.DeployerOverrider;
-import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.generic.GenericArtifactsDeployer;
 import org.jfrog.hudson.pipeline.Utils;
@@ -44,8 +42,6 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
     private Filter artifactDeploymentPatterns = new Filter();
     private String customBuildName = "";
     private transient CpsScript cpsScript;
-    String snapshotRepo;
-    String releaseRepo;
 
     protected transient ArtifactoryServer server;
 
@@ -121,7 +117,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         return artifactDeploymentPatterns;
     }
 
-    IncludesExcludes getArtifactsIncludeExcludeForDeyployment() {
+    public IncludesExcludes getArtifactsIncludeExcludeForDeyployment() {
         return Utils.getArtifactsIncludeExcludeForDeyployment(artifactDeploymentPatterns.getPatternFilter());
     }
 
@@ -133,22 +129,6 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         }
     }
 
-    public ServerDetails getDetails() {
-        RepositoryConf snapshotRepositoryConf = new RepositoryConf(snapshotRepo, snapshotRepo, false);
-        RepositoryConf releaseRepositoryConf = new RepositoryConf(releaseRepo, releaseRepo, false);
-        String serverName = server == null ? "" : server.getServerName();
-        String url = server == null ? "" : server.getUrl();
-        return new ServerDetails(serverName, url, releaseRepositoryConf, snapshotRepositoryConf, releaseRepositoryConf, snapshotRepositoryConf, "", "");
-    }
-
-    public boolean isEmpty() {
-        return server == null || (StringUtils.isEmpty(releaseRepo) && StringUtils.isEmpty(snapshotRepo));
-    }
-
-    private String getTargetRepository(String deployPath) {
-        return StringUtils.isNotBlank(snapshotRepo) && deployPath.contains("-SNAPSHOT") ? snapshotRepo : releaseRepo;
-    }
-
     public String getCustomBuildName() {
         return customBuildName;
     }
@@ -157,7 +137,13 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         this.customBuildName = customBuildName;
     }
 
+    public abstract ServerDetails getDetails();
+
     public abstract PublisherContext.Builder getContextBuilder();
+
+    public abstract boolean isEmpty();
+
+    public abstract String getTargetRepository(String deployPath);
 
     public CpsScript getCpsScript() {
         return cpsScript;

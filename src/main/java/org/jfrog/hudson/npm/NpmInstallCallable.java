@@ -19,10 +19,14 @@ import java.util.Objects;
 public class NpmInstallCallable extends MasterToSlaveFileCallable<Build> {
 
     private ArtifactoryDependenciesClientBuilder dependenciesClientBuilder;
-    private String resolutionRepository; // Artifactory repository to download dependencies.
-    private String executablePath; // npm executable path. Can be empty.
-    private String args; // npm args.
-    private String path; // Path to package.json or path to the directory that contains package.json.
+    // Artifactory repository to download dependencies.
+    private String resolutionRepository;
+    // npm executable path. Can be empty.
+    private String executablePath;
+    // Npm install arguments
+    private String args;
+    // Path to package.json or path to the directory that contains package.json.
+    private String path;
     private Log logger;
 
     public NpmInstallCallable(ArtifactoryDependenciesClientBuilder dependenciesClientBuilder, String resolutionRepository, String executablePath, String args, String path, Log logger) {

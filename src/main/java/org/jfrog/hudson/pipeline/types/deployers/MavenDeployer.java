@@ -1,6 +1,9 @@
 package org.jfrog.hudson.pipeline.types.deployers;
 
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
+import org.jfrog.hudson.RepositoryConf;
+import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.util.ExtractorUtils;
@@ -10,6 +13,8 @@ import org.jfrog.hudson.util.publisher.PublisherContext;
  * Created by Tamirh on 16/08/2016.
  */
 public class MavenDeployer extends Deployer {
+    private String snapshotRepo;
+    private String releaseRepo;
     private boolean deployEvenIfUnstable = false;
     public final static MavenDeployer EMPTY_DEPLOYER;
 
@@ -54,6 +59,13 @@ public class MavenDeployer extends Deployer {
     }
 
     @Override
+    public ServerDetails getDetails() {
+        RepositoryConf snapshotRepositoryConf = new RepositoryConf(snapshotRepo, snapshotRepo, false);
+        RepositoryConf releaesRepositoryConf = new RepositoryConf(releaseRepo, releaseRepo, false);
+        return new ServerDetails(this.server.getServerName(), this.server.getUrl(), releaesRepositoryConf, snapshotRepositoryConf, releaesRepositoryConf, snapshotRepositoryConf, "", "");
+    }
+
+    @Override
     public PublisherContext.Builder getContextBuilder() {
         return new PublisherContext.Builder().artifactoryServer(getArtifactoryServer())
                 .deployerOverrider(this)
@@ -65,6 +77,14 @@ public class MavenDeployer extends Deployer {
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
                 .deploymentProperties(ExtractorUtils.buildPropertiesString(getProperties()))
                 .includesExcludes(getArtifactsIncludeExcludeForDeyployment());
+    }
+
+    public boolean isEmpty() {
+        return server == null || (StringUtils.isEmpty(releaseRepo) && StringUtils.isEmpty(snapshotRepo));
+    }
+
+    public String getTargetRepository(String deployPath) {
+        return StringUtils.isNotBlank(snapshotRepo) && deployPath.contains("-SNAPSHOT") ? snapshotRepo : releaseRepo;
     }
 
     private static MavenDeployer createEmptyDeployer() {
