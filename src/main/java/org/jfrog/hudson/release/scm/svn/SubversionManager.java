@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.release.scm.svn;
 
-import hudson.FilePath;
 import hudson.maven.agent.AbortException;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;

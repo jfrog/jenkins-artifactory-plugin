@@ -24,7 +24,6 @@ import hudson.maven.MavenModuleSet;
 import hudson.maven.MavenModuleSetBuild;
 import hudson.model.BuildListener;
 import hudson.model.TaskListener;
-import hudson.remoting.VirtualChannel;
 import hudson.tasks.Maven;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang.StringUtils;

@@ -28,7 +28,6 @@ import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.pipeline.docker.proxy.CertManager;
 import org.jfrog.hudson.pipeline.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.types.DistributionConfig;
 import org.jfrog.hudson.pipeline.types.PromotionConfig;
@@ -218,21 +217,6 @@ public class Utils {
             }
         } catch (Exception e) {
             // Ignore exceptions
-        }
-    }
-
-    public static void copyCertsToAgent(Computer c) throws IOException, InterruptedException {
-        if (!(c instanceof Jenkins.MasterComputer)) {
-
-            String certPath = CertManager.DEFAULT_RELATIVE_CERT_PATH;
-            FilePath remotePublicKey = new FilePath(c.getChannel(), c.getNode().getRootPath() + "/" + certPath);
-            FilePath localPublicKey = new FilePath(Jenkins.getInstance().getRootPath(), certPath);
-            localPublicKey.copyTo(remotePublicKey);
-
-            String keyPath = CertManager.DEFAULT_RELATIVE_KEY_PATH;
-            FilePath remotePrivateKey = new FilePath(c.getChannel(), c.getNode().getRootPath() + "/" + keyPath);
-            FilePath localPrivateKey = new FilePath(Jenkins.getInstance().getRootPath(), keyPath);
-            localPrivateKey.copyTo(remotePrivateKey);
         }
     }
 

@@ -71,10 +71,6 @@ public abstract class AbstractPerforceManager<T extends SCM> extends AbstractScm
         return perforce.createNewChangeList();
     }
 
-    public void deleteChangeList(int changeListId) throws IOException {
-        perforce.deleteChangeList(changeListId);
-    }
-
     public int getDefaultChangeListId() throws IOException {
         return perforce.getDefaultChangeListId();
     }

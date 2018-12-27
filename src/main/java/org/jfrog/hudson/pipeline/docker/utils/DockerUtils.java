@@ -319,7 +319,7 @@ public class DockerUtils implements Serializable {
     }
 
     private static DockerClient getDockerClient(String host) {
-        NettyDockerCmdExecFactory nettyDockerCmdExecFactory = null;
+        NettyDockerCmdExecFactory nettyDockerCmdExecFactory;
 
         nettyDockerCmdExecFactory = new NettyDockerCmdExecFactory();
         if (StringUtils.isEmpty(host)) {

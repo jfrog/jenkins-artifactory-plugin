@@ -32,14 +32,12 @@ import hudson.util.ListBoxModel;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.maven.transformer.SnapshotNotAllowedException;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;
-import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.release.scm.AbstractScmCoordinator;
 import org.jfrog.hudson.release.scm.ScmCoordinator;
 import org.jfrog.hudson.release.scm.git.GitCoordinator;
-import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -402,12 +400,6 @@ public class MavenReleaseWrapper extends BuildWrapper {
                 if (!redeployPublisher.isAllowPromotionOfNonStagedBuilds()) {
                     // add a stage action
                     run.addAction(new UnifiedPromoteBuildAction(run, redeployPublisher));
-                }
-                // Checks if Push to Bintray is disabled.
-                if (PluginsUtils.isPushToBintrayEnabled()) {
-                    if (!redeployPublisher.isAllowBintrayPushOfNonStageBuilds()) {
-                        run.addAction(new BintrayPublishAction<ArtifactoryRedeployPublisher>(run, redeployPublisher));
-                    }
                 }
             }
 

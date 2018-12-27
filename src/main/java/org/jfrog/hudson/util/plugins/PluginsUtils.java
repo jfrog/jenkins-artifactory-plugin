@@ -73,16 +73,6 @@ public class PluginsUtils {
         return getDescriptor().getUseCredentialsPlugin();
     }
 
-    /**
-     * If push to Bintray is enabled. Retrieves this value from the ArtifactoryBuilder class.
-     *
-     * @return Push to Bintray is enabled (true) or disabled(false)
-     * @throws IllegalStateException
-     */
-    public static boolean isPushToBintrayEnabled() {
-        return getDescriptor().isPushToBintrayEnabled();
-    }
-
     private static ArtifactoryBuilder.DescriptorImpl getDescriptor() {
         ArtifactoryBuilder.DescriptorImpl descriptor = (ArtifactoryBuilder.DescriptorImpl)
                 Hudson.getInstance().getDescriptor(ArtifactoryBuilder.class);
@@ -130,21 +120,5 @@ public class PluginsUtils {
             mapper = new ObjectMapper();
         }
         return mapper;
-    }
-
-    public static int getProxyPort() {
-        try {
-            return getDescriptor().getBuildInfoProxyPort();
-        } catch (IllegalStateException e) {
-            return 0;
-        }
-    }
-
-    public static boolean isProxyEnabled() {
-        try {
-            return getDescriptor().isBuildInfoProxyEnabled();
-        } catch (IllegalStateException e) {
-            return false;
-        }
     }
 }

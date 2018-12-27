@@ -17,7 +17,10 @@
 package org.jfrog.hudson;
 
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.AbstractProject;
+import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.Descriptor;
+import hudson.model.Item;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -26,23 +29,18 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
-import org.jfrog.hudson.pipeline.docker.proxy.CertManager;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
-import org.kohsuke.stapler.bind.JavaScriptMethod;
 
 import javax.servlet.ServletException;
-import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -67,28 +65,10 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         private boolean useCredentialsPlugin;
         private List<ArtifactoryServer> artifactoryServers;
-        private boolean pushToBintrayEnabled = true;
-        private boolean buildInfoProxyEnabled = false;
-        private int buildInfoProxyPort;
-        private String buildInfoProxyCertPublic;
-        private String buildInfoProxyCertPrivate;
 
         public DescriptorImpl() {
             super(ArtifactoryBuilder.class);
-            initDefaultCertPaths();
             load();
-        }
-
-        private void initDefaultCertPaths() {
-            if (StringUtils.isNotEmpty(buildInfoProxyCertPublic) || StringUtils.isNotEmpty(buildInfoProxyCertPrivate)) {
-                return;
-            }
-
-            File jenkinsHome = new File(Jenkins.getInstance().getRootDir().getPath());
-            File publicCert = new File(jenkinsHome, CertManager.DEFAULT_RELATIVE_CERT_PATH);
-            File privateCert = new File(jenkinsHome, CertManager.DEFAULT_RELATIVE_KEY_PATH);
-            buildInfoProxyCertPublic = publicCert.getPath();
-            buildInfoProxyCertPrivate = privateCert.getPath();
         }
 
         @SuppressWarnings("unused")
@@ -206,16 +186,6 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         @Override
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
             boolean useCredentialsPlugin = (Boolean)o.get("useCredentialsPlugin");
-            this.pushToBintrayEnabled = (Boolean)o.get("pushToBintrayEnabled");
-
-            try {
-                configureProxy((JSONObject) o.get("buildInfoProxyEnabled"));
-            } catch (IOException e) {
-                throw new FormException(e, e.getMessage());
-            } catch (InterruptedException e) {
-                throw new FormException(e, e.getMessage());
-            }
-
             Object servers = o.get("artifactoryServer");    // an array or single object
             List<ArtifactoryServer> artifactoryServers;
             if (!JSONNull.getInstance().equals(servers)) {
@@ -282,21 +252,6 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             }
         }
 
-        private synchronized void configureProxy(JSONObject proxyConfig) throws IOException, InterruptedException {
-            if (proxyConfig == null) {
-                BuildInfoProxy.stopAll();
-                buildInfoProxyEnabled = false;
-                return;
-            }
-
-            int portFromForm = Integer.parseInt(proxyConfig.get("buildInfoProxyPort").toString());
-            if (!buildInfoProxyEnabled || portFromForm != buildInfoProxyPort) {
-                BuildInfoProxy.startAll(portFromForm);
-                buildInfoProxyEnabled = true;
-                buildInfoProxyPort = portFromForm;
-            }
-        }
-
         public List<ArtifactoryServer> getArtifactoryServers() {
             return artifactoryServers;
         }
@@ -314,62 +269,6 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         @SuppressWarnings({"UnusedDeclaration"})
         public void setUseCredentialsPlugin(boolean useCredentialsPlugin) {
             this.useCredentialsPlugin = useCredentialsPlugin;
-        }
-
-        // global.jelly uses this method to retrieve the value of pushToBintrayEnabled to determine if the checkbox should be checked.
-        public boolean isPushToBintrayEnabled() {
-            return pushToBintrayEnabled;
-        }
-
-        @SuppressWarnings({"UnusedDeclaration"})
-        public boolean isBuildInfoProxyEnabled() {
-            return buildInfoProxyEnabled && StringUtils.isNotEmpty(getBuildInfoProxyCertPublic()) && StringUtils.isNotEmpty(getBuildInfoProxyCertPrivate());
-        }
-
-        public String getBuildInfoProxyCertPublic() {
-            if (new File(buildInfoProxyCertPublic).exists()) {
-                return buildInfoProxyCertPublic;
-            }
-            return "";
-        }
-
-        public String getBuildInfoProxyCertPrivate() {
-            if (new File(buildInfoProxyCertPrivate).exists()) {
-                return buildInfoProxyCertPrivate;
-            }
-            return "";
-        }
-
-        @JavaScriptMethod
-        public Pair<String, String> generateCerts(String buildInfoProxyPort) {
-            if (isProxyCertExist()) {
-                return null;
-            }
-
-            int port = Integer.parseInt(buildInfoProxyPort);
-            CertManager.createCertificateSource(buildInfoProxyCertPublic, buildInfoProxyCertPrivate);
-            try {
-                BuildInfoProxy.startAll(port);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            this.buildInfoProxyPort = port;
-            return Pair.of(buildInfoProxyCertPublic, buildInfoProxyCertPrivate);
-        }
-
-        private Boolean isProxyCertExist() {
-            File buildInfoProxyCertPublicFile = new File(buildInfoProxyCertPublic);
-            File buildInfoProxyCertPrivateFile = new File(buildInfoProxyCertPrivate);
-            if (buildInfoProxyCertPublicFile.exists() || buildInfoProxyCertPrivateFile.exists()) {
-                return true;
-            }
-            return false;
-        }
-
-        public int getBuildInfoProxyPort() {
-            return buildInfoProxyPort;
         }
 
         private boolean isServerDuplicated(List<ArtifactoryServer> artifactoryServers) {

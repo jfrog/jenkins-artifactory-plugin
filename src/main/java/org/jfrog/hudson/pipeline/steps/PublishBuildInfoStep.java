@@ -2,7 +2,6 @@ package org.jfrog.hudson.pipeline.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -38,8 +37,6 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Boolean> {
         private static final long serialVersionUID = 1L;
-        @StepContextParameter
-        private transient FilePath ws;
 
         @StepContextParameter
         private transient Run build;

@@ -19,7 +19,6 @@ import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployableArtifactsUtils;
 import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.BuildInfoDeployer;
-import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 
 import java.io.File;
@@ -197,11 +196,6 @@ public class BuildInfo implements Serializable {
 
     protected BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryBuildInfoClient client)
             throws InterruptedException, NoSuchAlgorithmException, IOException {
-        if (BuildInfoProxy.isUp()) {
-            List<Module> dockerModules = dockerBuildInfoHelper.generateBuildInfoModules(build, listener, config);
-            addDockerBuildInfoModules(dockerModules);
-        }
-
         addDefaultModuleToModules(buildName);
         return new BuildInfoDeployer(config, client, build, listener, new BuildInfoAccessor(this));
     }

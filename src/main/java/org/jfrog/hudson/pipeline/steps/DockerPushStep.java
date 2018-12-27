@@ -3,7 +3,6 @@ package org.jfrog.hudson.pipeline.steps;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -14,7 +13,6 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.build.api.Module;
-import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.pipeline.docker.DockerImage;
@@ -35,7 +33,6 @@ public class DockerPushStep extends AbstractStepImpl {
 
     private final String image;
     private final ArtifactoryServer server;
-    private CredentialsConfig credentialsConfig;
     private String host;
     private BuildInfo buildInfo;
     private String targetRepo;
@@ -43,11 +40,10 @@ public class DockerPushStep extends AbstractStepImpl {
     private ArrayListMultimap<String, String> properties;
 
     @DataBoundConstructor
-    public DockerPushStep(String image, CredentialsConfig credentialsConfig, String host, String targetRepo,
+    public DockerPushStep(String image, String host, String targetRepo,
                           BuildInfo buildInfo, ArrayListMultimap<String, String> properties, ArtifactoryServer server) {
 
         this.image = image;
-        this.credentialsConfig = credentialsConfig;
         this.host = host;
         this.targetRepo = targetRepo;
         this.buildInfo = buildInfo;
@@ -65,10 +61,6 @@ public class DockerPushStep extends AbstractStepImpl {
 
     public ArrayListMultimap<String, String> getProperties() {
         return properties;
-    }
-
-    public CredentialsConfig getCredentialsConfig() {
-        return credentialsConfig;
     }
 
     public String getHost() {
@@ -98,9 +90,6 @@ public class DockerPushStep extends AbstractStepImpl {
         @StepContextParameter
         private transient Launcher launcher;
 
-        @StepContextParameter
-        private transient FilePath ws;
-
         @Override
         protected BuildInfo run() throws Exception {
             if (step.getImage() == null) {
@@ -116,8 +105,8 @@ public class DockerPushStep extends AbstractStepImpl {
             BuildInfo buildInfo = Utils.prepareBuildinfo(build, step.getBuildInfo());
 
             ArtifactoryServer server = step.getServer();
-            String username = step.getCredentialsConfig().provideUsername(build.getParent());
-            String password = step.getCredentialsConfig().providePassword(build.getParent());
+            String username = server.createCredentialsConfig().provideUsername(build.getParent());
+            String password = server.createCredentialsConfig().providePassword(build.getParent());
 
             String imageId = DockerAgentUtils.getImageIdFromAgent(launcher, step.getImage(), step.getHost());
             DockerAgentUtils.pushImage(launcher, log, step.getImage(), username, password, step.getHost());
@@ -135,7 +124,7 @@ public class DockerPushStep extends AbstractStepImpl {
             Module module = image.generateBuildInfoModule(build, listener, config, buildInfo.getName(), buildInfo.getNumber(), timestamp);
 
             if (module.getArtifacts() == null || module.getArtifacts().size() == 0) {
-                log.warn("Could not find docker image: " + step.getImage() + "in Artifactory.");
+                log.warn("Could not find docker image: " + step.getImage() + " in Artifactory.");
             }
 
             BuildInfoAccessor buildInfoAccessor = new BuildInfoAccessor(buildInfo);

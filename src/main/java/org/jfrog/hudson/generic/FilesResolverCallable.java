@@ -1,7 +1,6 @@
 package org.jfrog.hudson.generic;
 
 import com.google.common.collect.Lists;
-import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;

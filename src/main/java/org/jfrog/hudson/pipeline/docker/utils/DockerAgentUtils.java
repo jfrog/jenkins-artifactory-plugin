@@ -8,7 +8,6 @@ import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.pipeline.docker.DockerImage;
-import org.jfrog.hudson.pipeline.docker.proxy.BuildInfoProxy;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import java.io.IOException;
@@ -75,30 +74,6 @@ public class DockerAgentUtils implements Serializable {
             ArrayListMultimap<String, String> artifactsProps, int buildInfoId) throws IOException {
         DockerImage image = new DockerImage(imageId, imageTag, targetRepo, buildInfoId, artifactsProps);
         images.add(image);
-    }
-
-    /**
-     * Captures the docker image manifest and extracts the layers data
-     * from it, to create a build-info for it.
-     *
-     * @param content
-     * @param properties
-     */
-    public synchronized static void captureContent(String content, Properties properties) {
-        try {
-            String digest = DockerUtils.getConfigDigest(content);
-            Iterator<DockerImage> it = images.iterator();
-            while (it.hasNext()) {
-                DockerImage image = it.next();
-                if (digest.equals(image.getImageId())) {
-                    image.setManifest(content);
-                    image.setAgentName(BuildInfoProxy.getAgentName());
-                    image.addBuildInfoModuleProps(properties);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     /**

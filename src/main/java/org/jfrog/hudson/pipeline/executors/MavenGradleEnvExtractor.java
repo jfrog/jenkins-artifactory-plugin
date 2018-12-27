@@ -56,7 +56,7 @@ public class MavenGradleEnvExtractor {
             release.addVars(env);
         }
         try {
-            PublisherContext publisherContext = null;
+            PublisherContext publisherContext;
             // publisher should never be null or empty
             publisherContext = createPublisherContext();
             ResolverContext resolverContext = null;

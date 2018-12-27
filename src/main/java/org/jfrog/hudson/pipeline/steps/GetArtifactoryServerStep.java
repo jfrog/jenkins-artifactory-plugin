@@ -3,7 +3,6 @@ package org.jfrog.hudson.pipeline.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.model.Run;
-import hudson.util.ListBoxModel;
 import org.acegisecurity.acls.NotFoundException;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.lang.StringUtils;
@@ -12,7 +11,6 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.Utils;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
