@@ -73,11 +73,7 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
         try {
             deployerMigration(overrider, overriderClass);
             resolverMigration(overrider, overriderClass);
-        } catch (NoSuchFieldException e) {
-            converterErrors.add(getConversionErrorMessage(overrider, e));
-        } catch (IllegalAccessException e) {
-            converterErrors.add(getConversionErrorMessage(overrider, e));
-        } catch (IOException e) {
+        } catch (NoSuchFieldException | IllegalAccessException | IOException e) {
             converterErrors.add(getConversionErrorMessage(overrider, e));
         }
     }
@@ -147,9 +143,7 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
                         resolverDetailsField.set(overrider, resolverServerDetails);
                     }
                 }
-            } catch (NoSuchFieldException e) {
-                converterErrors.add(getConversionErrorMessage(overrider, e));
-            } catch (IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 converterErrors.add(getConversionErrorMessage(overrider, e));
             }
         }
@@ -175,9 +169,7 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
                         deployerDetailsField.set(overrider, deployerServerDetails);
                     }
                 }
-            } catch (NoSuchFieldException e) {
-                converterErrors.add(getConversionErrorMessage(overrider, e));
-            } catch (IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 converterErrors.add(getConversionErrorMessage(overrider, e));
             }
         }
@@ -226,9 +218,7 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
                         deploymentPropertiesField.set(overrider, matrixParams);
                     }
                 }
-            } catch (NoSuchFieldException e) {
-                converterErrors.add(getConversionErrorMessage(overrider, e));
-            } catch (IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 converterErrors.add(getConversionErrorMessage(overrider, e));
             }
         }
@@ -253,9 +243,7 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
                         useMavenPatternsField.set(overrider, !(Boolean)notM2Compatible);
                     }
                 }
-            } catch (NoSuchFieldException e) {
-                converterErrors.add(getConversionErrorMessage(overrider, e));
-            } catch (IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 converterErrors.add(getConversionErrorMessage(overrider, e));
             }
         }
@@ -280,9 +268,7 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
                         useArtifactoryGradlePluginField.set(overrider, skipInjectInitScript);
                     }
                 }
-            } catch (NoSuchFieldException e) {
-                converterErrors.add(getConversionErrorMessage(overrider, e));
-            } catch (IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 converterErrors.add(getConversionErrorMessage(overrider, e));
             }
         }
@@ -292,5 +278,4 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
         return String.format("Could not convert the class '%s' to use the new overriding" +
                 "format. Cause: %s", deployerOverrider.getClass().getName(), e.getCause());
     }
-
 }
