@@ -50,7 +50,7 @@ public class PublisherContext {
     private boolean enableIssueTrackerIntegration;
     private boolean aggregateBuildIssues;
     private String aggregationBuildStatus;
-    private boolean filterExcludedArtifactsFromBuild;
+    private boolean filterExcludedArtifactsFromBuild = true;
     private boolean recordAllDependencies;
     private String artifactoryPluginVersion;
     private String customBuildName;

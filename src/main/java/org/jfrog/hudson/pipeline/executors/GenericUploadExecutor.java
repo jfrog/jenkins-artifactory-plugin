@@ -31,15 +31,17 @@ public class GenericUploadExecutor {
     private transient FilePath ws;
     private transient Run build;
     private transient TaskListener listener;
-    private BuildInfo buildinfo;
+    private BuildInfo buildInfo;
+    private boolean failNoOp;
     private ArtifactoryServer server;
     private StepContext context;
 
-    public GenericUploadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, StepContext context) {
+    public GenericUploadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, boolean failNoOp, StepContext context) {
         this.server = server;
         this.listener = listener;
         this.build = build;
-        this.buildinfo = Utils.prepareBuildinfo(build, buildInfo);
+        this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
+        this.failNoOp = failNoOp;
         this.ws = ws;
         this.context = context;
     }
@@ -48,22 +50,25 @@ public class GenericUploadExecutor {
         Credentials credentials = new Credentials(server.getDeployerCredentialsConfig().provideUsername(build.getParent()),
                 server.getDeployerCredentialsConfig().providePassword(build.getParent()));
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(server);
-        List<Artifact> artifactsToDeploy = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
+        List<Artifact> deployedArtifacts = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
                 server, credentials, getPropertiesMap(), proxyConfiguration));
-        new BuildInfoAccessor(buildinfo).appendDeployedArtifacts(artifactsToDeploy);
-        return buildinfo;
+        if (failNoOp && deployedArtifacts.isEmpty()) {
+            throw new RuntimeException("Fail-no-op: No files were affected in the upload process.");
+        }
+        new BuildInfoAccessor(buildInfo).appendDeployedArtifacts(deployedArtifacts);
+        return buildInfo;
     }
 
     private ArrayListMultimap<String, String> getPropertiesMap() throws IOException, InterruptedException {
         ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
 
-        if (buildinfo.getName() != null) {
-            properties.put("build.name", buildinfo.getName());
+        if (buildInfo.getName() != null) {
+            properties.put("build.name", buildInfo.getName());
         } else {
             properties.put("build.name", BuildUniqueIdentifierHelper.getBuildName(build));
         }
-        if (buildinfo.getNumber() != null) {
-            properties.put("build.number", buildinfo.getNumber());
+        if (buildInfo.getNumber() != null) {
+            properties.put("build.number", buildInfo.getNumber());
         } else {
             properties.put("build.number", BuildUniqueIdentifierHelper.getBuildNumber(build));
         }
