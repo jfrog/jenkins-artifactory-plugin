@@ -1,10 +1,8 @@
 package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -36,12 +34,6 @@ public class DeployStep extends AbstractStepImpl {
 
         @StepContextParameter
         private transient FilePath ws;
-
-        @StepContextParameter
-        private transient EnvVars env;
-
-        @StepContextParameter
-        private transient Run build;
 
         @StepContextParameter
         private transient TaskListener listener;

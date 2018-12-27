@@ -32,11 +32,6 @@ public class PublisherContext {
     private ArtifactoryServer artifactoryServer;
     private ServerDetails serverDetails;
     private DeployerOverrider deployerOverrider;
-    private boolean runChecks;
-    private boolean includePublishArtifacts;
-    private String violationRecipients;
-    private String scopes;
-    private boolean licenseAutoDiscovery;
     private boolean discardOldBuilds;
     private boolean discardBuildArtifacts;
     private boolean asyncBuildRetention;
@@ -55,15 +50,7 @@ public class PublisherContext {
     private boolean enableIssueTrackerIntegration;
     private boolean aggregateBuildIssues;
     private String aggregationBuildStatus;
-    private boolean blackDuckRunChecks;
-    private String blackDuckAppName;
-    private String blackDuckAppVersion;
-    private String blackDuckReportRecipients; //csv
-    private String blackDuckScopes; //csv
-    private boolean blackDuckIncludePublishedArtifacts;
-    private boolean autoCreateMissingComponentRequests;
-    private boolean autoDiscardStaleComponentRequests;
-    private boolean filterExcludedArtifactsFromBuild;
+    private boolean filterExcludedArtifactsFromBuild = true;
     private boolean recordAllDependencies;
     private String artifactoryPluginVersion;
     private String customBuildName;
@@ -125,26 +112,6 @@ public class PublisherContext {
         return deployerOverrider;
     }
 
-    public String getScopes() {
-        return scopes;
-    }
-
-    public boolean isRunChecks() {
-        return runChecks;
-    }
-
-    public boolean isIncludePublishArtifacts() {
-        return includePublishArtifacts;
-    }
-
-    public String getViolationRecipients() {
-        return violationRecipients;
-    }
-
-    public boolean isLicenseAutoDiscovery() {
-        return licenseAutoDiscovery;
-    }
-
     public boolean isDiscardOldBuilds() {
         return discardOldBuilds;
     }
@@ -197,38 +164,6 @@ public class PublisherContext {
         return aggregationBuildStatus;
     }
 
-    public boolean isBlackDuckRunChecks() {
-        return blackDuckRunChecks;
-    }
-
-    public String getBlackDuckAppName() {
-        return blackDuckAppName;
-    }
-
-    public String getBlackDuckAppVersion() {
-        return blackDuckAppVersion;
-    }
-
-    public String getBlackDuckReportRecipients() {
-        return blackDuckReportRecipients;
-    }
-
-    public String getBlackDuckScopes() {
-        return blackDuckScopes;
-    }
-
-    public boolean isBlackDuckIncludePublishedArtifacts() {
-        return blackDuckIncludePublishedArtifacts;
-    }
-
-    public boolean isAutoCreateMissingComponentRequests() {
-        return autoCreateMissingComponentRequests;
-    }
-
-    public boolean isAutoDiscardStaleComponentRequests() {
-        return autoDiscardStaleComponentRequests;
-    }
-
     public boolean isFilterExcludedArtifactsFromBuild() {
         return filterExcludedArtifactsFromBuild;
     }
@@ -268,31 +203,6 @@ public class PublisherContext {
 
         public Builder overrideBuildName(boolean overrideBuildName) {
             publisher.overrideBuildName = overrideBuildName;
-            return this;
-        }
-
-        public Builder runChecks(boolean runChecks) {
-            publisher.runChecks = runChecks;
-            return this;
-        }
-
-        public Builder includePublishArtifacts(boolean includePublishArtifacts) {
-            publisher.includePublishArtifacts = includePublishArtifacts;
-            return this;
-        }
-
-        public Builder violationRecipients(String violationRecipients) {
-            publisher.violationRecipients = violationRecipients;
-            return this;
-        }
-
-        public Builder scopes(String scopes) {
-            publisher.scopes = scopes;
-            return this;
-        }
-
-        public Builder licenseAutoDiscovery(boolean licenseAutoDiscovery) {
-            publisher.licenseAutoDiscovery = licenseAutoDiscovery;
             return this;
         }
 
@@ -388,21 +298,6 @@ public class PublisherContext {
 
         public Builder aggregationBuildStatus(String aggregationBuildStatus) {
             publisher.aggregationBuildStatus = aggregationBuildStatus;
-            return this;
-        }
-
-        public Builder integrateBlackDuck(boolean runChecks, String appName, String appVersion,
-                                          String reportRecipients, String scopes, boolean includePublishedArtifacts,
-                                          boolean autoCreateMissingComponentRequests,
-                                          boolean autoDiscardStaleComponentRequests) {
-            publisher.blackDuckRunChecks = runChecks;
-            publisher.blackDuckAppName = appName;
-            publisher.blackDuckAppVersion = appVersion;
-            publisher.blackDuckReportRecipients = reportRecipients;
-            publisher.blackDuckScopes = scopes;
-            publisher.blackDuckIncludePublishedArtifacts = includePublishedArtifacts;
-            publisher.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
-            publisher.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
             return this;
         }
 

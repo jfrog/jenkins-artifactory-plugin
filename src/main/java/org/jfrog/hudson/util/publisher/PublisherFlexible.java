@@ -5,6 +5,7 @@ import hudson.tasks.Publisher;
 import jenkins.model.Jenkins;
 import org.jenkins_ci.plugins.flexible_publish.ConditionalPublisher;
 import org.jenkins_ci.plugins.flexible_publish.FlexiblePublisher;
+
 import java.util.List;
 
 /**

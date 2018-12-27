@@ -1,15 +1,12 @@
 package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
 import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -51,21 +48,6 @@ public class CreateArtifactoryServerStep extends AbstractStepImpl {
 
         @Inject(optional = true)
         private transient CreateArtifactoryServerStep step;
-
-        @StepContextParameter
-        private transient Run build;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @StepContextParameter
-        private transient Launcher launcher;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient EnvVars env;
 
         @Override
         protected ArtifactoryServer run() throws Exception {

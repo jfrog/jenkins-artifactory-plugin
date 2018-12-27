@@ -2,7 +2,6 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -11,10 +10,10 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.docker.utils.DockerAgentUtils;
 import org.jfrog.hudson.pipeline.common.docker.utils.DockerUtils;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -25,17 +24,17 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class DockerPullStep extends AbstractStepImpl {
 
     private final String image;
-    private CredentialsConfig credentialsConfig;
+    private final ArtifactoryServer server;
     private String host;
     private final BuildInfo buildInfo;
 
 
     @DataBoundConstructor
-    public DockerPullStep(String image, CredentialsConfig credentialsConfig, String host, BuildInfo buildInfo) {
+    public DockerPullStep(String image, String host, BuildInfo buildInfo, ArtifactoryServer server) {
         this.image = image;
-        this.credentialsConfig = credentialsConfig;
         this.host = host;
         this.buildInfo = buildInfo;
+        this.server = server;
     }
 
     public BuildInfo getBuildInfo() {
@@ -46,8 +45,8 @@ public class DockerPullStep extends AbstractStepImpl {
         return image;
     }
 
-    public CredentialsConfig getCredentialsConfig() {
-        return credentialsConfig;
+    public ArtifactoryServer getServer() {
+        return server;
     }
 
     public String getHost() {
@@ -69,9 +68,6 @@ public class DockerPullStep extends AbstractStepImpl {
         @StepContextParameter
         private transient Launcher launcher;
 
-        @StepContextParameter
-        private transient FilePath ws;
-
         @Override
         protected BuildInfo run() throws Exception {
             if (step.getImage() == null) {
@@ -85,8 +81,9 @@ public class DockerPullStep extends AbstractStepImpl {
                 imageTag += ":latest";
             }
 
-            String username = step.getCredentialsConfig().provideUsername(build.getParent());
-            String password = step.getCredentialsConfig().providePassword(build.getParent());
+            ArtifactoryServer server = step.getServer();
+            String username = server.createCredentialsConfig().provideUsername(build.getParent());
+            String password = server.createCredentialsConfig().providePassword(build.getParent());
 
             DockerAgentUtils.pullImage(launcher, imageTag, username, password, step.getHost());
             JenkinsBuildInfoLog log = new JenkinsBuildInfoLog(listener);

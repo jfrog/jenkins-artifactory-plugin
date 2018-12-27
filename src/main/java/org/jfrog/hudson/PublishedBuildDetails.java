@@ -4,9 +4,9 @@ package org.jfrog.hudson;
  * Created by yahavi on 28/03/2017.
  */
 public class PublishedBuildDetails {
-    private String artifactoryUrl = "";
-    private String buildName = "";
-    private String buildNumber = "";
+    private String artifactoryUrl;
+    private String buildName;
+    private String buildNumber;
 
     public PublishedBuildDetails(String artifactoryUrl, String buildName, String buildNumber) {
         this.artifactoryUrl = artifactoryUrl;

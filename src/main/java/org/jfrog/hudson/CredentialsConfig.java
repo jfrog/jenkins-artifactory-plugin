@@ -21,7 +21,7 @@ public class CredentialsConfig implements Serializable {
             new CredentialsConfig(new Credentials(StringUtils.EMPTY, StringUtils.EMPTY), StringUtils.EMPTY, false);
     private Credentials credentials;
     private String credentialsId;
-    private Boolean overridingCredentials = false;
+    private Boolean overridingCredentials;
     private boolean ignoreCredentialPluginDisabled; //We need this for the pipeline flow we can set credentials although the credentials plugin is disabled
 
     /**

@@ -35,6 +35,4 @@ public class ArtifactoryPlugin extends Plugin {
             Messages._permission_release(), Hudson.ADMINISTER, PermissionScope.JENKINS);
     public static final Permission PROMOTE = new Permission(GROUP, "Promote",
             Messages._permission_promote(), Hudson.ADMINISTER, PermissionScope.JENKINS);
-    public static final Permission PUSH_TO_BINTRAY = new Permission(GROUP, "PushToBintray",
-            Messages._permission_pushToBintray(), Hudson.ADMINISTER, PermissionScope.JENKINS);
 }

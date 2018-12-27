@@ -3,7 +3,10 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.model.Run;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
 

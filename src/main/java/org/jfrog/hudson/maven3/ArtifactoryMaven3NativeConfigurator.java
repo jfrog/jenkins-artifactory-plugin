@@ -36,8 +36,6 @@ import java.util.List;
  */
 public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements ResolverOverrider {
 
-    @Deprecated
-    private ServerDetails details = null;
     private final ServerDetails resolverDetails;
     /**
      * @deprecated: Use org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator#getResolverCredentialsId()()
@@ -46,9 +44,15 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
     private Credentials overridingResolverCredentials;
     private final CredentialsConfig resolverCredentialsConfig;
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private ServerDetails details = null;
+
     @DataBoundConstructor
     public ArtifactoryMaven3NativeConfigurator(ServerDetails details, ServerDetails resolverDetails, CredentialsConfig resolverCredentialsConfig) {
-        this.resolverDetails = resolverDetails != null ? resolverDetails : details;
+        this.resolverDetails = resolverDetails;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
     }
 
@@ -57,7 +61,7 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
     }
 
     public ServerDetails getResolverDetails() {
-        return resolverDetails != null ? resolverDetails : details;
+        return resolverDetails;
     }
 
     public String getDownloadReleaseRepositoryKey() {

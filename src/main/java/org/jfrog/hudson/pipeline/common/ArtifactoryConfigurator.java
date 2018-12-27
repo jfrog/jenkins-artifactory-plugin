@@ -43,26 +43,6 @@ public class ArtifactoryConfigurator implements BuildInfoAwareConfigurator, Depl
         return null;
     }
 
-    public boolean isRunChecks() {
-        return false;
-    }
-
-    public String getViolationRecipients() {
-        return null;
-    }
-
-    public boolean isIncludePublishArtifacts() {
-        return false;
-    }
-
-    public String getScopes() {
-        return null;
-    }
-
-    public boolean isLicenseAutoDiscovery() {
-        return false;
-    }
-
     public boolean isDiscardOldBuilds() {
         return false;
     }
@@ -85,38 +65,6 @@ public class ArtifactoryConfigurator implements BuildInfoAwareConfigurator, Depl
 
     public String getAggregationBuildStatus() {
         return null;
-    }
-
-    public boolean isBlackDuckRunChecks() {
-        return false;
-    }
-
-    public String getBlackDuckAppName() {
-        return null;
-    }
-
-    public String getBlackDuckAppVersion() {
-        return null;
-    }
-
-    public String getBlackDuckReportRecipients() {
-        return null;
-    }
-
-    public String getBlackDuckScopes() {
-        return null;
-    }
-
-    public boolean isBlackDuckIncludePublishedArtifacts() {
-        return false;
-    }
-
-    public boolean isAutoCreateMissingComponentRequests() {
-        return false;
-    }
-
-    public boolean isAutoDiscardStaleComponentRequests() {
-        return false;
     }
 
     public boolean isOverridingDefaultDeployer() {
