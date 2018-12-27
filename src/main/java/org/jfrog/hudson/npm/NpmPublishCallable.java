@@ -13,7 +13,6 @@ import org.jfrog.hudson.pipeline.types.deployers.NpmDeployer;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Objects;
 
 /**
  * Created by Yahav Itzhak on 25 Nov 2018.
@@ -21,19 +20,19 @@ import java.util.Objects;
 public class NpmPublishCallable extends MasterToSlaveFileCallable<Build> {
 
     private ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder;
-    private ArrayListMultimap<String, String> properties; // Properties to set in the published artifact.
-    private String executablePath; // npm executable path. Can be empty.
+    // Properties to set in the published artifact.
+    private ArrayListMultimap<String, String> properties;
+    // npm executable path. Can be empty.
+    private String executablePath;
     private NpmDeployer deployer;
-    private String args; // npm args.
     private String path; // Path to package.json or path to the directory that contains package.json.
     private Log logger;
 
-    public NpmPublishCallable(ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder, ArrayListMultimap<String, String> properties, String executablePath, NpmDeployer deployer, String args, String path, Log logger) {
+    public NpmPublishCallable(ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder, ArrayListMultimap<String, String> properties, String executablePath, NpmDeployer deployer, String path, Log logger) {
         this.buildInfoClientBuilder = buildInfoClientBuilder;
         this.properties = properties;
         this.executablePath = executablePath;
         this.deployer = deployer;
-        this.args = Objects.toString(args, "");
         this.path = path;
         this.logger = logger;
     }
@@ -42,6 +41,6 @@ public class NpmPublishCallable extends MasterToSlaveFileCallable<Build> {
     public Build invoke(File file, VirtualChannel channel) {
         Path basePath = file.toPath();
         Path packagePath = StringUtils.isBlank(path) ? basePath : basePath.resolve(Utils.replaceTildeWithUserHome(path));
-        return new NpmPublish(buildInfoClientBuilder, properties, executablePath, packagePath, deployer.getRepo(), logger, args).execute();
+        return new NpmPublish(buildInfoClientBuilder, properties, executablePath, packagePath, deployer.getRepo(), logger).execute();
     }
 }

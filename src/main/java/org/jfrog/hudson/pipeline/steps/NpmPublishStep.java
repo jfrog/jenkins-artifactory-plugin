@@ -10,8 +10,8 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.executors.NpmPublishExecutor;
-import org.jfrog.hudson.pipeline.types.packageManagerBuilds.NpmBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.types.packageManagerBuilds.NpmBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
@@ -23,14 +23,12 @@ public class NpmPublishStep extends AbstractStepImpl {
     private BuildInfo buildInfo;
     private NpmBuild npmBuild;
     private String path;
-    private String args;
 
     @DataBoundConstructor
     public NpmPublishStep(BuildInfo buildInfo, NpmBuild npmBuild, String path, String args) {
         this.buildInfo = buildInfo;
         this.npmBuild = npmBuild;
         this.path = path;
-        this.args = args;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
@@ -50,7 +48,7 @@ public class NpmPublishStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            return new NpmPublishExecutor(getContext(), step.buildInfo, step.npmBuild, step.args, step.path, ws, listener, build).execute();
+            return new NpmPublishExecutor(getContext(), step.buildInfo, step.npmBuild, step.path, ws, listener, build).execute();
         }
     }
 

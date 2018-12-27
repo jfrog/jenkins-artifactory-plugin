@@ -12,10 +12,10 @@ import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.npm.NpmPublishCallable;
 import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.types.deployers.Deployer;
-import org.jfrog.hudson.pipeline.types.packageManagerBuilds.NpmBuild;
 import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.types.deployers.NpmDeployer;
+import org.jfrog.hudson.pipeline.types.packageManagerBuilds.NpmBuild;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 /**
@@ -26,17 +26,15 @@ public class NpmPublishExecutor {
     private StepContext context;
     private BuildInfo buildInfo;
     private NpmBuild npmBuild;
-    private String args;
     private FilePath ws;
     private String path;
     private Log logger;
     private Run build;
 
-    public NpmPublishExecutor(StepContext context, BuildInfo buildInfo, NpmBuild npmBuild, String args, String path, FilePath ws, TaskListener listener, Run build) {
+    public NpmPublishExecutor(StepContext context, BuildInfo buildInfo, NpmBuild npmBuild, String path, FilePath ws, TaskListener listener, Run build) {
         this.context = context;
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.npmBuild = npmBuild;
-        this.args = args;
         this.path = path;
         this.ws = ws;
         this.logger = new JenkinsBuildInfoLog(listener);
@@ -48,7 +46,7 @@ public class NpmPublishExecutor {
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }
-        Build build = ws.act(new NpmPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), npmBuild.getExecutablePath(), deployer, args, path, logger));
+        Build build = ws.act(new NpmPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), npmBuild.getExecutablePath(), deployer, path, logger));
         if (build == null) {
             throw new RuntimeException("npm publish failed");
         }

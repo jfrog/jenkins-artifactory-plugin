@@ -37,25 +37,27 @@ public class NpmBuild extends PackageManagerBuild {
 
     @Whitelisted
     public void install(Map<String, Object> args) {
+        Map<String, Object> stepVariables = prepareNpmStep(args, Arrays.asList("path", "args", "buildInfo"));
+        stepVariables.put("args", args.get("args"));
         // Throws CpsCallableInvocation - Must be the last line in this method
-        cpsScript.invokeMethod("artifactoryNpmInstall", prepareNpmStep(args));
+        cpsScript.invokeMethod("artifactoryNpmInstall", stepVariables);
     }
 
     @Whitelisted
     public void publish(Map<String, Object> args) {
+        Map<String, Object> stepVariables = prepareNpmStep(args, Arrays.asList("path", "buildInfo"));
         // Throws CpsCallableInvocation - Must be the last line in this method
-        cpsScript.invokeMethod("artifactoryNpmPublish", prepareNpmStep(args));
+        cpsScript.invokeMethod("artifactoryNpmPublish", stepVariables);
     }
 
-    private Map<String, Object> prepareNpmStep(Map<String, Object> args) {
+    private Map<String, Object> prepareNpmStep(Map<String, Object> args, List<String> keysAsList) {
         Set<String> npmArgumentsSet = args.keySet();
-        List<String> keysAsList = Arrays.asList("path", "args", "buildInfo");
         if (!keysAsList.containsAll(npmArgumentsSet)) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
         }
 
         deployer.setCpsScript(cpsScript);
-        Map<String, Object> stepVariables = getRunArguments((String) args.get("path"), (String) args.get("args"), (BuildInfo) args.get("buildInfo"));
+        Map<String, Object> stepVariables = getRunArguments((String) args.get("path"), (BuildInfo) args.get("buildInfo"));
         appendBuildInfo(cpsScript, stepVariables);
         return stepVariables;
     }
@@ -70,14 +72,11 @@ public class NpmBuild extends PackageManagerBuild {
         setDeployer(deployerArguments, Arrays.asList("repo", "server", "deployArtifacts", "includeEnvVars"));
     }
 
-    private Map<String, Object> getRunArguments(String path, String args, BuildInfo buildInfo) {
+    private Map<String, Object> getRunArguments(String path, BuildInfo buildInfo) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("npmBuild", this);
         stepVariables.put("path", path);
-        stepVariables.put("args", args);
         stepVariables.put(BUILD_INFO, buildInfo);
         return stepVariables;
     }
-
-
 }
