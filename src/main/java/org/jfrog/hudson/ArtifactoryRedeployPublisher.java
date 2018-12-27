@@ -32,13 +32,11 @@ import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Publisher;
 import hudson.tasks.Recorder;
-import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
 import org.jfrog.hudson.action.ArtifactoryProjectAction;
 import org.jfrog.hudson.maven2.ArtifactsDeployer;
 import org.jfrog.hudson.maven2.MavenBuildInfoDeployer;
@@ -48,7 +46,6 @@ import org.jfrog.hudson.util.converters.DeployerResolverOverriderConverter;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 
@@ -73,8 +70,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     /**
      * Repository URL and repository to deploy artifacts to.
      */
-    @Deprecated
-    private ServerDetails details = null;
     private final ServerDetails deployerDetails;
     /**
      * If checked (default) deploy maven artifacts
@@ -87,43 +82,21 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
      */
     private final boolean includeEnvVars;
     private final IncludesExcludes envVarsPatterns;
-    private final boolean runChecks;
-    private final String violationRecipients;
-    private final boolean includePublishArtifacts;
     private final boolean passIdentifiedDownstream;
-    private final String scopes;
-    private final boolean licenseAutoDiscovery;
-    private final boolean disableLicenseAutoDiscovery;
     private final boolean discardOldBuilds;
     private final boolean discardBuildArtifacts;
     private final boolean asyncBuildRetention;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean allowPromotionOfNonStagedBuilds;
-    private final boolean allowBintrayPushOfNonStageBuilds;
     private final boolean filterExcludedArtifactsFromBuild;
     private final boolean recordAllDependencies;
     private String defaultPromotionTargetRepository;
     private boolean deployBuildInfo;
     private String aggregationBuildStatus;
     private boolean aggregateBuildIssues;
-    private boolean blackDuckRunChecks;
-    private String blackDuckAppName;
-    private String blackDuckAppVersion;
-    private String blackDuckReportRecipients; //csv
-    private String blackDuckScopes; //csv
-    private boolean blackDuckIncludePublishedArtifacts;
-    private boolean autoCreateMissingComponentRequests;
-    private boolean autoDiscardStaleComponentRequests;
     private String customBuildName;
     private boolean overrideBuildName;
-    /**
-     * @deprecated: Use org.jfrog.hudson.ArtifactoryRedeployPublisher#deployBuildInfo
-     */
-    @Deprecated
-    private transient Boolean skipBuildInfoDeploy;
     /**
      * @deprecated: Use org.jfrog.hudson.ArtifactoryRedeployPublisher#getDeployerCredentialsConfig()()
      */
@@ -131,58 +104,44 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     private Credentials overridingDeployerCredentials;
     // NOTE: The following getters are used by jelly. Do not remove them
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private ServerDetails details = null;
+    @Deprecated
+    private final String matrixParams = null;
+
     @DataBoundConstructor
     public ArtifactoryRedeployPublisher(ServerDetails details, ServerDetails deployerDetails, boolean deployArtifacts,
                                         IncludesExcludes artifactDeploymentPatterns, CredentialsConfig deployerCredentialsConfig,
                                         boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                        boolean deployBuildInfo, boolean evenIfUnstable, boolean runChecks,
-                                        String violationRecipients, boolean includePublishArtifacts, String scopes,
-                                        boolean disableLicenseAutoDiscovery, boolean discardOldBuilds, boolean passIdentifiedDownstream,
+                                        boolean deployBuildInfo, boolean evenIfUnstable, boolean discardOldBuilds, boolean passIdentifiedDownstream,
                                         boolean discardBuildArtifacts, boolean asyncBuildRetention, String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration,
                                         boolean aggregateBuildIssues, String aggregationBuildStatus,
                                         boolean recordAllDependencies, boolean allowPromotionOfNonStagedBuilds,
-                                        String defaultPromotionTargetRepository,
-                                        boolean allowBintrayPushOfNonStageBuilds,
-                                        boolean blackDuckRunChecks, String blackDuckAppName, String blackDuckAppVersion,
-                                        String blackDuckReportRecipients, String blackDuckScopes,
-                                        boolean blackDuckIncludePublishedArtifacts, boolean autoCreateMissingComponentRequests,
-                                        boolean autoDiscardStaleComponentRequests, boolean filterExcludedArtifactsFromBuild,
+                                        String defaultPromotionTargetRepository, boolean filterExcludedArtifactsFromBuild,
                                         String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.deployArtifacts = deployArtifacts;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
         this.evenIfUnstable = evenIfUnstable;
-        this.runChecks = runChecks;
-        this.violationRecipients = violationRecipients;
-        this.includePublishArtifacts = includePublishArtifacts;
-        this.scopes = scopes;
-        this.disableLicenseAutoDiscovery = disableLicenseAutoDiscovery;
         this.discardOldBuilds = discardOldBuilds;
         this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
-        this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
         this.deployBuildInfo = deployBuildInfo;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.recordAllDependencies = recordAllDependencies;
         this.allowPromotionOfNonStagedBuilds = allowPromotionOfNonStagedBuilds;
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
-        this.blackDuckRunChecks = blackDuckRunChecks;
-        this.blackDuckAppName = blackDuckAppName;
-        this.blackDuckAppVersion = blackDuckAppVersion;
-        this.blackDuckReportRecipients = blackDuckReportRecipients;
-        this.blackDuckScopes = blackDuckScopes;
-        this.blackDuckIncludePublishedArtifacts = blackDuckIncludePublishedArtifacts;
-        this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
-        this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
-        this.allowBintrayPushOfNonStageBuilds = allowBintrayPushOfNonStageBuilds;
         this.customBuildName = customBuildName;
         this.overrideBuildName = overrideBuildName;
     }
@@ -193,11 +152,11 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public IncludesExcludes getArtifactDeploymentPatterns() {
@@ -242,37 +201,12 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         return evenIfUnstable;
     }
 
-    public boolean isIncludePublishArtifacts() {
-        return includePublishArtifacts;
-    }
-
     public boolean isIncludeEnvVars() {
         return includeEnvVars;
     }
 
     public IncludesExcludes getEnvVarsPatterns() {
         return envVarsPatterns;
-    }
-
-    @SuppressWarnings({"UnusedDeclaration"})
-    public boolean isDisableLicenseAutoDiscovery() {
-        return disableLicenseAutoDiscovery;
-    }
-
-    public boolean isLicenseAutoDiscovery() {
-        return licenseAutoDiscovery;
-    }
-
-    public boolean isRunChecks() {
-        return runChecks;
-    }
-
-    public String getScopes() {
-        return scopes;
-    }
-
-    public String getViolationRecipients() {
-        return violationRecipients;
     }
 
     public String getArtifactoryName() {
@@ -328,44 +262,8 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
     }
 
-    public boolean isAllowBintrayPushOfNonStageBuilds() {
-        return allowBintrayPushOfNonStageBuilds;
-    }
-
     public boolean isRecordAllDependencies() {
         return recordAllDependencies;
-    }
-
-    public boolean isBlackDuckRunChecks() {
-        return blackDuckRunChecks;
-    }
-
-    public String getBlackDuckAppName() {
-        return blackDuckAppName;
-    }
-
-    public String getBlackDuckAppVersion() {
-        return blackDuckAppVersion;
-    }
-
-    public String getBlackDuckReportRecipients() {
-        return blackDuckReportRecipients;
-    }
-
-    public String getBlackDuckScopes() {
-        return blackDuckScopes;
-    }
-
-    public boolean isBlackDuckIncludePublishedArtifacts() {
-        return blackDuckIncludePublishedArtifacts;
-    }
-
-    public boolean isAutoCreateMissingComponentRequests() {
-        return autoCreateMissingComponentRequests;
-    }
-
-    public boolean isAutoDiscardStaleComponentRequests() {
-        return autoDiscardStaleComponentRequests;
     }
 
     public boolean isFilterExcludedArtifactsFromBuild() {
@@ -467,12 +365,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
         if (isAllowPromotionOfNonStagedBuilds()) {
             build.getActions().add(new UnifiedPromoteBuildAction(build, this));
-        }
-        // Checks if Push to Bintray is disabled.
-        if (PluginsUtils.isPushToBintrayEnabled()) {
-            if (isAllowBintrayPushOfNonStageBuilds()) {
-                build.getActions().add(new BintrayPublishAction<ArtifactoryRedeployPublisher>(build, this));
-            }
         }
     }
 
@@ -646,11 +538,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
             return "Deploy artifacts to Artifactory";
         }
 
-        @SuppressWarnings({"UnusedDeclaration"})
-        public FormValidation doCheckViolationRecipients(@QueryParameter String value) {
-            return FormValidations.validateEmails(value);
-        }
-
         /**
          * Returns the list of {@link ArtifactoryServer} configured.
          *
@@ -666,10 +553,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
         public boolean isUseCredentialsPlugin() {
             return PluginsUtils.isUseCredentialsPlugin();
-        }
-
-        public boolean isPushToBintrayEnabled() {
-            return PluginsUtils.isPushToBintrayEnabled();
         }
     }
 

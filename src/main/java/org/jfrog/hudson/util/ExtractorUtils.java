@@ -44,18 +44,14 @@ import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.maven3.ArtifactoryMaven3Configurator;
 import org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.resolvers.MavenResolver;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.types.resolvers.MavenResolver;
 import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.util.plugins.MultiConfigurationUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -337,31 +333,6 @@ public class ExtractorUtils {
             String snapshotRepoKey = Util.replaceMacro(inputSnapshotRepKey, env);
             configuration.publisher.setSnapshotRepoKey(snapshotRepoKey);
         }
-
-        configuration.info.licenseControl.setRunChecks(context.isRunChecks());
-        configuration.info.licenseControl.setIncludePublishedArtifacts(context.isIncludePublishArtifacts());
-        configuration.info.licenseControl.setAutoDiscover(context.isLicenseAutoDiscovery());
-        if (context.isRunChecks()) {
-            if (StringUtils.isNotBlank(context.getViolationRecipients())) {
-                configuration.info.licenseControl.setViolationRecipients(
-                        Util.replaceMacro(context.getViolationRecipients(), env)
-                );
-            }
-            if (StringUtils.isNotBlank(context.getScopes())) {
-                configuration.info.licenseControl.setScopes(Util.replaceMacro(context.getScopes(), env));
-            }
-        }
-
-        configuration.info.blackDuckProperties.setRunChecks(context.isBlackDuckRunChecks());
-        configuration.info.blackDuckProperties.setAppName(Util.replaceMacro(context.getBlackDuckAppName(), env));
-        configuration.info.blackDuckProperties.setAppVersion(Util.replaceMacro(context.getBlackDuckAppVersion(), env));
-        configuration.info.blackDuckProperties.setReportRecipients(
-                Util.replaceMacro(context.getBlackDuckReportRecipients(), env)
-        );
-        configuration.info.blackDuckProperties.setScopes(Util.replaceMacro(context.getBlackDuckScopes(), env));
-        configuration.info.blackDuckProperties.setIncludePublishedArtifacts(context.isBlackDuckIncludePublishedArtifacts());
-        configuration.info.blackDuckProperties.setAutoCreateMissingComponentRequests(context.isAutoCreateMissingComponentRequests());
-        configuration.info.blackDuckProperties.setAutoDiscardStaleComponentRequests(context.isAutoDiscardStaleComponentRequests());
 
         if (context.isDiscardOldBuilds()) {
             BuildRetention buildRetention = BuildRetentionFactory.createBuildRetention(build, context.isDiscardBuildArtifacts());

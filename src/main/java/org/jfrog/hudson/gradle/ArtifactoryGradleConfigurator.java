@@ -37,7 +37,6 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask;
 import org.jfrog.hudson.*;
-import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.action.ArtifactoryProjectAction;
 import org.jfrog.hudson.release.ReleaseAction;
@@ -78,18 +77,10 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     public final boolean includeEnvVars;
     private final CredentialsConfig deployerCredentialsConfig;
     private final CredentialsConfig resolverCredentialsConfig;
-    private final boolean runChecks;
-    private final String violationRecipients;
-    private final boolean includePublishArtifacts;
-    private final String scopes;
-    private final boolean licenseAutoDiscovery;
-    private final boolean disableLicenseAutoDiscovery;
     private final String ivyPattern;
     private final boolean enableIssueTrackerIntegration;
     private final boolean aggregateBuildIssues;
     private final String artifactPattern;
-    @Deprecated
-    private final Boolean notM2Compatible = null;
     private final Boolean useMavenPatterns;
     private final IncludesExcludes artifactDeploymentPatterns;
     private final boolean discardOldBuilds;
@@ -97,31 +88,16 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private final GradleReleaseWrapper releaseWrapper;
     private final boolean discardBuildArtifacts;
     private final boolean asyncBuildRetention;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
-    @Deprecated
-    private final Boolean skipInjectInitScript = null;
     private final Boolean useArtifactoryGradlePlugin;
     private final boolean allowPromotionOfNonStagedBuilds;
-    private final boolean allowBintrayPushOfNonStageBuilds;
-    private final boolean blackDuckRunChecks;
-    private final String blackDuckAppName;
-    private final String blackDuckAppVersion;
     private final boolean filterExcludedArtifactsFromBuild;
     private final ServerDetails resolverDetails;
     private String defaultPromotionTargetRepository;
-    @Deprecated
-    private ServerDetails details = null;
     private ServerDetails deployerDetails;
     private boolean deployArtifacts;
     private IncludesExcludes envVarsPatterns;
     private String aggregationBuildStatus;
-    private String blackDuckReportRecipients; //csv
-    private String blackDuckScopes; //csv
-    private boolean blackDuckIncludePublishedArtifacts;
-    private boolean autoCreateMissingComponentRequests;
-    private boolean autoDiscardStaleComponentRequests;
     private String artifactoryCombinationFilter;
     private String customBuildName;
     private boolean overrideBuildName;
@@ -137,14 +113,25 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     @Deprecated
     private Credentials overridingResolverCredentials;
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private ServerDetails details = null;
+    @Deprecated
+    private final String matrixParams = null;
+    @Deprecated
+    private final Boolean notM2Compatible = null;
+    @Deprecated
+    private final Boolean skipInjectInitScript = null;
+
     @DataBoundConstructor
     public ArtifactoryGradleConfigurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
                                          CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                          boolean deployMaven, boolean deployIvy, boolean deployArtifacts,
                                          String remotePluginLocation, boolean includeEnvVars,
-                                         IncludesExcludes envVarsPatterns, boolean deployBuildInfo, boolean runChecks,
-                                         String violationRecipients, boolean includePublishArtifacts, String scopes,
-                                         boolean disableLicenseAutoDiscovery, String ivyPattern, String artifactPattern,
+                                         IncludesExcludes envVarsPatterns, boolean deployBuildInfo,
+                                         String ivyPattern, String artifactPattern,
                                          Boolean useMavenPatterns, Boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
                                          boolean discardOldBuilds, boolean passIdentifiedDownstream,
                                          GradleReleaseWrapper releaseWrapper, boolean discardBuildArtifacts, boolean asyncBuildRetention,
@@ -152,15 +139,9 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean allowPromotionOfNonStagedBuilds,
                                          String defaultPromotionTargetRepository,
-                                         boolean allowBintrayPushOfNonStageBuilds, boolean blackDuckRunChecks,
-                                         String blackDuckAppName, String blackDuckAppVersion,
-                                         String blackDuckReportRecipients, String blackDuckScopes,
-                                         boolean blackDuckIncludePublishedArtifacts,
-                                         boolean autoCreateMissingComponentRequests,
-                                         boolean autoDiscardStaleComponentRequests,
                                          boolean filterExcludedArtifactsFromBuild, String artifactoryCombinationFilter,
                                          String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -171,38 +152,23 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
         this.deployBuildInfo = deployBuildInfo;
-        this.runChecks = runChecks;
-        this.violationRecipients = violationRecipients;
-        this.includePublishArtifacts = includePublishArtifacts;
-        this.scopes = scopes;
-        this.disableLicenseAutoDiscovery = disableLicenseAutoDiscovery;
         this.ivyPattern = ivyPattern;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.artifactPattern = cleanString(artifactPattern);
-        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
+        this.useMavenPatterns = useMavenPatterns;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.discardOldBuilds = discardOldBuilds;
         this.passIdentifiedDownstream = passIdentifiedDownstream;
         this.releaseWrapper = releaseWrapper;
         this.asyncBuildRetention = asyncBuildRetention;
         this.discardBuildArtifacts = discardBuildArtifacts;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
-        this.useArtifactoryGradlePlugin = useArtifactoryGradlePlugin != null ? useArtifactoryGradlePlugin : skipInjectInitScript;
-        this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
+        this.deploymentProperties = deploymentProperties;
+        this.useArtifactoryGradlePlugin = useArtifactoryGradlePlugin;
         this.allowPromotionOfNonStagedBuilds = allowPromotionOfNonStagedBuilds;
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
-        this.blackDuckRunChecks = blackDuckRunChecks;
-        this.allowBintrayPushOfNonStageBuilds = allowBintrayPushOfNonStageBuilds;
-        this.blackDuckAppName = blackDuckAppName;
-        this.blackDuckAppVersion = blackDuckAppVersion;
-        this.blackDuckReportRecipients = blackDuckReportRecipients;
-        this.blackDuckScopes = blackDuckScopes;
-        this.blackDuckIncludePublishedArtifacts = blackDuckIncludePublishedArtifacts;
-        this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
-        this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
         this.customBuildName = customBuildName;
         this.overrideBuildName = overrideBuildName;
@@ -213,7 +179,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public ServerDetails getResolverDetails() {
@@ -221,7 +187,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public boolean isPassIdentifiedDownstream() {
@@ -244,9 +210,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         if (useArtifactoryGradlePlugin != null) {
             return useArtifactoryGradlePlugin;
         }
-        if (skipInjectInitScript != null) {
-            return skipInjectInitScript;
-        }
         return false;
     }
 
@@ -262,10 +225,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return deployerCredentialsConfig;
     }
 
-    public String getViolationRecipients() {
-        return violationRecipients;
-    }
-
     public String getArtifactPattern() {
         return cleanString(artifactPattern);
     }
@@ -278,28 +237,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return artifactDeploymentPatterns;
     }
 
-    public boolean isRunChecks() {
-        return runChecks;
-    }
-
-    public boolean isIncludePublishArtifacts() {
-        return includePublishArtifacts;
-    }
-
     public boolean isDeployBuildInfo() {
         return deployBuildInfo;
-    }
-
-    public boolean isLicenseAutoDiscovery() {
-        return licenseAutoDiscovery;
-    }
-
-    public boolean isDisableLicenseAutoDiscovery() {
-        return disableLicenseAutoDiscovery;
-    }
-
-    public String getScopes() {
-        return scopes;
     }
 
     public boolean isIncludeEnvVars() {
@@ -348,10 +287,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public boolean isUseMavenPatterns() {
-        if (useMavenPatterns != null) {
-            return useMavenPatterns;
-        }
-        return notM2Compatible != null && !notM2Compatible;
+        return useMavenPatterns;
     }
 
     public boolean isEnableIssueTrackerIntegration() {
@@ -376,42 +312,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
 
     public void setDefaultPromotionTargetRepository(String defaultPromotionTargetRepository) {
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
-    }
-
-    public boolean isAllowBintrayPushOfNonStageBuilds() {
-        return allowBintrayPushOfNonStageBuilds;
-    }
-
-    public boolean isBlackDuckRunChecks() {
-        return blackDuckRunChecks;
-    }
-
-    public String getBlackDuckAppName() {
-        return blackDuckAppName;
-    }
-
-    public String getBlackDuckAppVersion() {
-        return blackDuckAppVersion;
-    }
-
-    public String getBlackDuckReportRecipients() {
-        return blackDuckReportRecipients;
-    }
-
-    public String getBlackDuckScopes() {
-        return blackDuckScopes;
-    }
-
-    public boolean isBlackDuckIncludePublishedArtifacts() {
-        return blackDuckIncludePublishedArtifacts;
-    }
-
-    public boolean isAutoCreateMissingComponentRequests() {
-        return autoCreateMissingComponentRequests;
-    }
-
-    public boolean isAutoDiscardStaleComponentRequests() {
-        return autoDiscardStaleComponentRequests;
     }
 
     public boolean isFilterExcludedArtifactsFromBuild() {
@@ -445,7 +345,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
 
     @Override
     public Collection<? extends Action> getProjectActions(AbstractProject project) {
-        List<ArtifactoryProjectAction> action = null;
+        List<ArtifactoryProjectAction> action;
         if (isOverrideBuildName()) {
             action = ActionableHelper.getArtifactoryProjectAction(getArtifactoryName(), project, getCustomBuildName());
         } else {
@@ -634,14 +534,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                                 build.getActions()
                                         .add(new UnifiedPromoteBuildAction(build, ArtifactoryGradleConfigurator.this));
                             }
-                            // Checks if Push to Bintray is disabled.
-                            if (PluginsUtils.isPushToBintrayEnabled()) {
-                                if (isAllowBintrayPushOfNonStageBuilds()) {
-                                    build.getActions()
-                                            .add(new BintrayPublishAction<ArtifactoryGradleConfigurator>(build,
-                                                    ArtifactoryGradleConfigurator.this));
-                                }
-                            }
                         }
                     }
                     success = true;
@@ -678,10 +570,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private PublisherContext.Builder getBuilder() {
         return new PublisherContext.Builder()
                 .artifactoryServer(getArtifactoryServer())
-                .deployerOverrider(ArtifactoryGradleConfigurator.this).runChecks(isRunChecks())
-                .includePublishArtifacts(isIncludePublishArtifacts())
-                .violationRecipients(getViolationRecipients()).scopes(getScopes())
-                .licenseAutoDiscovery(isLicenseAutoDiscovery()).discardOldBuilds(isDiscardOldBuilds())
+                .deployerOverrider(ArtifactoryGradleConfigurator.this)
+                .discardOldBuilds(isDiscardOldBuilds())
                 .deployArtifacts(isDeployArtifacts()).includesExcludes(getArtifactDeploymentPatterns())
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
                 .includeEnvVars(isIncludeEnvVars()).envVarsPatterns(getEnvVarsPatterns())
@@ -691,10 +581,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 .enableIssueTrackerIntegration(isEnableIssueTrackerIntegration())
                 .aggregateBuildIssues(isAggregateBuildIssues())
                 .aggregationBuildStatus(getAggregationBuildStatus())
-                .integrateBlackDuck(isBlackDuckRunChecks(), getBlackDuckAppName(), getBlackDuckAppVersion(),
-                        getBlackDuckReportRecipients(), getBlackDuckScopes(),
-                        isBlackDuckIncludePublishedArtifacts(), isAutoCreateMissingComponentRequests(),
-                        isAutoDiscardStaleComponentRequests())
                 .filterExcludedArtifactsFromBuild(isFilterExcludedArtifactsFromBuild())
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .overrideBuildName(isOverrideBuildName())
@@ -913,10 +799,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
             return "Gradle-Artifactory Integration";
         }
 
-        public boolean isPushToBintrayEnabled() {
-            return PluginsUtils.isPushToBintrayEnabled();
-        }
-
         @Override
         public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
             req.bindParameters(this, "gradle");
@@ -932,10 +814,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         public BuildWrapper newInstance(StaplerRequest req, JSONObject formData) throws FormException {
             ArtifactoryGradleConfigurator wrapper = (ArtifactoryGradleConfigurator) super.newInstance(req, formData);
             return wrapper;
-        }
-
-        public FormValidation doCheckViolationRecipients(@QueryParameter String value) {
-            return FormValidations.validateEmails(value);
         }
 
         public FormValidation doCheckArtifactoryCombinationFilter(@QueryParameter String value)
@@ -995,15 +873,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 if (successRun) {
                     // add a stage action
                     run.addAction(new UnifiedPromoteBuildAction(run, wrapper));
-                }
-            }
-            // Checks if Push to Bintray is disabled.
-            if (PluginsUtils.isPushToBintrayEnabled()) {
-                if (!wrapper.isAllowBintrayPushOfNonStageBuilds()) {
-                    if (successRun) {
-                        // add push to bintray action
-                        run.addAction(new BintrayPublishAction<ArtifactoryGradleConfigurator>(run, wrapper));
-                    }
                 }
             }
 

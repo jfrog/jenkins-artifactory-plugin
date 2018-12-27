@@ -17,7 +17,6 @@
 package org.jfrog.hudson.release.maven;
 
 import com.google.common.collect.Maps;
-import hudson.FilePath;
 import hudson.maven.ModuleName;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;

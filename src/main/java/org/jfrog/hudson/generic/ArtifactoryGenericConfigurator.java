@@ -23,7 +23,6 @@ import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
 import org.jfrog.hudson.*;
-import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.util.*;
@@ -49,8 +48,6 @@ import java.util.List;
 public class ArtifactoryGenericConfigurator extends BuildWrapper implements DeployerOverrider, ResolverOverrider,
         BuildInfoAwareConfigurator, MultiConfigurationAware {
 
-    @Deprecated
-    private final ServerDetails details = null;
     private final ServerDetails deployerDetails;
     private final ServerDetails resolverDetails;
     private final CredentialsConfig deployerCredentialsConfig;
@@ -60,8 +57,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     private final SpecConfiguration downloadSpec;
     private final String deployPattern;
     private final String resolvePattern;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
     private final boolean deployBuildInfo;
     /**
@@ -90,6 +85,14 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     @Deprecated
     private Credentials overridingResolverCredentials;
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private final ServerDetails details = null;
+    @Deprecated
+    private final String matrixParams = null;
+
     @DataBoundConstructor
     public ArtifactoryGenericConfigurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
                                           CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
@@ -104,7 +107,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                                           String artifactoryCombinationFilter,
                                           String customBuildName,
                                           boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -113,7 +116,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         this.useSpecs = useSpecs;
         this.uploadSpec = uploadSpec;
         this.downloadSpec = downloadSpec;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.deployBuildInfo = deployBuildInfo;
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
@@ -153,7 +156,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public ServerDetails getResolverDetails() {
@@ -190,7 +193,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public boolean isDeployBuildInfo() {
@@ -203,27 +206,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
     public IncludesExcludes getEnvVarsPatterns() {
         return envVarsPatterns;
-    }
-
-    public boolean isRunChecks() {
-        // There is no use of license checks in a generic build
-        return false;
-    }
-
-    public String getViolationRecipients() {
-        return null;
-    }
-
-    public boolean isIncludePublishArtifacts() {
-        return false;
-    }
-
-    public String getScopes() {
-        return null;
-    }
-
-    public boolean isLicenseAutoDiscovery() {
-        return false;
     }
 
     public boolean isDiscardOldBuilds() {
@@ -248,38 +230,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
     public String getAggregationBuildStatus() {
         return null;
-    }
-
-    public boolean isBlackDuckRunChecks() {
-        return false;
-    }
-
-    public String getBlackDuckAppName() {
-        return null;
-    }
-
-    public String getBlackDuckAppVersion() {
-        return null;
-    }
-
-    public String getBlackDuckReportRecipients() {
-        return null;
-    }
-
-    public String getBlackDuckScopes() {
-        return null;
-    }
-
-    public boolean isBlackDuckIncludePublishedArtifacts() {
-        return false;
-    }
-
-    public boolean isAutoCreateMissingComponentRequests() {
-        return false;
-    }
-
-    public boolean isAutoDiscardStaleComponentRequests() {
-        return false;
     }
 
     public String getArtifactoryCombinationFilter() {
@@ -412,12 +362,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                             // add the result action (prefer always the same index)
                             build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                             build.getActions().add(new UnifiedPromoteBuildAction(build, ArtifactoryGenericConfigurator.this));
-                            // Checks if Push to Bintray is disabled.
-                            if (PluginsUtils.isPushToBintrayEnabled()) {
-                                build.getActions().add(new BintrayPublishAction<ArtifactoryGenericConfigurator>(build,
-                                        ArtifactoryGenericConfigurator.this));
-                            }
-
                         }
                     }
 

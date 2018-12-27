@@ -29,7 +29,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.extractor.maven.Maven3BuildInfoLogger;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.pipeline.Utils;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.util.PluginDependencyHelper;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.DataBoundConstructor;

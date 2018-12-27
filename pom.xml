@@ -38,9 +38,11 @@
         <findbugs.failOnError>false</findbugs.failOnError>
 
         <buildinfo.version>2.12.x-SNAPSHOT</buildinfo.version>
-        <buildinfo.maven3.version>2.12.1</buildinfo.maven3.version>
+        <buildinfo.maven3.version>2.12.x-SNAPSHOT</buildinfo.maven3.version>
         <buildinfo.gradle.version>4.8.x-SNAPSHOT</buildinfo.gradle.version>
-        <buildinfo.ivy.version>2.12.1</buildinfo.ivy.version>
+        <buildinfo.ivy.version>2.12.x-SNAPSHOT</buildinfo.ivy.version>
+        <buildinfo.npm.version>2.12.x-SNAPSHOT</buildinfo.npm.version>
+
     </properties>
 
     <developers>
@@ -106,6 +108,11 @@
                     <artifactId>slf4j-jdk14</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-job</artifactId>
+            <version>2.0</version>
         </dependency>
         <dependency>
             <groupId>org.jvnet.hudson.plugins</groupId>
@@ -283,6 +290,11 @@
                     <artifactId>jarjar-plugin</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jfrog.buildinfo</groupId>
+            <artifactId>build-info-extractor-npm</artifactId>
+            <version>${buildinfo.npm.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>

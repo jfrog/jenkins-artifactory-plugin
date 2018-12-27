@@ -17,13 +17,8 @@
 package org.jfrog.hudson.maven2;
 
 import hudson.Extension;
-import hudson.maven.MavenBuild;
-import hudson.maven.MavenBuildProxy;
+import hudson.maven.*;
 import hudson.maven.MavenBuildProxy.BuildCallable;
-import hudson.maven.MavenModule;
-import hudson.maven.MavenReporter;
-import hudson.maven.MavenReporterDescriptor;
-import hudson.maven.MojoInfo;
 import hudson.model.BuildListener;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.project.MavenProject;

@@ -2,7 +2,7 @@ package org.jfrog.hudson.pipeline;
 
 import org.junit.Test;
 
-import static org.jfrog.hudson.pipeline.Utils.escapeUnixArgument;
+import static org.jfrog.hudson.pipeline.common.Utils.escapeUnixArgument;
 import static org.junit.Assert.assertTrue;
 
 public class UtilsTest {
