@@ -99,6 +99,10 @@ public class ArtifactoryTrigger extends Trigger {
         return details;
     }
 
+    public String getArtifactoryName() {
+        return getDetails() != null ? getDetails().artifactoryName : null;
+    }
+
     @Override
     public DescriptorImpl getDescriptor() {
         return (DescriptorImpl) super.getDescriptor();
