@@ -1,6 +1,7 @@
-package org.jfrog.hudson.pipeline.IntegrationTests;
+package org.jfrog.hudson.pipeline.integrationTests;
 
 import hudson.FilePath;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.artifactory.client.Artifactory;
 import org.jfrog.artifactory.client.RepositoryHandle;
@@ -14,6 +15,10 @@ class ITestUtils {
 
     static Path getResourcesDir() {
         return Paths.get("src", "test", "resources");
+    }
+
+    static String fixWindowsPath(String path) {
+        return StringUtils.replace(path, "\\", "\\\\");
     }
 
     static boolean isExistInArtifactory(Artifactory artifactoryClient, String repo, String path) {

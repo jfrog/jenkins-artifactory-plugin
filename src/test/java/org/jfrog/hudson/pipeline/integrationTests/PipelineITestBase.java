@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.IntegrationTests;
+package org.jfrog.hudson.pipeline.integrationTests;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
@@ -16,6 +16,7 @@ import org.junit.ClassRule;
 import org.junit.platform.commons.util.StringUtils;
 import org.jvnet.hudson.test.JenkinsRule;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -24,7 +25,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.jfrog.artifactory.client.model.impl.RepositoryTypeImpl.LOCAL;
-import static org.jfrog.hudson.pipeline.IntegrationTests.ITestUtils.getResourcesDir;
+import static org.jfrog.hudson.pipeline.integrationTests.ITestUtils.fixWindowsPath;
+import static org.jfrog.hudson.pipeline.integrationTests.ITestUtils.getResourcesDir;
 
 public class PipelineITestBase {
 
@@ -36,7 +38,7 @@ public class PipelineITestBase {
     private static final String ARTIFACTORY_URL = System.getenv("JENKINS_ARTIFACTORY_URL");
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_ARTIFACTORY_USERNAME");
     private static final String ARTIFACTORY_PASSWORD = System.getenv("JENKINS_ARTIFACTORY_PASSWORD");
-    static Path FILES_PATH = getResourcesDir().resolve("files").toAbsolutePath();
+    static Path FILES_PATH = getResourcesDir().resolve("files").resolve("/").toAbsolutePath();
 
     private static ClassLoader classLoader = PipelineITestBase.class.getClassLoader();
     private static StrSubstitutor pipelineSubstitute;
@@ -59,7 +61,7 @@ public class PipelineITestBase {
                 .build();
         deleteOldRepos();
         Map<String, String> valuesToSubstitute = new HashMap<String, String>() {{
-            put("FILES_DIR", FILES_PATH.toString() + "*");
+            put("FILES_DIR", fixWindowsPath(FILES_PATH.toString() + File.separator + "*"));
             put("LOCAL_REPO", localRepo);
         }};
         pipelineSubstitute = new StrSubstitutor(valuesToSubstitute);
