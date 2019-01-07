@@ -38,7 +38,7 @@ public class PipelineITestBase {
     private static final String ARTIFACTORY_URL = System.getenv("JENKINS_ARTIFACTORY_URL");
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_ARTIFACTORY_USERNAME");
     private static final String ARTIFACTORY_PASSWORD = System.getenv("JENKINS_ARTIFACTORY_PASSWORD");
-    static Path FILES_PATH = getResourcesDir().resolve("files").resolve("/").toAbsolutePath();
+    static Path FILES_PATH = getResourcesDir().resolve("integration").resolve("files").resolve("/").toAbsolutePath();
 
     private static ClassLoader classLoader = PipelineITestBase.class.getClassLoader();
     private static StrSubstitutor pipelineSubstitute;
@@ -97,7 +97,7 @@ public class PipelineITestBase {
     }
 
     private String readPipeline(String name) throws IOException {
-        InputStream inputStream = classLoader.getResourceAsStream(Paths.get("pipelines", pipelineType.toString(), name + ".pipeline").toString());
+        InputStream inputStream = classLoader.getResourceAsStream(Paths.get("integration", "pipelines", pipelineType.toString(), name + ".pipeline").toString());
         if (inputStream == null) {
             throw new IOException(name + " not found");
         }

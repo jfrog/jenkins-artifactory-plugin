@@ -1,4 +1,4 @@
-package pipelines.declarative
+package integration.pipelines.declarative
 
 node {
     rtServer(
@@ -13,10 +13,11 @@ node {
             spec: """{
               "files": [
                 {
-                  "pattern": "${FILES_DIR}",
+                  "pattern": "NOT_EXISTS",
                   "target": "${LOCAL_REPO}/"
                 }
              ]
-            }"""
+            }""",
+            failNoOp: true
     )
 }

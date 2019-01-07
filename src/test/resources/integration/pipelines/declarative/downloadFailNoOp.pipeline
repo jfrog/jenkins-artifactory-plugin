@@ -1,4 +1,4 @@
-package pipelines.declarative
+package integration.pipelines.declarative
 
 node {
     rtServer(
@@ -8,13 +8,13 @@ node {
             password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     )
 
-    rtUpload(
+    rtDownload(
             serverId: "Artifactory-1",
             spec: """{
               "files": [
                 {
-                  "pattern": "NOT_EXISTS",
-                  "target": "${LOCAL_REPO}/"
+                  "pattern": "${LOCAL_REPO}/NOT_EXISTS",
+                  "target": "download-test/"
                 }
              ]
             }""",
