@@ -14,6 +14,9 @@ environment:
     secure: Um8o75MQIieSavIemF4ySA==
 
 test_script:
-    - mvn clean integration-test
+  - mvn clean verify
+
+cache:
+  - C:\Users\appveyor\.m2
 
 build: off

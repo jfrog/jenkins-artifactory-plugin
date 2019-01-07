@@ -59,7 +59,7 @@ public class PipelineITestBase {
                 .build();
         deleteOldRepos();
         Map<String, String> valuesToSubstitute = new HashMap<String, String>() {{
-            put("FILES_DIR", FILES_PATH.resolve("*").toString());
+            put("FILES_DIR", FILES_PATH.toString() + "*");
             put("LOCAL_REPO", localRepo);
         }};
         pipelineSubstitute = new StrSubstitutor(valuesToSubstitute);
