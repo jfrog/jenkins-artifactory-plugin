@@ -1,0 +1,22 @@
+package pipelines.declarative
+
+node {
+    rtServer(
+            id: "Artifactory-1",
+            url: "${env.JENKINS_ARTIFACTORY_URL}",
+            username: "${env.JENKINS_ARTIFACTORY_USERNAME}",
+            password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    )
+
+    rtUpload(
+            serverId: "Artifactory-1",
+            spec: """{
+              "files": [
+                {
+                  "pattern": "${FILES_DIR}",
+                  "target": "${LOCAL_REPO}/"
+                }
+             ]
+            }"""
+    )
+}

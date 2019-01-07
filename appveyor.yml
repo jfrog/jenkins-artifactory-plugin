@@ -1,0 +1,19 @@
+stack: jdk 8, node 8
+skip_tags: true
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      JAVA_HOME: C:\Program Files\Java\jdk1.8.0
+    - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+
+  JENKINS_ARTIFACTORY_URL:
+    secure: RIh0gGFDn2JAnLUEEqLsQnZ5H3XFWg1s+Qq8Z4i+Xu+FtQf6Tsu2AnfY4/6AaXJ8
+  JENKINS_ARTIFACTORY_USERNAME:
+    secure: YEB5Wiv9a2vNpUhy+MfL+A==
+  JENKINS_ARTIFACTORY_PASSWORD:
+    secure: Um8o75MQIieSavIemF4ySA==
+
+test_script:
+    - mvn clean integration-test
+
+build: off
