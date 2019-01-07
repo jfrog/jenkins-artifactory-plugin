@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.IntegrationTests;
+package org.jfrog.hudson.pipeline.integrationTests;
 
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.junit.Test;
@@ -6,7 +6,7 @@ import org.junit.Test;
 import java.nio.file.Files;
 import java.util.Arrays;
 
-import static org.jfrog.hudson.pipeline.IntegrationTests.ITestUtils.*;
+import static org.jfrog.hudson.pipeline.integrationTests.ITestUtils.*;
 import static org.junit.Assert.*;
 
 public class DeclarativeITest extends PipelineITestBase {
