@@ -17,6 +17,7 @@ test_script:
   - mvn clean verify
 
 cache:
-  - C:\Users\appveyor\.m2
+  - C:\maven\ -> appveyor.yml
+  - C:\Users\appveyor\.m2\ -> pom.xml
 
 build: off

@@ -1,1 +1,9 @@
 package integration.pipelines.scripted
+
+node {
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def rtMaven = Artifactory.newMavenBuild()
+    rtMaven.deployer releaseRepo: "${LOCAL_REPO}", snapshotRepo: "${LOCAL_REPO}", server: rtServer
+    rtMaven.resolver releaseRepo: "libs-release", snapshotRepo: "libs-snapshot", server: rtServer
+    def buildInfo = rtMaven.run pom: "${MAVEN_PROJECT_PATH}", goals: "clean install"
+}

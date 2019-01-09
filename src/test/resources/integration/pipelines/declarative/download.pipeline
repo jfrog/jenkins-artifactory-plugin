@@ -1,6 +1,7 @@
 package integration.pipelines.declarative
 
 node {
+    stage "Configuration"
     rtServer(
             id: "Artifactory-1",
             url: "${env.JENKINS_ARTIFACTORY_URL}",
@@ -8,8 +9,11 @@ node {
             password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     )
 
+    stage "Download"
     rtDownload(
             serverId: "Artifactory-1",
+            buildName: "declarative-download-test",
+            buildNumber: "3",
             spec: """{
               "files": [
                 {
@@ -18,5 +22,12 @@ node {
                 }
              ]
             }"""
+    )
+
+    stage "Publish Build Info"
+    rtPublishBuildInfo(
+            serverId: "Artifactory-1",
+            buildName: "declarative-download-test",
+            buildNumber: "3"
     )
 }
