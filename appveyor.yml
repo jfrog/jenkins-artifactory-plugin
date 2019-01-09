@@ -14,10 +14,10 @@ environment:
     secure: Um8o75MQIieSavIemF4ySA==
 
 test_script:
-  - mvn clean verify
+  - mvn -V clean verify
 
 cache:
-  - C:\maven\ -> appveyor.yml
   - C:\Users\appveyor\.m2\ -> pom.xml
+  - /home/appveyor/.m2/ -> pom.xml
 
 build: off
