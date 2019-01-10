@@ -1,9 +1,24 @@
 package integration.pipelines.scripted
 
+import org.apache.commons.io.FileUtils
+
+import java.nio.file.Paths
+
 node {
+    stage "Configure Artifactory"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+
+    stage "Configure maven build"
     def rtMaven = Artifactory.newMavenBuild()
-    rtMaven.deployer releaseRepo: "${LOCAL_REPO}", snapshotRepo: "${LOCAL_REPO}", server: rtServer
+    rtMaven.deployer releaseRepo: "${LOCAL_REPO1}", snapshotRepo: "${LOCAL_REPO1}", server: rtServer
     rtMaven.resolver releaseRepo: "libs-release", snapshotRepo: "libs-snapshot", server: rtServer
-    def buildInfo = rtMaven.run pom: "${MAVEN_PROJECT_PATH}", goals: "clean install"
+
+    stage "Copy project example"
+    FileUtils.copyDirectory(Paths.get("${MAVEN_PROJECT_PATH}").toFile(), Paths.get(pwd(), "maven-example").toFile())
+
+    stage "Run maven"
+    def buildInfo = rtMaven.run pom: "maven-example", goals: "clean install"
+
+    stage ("Publish build info")
+    rtServer.publishBuildInfo buildInfo
 }

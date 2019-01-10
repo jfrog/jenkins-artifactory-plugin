@@ -3,19 +3,20 @@ package org.jfrog.hudson.pipeline.integrationTests;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.artifactory.client.Artifactory;
 import org.jfrog.artifactory.client.ArtifactoryClientBuilder;
-import org.jfrog.artifactory.client.model.LightweightRepository;
-import org.jfrog.artifactory.client.model.Repository;
+import org.jfrog.artifactory.client.ArtifactoryRequest;
+import org.jfrog.artifactory.client.impl.ArtifactoryRequestImpl;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.junit.*;
-import org.junit.platform.commons.util.StringUtils;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
@@ -26,10 +27,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
-import static org.jfrog.artifactory.client.model.impl.RepositoryTypeImpl.LOCAL;
 import static org.jfrog.hudson.pipeline.integrationTests.ITestUtils.*;
 import static org.junit.Assert.*;
 
@@ -38,20 +37,18 @@ public class PipelineITestBase {
     @ClassRule // The Jenkins instance
     public static JenkinsRule jenkins = new JenkinsRule();
 
-    private static final String LOCAL_REPO = "jenkins-tests-repo";
     private static final String ARTIFACTORY_URL = System.getenv("JENKINS_ARTIFACTORY_URL");
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_ARTIFACTORY_USERNAME");
     private static final String ARTIFACTORY_PASSWORD = System.getenv("JENKINS_ARTIFACTORY_PASSWORD");
-    private static final Path MAVEN_PROJECT_PATH = getIntegrationDir().resolve("maven-example").toAbsolutePath();
-    private static final Path GRADLE_PROJECT_PATH = getIntegrationDir().resolve("gradle-example").toAbsolutePath();
-    static Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
-    private static ArtifactoryBuildInfoClient buildInfoClient;
+    private static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
 
-    private static ClassLoader classLoader = PipelineITestBase.class.getClassLoader();
-    private static StrSubstitutor pipelineSubstitute;
+    private static long currentTime = System.currentTimeMillis();
+    private static StrSubstitutor pipelineSubstitution;
+    private static ArtifactoryBuildInfoClient buildInfoClient;
+    private static Artifactory artifactoryClient;
+
+    private ClassLoader classLoader = PipelineITestBase.class.getClassLoader();
     private PipelineType pipelineType;
-    static Artifactory artifactoryClient;
-    static String localRepo;
 
     PipelineITestBase(PipelineType pipelineType) {
         this.pipelineType = pipelineType;
@@ -59,27 +56,42 @@ public class PipelineITestBase {
 
     @BeforeClass
     public static void setUp() {
-        localRepo = LOCAL_REPO + "-" + System.currentTimeMillis();
         verifyEnvironment();
         createClients();
-        cleanUpRepos();
-        createPipelineSubstitute();
+        cleanUpArtifactory(artifactoryClient);
+        createPipelineSubstitution();
     }
 
     @Before
-    public void createRepo() {
-        Repository repository = artifactoryClient.repositories()
-                .builders()
-                .localRepositoryBuilder()
-                .key(localRepo)
-                .description("Jenkins Artifactory tests repository")
-                .build();
-        artifactoryClient.repositories().create(1, repository);
+    public void createRepos() {
+        Arrays.stream(TestRepository.values()).forEach(this::createRepo);
+    }
+
+    private static String getRepoKey(TestRepository repository) {
+        return String.format("%s-%d", repository.getRepoName(), currentTime);
+    }
+
+    private void createRepo(TestRepository repository) {
+        try {
+            String repositorySettingsPath = Paths.get("integration", "settings", repository.getRepoName() + ".json").toString();
+            InputStream inputStream = classLoader.getResourceAsStream(repositorySettingsPath);
+            if (inputStream == null) {
+                throw new IOException(repositorySettingsPath + " not found");
+            }
+            String repositorySettings = IOUtils.toString(inputStream, "UTF-8");
+            artifactoryClient.restCall(new ArtifactoryRequestImpl()
+                    .method(ArtifactoryRequest.Method.PUT)
+                    .requestType(ArtifactoryRequest.ContentType.JSON)
+                    .apiUrl("api/repositories/" + getRepoKey(repository))
+                    .requestBody(repositorySettings));
+        } catch (Exception e) {
+            fail(ExceptionUtils.getRootCauseMessage(e));
+        }
     }
 
     @After
-    public void deleteRepo() {
-        artifactoryClient.repository(localRepo).delete();
+    public void deleteRepos() {
+        Arrays.stream(TestRepository.values()).forEach(repoName -> artifactoryClient.repository(getRepoKey(repoName)).delete());
     }
 
     @AfterClass
@@ -97,37 +109,39 @@ public class PipelineITestBase {
                 .build();
     }
 
-    private static void cleanUpRepos() {
-        artifactoryClient.repositories().list(LOCAL).stream()
-                .map(LightweightRepository::getKey)
-                .filter(repoKey -> repoKey.startsWith(LOCAL_REPO))
-                .forEach(repoKey -> artifactoryClient.repository(repoKey).delete());
+    private static void createPipelineSubstitution() {
+        pipelineSubstitution = new StrSubstitutor(new HashMap<String, String>() {{
+            put("FILES_DIR", fixWindowsPath(FILES_PATH.toString() + File.separator + "*"));
+            put("MAVEN_PROJECT_PATH", getProjectPath("maven-example"));
+            put("GRADLE_PROJECT_PATH", getProjectPath("gradle-example"));
+            put("NPM_PROJECT_PATH", getProjectPath("npm-example"));
+            put("LOCAL_REPO1", getRepoKey(TestRepository.LOCAL_REPO1));
+            put("LOCAL_REPO2", getRepoKey(TestRepository.LOCAL_REPO2));
+            put("NPM_LOCAL", getRepoKey(TestRepository.NPM_LOCAL));
+            put("NPM_REMOTE", getRepoKey(TestRepository.NPM_REMOTE));
+        }});
     }
 
-    private static void createPipelineSubstitute() {
-        Map<String, String> valuesToSubstitute = new HashMap<String, String>() {{
-            put("FILES_DIR", fixWindowsPath(FILES_PATH.toString() + File.separator + "*"));
-            put("MAVEN_PROJECT_PATH", fixWindowsPath(MAVEN_PROJECT_PATH.toString()));
-            put("GRADLE_PROJECT_PATH", fixWindowsPath(GRADLE_PROJECT_PATH.toString()));
-            put("LOCAL_REPO", localRepo);
-        }};
-        pipelineSubstitute = new StrSubstitutor(valuesToSubstitute);
+    private static String getProjectPath(String projectName) {
+        Path projectPath = getIntegrationDir().resolve(projectName).toAbsolutePath();
+        return fixWindowsPath(projectPath.toString());
     }
 
     WorkflowRun buildWorkflowProject(String name) throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
-        jenkins.getInstance().getWorkspaceFor(project).mkdirs();
+        jenkins.getInstance().getWorkspaceFor(project).mkdirs(); // TODO - Delete after fix
         project.setDefinition(new CpsFlowDefinition(readPipeline(name)));
         return jenkins.buildAndAssertSuccess(project);
     }
 
     private String readPipeline(String name) throws IOException {
-        InputStream inputStream = classLoader.getResourceAsStream(Paths.get("integration", "pipelines", pipelineType.toString(), name + ".pipeline").toString());
+        String pipelinePath = Paths.get("integration", "pipelines", pipelineType.toString(), name + ".pipeline").toString();
+        InputStream inputStream = classLoader.getResourceAsStream(pipelinePath);
         if (inputStream == null) {
-            throw new IOException(name + " not found");
+            throw new IOException(pipelinePath + " not found");
         }
         String pipeline = IOUtils.toString(inputStream);
-        return pipelineSubstitute.replace(pipeline);
+        return pipelineSubstitution.replace(pipeline);
     }
 
     private static void verifyEnvironment() {
@@ -148,9 +162,8 @@ public class PipelineITestBase {
 
         buildWorkflowProject("upload");
         try {
-            for (String fileName : Arrays.asList("a.in", "b.in", "c.in")) {
-                assertTrue(isExistInArtifactory(artifactoryClient, localRepo, fileName));
-            }
+            Arrays.asList("a.in", "b.in", "c.in").forEach(artifactName ->
+                    assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleArtifacts(module, expectedArtifacts);
@@ -163,7 +176,7 @@ public class PipelineITestBase {
         Set<String> expectedDependencies = Sets.newHashSet("a.in", "b.in", "c.in");
         String buildNumber = "3";
 
-        Files.list(FILES_PATH).forEach(file -> uploadFile(artifactoryClient, file, localRepo));
+        Files.list(FILES_PATH).forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
         WorkflowRun build = buildWorkflowProject("download");
         try {
             for (String fileName : expectedDependencies) {
@@ -172,6 +185,43 @@ public class PipelineITestBase {
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleDependencies(module, expectedDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void promotionTest(String buildName) throws Exception {
+        Set<String> expectedDependencies = Sets.newHashSet("a.in", "b.in", "c.in");
+        String buildNumber = "4";
+
+        Files.list(FILES_PATH).forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
+        WorkflowRun build = buildWorkflowProject("promote");
+        try {
+            for (String fileName : expectedDependencies) {
+                assertTrue(isExistInWorkspace(jenkins, build, "promotion-test", fileName));
+            }
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertModuleDependencies(module, expectedDependencies);
+            // In this tests, the expected dependencies and artifacts are equal
+            assertModuleArtifacts(module, expectedDependencies);
+            assertNoArtifactsInRepo(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1));
+            assertArtifactsInRepo(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO2), expectedDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void npmTest(String buildName) throws Exception {
+        Set<String> expectedArtifact = Sets.newHashSet("package-name1:0.0.1");
+        Set<String> expectedDependencies = Sets.newHashSet("big-integer-1.6.40.tgz", "is-number-7.0.0.tgz");
+        String buildNumber = "3";
+        try {
+            buildWorkflowProject("npm");
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, "package-name1:0.0.1");
+            assertModuleDependencies(module, expectedDependencies);
+            assertModuleArtifacts(module, expectedArtifact);
         } finally {
             deleteBuild(artifactoryClient, buildName);
         }
@@ -186,7 +236,7 @@ public class PipelineITestBase {
             assertTrue(t.getMessage().contains("Fail-no-op: No files were affected in the upload process."));
         }
         for (String fileName : Arrays.asList("a.in", "b.in", "c.in")) {
-            assertFalse(isExistInArtifactory(artifactoryClient, localRepo, fileName));
+            assertFalse(isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), fileName));
         }
     }
 

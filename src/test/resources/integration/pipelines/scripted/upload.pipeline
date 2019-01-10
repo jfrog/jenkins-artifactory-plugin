@@ -12,7 +12,7 @@ node {
       "files": [
         {
           "pattern": "${FILES_DIR}",
-          "target": "${LOCAL_REPO}/"
+          "target": "${LOCAL_REPO1}/"
         }
      ]
     }"""

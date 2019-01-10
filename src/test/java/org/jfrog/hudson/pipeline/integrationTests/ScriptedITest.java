@@ -17,4 +17,19 @@ public class ScriptedITest extends PipelineITestBase {
     public void uploadTest() throws Exception {
         super.uploadTest("scripted-upload-test");
     }
+
+    @Test
+    public void promotionTest() throws Exception {
+        super.promotionTest("scripted-promotion-test");
+    }
+
+    @Test
+    public void mavenTest() throws Exception {
+        buildWorkflowProject("maven");
+    }
+
+    @Test
+    public void npmTest() throws Exception {
+        super.npmTest("scripted-npm-test");
+    }
 }

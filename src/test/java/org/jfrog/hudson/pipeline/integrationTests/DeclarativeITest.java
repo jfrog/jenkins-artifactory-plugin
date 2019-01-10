@@ -17,4 +17,9 @@ public class DeclarativeITest extends PipelineITestBase {
     public void uploadTest() throws Exception {
         super.uploadTest("declarative-upload-test");
     }
+
+    @Test
+    public void promotionTest() throws Exception {
+        super.promotionTest("declarative-promotion-test");
+    }
 }

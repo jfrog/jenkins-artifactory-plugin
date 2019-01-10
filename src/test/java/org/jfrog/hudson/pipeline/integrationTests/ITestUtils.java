@@ -7,6 +7,9 @@ import org.jfrog.artifactory.client.Artifactory;
 import org.jfrog.artifactory.client.ArtifactoryRequest;
 import org.jfrog.artifactory.client.RepositoryHandle;
 import org.jfrog.artifactory.client.impl.ArtifactoryRequestImpl;
+import org.jfrog.artifactory.client.model.LightweightRepository;
+import org.jfrog.artifactory.client.model.RepoPath;
+import org.jfrog.artifactory.client.model.RepositoryType;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
@@ -17,11 +20,13 @@ import org.jvnet.hudson.test.JenkinsRule;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.jfrog.artifactory.client.model.impl.RepositoryTypeImpl.*;
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
 
 class ITestUtils {
 
@@ -31,6 +36,17 @@ class ITestUtils {
 
     static String fixWindowsPath(String path) {
         return StringUtils.replace(path, "\\", "\\\\");
+    }
+
+    static void cleanUpArtifactory(Artifactory artifactoryClient) {
+        Arrays.asList(LOCAL, REMOTE, VIRTUAL).forEach(repoType -> cleanUpRepositoryType(artifactoryClient, repoType));
+    }
+
+    private static void cleanUpRepositoryType(Artifactory artifactoryClient, RepositoryType repositoryType) {
+        artifactoryClient.repositories().list(repositoryType).stream()
+                .map(LightweightRepository::getKey)
+                .filter(repoKey -> org.apache.commons.lang3.StringUtils.startsWithAny(repoKey, TestRepository.toArray()))
+                .forEach(repoKey -> artifactoryClient.repository(repoKey).delete());
     }
 
     static boolean isExistInArtifactory(Artifactory artifactoryClient, String repo, String path) {
@@ -73,6 +89,17 @@ class ITestUtils {
         assertEquals(expectedArtifacts, actualArtifacts);
     }
 
+    static void assertNoArtifactsInRepo(Artifactory artifactoryClient, String repoKey) {
+        List<RepoPath> repoPaths = artifactoryClient.searches().repositories(repoKey).artifactsByName("*in").doSearch();
+        assertTrue(repoPaths.isEmpty());
+    }
+
+    static void assertArtifactsInRepo(Artifactory artifactoryClient, String repoKey, Set<String> expectedArtifacts) {
+        List<RepoPath> repoPaths = artifactoryClient.searches().repositories(repoKey).artifactsByName("*in").doSearch();
+        Set<String> actualArtifacts = repoPaths.stream().map(RepoPath::getItemPath).collect(Collectors.toSet());
+        assertEquals(expectedArtifacts, actualArtifacts);
+    }
+
     static Module getAndAssertModule(Build buildInfo, String moduleName) {
         assertNotNull(buildInfo);
         assertNotNull(buildInfo.getModules());
@@ -83,6 +110,9 @@ class ITestUtils {
     }
 
     static void deleteBuild(Artifactory artifactoryClient, String buildName) throws IOException {
-        artifactoryClient.restCall(new ArtifactoryRequestImpl().method(ArtifactoryRequest.Method.DELETE).apiUrl("api/build/" + buildName).addQueryParam("deleteAll", "1"));
+        artifactoryClient.restCall(new ArtifactoryRequestImpl()
+                .method(ArtifactoryRequest.Method.DELETE)
+                .apiUrl("api/build/" + buildName)
+                .addQueryParam("deleteAll", "1"));
     }
 }

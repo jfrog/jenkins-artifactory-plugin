@@ -11,7 +11,7 @@ node {
     def downloadSpec = """{
       "files": [
         {
-          "pattern": "${LOCAL_REPO}/*",
+          "pattern": "${LOCAL_REPO1}/*",
           "target": "download-test/"
         }
      ]

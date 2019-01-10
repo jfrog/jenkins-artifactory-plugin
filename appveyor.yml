@@ -1,6 +1,7 @@
 stack: jdk 8, node 8
 skip_tags: true
 environment:
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       JAVA_HOME: C:\Program Files\Java\jdk1.8.0
