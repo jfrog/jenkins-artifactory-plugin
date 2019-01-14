@@ -20,6 +20,7 @@ import org.jfrog.build.api.Module;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.junit.*;
+import org.junit.rules.Timeout;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import static org.jfrog.hudson.pipeline.integrationtests.ITestUtils.*;
 import static org.junit.Assert.*;
@@ -39,6 +41,9 @@ public class PipelineITestBase {
 
     @ClassRule // The Jenkins instance
     public static JenkinsRule jenkins = new JenkinsRule();
+
+    @Rule
+    public Timeout globalTimeout = new Timeout(10, TimeUnit.MINUTES);
 
     private static final String ARTIFACTORY_URL = System.getenv("JENKINS_ARTIFACTORY_URL");
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_ARTIFACTORY_USERNAME");

@@ -51,7 +51,7 @@ node {
     )
 
     stage "Promotion"
-    rtPromote (
+    rtPromote(
             //Mandatory parameter
             serverId: serverId,
             targetRepo: "${LOCAL_REPO2}",

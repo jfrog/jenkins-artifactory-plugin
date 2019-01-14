@@ -15,7 +15,7 @@ environment:
 init:
   - cmd: "choco install gradle -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
   - sh: sudo apt -yq update
-  - sh: sudo apt install -yq --no-install-suggests --no-install-recommends maven gradle
+  - sh: sudo apt upgrade -y maven gradle
 
 test_script:
   - mvn -V clean verify
