@@ -1,6 +1,9 @@
-package org.jfrog.hudson.pipeline.integrationTests;
+package org.jfrog.hudson.pipeline.integrationtests;
 
 import com.google.common.collect.Sets;
+import hudson.EnvVars;
+import hudson.slaves.EnvironmentVariablesNodeProperty;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
 
-import static org.jfrog.hudson.pipeline.integrationTests.ITestUtils.*;
+import static org.jfrog.hudson.pipeline.integrationtests.ITestUtils.*;
 import static org.junit.Assert.*;
 
 public class PipelineITestBase {
@@ -57,6 +60,7 @@ public class PipelineITestBase {
     @BeforeClass
     public static void setUp() {
         verifyEnvironment();
+        setJarsLibEnv();
         createClients();
         cleanUpArtifactory(artifactoryClient);
         createPipelineSubstitution();
@@ -113,10 +117,11 @@ public class PipelineITestBase {
         pipelineSubstitution = new StrSubstitutor(new HashMap<String, String>() {{
             put("FILES_DIR", fixWindowsPath(FILES_PATH.toString() + File.separator + "*"));
             put("MAVEN_PROJECT_PATH", getProjectPath("maven-example"));
-            put("GRADLE_PROJECT_PATH", getProjectPath("gradle-example"));
+            put("GRADLE_PROJECT_PATH", getProjectPath("gradle-example-ci"));
             put("NPM_PROJECT_PATH", getProjectPath("npm-example"));
             put("LOCAL_REPO1", getRepoKey(TestRepository.LOCAL_REPO1));
             put("LOCAL_REPO2", getRepoKey(TestRepository.LOCAL_REPO2));
+            put("JCENTER_REMOTE_REPO", getRepoKey(TestRepository.JCENTER_REMOTE_REPO));
             put("NPM_LOCAL", getRepoKey(TestRepository.NPM_LOCAL));
             put("NPM_REMOTE", getRepoKey(TestRepository.NPM_REMOTE));
         }});
@@ -127,7 +132,7 @@ public class PipelineITestBase {
         return fixWindowsPath(projectPath.toString());
     }
 
-    WorkflowRun buildWorkflowProject(String name) throws Exception {
+    private WorkflowRun buildWorkflowProject(String name) throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
         jenkins.getInstance().getWorkspaceFor(project).mkdirs(); // TODO - Delete after fix
         project.setDefinition(new CpsFlowDefinition(readPipeline(name)));
@@ -149,11 +154,18 @@ public class PipelineITestBase {
             throw new IllegalArgumentException("JENKINS_ARTIFACTORY_URL is not set");
         }
         if (StringUtils.isBlank(ARTIFACTORY_USERNAME)) {
-            throw new IllegalArgumentException("ARTIFACTORY_USERNAME is not set");
+            throw new IllegalArgumentException("JENKINS_ARTIFACTORY_USERNAME is not set");
         }
         if (StringUtils.isBlank(ARTIFACTORY_PASSWORD)) {
-            throw new IllegalArgumentException("ARTIFACTORY_PASSWORD is not set");
+            throw new IllegalArgumentException("JENKINS_ARTIFACTORY_PASSWORD is not set");
         }
+    }
+
+    private static void setJarsLibEnv() {
+        EnvironmentVariablesNodeProperty prop = new EnvironmentVariablesNodeProperty();
+        EnvVars envVars = prop.getEnvVars();
+        envVars.put("ARTIFACTORY_JARS_LIB", Paths.get("target", "artifactory", "WEB-INF", "lib").toAbsolutePath().toString());
+        jenkins.jenkins.getGlobalNodeProperties().add(prop);
     }
 
     void uploadTest(String buildName) throws Exception {
@@ -212,6 +224,46 @@ public class PipelineITestBase {
         }
     }
 
+    void mavenTest(String buildName) throws Exception {
+        Set<String> expectedArtifacts = Sets.newHashSet("multi-3.7-SNAPSHOT.pom");
+        String buildNumber = "3";
+        try {
+            buildWorkflowProject("maven");
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            assertEquals(4, buildInfo.getModules().size());
+
+            Module module = getAndAssertModule(buildInfo, "org.jfrog.test:multi:3.7-SNAPSHOT");
+            assertModuleArtifacts(module, expectedArtifacts);
+            assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi1:3.7-SNAPSHOT");
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi2:3.7-SNAPSHOT");
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi3:3.7-SNAPSHOT");
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void gradleCiServerTest(String buildName) throws Exception {
+        Set<String> expectedArtifacts = Sets.newHashSet("gradle-example-ci-server-1.0.jar", "ivy-1.0.xml", "gradle-example-ci-server-1.0.pom");
+        String buildNumber = "3";
+        try {
+            buildWorkflowProject("gradleCiServer");
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            assertEquals(5, buildInfo.getModules().size());
+
+            Module module = getAndAssertModule(buildInfo, "org.jfrog.example.gradle:gradle-example-ci-server:1.0");
+            assertModuleArtifacts(module, expectedArtifacts);
+            assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
+
+            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:services:1.0");
+            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:api:1.0");
+            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:shared:1.0");
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.example.gradle:webservice:1.0");
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
     void npmTest(String buildName) throws Exception {
         Set<String> expectedArtifact = Sets.newHashSet("package-name1:0.0.1");
         Set<String> expectedDependencies = Sets.newHashSet("big-integer-1.6.40.tgz", "is-number-7.0.0.tgz");
@@ -249,15 +301,5 @@ public class PipelineITestBase {
             assertTrue(t.getMessage().contains("Fail-no-op: No files were affected in the download process."));
         }
     }
-
-//    @Test
-//    public void mavenTest() throws Exception {
-//        buildWorkflowProject("maven");
-//    }
-//
-//    @Test
-//    public void gradleTest() throws Exception {
-//        buildWorkflowProject("gradle");
-//    }
 
 }

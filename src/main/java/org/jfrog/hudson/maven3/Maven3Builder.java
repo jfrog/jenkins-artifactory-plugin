@@ -18,7 +18,6 @@ package org.jfrog.hudson.maven3;
 
 import hudson.*;
 import hudson.model.*;
-import hudson.remoting.Which;
 import hudson.tasks.BuildStepDescriptor;
 import hudson.tasks.Builder;
 import hudson.tasks.Maven;
@@ -27,7 +26,6 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.BuildInfoConfigProperties;
-import org.jfrog.build.extractor.maven.Maven3BuildInfoLogger;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.util.PluginDependencyHelper;
@@ -209,10 +207,9 @@ public class Maven3Builder extends Builder {
             args.addKeyValuePair("-D", BuildInfoConfigProperties.PROP_ARTIFACTORY_RESOLUTION_ENABLED, Boolean.TRUE.toString(), false);
         }
 
-        // use the classworlds conf packaged with this plugin and resolve the extractor libs
-        File maven3ExtractorJar = Which.jarFile(Maven3BuildInfoLogger.class);
+        File extractorJar = PluginDependencyHelper.getExtractorJar(env);
         FilePath actualDependencyDirectory =
-                PluginDependencyHelper.getActualDependencyDirectory(maven3ExtractorJar, ws);
+                PluginDependencyHelper.getActualDependencyDirectory(extractorJar, ws);
 
         if (getMavenOpts() == null || !getMavenOpts().contains("-Dm3plugin.lib")) {
             args.addKeyValuePair("-D", "m3plugin.lib", actualDependencyDirectory.getRemote(), false);

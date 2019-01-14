@@ -1,9 +1,0 @@
-package integration.pipelines.scripted
-
-node {
-    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
-    def rtGradle = Artifactory.newGradleBuild()
-    rtGradle.deployer repo: "${LOCAL_REPO1}"
-    rtGradle.resolver repo: "libs-release"
-    def buildInfo = rtGradle.run rootDir: "${GRADLE_PROJECT_PATH}", buildFile: "build.gradle", tasks: "clean artifactoryPublish"
-}

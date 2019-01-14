@@ -1,10 +1,11 @@
-package org.jfrog.hudson.pipeline.integrationTests;
+package org.jfrog.hudson.pipeline.integrationtests;
 
 import java.util.Arrays;
 
 enum TestRepository {
     LOCAL_REPO1("jenkins-tests-local-1"),
     LOCAL_REPO2("jenkins-tests-local-2"),
+    JCENTER_REMOTE_REPO("jenkins-tests-jcenter"),
     NPM_LOCAL("jenkins-tests-npm-local"),
     NPM_REMOTE("jenkins-tests-npm-remote");
 

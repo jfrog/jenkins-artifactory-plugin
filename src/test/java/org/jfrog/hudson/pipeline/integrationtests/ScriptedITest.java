@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.integrationTests;
+package org.jfrog.hudson.pipeline.integrationtests;
 
 import org.junit.Test;
 
@@ -25,7 +25,12 @@ public class ScriptedITest extends PipelineITestBase {
 
     @Test
     public void mavenTest() throws Exception {
-        buildWorkflowProject("maven");
+        super.mavenTest("scripted-maven-test");
+    }
+
+    @Test
+    public void gradleTest() throws Exception {
+        super.gradleCiServerTest("scripted-gradle-ci-test");
     }
 
     @Test

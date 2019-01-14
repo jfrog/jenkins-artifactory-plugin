@@ -19,6 +19,7 @@ package org.jfrog.hudson.gradle;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.tikal.jenkins.plugins.multijob.MultiJobProject;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -445,7 +446,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 FilePath initScript;
                 try {
                     initScript = workspace.createTextTempFile("init-artifactory", "gradle",
-                            writer.generateInitScript(), false);
+                            writer.generateInitScript(new EnvVars(env)), false);
                     ActionableHelper.deleteFilePathOnExit(initScript);
                     initScriptPath = initScript.getRemote();
                     initScriptPath = initScriptPath.replace('\\', '/');

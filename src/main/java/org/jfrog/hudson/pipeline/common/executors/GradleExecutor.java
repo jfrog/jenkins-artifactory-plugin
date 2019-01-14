@@ -183,7 +183,7 @@ public class GradleExecutor implements Executor {
 
     private String createInitScript() throws Exception {
         GradleInitScriptWriter writer = new GradleInitScriptWriter(tempDir);
-        FilePath initScript = tempDir.createTextTempFile("init-artifactory", "gradle", writer.generateInitScript());
+        FilePath initScript = tempDir.createTextTempFile("init-artifactory", "gradle", writer.generateInitScript(env));
         ActionableHelper.deleteFilePathOnExit(initScript);
         String initScriptPath = initScript.getRemote();
         initScriptPath = initScriptPath.replace('\\', '/');

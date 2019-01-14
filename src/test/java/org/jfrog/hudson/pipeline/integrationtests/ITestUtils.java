@@ -1,6 +1,7 @@
-package org.jfrog.hudson.pipeline.integrationTests;
+package org.jfrog.hudson.pipeline.integrationtests;
 
 import hudson.FilePath;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.artifactory.client.Artifactory;
@@ -103,10 +104,20 @@ class ITestUtils {
     static Module getAndAssertModule(Build buildInfo, String moduleName) {
         assertNotNull(buildInfo);
         assertNotNull(buildInfo.getModules());
-        assertEquals(1, buildInfo.getModules().size());
         Module module = buildInfo.getModule(moduleName);
         assertNotNull(module);
         return module;
+    }
+
+    static void assertModuleContainsArtifactsAndDependencies(Build buildInfo, String moduleName) {
+        Module module = getAndAssertModule(buildInfo, moduleName);
+        assertTrue(CollectionUtils.isNotEmpty(module.getArtifacts()));
+        assertTrue(CollectionUtils.isNotEmpty(module.getDependencies()));
+    }
+
+    static void assertModuleContainsArtifacts(Build buildInfo, String moduleName) {
+        Module module = getAndAssertModule(buildInfo, moduleName);
+        assertTrue(CollectionUtils.isNotEmpty(module.getArtifacts()));
     }
 
     static void deleteBuild(Artifactory artifactoryClient, String buildName) throws IOException {

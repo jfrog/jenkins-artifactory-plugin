@@ -1,14 +1,16 @@
 package org.jfrog.hudson.util;
 
+import hudson.EnvVars;
 import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.AbstractBuild;
 import hudson.model.Hudson;
-import hudson.model.Run;
+import hudson.remoting.Which;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.build.extractor.BuildInfoExtractor;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 
 /**
@@ -56,14 +58,19 @@ public class PluginDependencyHelper {
         return remoteDependencyDir;
     }
 
-    private static FilePath getRootPath(Run build, Launcher launcher) {
-        // The build type can be Run or AbstractBuild,
-        // it's dependence whether we are running a pipleline or other kind of job.
-        // If are running a pipeline jon the build type is Run.
-        if (build instanceof AbstractBuild) {
-            return ((AbstractBuild) build).getBuiltOn().getRootPath();
+    public static File getExtractorJar(EnvVars env) throws IOException {
+        String libPath = env.get("ARTIFACTORY_JARS_LIB");
+        if (StringUtils.isBlank(libPath)) {
+            // use the classworlds conf packaged with this plugin and resolve the extractor libs
+            return Which.jarFile(BuildInfoExtractor.class);
+        } else {
+            FileFilter fileFilter = new WildcardFileFilter("build-info-extractor-*.jar");
+            File[] jars = new File(libPath).listFiles(fileFilter);
+            if (ArrayUtils.isEmpty(jars)) {
+                throw new IOException("Artifactory jars lib util doesn't contain the build info extractors");
+            }
+            return jars[0];
         }
-        return ActionableHelper.getNode(launcher).getRootPath();
     }
 
 }
