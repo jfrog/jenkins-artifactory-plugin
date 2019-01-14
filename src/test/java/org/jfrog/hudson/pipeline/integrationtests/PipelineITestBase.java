@@ -117,7 +117,8 @@ public class PipelineITestBase {
         pipelineSubstitution = new StrSubstitutor(new HashMap<String, String>() {{
             put("FILES_DIR", fixWindowsPath(FILES_PATH.toString() + File.separator + "*"));
             put("MAVEN_PROJECT_PATH", getProjectPath("maven-example"));
-            put("GRADLE_PROJECT_PATH", getProjectPath("gradle-example-ci"));
+            put("GRADLE_PROJECT_PATH", getProjectPath("gradle-example"));
+            put("GRADLE_CI_PROJECT_PATH", getProjectPath("gradle-example-ci"));
             put("NPM_PROJECT_PATH", getProjectPath("npm-example"));
             put("LOCAL_REPO1", getRepoKey(TestRepository.LOCAL_REPO1));
             put("LOCAL_REPO2", getRepoKey(TestRepository.LOCAL_REPO2));
@@ -238,6 +239,22 @@ public class PipelineITestBase {
             assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi1:3.7-SNAPSHOT");
             assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi2:3.7-SNAPSHOT");
             assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi3:3.7-SNAPSHOT");
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void gradleTest(String buildName) throws Exception {
+        String buildNumber = "3";
+        try {
+            buildWorkflowProject("gradle");
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            assertEquals(4, buildInfo.getModules().size());
+
+            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:services:1.0-SNAPSHOT");
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.example.gradle:api:1.0-SNAPSHOT");
+            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:shared:1.0-SNAPSHOT");
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.example.gradle:webservice:1.0-SNAPSHOT");
         } finally {
             deleteBuild(artifactoryClient, buildName);
         }

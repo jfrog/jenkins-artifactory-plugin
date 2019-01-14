@@ -30,6 +30,11 @@ public class ScriptedITest extends PipelineITestBase {
 
     @Test
     public void gradleTest() throws Exception {
+        super.gradleTest("scripted-gradle-test");
+    }
+
+    @Test
+    public void gradleCiServerTest() throws Exception {
         super.gradleCiServerTest("scripted-gradle-ci-test");
     }
 
