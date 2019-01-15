@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.integrationtests;
+package org.jfrog.hudson.pipeline.integration;
 
 enum PipelineType {
     SCRIPTED,

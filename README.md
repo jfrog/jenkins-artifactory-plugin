@@ -19,3 +19,22 @@ To build the plugin, please use Maven with JDK 8 and run:
 ```console
 > mvn clean install
 ```
+
+## Tests
+#### Unit tests
+To run unit tests execute the following command: 
+```
+> mvn clean test
+```
+
+#### Integration tests
+* The *ARTIFACTORY_URL* environment variable should be set to the Artifactory URL.
+* The *ARTIFACTORY_USERNAME* environment variable should be set to the Artifactory username.
+* The *ARTIFACTORY_PASSWORD* environment variable should be set to the Artifactory password.
+* The *MAVEN_HOME* environment variable should be set to the local maven installation path.
+* The *GRADLE_HOME* environment variable should be set to the local gradle installation path.
+
+To run integration tests execute the following command:
+```
+> mvn clean verify
+```

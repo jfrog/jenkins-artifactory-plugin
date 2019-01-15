@@ -1,8 +1,8 @@
-package org.jfrog.hudson.pipeline.integrationtests;
+package org.jfrog.hudson.pipeline.integration;
 
 import org.junit.Test;
 
-public class ScriptedITest extends PipelineITestBase {
+public class ScriptedITest extends CommonITestsPipeline {
 
     public ScriptedITest() {
         super(PipelineType.SCRIPTED);

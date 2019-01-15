@@ -1,8 +1,8 @@
-package org.jfrog.hudson.pipeline.integrationtests;
+package org.jfrog.hudson.pipeline.integration;
 
 import org.junit.Test;
 
-public class DeclarativeITest extends PipelineITestBase {
+public class DeclarativeITest extends CommonITestsPipeline {
 
     public DeclarativeITest() {
         super(PipelineType.DECLARATIVE);
@@ -37,9 +37,4 @@ public class DeclarativeITest extends PipelineITestBase {
     public void gradleCiServerTest() throws Exception {
         super.gradleCiServerTest("declarative-gradle-ci-test");
     }
-//
-//    @Test
-//    public void npmTest() throws Exception {
-//        super.npmTest("declarative-npm-test");
-//    }
 }

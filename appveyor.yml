@@ -1,3 +1,21 @@
+# ~~~ How to use Appveyor ~~~
+# Preconditions: Artifactory with external access.
+#
+# = Trigger tests on commits =
+#   1. Create a new project in Appveyor and choose jenkins-artifactory-plugin.
+#   2. In project settings, copy the 'Webhook URL' and create a new 'Push events' Webhook in Github.
+#
+# = Configure Artifactory =
+#   Create a remote Nuget repository in Artifactory:
+#     A. Repository Key: choco
+#     B. Url: https://chocolatey.org
+#     * The test uses Chocolatey package manager to download Gradle Nuget package through Artifactory's cache.
+#
+# = Override credentials in Appveyor in case of a fork =
+#   1. In the project at Appveyor - Go to settings -> Environment.
+#   2. Override 'JENKINS_ARTIFACTORY_URL' and 'JENKINS_ARTIFACTORY_USERNAME'.
+#   3. Override 'JENKINS_ARTIFACTORY_PASSWORD' with variable encryption.
+
 image:
   - Visual Studio 2017
   - Ubuntu
@@ -22,10 +40,11 @@ init:
   - sh: sdk install gradle && export GRADLE_HOME=/home/appveyor/.sdkman/candidates/gradle/current
 
 test_script:
-  - mvn -V clean verify
+  - mvn -V --batch-mode clean verify
 
 cache:
   - C:\Users\appveyor\.m2\ -> pom.xml
   - /home/appveyor/.m2/ -> pom.xml
+  - /home/appveyor/.sdkman/ -> appveyor.yml
 
 build: off
