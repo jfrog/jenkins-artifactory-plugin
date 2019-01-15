@@ -29,6 +29,9 @@ import java.util.HashMap;
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.junit.Assert.fail;
 
+/**
+ * @author yahavi
+ */
 public class PipelineTestBase {
 
     @ClassRule // The Jenkins instance

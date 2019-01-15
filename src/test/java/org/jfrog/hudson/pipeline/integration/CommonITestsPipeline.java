@@ -14,6 +14,9 @@ import java.util.Set;
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.junit.Assert.*;
 
+/**
+ * @author yahavi
+ */
 public class CommonITestsPipeline extends PipelineTestBase {
 
     CommonITestsPipeline(PipelineType pipelineType) {

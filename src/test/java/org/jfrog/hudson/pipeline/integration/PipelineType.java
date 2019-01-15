@@ -1,5 +1,8 @@
 package org.jfrog.hudson.pipeline.integration;
 
+/**
+ * @author yahavi
+ */
 enum PipelineType {
     SCRIPTED,
     DECLARATIVE;

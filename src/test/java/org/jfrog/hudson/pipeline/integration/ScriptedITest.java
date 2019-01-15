@@ -2,6 +2,9 @@ package org.jfrog.hudson.pipeline.integration;
 
 import org.junit.Test;
 
+/**
+ * @author yahavi
+ */
 public class ScriptedITest extends CommonITestsPipeline {
 
     public ScriptedITest() {

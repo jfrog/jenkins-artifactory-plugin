@@ -7,6 +7,6 @@
   },
   "dependencies": {
     "is-number": "7.0.0",
-    "big-integer": "^1.6.40"
+    "big-integer": "1.6.40"
   }
 }

@@ -2,6 +2,9 @@ package org.jfrog.hudson.pipeline.integration;
 
 import java.util.Arrays;
 
+/**
+ * @author yahavi
+ */
 enum TestRepository {
     LOCAL_REPO1("jenkins-tests-local-1"),
     LOCAL_REPO2("jenkins-tests-local-2"),

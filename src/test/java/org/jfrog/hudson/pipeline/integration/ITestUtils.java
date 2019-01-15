@@ -29,20 +29,45 @@ import java.util.stream.Collectors;
 import static org.jfrog.artifactory.client.model.impl.RepositoryTypeImpl.*;
 import static org.junit.Assert.*;
 
+/**
+ * @author yahavi
+ */
 class ITestUtils {
 
+    /**
+     * Get the integration tests dir.
+     *
+     * @return integration tests dir
+     */
     static Path getIntegrationDir() {
         return Paths.get("src", "test", "resources", "integration");
     }
 
+    /**
+     * Escape backslashes in filesystem path.
+     *
+     * @param path - Filesystem path to fix
+     * @return path compatible with Windows
+     */
     static String fixWindowsPath(String path) {
         return StringUtils.replace(path, "\\", "\\\\");
     }
 
+    /**
+     * Clean up old test repositories.
+     *
+     * @param artifactoryClient - The Artifactory java client
+     */
     static void cleanUpArtifactory(Artifactory artifactoryClient) {
         Arrays.asList(LOCAL, REMOTE, VIRTUAL).forEach(repoType -> cleanUpRepositoryType(artifactoryClient, repoType));
     }
 
+    /**
+     * Clean up old tests repositories with the specified type - Local, Remote or Virtual
+     *
+     * @param artifactoryClient - The Artifactory java client
+     * @param repositoryType    - The repository type to delete
+     */
     private static void cleanUpRepositoryType(Artifactory artifactoryClient, RepositoryType repositoryType) {
         artifactoryClient.repositories().list(repositoryType).stream()
                 .map(LightweightRepository::getKey)
@@ -50,16 +75,33 @@ class ITestUtils {
                 .forEach(repoKey -> artifactoryClient.repository(repoKey).delete());
     }
 
-    static boolean isExistInArtifactory(Artifactory artifactoryClient, String repo, String path) {
-        RepositoryHandle repositoryHandle = artifactoryClient.repository(repo);
+    /**
+     * Return true if the Artifact exists in the repository.
+     *
+     * @param artifactoryClient - Artifactory java client
+     * @param repoKey           - Repository key
+     * @param artifactName      - Artifact name
+     * @return true if the artifact exists in the repository
+     */
+    static boolean isExistInArtifactory(Artifactory artifactoryClient, String repoKey, String artifactName) {
+        RepositoryHandle repositoryHandle = artifactoryClient.repository(repoKey);
         try {
-            repositoryHandle.file(path).info();
+            repositoryHandle.file(artifactName).info();
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
+    /**
+     * Return true if the file exists in the workspace under the input directory.
+     *
+     * @param jenkins  - Jenkins instance
+     * @param build    - Jenkins job
+     * @param dir      - Directory under workspace
+     * @param fileName - File name to search
+     * @return true if the file exists in the workspace under the input directory
+     */
     static boolean isExistInWorkspace(JenkinsRule jenkins, WorkflowRun build, String dir, String fileName) throws IOException, InterruptedException {
         FilePath ws = jenkins.getInstance().getWorkspaceFor(build.getParent());
         if (ws == null) {
@@ -72,35 +114,82 @@ class ITestUtils {
         return ws.child(fileName).exists();
     }
 
-    static void uploadFile(Artifactory artifactoryClient, Path source, String repo) {
-        artifactoryClient.repository(repo).upload(source.getFileName().toString(), source.toFile()).doUpload();
+    /**
+     * Use Artifactory java client to upload a file to Artifactory.
+     *
+     * @param artifactoryClient - Artifactory java client
+     * @param source            - Source file to upload
+     * @param repoKey           - Repository key
+     */
+    static void uploadFile(Artifactory artifactoryClient, Path source, String repoKey) {
+        artifactoryClient.repository(repoKey).upload(source.getFileName().toString(), source.toFile()).doUpload();
     }
 
+    /**
+     * Get build info from Artifactory.
+     *
+     * @param buildInfoClient - Artifactory build-info client
+     * @param buildName       - Build name
+     * @param buildNumber     - Build number
+     * @return build info for the specified build name and number
+     */
     static Build getBuildInfo(ArtifactoryBuildInfoClient buildInfoClient, String buildName, String buildNumber) throws IOException {
         return buildInfoClient.getBuildInfo(buildName, buildNumber);
     }
 
+    /**
+     * Assert that the module dependencies and the expected dependencies are equal.
+     *
+     * @param module               - Module to check
+     * @param expectedDependencies - Expected dependencies
+     */
     static void assertModuleDependencies(Module module, Set<String> expectedDependencies) {
         Set<String> actualDependencies = module.getDependencies().stream().map(Dependency::getId).collect(Collectors.toSet());
         assertEquals(expectedDependencies, actualDependencies);
     }
 
+    /**
+     * Assert that the module artifacts and the expected artifacts are equal.
+     *
+     * @param module            - Module to check
+     * @param expectedArtifacts - Expected artifacts
+     */
     static void assertModuleArtifacts(Module module, Set<String> expectedArtifacts) {
         Set<String> actualArtifacts = module.getArtifacts().stream().map(Artifact::getName).collect(Collectors.toSet());
         assertEquals(expectedArtifacts, actualArtifacts);
     }
 
+    /**
+     * Assert no artifacts in repository.
+     *
+     * @param artifactoryClient - Artifactory java client
+     * @param repoKey           - Repository key
+     */
     static void assertNoArtifactsInRepo(Artifactory artifactoryClient, String repoKey) {
         List<RepoPath> repoPaths = artifactoryClient.searches().repositories(repoKey).artifactsByName("*in").doSearch();
         assertTrue(repoPaths.isEmpty());
     }
 
+    /**
+     * Assert artifacts exist in repository.
+     *
+     * @param artifactoryClient - Artifactory java client
+     * @param repoKey           - Repository key
+     * @param expectedArtifacts - Expected artifacts
+     */
     static void assertArtifactsInRepo(Artifactory artifactoryClient, String repoKey, Set<String> expectedArtifacts) {
         List<RepoPath> repoPaths = artifactoryClient.searches().repositories(repoKey).artifactsByName("*in").doSearch();
         Set<String> actualArtifacts = repoPaths.stream().map(RepoPath::getItemPath).collect(Collectors.toSet());
         assertEquals(expectedArtifacts, actualArtifacts);
     }
 
+    /**
+     * Get module from the build-info object and assert its existence.
+     *
+     * @param buildInfo  - Build-info object
+     * @param moduleName - Module name
+     * @return module from the build-info
+     */
     static Module getAndAssertModule(Build buildInfo, String moduleName) {
         assertNotNull(buildInfo);
         assertNotNull(buildInfo.getModules());
@@ -109,17 +198,35 @@ class ITestUtils {
         return module;
     }
 
+    /**
+     * Assert that the artifacts and dependencies lists are not empty in the input module.
+     *
+     * @param buildInfo  - Build info object
+     * @param moduleName - Module name
+     */
     static void assertModuleContainsArtifactsAndDependencies(Build buildInfo, String moduleName) {
         Module module = getAndAssertModule(buildInfo, moduleName);
         assertTrue(CollectionUtils.isNotEmpty(module.getArtifacts()));
         assertTrue(CollectionUtils.isNotEmpty(module.getDependencies()));
     }
 
+    /**
+     * Assert that the artifacts list is not empty in the input module.
+     *
+     * @param buildInfo  - Build info object
+     * @param moduleName - Module name
+     */
     static void assertModuleContainsArtifacts(Build buildInfo, String moduleName) {
         Module module = getAndAssertModule(buildInfo, moduleName);
         assertTrue(CollectionUtils.isNotEmpty(module.getArtifacts()));
     }
 
+    /**
+     * Delete build in Artifactory.
+     *
+     * @param artifactoryClient - Artifactory java client
+     * @param buildName         - Build name to delete
+     */
     static void deleteBuild(Artifactory artifactoryClient, String buildName) throws IOException {
         artifactoryClient.restCall(new ArtifactoryRequestImpl()
                 .method(ArtifactoryRequest.Method.DELETE)
