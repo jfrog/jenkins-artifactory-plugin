@@ -5,6 +5,7 @@ stack: jdk 8, node 8
 skip_tags: true
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  GRADLE_OPTS: -Dorg.gradle.daemon=false
   JENKINS_ARTIFACTORY_URL:
     secure: RIh0gGFDn2JAnLUEEqLsQnZ5H3XFWg1s+Qq8Z4i+Xu+FtQf6Tsu2AnfY4/6AaXJ8
   JENKINS_ARTIFACTORY_USERNAME:
@@ -13,13 +14,12 @@ environment:
     secure: Um8o75MQIieSavIemF4ySA==
 
 init:
-  - cmd: "choco install gradle -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
-  - cmd: "choco install maven -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
+  - cmd: "choco install maven gradle -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
   - cmd: refreshenv
   - sh: curl -s "https://get.sdkman.io" | bash
   - sh: source "/home/appveyor/.sdkman/bin/sdkman-init.sh"
-  - sh: export MAVEN_HOME=/home/appveyor/.sdkman/candidates/maven/current
-  - sh: export GRADLE_HOME=/home/appveyor/.sdkman/candidates/gradle/current
+  - sh: sdk install maven && export MAVEN_HOME=/home/appveyor/.sdkman/candidates/maven/current
+  - sh: sdk install gradle && export GRADLE_HOME=/home/appveyor/.sdkman/candidates/gradle/current
 
 test_script:
   - mvn -V clean verify
