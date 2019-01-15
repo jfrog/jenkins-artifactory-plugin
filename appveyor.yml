@@ -13,9 +13,9 @@ environment:
     secure: Um8o75MQIieSavIemF4ySA==
 
 init:
-  - cmd: "choco install gradle -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
-  - sh: sudo apt -yq update
-  - sh: sudo apt upgrade -y maven gradle
+  - cmd: "choco install gradle -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD% && refreshenv"
+  - sh: sudo apt -yq update && sudo apt upgrade -y maven gradle
+  - sh: export MAVEN_HOME=/usr/share/maven && export GRADLE_HOME=/opt/gradle
 
 test_script:
   - mvn -V clean verify

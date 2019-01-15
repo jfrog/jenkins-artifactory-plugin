@@ -20,7 +20,6 @@ import org.jfrog.build.api.Module;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.junit.*;
-import org.junit.rules.Timeout;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
@@ -32,7 +31,6 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.jfrog.hudson.pipeline.integrationtests.ITestUtils.*;
 import static org.junit.Assert.*;
@@ -41,9 +39,6 @@ public class PipelineITestBase {
 
     @ClassRule // The Jenkins instance
     public static JenkinsRule jenkins = new JenkinsRule();
-
-    @Rule
-    public Timeout globalTimeout = new Timeout(10, TimeUnit.MINUTES);
 
     private static final String ARTIFACTORY_URL = System.getenv("JENKINS_ARTIFACTORY_URL");
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_ARTIFACTORY_USERNAME");
@@ -76,6 +71,17 @@ public class PipelineITestBase {
         Arrays.stream(TestRepository.values()).forEach(this::createRepo);
     }
 
+    @After
+    public void deleteRepos() {
+        Arrays.stream(TestRepository.values()).forEach(repoName -> artifactoryClient.repository(getRepoKey(repoName)).delete());
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        buildInfoClient.close();
+        artifactoryClient.close();
+    }
+
     private static String getRepoKey(TestRepository repository) {
         return String.format("%s-%d", repository.getRepoName(), currentTime);
     }
@@ -96,17 +102,6 @@ public class PipelineITestBase {
         } catch (Exception e) {
             fail(ExceptionUtils.getRootCauseMessage(e));
         }
-    }
-
-    @After
-    public void deleteRepos() {
-        Arrays.stream(TestRepository.values()).forEach(repoName -> artifactoryClient.repository(getRepoKey(repoName)).delete());
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        buildInfoClient.close();
-        artifactoryClient.close();
     }
 
     private static void createClients() {

@@ -441,6 +441,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.1</version>
                 <configuration>
+                    <systemPropertyVariables>
+                        <!--This will disable JenkinsRule timeout-->
+                        <maven.surefire.debug>true</maven.surefire.debug>
+                    </systemPropertyVariables>
                     <excludes>
                         <exclude>**/InjectedTest.java</exclude>
                         <exclude>**/*ITest.java</exclude>
