@@ -1,33 +1,33 @@
-## Artifactory Plugin for Jenkins
+# Artifactory Plugin for Jenkins
 
-### General
+## General
 The plugin integrates Jenkins and Artifactory to publish, resolve, promote and release traceable build artifacts.
 For more information please visit the [JFrog Artifactory Plugin documentation](https://www.jfrog.com/confluence/display/RTF/Jenkins+Artifactory+Plug-in)
 
-### How to Contribute
+## How to Contribute
 JFrog welcomes community contribution through pull requests.
 
-#### Important:
+### Important:
 The plugin code is stored in two github repositories:
 https://github.com/jfrog/jenkins-artifactory-plugin and
 https://github.com/jenkinsci/artifactory-plugin
 
 Please make sure to submit pull requests to *https://github.com/jfrog/jenkins-artifactory-plugin* only.
 
-### How to build the plugin code
+## How to build the plugin code
 To build the plugin, please use Maven with JDK 8 and run:
 ```console
 > mvn clean install
 ```
 
 ## Tests
-#### Unit tests
+### Unit tests
 To run unit tests execute the following command: 
 ```
 > mvn clean test
 ```
 
-#### Integration tests
+### Integration tests
 * The *ARTIFACTORY_URL* environment variable should be set to the Artifactory URL.
 * The *ARTIFACTORY_USERNAME* environment variable should be set to the Artifactory username.
 * The *ARTIFACTORY_PASSWORD* environment variable should be set to the Artifactory password.

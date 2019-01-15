@@ -9,7 +9,7 @@
 #   Create a remote Nuget repository in Artifactory:
 #     A. Repository Key: choco
 #     B. Url: https://chocolatey.org
-#     * The test uses Chocolatey package manager to download Gradle Nuget package through Artifactory's cache.
+#     * The test uses Chocolatey package manager to download Maven and Gradle Nuget packages through Artifactory's cache.
 #
 # = Override credentials in Appveyor in case of a fork =
 #   1. In the project at Appveyor - Go to settings -> Environment.
@@ -40,7 +40,7 @@ init:
   - sh: sdk install gradle && export GRADLE_HOME=/home/appveyor/.sdkman/candidates/gradle/current
 
 test_script:
-  - mvn -V --batch-mode clean verify
+  - mvn -V -B clean verify
 
 cache:
   - C:\Users\appveyor\.m2\ -> pom.xml
