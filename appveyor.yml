@@ -32,7 +32,7 @@ environment:
     secure: Um8o75MQIieSavIemF4ySA==
 
 init:
-  - cmd: "choco install maven gradle -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
+  - cmd: "choco install maven gradle -i -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
   - cmd: refreshenv
   - sh: curl -s "https://get.sdkman.io" | bash
   - sh: source "/home/appveyor/.sdkman/bin/sdkman-init.sh"

@@ -17,10 +17,10 @@ node {
     rtMaven.resolver releaseRepo: "${JCENTER_REMOTE_REPO}", snapshotRepo: "${JCENTER_REMOTE_REPO}", server: rtServer
 
     stage "Copy project example"
-    FileUtils.copyDirectory(Paths.get("${MAVEN_PROJECT_PATH}").toFile(), Paths.get(pwd(), "maven-example").toFile())
+    FileUtils.copyDirectory(Paths.get("${MAVEN_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-maven-example").toFile())
 
     stage "Run maven"
-    rtMaven.run pom: "maven-example", goals: "clean install", buildInfo: buildInfo
+    rtMaven.run pom: "scripted-maven-example", goals: "clean install", buildInfo: buildInfo
 
     stage "Publish build info"
     rtServer.publishBuildInfo buildInfo

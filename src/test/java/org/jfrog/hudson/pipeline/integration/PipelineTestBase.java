@@ -48,7 +48,7 @@ public class PipelineTestBase {
     static Artifactory artifactoryClient;
 
     private ClassLoader classLoader = PipelineTestBase.class.getClassLoader();
-    private PipelineType pipelineType;
+    PipelineType pipelineType;
 
     PipelineTestBase(PipelineType pipelineType) {
         this.pipelineType = pipelineType;

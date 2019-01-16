@@ -17,10 +17,10 @@ node {
     rtGradle.resolver repo: "${JCENTER_REMOTE_REPO}", server: rtServer
 
     stage "Copy project example"
-    FileUtils.copyDirectory(Paths.get("${GRADLE_CI_PROJECT_PATH}").toFile(), Paths.get(pwd(), "gradle-example-ci-server").toFile())
+    FileUtils.copyDirectory(Paths.get("${GRADLE_CI_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-gradle-example-ci-server").toFile())
 
     stage "Run Gradle"
-    rtGradle.run rootDir: "gradle-example-ci-server", buildFile: "build.gradle", tasks: "clean artifactoryPublish", buildInfo: buildInfo
+    rtGradle.run rootDir: "scripted-gradle-example-ci-server", buildFile: "build.gradle", tasks: "clean artifactoryPublish", buildInfo: buildInfo
 
     stage "Publish build info"
     rtServer.publishBuildInfo buildInfo

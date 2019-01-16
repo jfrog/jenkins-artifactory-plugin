@@ -18,10 +18,10 @@ node {
     rtGradle.usesPlugin = true
 
     stage "Copy project example"
-    FileUtils.copyDirectory(Paths.get("${GRADLE_PROJECT_PATH}").toFile(), Paths.get(pwd(), "gradle-example").toFile())
+    FileUtils.copyDirectory(Paths.get("${GRADLE_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-gradle-example").toFile())
 
     stage "Run Gradle"
-    rtGradle.run rootDir: "gradle-example", buildFile: "build.gradle", tasks: "clean artifactoryPublish", buildInfo: buildInfo
+    rtGradle.run rootDir: "scripted-gradle-example", buildFile: "build.gradle", tasks: "clean artifactoryPublish", buildInfo: buildInfo
 
     stage "Publish build info"
     rtServer.publishBuildInfo buildInfo

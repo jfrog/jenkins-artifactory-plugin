@@ -19,19 +19,21 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 /**
  * Created by Yahav Itzhak on 25 Nov 2018.
  */
-public class NpmInstallExecutor {
+public class NpmInstallExecutor implements Executor {
 
     private BuildInfo buildInfo;
     private NpmBuild npmBuild;
+    private String npmExe;
     private String args;
     private FilePath ws;
     private String path;
     private Log logger;
     private Run build;
 
-    public NpmInstallExecutor(BuildInfo buildInfo, NpmBuild npmBuild, String args, FilePath ws, String path, TaskListener listener, Run build) {
+    public NpmInstallExecutor(BuildInfo buildInfo, NpmBuild npmBuild, String npmExe, String args, FilePath ws, String path, TaskListener listener, Run build) {
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.npmBuild = npmBuild;
+        this.npmExe = npmExe;
         this.args = args;
         this.ws = ws;
         this.path = path;
@@ -39,18 +41,22 @@ public class NpmInstallExecutor {
         this.build = build;
     }
 
-    public BuildInfo execute() throws Exception {
+    public BuildInfo getBuildInfo() {
+        return buildInfo;
+    }
+
+    @Override
+    public void execute() throws Exception {
         NpmResolver resolver = (NpmResolver) npmBuild.getResolver();
         if (resolver.isEmpty()) {
             throw new IllegalStateException("Resolver must be configured with resolution repository and Artifactory server");
         }
-        Build build = ws.act(new NpmInstallCallable(createArtifactoryClientBuilder(resolver), resolver.getRepo(), npmBuild.getExecutablePath(), args, path, logger));
+        Build build = ws.act(new NpmInstallCallable(createArtifactoryClientBuilder(resolver), resolver.getRepo(), npmExe, args, path, logger));
         if (build == null) {
             throw new RuntimeException("npm build failed");
         }
         buildInfo.append(build);
         buildInfo.setAgentName(Utils.getAgentName(ws));
-        return buildInfo;
     }
 
     private ArtifactoryDependenciesClientBuilder createArtifactoryClientBuilder(NpmResolver resolver) {

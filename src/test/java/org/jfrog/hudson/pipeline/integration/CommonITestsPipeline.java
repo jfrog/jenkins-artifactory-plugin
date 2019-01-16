@@ -115,14 +115,14 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void gradleCiServerTest(String buildName) throws Exception {
-        Set<String> expectedArtifacts = Sets.newHashSet("gradle-example-ci-server-1.0.jar", "ivy-1.0.xml", "gradle-example-ci-server-1.0.pom");
+        Set<String> expectedArtifacts = Sets.newHashSet(pipelineType.toString() + "-gradle-example-ci-server-1.0.jar", "ivy-1.0.xml", pipelineType.toString() + "-gradle-example-ci-server-1.0.pom");
         String buildNumber = "3";
         try {
             runPipeline("gradleCiServer");
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             assertEquals(5, buildInfo.getModules().size());
 
-            Module module = getAndAssertModule(buildInfo, "org.jfrog.example.gradle:gradle-example-ci-server:1.0");
+            Module module = getAndAssertModule(buildInfo, "org.jfrog.example.gradle:" + pipelineType.toString() + "-gradle-example-ci-server:1.0");
             assertModuleArtifacts(module, expectedArtifacts);
             assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
 

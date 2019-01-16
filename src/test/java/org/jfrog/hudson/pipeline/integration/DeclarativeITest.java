@@ -40,4 +40,9 @@ public class DeclarativeITest extends CommonITestsPipeline {
     public void gradleCiServerTest() throws Exception {
         super.gradleCiServerTest("declarative-gradle-ci-test");
     }
+
+    @Test
+    public void npmTest() throws Exception {
+        super.npmTest("declarative-npm-test");
+    }
 }

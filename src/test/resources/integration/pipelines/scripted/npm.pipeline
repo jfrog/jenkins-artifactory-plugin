@@ -18,17 +18,17 @@ node {
 
 
     stage "Copy project example"
-    FileUtils.copyDirectory(Paths.get("${NPM_PROJECT_PATH}").toFile(), Paths.get(pwd(), "npm-example").toFile())
+    FileUtils.copyDirectory(Paths.get("${NPM_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-npm-example").toFile())
 
     stage "Install npm"
-    rtNpm.install buildInfo: buildInfo, path: "npm-example"//, args: "--production"
+    rtNpm.install buildInfo: buildInfo, path: "scripted-npm-example"
 
 
-    stage ("Publish npm")
-    rtNpm.publish buildInfo: buildInfo, path: "npm-example"
+    stage "Publish npm"
+    rtNpm.publish buildInfo: buildInfo, path: "scripted-npm-example"
 
 
-    stage ("Publish build info")
+    stage "Publish build info"
     rtServer.publishBuildInfo buildInfo
 
 }

@@ -33,13 +33,13 @@ node {
     )
 
     stage "Copy project example"
-    FileUtils.copyDirectory(Paths.get("${MAVEN_PROJECT_PATH}").toFile(), Paths.get(pwd(), "maven-example").toFile())
+    FileUtils.copyDirectory(Paths.get("${MAVEN_PROJECT_PATH}").toFile(), Paths.get(pwd(), "declarative-maven-example").toFile())
 
     stage "Run maven"
     rtMavenRun(
             buildName: buildName,
             buildNumber: buildNumber,
-            pom: 'maven-example/pom.xml',
+            pom: 'declarative-maven-example/pom.xml',
             goals: 'clean install',
             deployerId: "MAVEN_DEPLOYER",
             resolverId: "MAVEN_RESOLVER"

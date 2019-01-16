@@ -21,38 +21,44 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 /**
  * Created by Yahav Itzhak on 25 Nov 2018.
  */
-public class NpmPublishExecutor {
+public class NpmPublishExecutor implements Executor {
 
     private StepContext context;
     private BuildInfo buildInfo;
     private NpmBuild npmBuild;
+    private String npmExe;
     private FilePath ws;
     private String path;
     private Log logger;
     private Run build;
 
-    public NpmPublishExecutor(StepContext context, BuildInfo buildInfo, NpmBuild npmBuild, String path, FilePath ws, TaskListener listener, Run build) {
+    public NpmPublishExecutor(StepContext context, BuildInfo buildInfo, NpmBuild npmBuild, String npmExe, String path, FilePath ws, TaskListener listener, Run build) {
         this.context = context;
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.npmBuild = npmBuild;
+        this.npmExe = npmExe;
         this.path = path;
         this.ws = ws;
         this.logger = new JenkinsBuildInfoLog(listener);
         this.build = build;
     }
 
-    public BuildInfo execute() throws Exception {
+    public BuildInfo getBuildInfo() {
+        return buildInfo;
+    }
+
+    @Override
+    public void execute() throws Exception {
         NpmDeployer deployer = (NpmDeployer) npmBuild.getDeployer();
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }
-        Build build = ws.act(new NpmPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), npmBuild.getExecutablePath(), deployer, path, logger));
+        Build build = ws.act(new NpmPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), npmExe, deployer, path, logger));
         if (build == null) {
             throw new RuntimeException("npm publish failed");
         }
         buildInfo.append(build);
         buildInfo.setAgentName(Utils.getAgentName(ws));
-        return buildInfo;
     }
 
     private ArtifactoryBuildInfoClientBuilder createArtifactoryClientBuilder(Deployer deployer) {

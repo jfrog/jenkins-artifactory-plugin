@@ -2,11 +2,11 @@ package org.jfrog.hudson.trigger;
 
 import antlr.ANTLRException;
 import hudson.Extension;
+import hudson.maven.MavenModuleSet;
 import hudson.model.*;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jfrog.build.api.Build;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryHttpClient;
 import org.jfrog.build.client.ItemLastModified;
@@ -18,8 +18,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -62,9 +60,13 @@ public class ArtifactoryTrigger extends Trigger {
                     this.lastModified = responseLastModified;
                     if (job instanceof Project) {
                         AbstractProject<?, ?> project = ((Project) job).getRootProject();
-                        logger.fine("Updating " + job.getName());
-                        project.save();
-                        project.scheduleBuild(new ArtifactoryCause(itemLastModified.getUri()));
+                        saveAndSchedule(itemLastModified, project);
+                        return;
+                    }
+
+                    if (job instanceof MavenModuleSet) {
+                        AbstractProject project = ((MavenModuleSet)job).getRootProject();
+                        saveAndSchedule(itemLastModified, project);
                         return;
                     }
 
@@ -75,12 +77,18 @@ public class ArtifactoryTrigger extends Trigger {
                         project.scheduleBuild(new ArtifactoryCause(itemLastModified.getUri()));
                     }
                 } else {
-                    logger.fine(job.getName() + " job received last modified time that is not newer for " + path);
+                    logger.fine(String.format("Artifactory trigger did not trigger job %s, since last modified time: %d is earlier or equal than %d for path %s", job.getName(), responseLastModified, lastModified, path));
                 }
         } catch (IOException | ParseException e) {
             logger.severe("Received an error: " + e.getMessage());
             logger.fine("Received an error: " + e);
         }
+    }
+
+    private void saveAndSchedule(ItemLastModified itemLastModified, AbstractProject project) throws IOException {
+        logger.fine("Updating " + job.getName());
+        project.save();
+        project.scheduleBuild(new ArtifactoryCause(itemLastModified.getUri()));
     }
 
     @Override
@@ -108,25 +116,15 @@ public class ArtifactoryTrigger extends Trigger {
         return (DescriptorImpl) super.getDescriptor();
     }
 
-    private long getLastModified(String date) throws ParseException {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Build.STARTED_FORMAT);
-        Date parse = simpleDateFormat.parse(date);
-        return parse.getTime();
-    }
-
     @Extension
     public static final class DescriptorImpl extends TriggerDescriptor {
-
-        public boolean isApplicable(AbstractProject<?, ?> item) {
-            return true;
-        }
 
         public String getDisplayName() {
             return "Enable Artifactory trigger";
         }
 
         public boolean isApplicable(Item item) {
-            return true;
+            return (item instanceof WorkflowJob || item instanceof Project || item instanceof MavenModuleSet);
         }
 
         public List<ArtifactoryServer> getArtifactoryServers() {

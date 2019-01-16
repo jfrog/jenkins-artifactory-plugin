@@ -1,14 +1,17 @@
 package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
+import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.NpmInstallExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.NpmBuild;
@@ -40,6 +43,12 @@ public class NpmInstallStep extends AbstractStepImpl {
         private transient TaskListener listener;
 
         @StepContextParameter
+        private transient Launcher launcher;
+
+        @StepContextParameter
+        private transient EnvVars env;
+
+        @StepContextParameter
         private transient FilePath ws;
 
         @StepContextParameter
@@ -50,7 +59,10 @@ public class NpmInstallStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            return new NpmInstallExecutor(step.buildInfo, step.npmBuild, step.args, ws, step.path, listener, build).execute();
+            String npmExe = Utils.getNpmExe(listener, env, launcher, step.npmBuild.getTool());
+            NpmInstallExecutor npmInstallExecutor = new NpmInstallExecutor(step.buildInfo, step.npmBuild, npmExe, step.args, ws, step.path, listener, build);
+            npmInstallExecutor.execute();
+            return npmInstallExecutor.getBuildInfo();
         }
     }
 

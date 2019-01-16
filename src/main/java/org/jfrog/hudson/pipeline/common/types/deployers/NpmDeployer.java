@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.common.types.deployers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.RepositoryConf;
@@ -47,6 +48,7 @@ public class NpmDeployer extends Deployer {
     }
 
     @Override
+    @JsonIgnore
     public PublisherContext.Builder getContextBuilder() {
         return new PublisherContext.Builder()
                 .artifactoryServer(getArtifactoryServer())

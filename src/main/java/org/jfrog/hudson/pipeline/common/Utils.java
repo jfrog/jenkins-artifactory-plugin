@@ -16,6 +16,7 @@ import hudson.remoting.VirtualChannel;
 import hudson.util.ArgumentListBuilder;
 import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
+import jenkins.plugins.nodejs.tools.NodeJSInstallation;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -42,6 +43,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -337,7 +339,8 @@ public class Utils {
 
     /**
      * Add the buildInfo to step variables if missing and set its cps script.
-     * @param cpsScript the cps script
+     *
+     * @param cpsScript     the cps script
      * @param stepVariables step variables map
      * @return the build info
      */
@@ -387,5 +390,34 @@ public class Utils {
 
     public static String replaceTildeWithUserHome(String path) {
         return path.replaceFirst("^~", System.getProperty("user.home"));
+    }
+
+    public static String getNpmExe(TaskListener listener, EnvVars env, Launcher launcher, String nodeTool) throws IOException, InterruptedException {
+        // npm from tool
+        if (StringUtils.isNotEmpty(nodeTool)) {
+            NodeJSInstallation nodeInstallation = getNpmInstallation(nodeTool);
+            if (nodeInstallation == null) {
+                listener.error("Couldn't find NodeJS tool '" + nodeTool + "'");
+                throw new Run.RunnerAbortedException();
+            }
+            Node node = ActionableHelper.getNode(launcher);
+            nodeInstallation = nodeInstallation.forNode(node, listener).forEnvironment(env);
+            String nodeExe = nodeInstallation.getExecutable(launcher);
+            return Paths.get(nodeExe).resolveSibling("npm").toString();
+        }
+        // npm from environment
+        if (env.containsKey("NODEJS_HOME")) {
+            return Paths.get(env.get("NODEJS_HOME"), "bin", "npm").toString();
+        }
+        // npm from path
+        return "";
+    }
+
+    private static NodeJSInstallation getNpmInstallation(String nodeTool) {
+        NodeJSInstallation[] installations = Jenkins.getInstance().getDescriptorByType(NodeJSInstallation.DescriptorImpl.class).getInstallations();
+        return Arrays.stream(installations)
+                .filter(i -> nodeTool.equals(i.getName()))
+                .findFirst()
+                .orElse(null);
     }
 }

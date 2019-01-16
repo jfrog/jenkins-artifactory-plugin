@@ -18,21 +18,10 @@ import static org.jfrog.hudson.pipeline.common.Utils.appendBuildInfo;
  * Created by Yahav Itzhak on 26 Dec 2018.
  */
 public class NpmBuild extends PackageManagerBuild {
-    private String executablePath = "";
 
     public NpmBuild() {
         deployer = new NpmDeployer();
         resolver = new NpmResolver();
-    }
-
-    @Whitelisted
-    public String getExecutablePath() {
-        return executablePath;
-    }
-
-    @Whitelisted
-    public void setExecutablePath(String executablePath) {
-        this.executablePath = executablePath;
     }
 
     @Whitelisted

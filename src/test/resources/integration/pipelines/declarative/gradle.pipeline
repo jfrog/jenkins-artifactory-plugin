@@ -31,14 +31,14 @@ node {
     )
 
     stage "Copy project example"
-    FileUtils.copyDirectory(Paths.get("${GRADLE_PROJECT_PATH}").toFile(), Paths.get(pwd(), "gradle-example").toFile())
+    FileUtils.copyDirectory(Paths.get("${GRADLE_PROJECT_PATH}").toFile(), Paths.get(pwd(), "declarative-gradle-example").toFile())
 
     stage "Run Gradle"
     rtGradleRun(
             buildName: buildName,
             buildNumber: buildNumber,
             usesPlugin: true,
-            rootDir: 'gradle-example',
+            rootDir: 'declarative-gradle-example',
             buildFile: 'build.gradle',
             tasks: 'clean artifactoryPublish',
             deployerId: "GRADLE_DEPLOYER",

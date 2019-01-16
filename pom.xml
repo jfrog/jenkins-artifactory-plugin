@@ -164,6 +164,12 @@
             <version>1.22</version>
         </dependency>
         <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>nodejs</artifactId>
+            <version>1.2.7</version>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-api</artifactId>
             <version>${buildinfo.version}</version>
