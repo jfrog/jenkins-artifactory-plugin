@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.declarative.utils;
 import com.fasterxml.jackson.databind.JsonNode;
 import hudson.FilePath;
 import hudson.model.Run;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -54,7 +55,7 @@ public class DeclarativePipelineUtils {
     }
 
     static String getBuildDataFileName(String stepName, String stepId) {
-        return stepName + "_" + stepId;
+        return stepName + "_" + Base64.encodeBase64URLSafeString(stepId.getBytes());
     }
 
     /**
