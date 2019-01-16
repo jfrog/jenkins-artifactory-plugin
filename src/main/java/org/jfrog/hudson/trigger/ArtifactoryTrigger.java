@@ -77,7 +77,7 @@ public class ArtifactoryTrigger extends Trigger {
                         project.scheduleBuild(new ArtifactoryCause(itemLastModified.getUri()));
                     }
                 } else {
-                    logger.fine(job.getName() + " job received last modified time (" + responseLastModified + ") that is not newer (" + lastModified +") for " + path);
+                    logger.fine(String.format("Artifactory trigger did not trigger job %s, since last modified time: %d is earlier or equal than %d for path %s", job.getName(), responseLastModified, lastModified, path));
                 }
         } catch (IOException | ParseException e) {
             logger.severe("Received an error: " + e.getMessage());
