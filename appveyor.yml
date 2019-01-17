@@ -32,11 +32,12 @@ environment:
     secure: Um8o75MQIieSavIemF4ySA==
 
 init:
-  - cmd: "choco install maven gradle -i -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
+  - cmd: "choco install maven --version 3.3.9.2 -i -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
+  - cmd: "choco install gradle -i -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
   - cmd: refreshenv
   - sh: curl -s "https://get.sdkman.io" | bash
   - sh: source "/home/appveyor/.sdkman/bin/sdkman-init.sh"
-  - sh: sdk install maven && export MAVEN_HOME=/home/appveyor/.sdkman/candidates/maven/current
+  - sh: sdk install maven 3.3.9 && export MAVEN_HOME=/home/appveyor/.sdkman/candidates/maven/current
   - sh: sdk install gradle && export GRADLE_HOME=/home/appveyor/.sdkman/candidates/gradle/current
 
 test_script:
@@ -44,6 +45,8 @@ test_script:
 
 cache:
   - C:\Users\appveyor\.m2\ -> pom.xml
+  - C:\ProgramData\chocolatey\bin -> appveyor.yml
+  - C:\ProgramData\chocolatey\lib -> appveyor.yml
   - /home/appveyor/.m2/ -> pom.xml
   - /home/appveyor/.sdkman/ -> appveyor.yml
 
