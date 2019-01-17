@@ -2,7 +2,7 @@ package integration.pipelines.declarative
 
 node {
     def serverId = "Artifactory-1"
-    def buildName = "declarative-promotion-test"
+    def buildName = "declarative:promotion test"
     def buildNumber = "4"
 
     stage "Configuration"

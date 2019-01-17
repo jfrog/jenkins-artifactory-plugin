@@ -13,36 +13,36 @@ public class ScriptedITest extends CommonITestsPipeline {
 
     @Test
     public void downloadTest() throws Exception {
-        super.downloadTest("scripted-download-test");
+        super.downloadTest("scripted:download test");
     }
 
     @Test
     public void uploadTest() throws Exception {
-        super.uploadTest("scripted-upload-test");
+        super.uploadTest("scripted:upload test");
     }
 
     @Test
     public void promotionTest() throws Exception {
-        super.promotionTest("scripted-promotion-test");
+        super.promotionTest("scripted:promotion test");
     }
 
     @Test
     public void mavenTest() throws Exception {
-        super.mavenTest("scripted-maven-test");
+        super.mavenTest("scripted:maven test");
     }
 
     @Test
     public void gradleTest() throws Exception {
-        super.gradleTest("scripted-gradle-test");
+        super.gradleTest("scripted:gradle test");
     }
 
     @Test
     public void gradleCiServerTest() throws Exception {
-        super.gradleCiServerTest("scripted-gradle-ci-test");
+        super.gradleCiServerTest("scripted:gradle-ci test");
     }
 
     @Test
     public void npmTest() throws Exception {
-        super.npmTest("scripted-npm-test");
+        super.npmTest("scripted:npm test");
     }
 }

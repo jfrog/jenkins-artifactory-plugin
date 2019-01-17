@@ -8,7 +8,7 @@ node {
     stage "Configure Artifactory"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     def buildInfo = Artifactory.newBuildInfo()
-    buildInfo.name = "scripted-maven-test"
+    buildInfo.name = "scripted:maven test"
     buildInfo.number = "3"
 
     stage "Configure Maven build"

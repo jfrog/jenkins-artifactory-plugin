@@ -13,36 +13,36 @@ public class DeclarativeITest extends CommonITestsPipeline {
 
     @Test
     public void downloadTest() throws Exception {
-        super.downloadTest("declarative-download-test");
+        super.downloadTest("declarative:download test");
     }
 
     @Test
     public void uploadTest() throws Exception {
-        super.uploadTest("declarative-upload-test");
+        super.uploadTest("declarative:upload test");
     }
 
     @Test
     public void promotionTest() throws Exception {
-        super.promotionTest("declarative-promotion-test");
+        super.promotionTest("declarative:promotion test");
     }
 
     @Test
     public void mavenTest() throws Exception {
-        super.mavenTest("declarative-maven-test");
+        super.mavenTest("declarative:maven test");
     }
 
     @Test
     public void gradleTest() throws Exception {
-        super.gradleTest("declarative-gradle-test");
+        super.gradleTest("declarative:gradle test");
     }
 
     @Test
     public void gradleCiServerTest() throws Exception {
-        super.gradleCiServerTest("declarative-gradle-ci-test");
+        super.gradleCiServerTest("declarative:gradle-ci test");
     }
 
     @Test
     public void npmTest() throws Exception {
-        super.npmTest("declarative-npm-test");
+        super.npmTest("declarative:npm test");
     }
 }

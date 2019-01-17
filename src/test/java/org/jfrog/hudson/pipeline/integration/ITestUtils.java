@@ -19,6 +19,8 @@ import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfo
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -134,7 +136,7 @@ class ITestUtils {
      * @return build info for the specified build name and number
      */
     static Build getBuildInfo(ArtifactoryBuildInfoClient buildInfoClient, String buildName, String buildNumber) throws IOException {
-        return buildInfoClient.getBuildInfo(buildName, buildNumber);
+        return buildInfoClient.getBuildInfo(encodeBuildName(buildName), buildNumber);
     }
 
     /**
@@ -230,7 +232,11 @@ class ITestUtils {
     static void deleteBuild(Artifactory artifactoryClient, String buildName) throws IOException {
         artifactoryClient.restCall(new ArtifactoryRequestImpl()
                 .method(ArtifactoryRequest.Method.DELETE)
-                .apiUrl("api/build/" + buildName)
+                .apiUrl("api/build/" + encodeBuildName(buildName))
                 .addQueryParam("deleteAll", "1"));
+    }
+
+    private static String encodeBuildName(String buildName) throws UnsupportedEncodingException {
+        return URLEncoder.encode(buildName, "UTF-8").replace("+", "%20");
     }
 }
