@@ -23,7 +23,7 @@
     </parent>
 
     <artifactId>artifactory</artifactId>
-    <version>3.0.x-SNAPSHOT</version>
+    <version>3.1.x-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>Jenkins Artifactory Plugin</name>
     <description>Integrates Artifactory to Jenkins</description>
