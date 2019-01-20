@@ -233,7 +233,8 @@ class ITestUtils {
         artifactoryClient.restCall(new ArtifactoryRequestImpl()
                 .method(ArtifactoryRequest.Method.DELETE)
                 .apiUrl("api/build/" + encodeBuildName(buildName))
-                .addQueryParam("deleteAll", "1"));
+                .addQueryParam("deleteAll", "1")
+                .addQueryParam("artifacts", "1"));
     }
 
     private static String encodeBuildName(String buildName) throws UnsupportedEncodingException {

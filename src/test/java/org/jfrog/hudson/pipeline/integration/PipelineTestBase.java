@@ -162,7 +162,7 @@ public class PipelineTestBase {
      */
     WorkflowRun runPipeline(String name) throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
-        jenkins.getInstance().getWorkspaceFor(project).mkdirs(); // TODO - Delete after fix
+        jenkins.getInstance().getWorkspaceFor(project).mkdirs();
         project.setDefinition(new CpsFlowDefinition(readPipeline(name)));
         return jenkins.buildAndAssertSuccess(project);
     }

@@ -22,7 +22,6 @@ enum TestRepository {
         return repoName;
     }
 
-
     public static String[] toArray() {
         return Arrays.stream(values()).map(TestRepository::getRepoName).toArray(String[]::new);
     }

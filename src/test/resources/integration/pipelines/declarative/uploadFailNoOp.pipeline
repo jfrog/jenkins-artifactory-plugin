@@ -3,6 +3,7 @@ package integration.pipelines.declarative
 node {
     def serverId = "Artifactory-1"
 
+    stage "Configuration"
     rtServer(
             id: serverId,
             url: "${env.JENKINS_ARTIFACTORY_URL}",
@@ -10,6 +11,7 @@ node {
             password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     )
 
+    stage "Upload"
     rtUpload(
             serverId: serverId,
             spec: """{
