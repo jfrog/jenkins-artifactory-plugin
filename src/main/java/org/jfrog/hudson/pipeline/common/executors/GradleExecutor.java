@@ -133,7 +133,7 @@ public class GradleExecutor implements Executor {
     private void exe(ArgumentListBuilder args) {
         boolean failed;
         try {
-            int exitValue = launcher.launch().cmds(args).envs(extendedEnv).stdout(listener).pwd(ws).join();
+            int exitValue = launcher.launch().cmds(args).envs(extendedEnv).stdout(listener).stderr(listener.getLogger()).pwd(ws).join();
             failed = (exitValue != 0);
         } catch (Exception e) {
             listener.error("Couldn't execute gradle task. " + e.getMessage());

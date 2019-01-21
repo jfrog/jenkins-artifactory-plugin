@@ -113,7 +113,7 @@ public class Maven3Builder extends Builder {
 
     private boolean RunMaven(Run<?, ?> build, Launcher launcher, TaskListener listener, EnvVars env, FilePath workDir, String[] cmds) throws InterruptedException, IOException {
         try {
-            int exitValue = launcher.launch().cmds(cmds).envs(env).stdout(listener).pwd(workDir).join();
+            int exitValue = launcher.launch().cmds(cmds).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(workDir).join();
             boolean success = (exitValue == 0);
             build.setResult(success ? Result.SUCCESS : Result.FAILURE);
             return success;

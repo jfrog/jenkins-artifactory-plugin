@@ -256,7 +256,7 @@ public class Utils {
             } else {
                 args = args.toWindowsCommand();
             }
-            int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).pwd(pwd).join();
+            int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(pwd).join();
             failed = (exitValue != 0);
         } catch (Exception e) {
             listener.error("Couldn't execute the conan client executable. " + e.getMessage());
