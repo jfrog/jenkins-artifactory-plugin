@@ -16,6 +16,7 @@ import hudson.remoting.VirtualChannel;
 import hudson.util.ArgumentListBuilder;
 import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
+import jenkins.plugins.nodejs.NodeJSConstants;
 import jenkins.plugins.nodejs.tools.NodeJSInstallation;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.io.IOUtils;
@@ -26,6 +27,7 @@ import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.Vcs;
+import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.hudson.CredentialsConfig;
@@ -34,16 +36,12 @@ import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.DistributionConfig;
 import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
-import org.jfrog.hudson.util.ExtractorUtils;
-import org.jfrog.hudson.util.IncludesExcludes;
-import org.jfrog.hudson.util.RepositoriesUtils;
+import org.jfrog.hudson.util.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.nio.file.Paths;
 import java.util.*;
 
 /**
@@ -392,25 +390,42 @@ public class Utils {
         return path.replaceFirst("^~", System.getProperty("user.home"));
     }
 
-    public static String getNpmExe(TaskListener listener, EnvVars env, Launcher launcher, String nodeTool) throws IOException, InterruptedException {
+    public static String getNpmExe(FilePath ws, TaskListener listener, EnvVars env, Launcher launcher, String nodeTool) throws IOException, InterruptedException {
+        Log logger = new JenkinsBuildInfoLog(listener);
+        String npmPath = "";
         // npm from tool
         if (StringUtils.isNotEmpty(nodeTool)) {
-            NodeJSInstallation nodeInstallation = getNpmInstallation(nodeTool);
-            if (nodeInstallation == null) {
-                listener.error("Couldn't find NodeJS tool '" + nodeTool + "'");
-                throw new Run.RunnerAbortedException();
-            }
-            Node node = ActionableHelper.getNode(launcher);
-            nodeInstallation = nodeInstallation.forNode(node, listener).forEnvironment(env);
-            String nodeExe = nodeInstallation.getExecutable(launcher);
-            return Paths.get(nodeExe).resolveSibling("npm").toString();
+            npmPath = getNpmFromTool(ws, logger, listener, env, launcher, nodeTool);
         }
         // npm from environment
         if (env.containsKey("NODEJS_HOME")) {
-            return Paths.get(env.get("NODEJS_HOME"), "bin", "npm").toString();
+            npmPath = ws.child(env.get("NODEJS_HOME")).child("bin").child("npm").getRemote();
         }
-        // npm from path
-        return "";
+        logger.debug("Using npm executable from " + StringUtils.defaultIfEmpty(npmPath, "PATH"));
+        // If npmPath is empty, try to use npm from PATH
+        return npmPath;
+    }
+
+    private static String getNpmFromTool(FilePath ws, Log logger, TaskListener listener, EnvVars env, Launcher launcher, String nodeTool) throws IOException, InterruptedException {
+        NodeJSInstallation nodeInstallation = getNpmInstallation(nodeTool);
+        if (nodeInstallation == null) {
+            logger.error("Couldn't find NodeJS tool '" + nodeTool + "'");
+            throw new Run.RunnerAbortedException();
+        }
+        Node node = ActionableHelper.getNode(launcher);
+        nodeInstallation = nodeInstallation.forNode(node, listener).forEnvironment(env);
+        String nodeJsHome = nodeInstallation.forNode(node, listener).forEnvironment(env).getHome();
+        if (StringUtils.isBlank(nodeJsHome)) {
+            logger.error("Couldn't find NodeJS home");
+            throw new Run.RunnerAbortedException();
+        }
+        FilePath nodePath = ws.child(nodeJsHome).child("bin").child("node");
+        if (!nodePath.exists()) {
+            logger.error("Couldn't find node executable in path " + nodePath.getRemote());
+            throw new Run.RunnerAbortedException();
+        }
+        env.override(NodeJSConstants.ENVVAR_NODEJS_PATH, nodePath.getParent().getRemote()); // Prepend NODEJS_HOME/bin to PATH
+        return nodePath.sibling("npm").getRemote();
     }
 
     private static NodeJSInstallation getNpmInstallation(String nodeTool) {

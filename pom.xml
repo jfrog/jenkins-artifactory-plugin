@@ -37,11 +37,11 @@
         <enforcer.skip>true</enforcer.skip>
         <findbugs.failOnError>false</findbugs.failOnError>
 
-        <buildinfo.version>2.13.0</buildinfo.version>
-        <buildinfo.maven3.version>2.13.0</buildinfo.maven3.version>
-        <buildinfo.gradle.version>4.9.0</buildinfo.gradle.version>
-        <buildinfo.ivy.version>2.13.0</buildinfo.ivy.version>
-        <buildinfo.npm.version>2.13.0</buildinfo.npm.version>
+        <buildinfo.version>2.13.x-SNAPSHOT</buildinfo.version>
+        <buildinfo.maven3.version>2.13.x-SNAPSHOT</buildinfo.maven3.version>
+        <buildinfo.gradle.version>4.9.x-SNAPSHOT</buildinfo.gradle.version>
+        <buildinfo.ivy.version>2.13.x-SNAPSHOT</buildinfo.ivy.version>
+        <buildinfo.npm.version>2.13.x-SNAPSHOT</buildinfo.npm.version>
 
     </properties>
 

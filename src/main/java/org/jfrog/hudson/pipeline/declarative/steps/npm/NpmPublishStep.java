@@ -98,8 +98,8 @@ public class NpmPublishStep extends AbstractStepImpl {
         protected Void run() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            String npmExe = Utils.getNpmExe(listener, env, launcher, step.npmBuild.getTool());
-            NpmPublishExecutor npmPublishExecutor = new NpmPublishExecutor(getContext(), buildInfo, step.npmBuild, npmExe, step.path, ws, listener, build);
+            String npmExe = Utils.getNpmExe(ws, listener, env, launcher, step.npmBuild.getTool());
+            NpmPublishExecutor npmPublishExecutor = new NpmPublishExecutor(getContext(), buildInfo, step.npmBuild, npmExe, step.path, ws, env, listener, build);
             npmPublishExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(npmPublishExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
             return null;

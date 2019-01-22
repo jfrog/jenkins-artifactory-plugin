@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.common.executors;
 
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -27,16 +28,18 @@ public class NpmInstallExecutor implements Executor {
     private String args;
     private FilePath ws;
     private String path;
+    private EnvVars env;
     private Log logger;
     private Run build;
 
-    public NpmInstallExecutor(BuildInfo buildInfo, NpmBuild npmBuild, String npmExe, String args, FilePath ws, String path, TaskListener listener, Run build) {
+    public NpmInstallExecutor(BuildInfo buildInfo, NpmBuild npmBuild, String npmExe, String args, FilePath ws, String path, EnvVars env, TaskListener listener, Run build) {
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.npmBuild = npmBuild;
         this.npmExe = npmExe;
         this.args = args;
         this.ws = ws;
         this.path = path;
+        this.env = env;
         this.logger = new JenkinsBuildInfoLog(listener);
         this.build = build;
     }
@@ -51,7 +54,7 @@ public class NpmInstallExecutor implements Executor {
         if (resolver.isEmpty()) {
             throw new IllegalStateException("Resolver must be configured with resolution repository and Artifactory server");
         }
-        Build build = ws.act(new NpmInstallCallable(createArtifactoryClientBuilder(resolver), resolver.getRepo(), npmExe, args, path, logger));
+        Build build = ws.act(new NpmInstallCallable(createArtifactoryClientBuilder(resolver), resolver.getRepo(), npmExe, args, path, env, logger));
         if (build == null) {
             throw new RuntimeException("npm build failed");
         }

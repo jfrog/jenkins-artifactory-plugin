@@ -59,8 +59,8 @@ public class NpmInstallStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            String npmExe = Utils.getNpmExe(listener, env, launcher, step.npmBuild.getTool());
-            NpmInstallExecutor npmInstallExecutor = new NpmInstallExecutor(step.buildInfo, step.npmBuild, npmExe, step.args, ws, step.path, listener, build);
+            String npmExe = Utils.getNpmExe(ws, listener, env, launcher, step.npmBuild.getTool());
+            NpmInstallExecutor npmInstallExecutor = new NpmInstallExecutor(step.buildInfo, step.npmBuild, npmExe, step.args, ws, step.path, env, listener, build);
             npmInstallExecutor.execute();
             return npmInstallExecutor.getBuildInfo();
         }

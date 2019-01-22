@@ -1,6 +1,7 @@
 package org.jfrog.hudson.npm;
 
 import com.google.common.collect.ArrayListMultimap;
+import hudson.EnvVars;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang3.StringUtils;
@@ -26,14 +27,16 @@ public class NpmPublishCallable extends MasterToSlaveFileCallable<Build> {
     private String executablePath;
     private NpmDeployer deployer;
     private String path; // Path to package.json or path to the directory that contains package.json.
+    private EnvVars env;
     private Log logger;
 
-    public NpmPublishCallable(ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder, ArrayListMultimap<String, String> properties, String executablePath, NpmDeployer deployer, String path, Log logger) {
+    public NpmPublishCallable(ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder, ArrayListMultimap<String, String> properties, String executablePath, NpmDeployer deployer, String path, EnvVars env, Log logger) {
         this.buildInfoClientBuilder = buildInfoClientBuilder;
         this.properties = properties;
         this.executablePath = executablePath;
         this.deployer = deployer;
         this.path = path;
+        this.env = env;
         this.logger = logger;
     }
 
@@ -41,6 +44,6 @@ public class NpmPublishCallable extends MasterToSlaveFileCallable<Build> {
     public Build invoke(File file, VirtualChannel channel) {
         Path basePath = file.toPath();
         Path packagePath = StringUtils.isBlank(path) ? basePath : basePath.resolve(Utils.replaceTildeWithUserHome(path));
-        return new NpmPublish(buildInfoClientBuilder, properties, executablePath, packagePath, deployer.getRepo(), logger).execute();
+        return new NpmPublish(buildInfoClientBuilder, properties, executablePath, packagePath, deployer.getRepo(), logger, env).execute();
     }
 }
