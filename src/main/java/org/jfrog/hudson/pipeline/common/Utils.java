@@ -72,7 +72,7 @@ public class Utils {
             CredentialsConfig credentials = pipelineServer.createCredentialsConfig();
 
             return new org.jfrog.hudson.ArtifactoryServer(null, pipelineServer.getUrl(), credentials,
-                    credentials, pipelineServer.getConnection().getTimeout(), pipelineServer.isBypassProxy(), pipelineServer.getConnection().getRetry(), pipelineServer.getFileSpecThreads());
+                    credentials, pipelineServer.getConnection().getTimeout(), pipelineServer.isBypassProxy(), pipelineServer.getConnection().getRetry(), pipelineServer.getDeploymentThreads());
         }
         org.jfrog.hudson.ArtifactoryServer server = RepositoriesUtils.getArtifactoryServer(artifactoryServerID, RepositoriesUtils.getArtifactoryServers());
         if (server == null) {

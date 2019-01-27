@@ -95,7 +95,7 @@ public class ArtifactoryServer implements Serializable {
         this.bypassProxy = bypassProxy;
         this.id = serverId;
         this.connectionRetry = connectionRetry != null ? connectionRetry : 3;
-        this.deploymentThreads = deploymentThreads;
+        this.deploymentThreads = deploymentThreads != null && deploymentThreads > 0 ? deploymentThreads : 3;
     }
 
     public String getName() {
@@ -144,24 +144,21 @@ public class ArtifactoryServer implements Serializable {
 
 
     // To populate the dropdown list from the jelly
-    public List<Integer> getFileSpecUploadThreads() {
+    //  @global.jelly:      <j:forEach var="r" items="${server.deploymentsThreads}">
+    public List<Integer> getDeploymentsThreads() {
         List<Integer> items = new ArrayList<Integer>();
-        for (int i = 1; i < 10; i++) {
+        for (int i = 1; i <= 10; i++) {
             items.add(i);
         }
         return items;
     }
 
     // Jelly uses reflection here and the above method to get the data by the method and variable (matching) names
-    public void setDeploymentThreads(int deploymentThreads) {
-        this.deploymentThreads = deploymentThreads;
-    }
+    //  @global.jelly:      <f:option selected="${r==server.deploymentThreads}"
+    public void setDeploymentThreads(int deploymentThreads) { this.deploymentThreads = deploymentThreads; }
 
     public int getDeploymentThreads() {
-        if (deploymentThreads == null) {
-            deploymentThreads = 3;
-        }
-        return this.deploymentThreads;
+        return deploymentThreads;
     }
 
     public List<String> getLocalRepositoryKeys(Credentials credentials) throws IOException {

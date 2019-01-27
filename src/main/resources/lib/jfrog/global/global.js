@@ -35,18 +35,18 @@ function populateDropDownList() {
             }
         }
 
-        // Populates the fileSpecThreads field
-        let fileSpecThreadsValue = document.getElementsByName("fileSpecThreads");
-        for (let i = 0; i < fileSpecThreadsValue.length; i++) {
-            if (fileSpecThreadsValue[i].length === 0) {
+        // Populates the deploymentThreads field
+        let deploymentThreadsValue = document.getElementsByName("deploymentThreads");
+        for (let i = 0; i < deploymentThreadsValue.length; i++) {
+            if (deploymentThreadsValue[i].length === 0) {
                 // populate the selection fields and set 3 as default.
                 for (let j = 1; j < DEFAULT_OPTIONS_NUMBER; j++) {
                     let el = document.createElement("option");
                     el.textContent = j;
                     el.value = j;
-                    fileSpecThreadsValue[i].appendChild(el);
+                    deploymentThreadsValue[i].appendChild(el);
                     if (j === 3) {
-                        fileSpecThreadsValue[i].selectedIndex = j;
+                        deploymentThreadsValue[i].selectedIndex = j;
                     }
                 }
             }

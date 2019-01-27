@@ -47,10 +47,10 @@
                                         </j:forEach>
                                     </select>
                                 </f:entry>
-                                <f:entry field="deploymentThreads" title="Number of concurrent threads for Generic uploads"
-                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-fileSpecUploadThreads.html">
+                                <f:entry field="deploymentThreads" title="Number of threads for Generic uploads"
+                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-deploymentThreads.html">
                                     <select class="setting-input" name="deploymentThreads">
-                                        <j:forEach var="r" items="${server.fileSpecUploadThreads}">
+                                        <j:forEach var="r" items="${server.deploymentsThreads}">
                                             <f:option selected="${r==server.deploymentThreads}"
                                                       value="${r}">${r}
                                             </f:option>

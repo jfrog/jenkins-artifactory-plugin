@@ -53,7 +53,7 @@ public class GetArtifactoryServerExecutor implements Executor {
         }
         ArtifactoryServer server = artifactoryServers.get(0);
         artifactoryServer = new org.jfrog.hudson.pipeline.common.types.ArtifactoryServer(artifactoryServerID, server.getUrl(),
-                server.getResolvingCredentialsConfig().provideUsername(build.getParent()), server.getResolvingCredentialsConfig().providePassword(build.getParent()) , server.getDeploymentThreads());
+                server.getResolvingCredentialsConfig().provideUsername(build.getParent()), server.getResolvingCredentialsConfig().providePassword(build.getParent()), server.getDeploymentThreads());
         artifactoryServer.setBypassProxy(server.isBypassProxy());
         artifactoryServer.getConnection().setRetry(server.getConnectionRetry());
         artifactoryServer.getConnection().setTimeout(server.getTimeout());
