@@ -56,7 +56,7 @@ public class NpmPublishExecutor implements Executor {
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }
-        Build build = ws.act(new NpmPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), npmExe, deployer, path, env, logger));
+        Build build = ws.act(new NpmPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), deployer.getRepo(), npmExe, path, env, logger));
         if (build == null) {
             throw new RuntimeException("npm publish failed");
         }

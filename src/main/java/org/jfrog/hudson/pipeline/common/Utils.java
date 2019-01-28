@@ -393,13 +393,13 @@ public class Utils {
     public static String getNpmExe(FilePath ws, TaskListener listener, EnvVars env, Launcher launcher, String nodeTool) throws IOException, InterruptedException {
         Log logger = new JenkinsBuildInfoLog(listener);
         String npmPath = "";
+        String nodejsHome;
         // npm from tool
         if (StringUtils.isNotEmpty(nodeTool)) {
             npmPath = getNpmFromTool(ws, logger, listener, env, launcher, nodeTool);
-        }
-        // npm from environment
-        if (env.containsKey("NODEJS_HOME")) {
-            npmPath = ws.child(env.get("NODEJS_HOME")).child("bin").child("npm").getRemote();
+        } else if ((nodejsHome = env.get("NODEJS_HOME")) != null) {
+            // npm from environment
+            npmPath = ws.child(nodejsHome).child("bin").child("npm").getRemote();
         }
         logger.debug("Using npm executable from " + StringUtils.defaultIfEmpty(npmPath, "PATH"));
         // If npmPath is empty, try to use npm from PATH
@@ -413,7 +413,6 @@ public class Utils {
             throw new Run.RunnerAbortedException();
         }
         Node node = ActionableHelper.getNode(launcher);
-        nodeInstallation = nodeInstallation.forNode(node, listener).forEnvironment(env);
         String nodeJsHome = nodeInstallation.forNode(node, listener).forEnvironment(env).getHome();
         if (StringUtils.isBlank(nodeJsHome)) {
             logger.error("Couldn't find NodeJS home");
@@ -424,7 +423,8 @@ public class Utils {
             logger.error("Couldn't find node executable in path " + nodePath.getRemote());
             throw new Run.RunnerAbortedException();
         }
-        env.override(NodeJSConstants.ENVVAR_NODEJS_PATH, nodePath.getParent().getRemote()); // Prepend NODEJS_HOME/bin to PATH
+        // Prepend NODEJS_HOME/bin to PATH
+        env.override(NodeJSConstants.ENVVAR_NODEJS_PATH, nodePath.getParent().getRemote());
         return nodePath.sibling("npm").getRemote();
     }
 
