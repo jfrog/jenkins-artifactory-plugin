@@ -38,5 +38,5 @@ To run unit tests execute the following command:
 
 To run integration tests execute the following command:
 ```
-> mvn clean verify
+> mvn clean verify -DskipITs=false
 ```

@@ -41,7 +41,7 @@ before_test:
   - sh: export GRADLE_HOME=/home/appveyor/.sdkman/candidates/gradle/current && sdk install gradle
 
 test_script:
-  - mvn -V -B -U clean verify
+  - mvn -V -B -U clean verify -DskipITs=false
 
 cache:
   - C:\Users\appveyor\.m2\ -> pom.xml
