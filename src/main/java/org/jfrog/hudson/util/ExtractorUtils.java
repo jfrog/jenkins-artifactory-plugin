@@ -44,18 +44,14 @@ import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.maven3.ArtifactoryMaven3Configurator;
 import org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator;
-import org.jfrog.hudson.pipeline.Utils;
-import org.jfrog.hudson.pipeline.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.types.resolvers.MavenResolver;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.types.resolvers.MavenResolver;
 import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.util.plugins.MultiConfigurationUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 /**
@@ -151,7 +147,7 @@ public class ExtractorUtils {
         }
 
         // Create tempdir for properties file
-        FilePath tempDir = createAndGetTempDir(launcher, ws);
+        FilePath tempDir = createAndGetTempDir(ws);
 
         persistConfiguration(configuration, env, tempDir, launcher);
         return configuration;
@@ -337,31 +333,6 @@ public class ExtractorUtils {
             String snapshotRepoKey = Util.replaceMacro(inputSnapshotRepKey, env);
             configuration.publisher.setSnapshotRepoKey(snapshotRepoKey);
         }
-
-        configuration.info.licenseControl.setRunChecks(context.isRunChecks());
-        configuration.info.licenseControl.setIncludePublishedArtifacts(context.isIncludePublishArtifacts());
-        configuration.info.licenseControl.setAutoDiscover(context.isLicenseAutoDiscovery());
-        if (context.isRunChecks()) {
-            if (StringUtils.isNotBlank(context.getViolationRecipients())) {
-                configuration.info.licenseControl.setViolationRecipients(
-                        Util.replaceMacro(context.getViolationRecipients(), env)
-                );
-            }
-            if (StringUtils.isNotBlank(context.getScopes())) {
-                configuration.info.licenseControl.setScopes(Util.replaceMacro(context.getScopes(), env));
-            }
-        }
-
-        configuration.info.blackDuckProperties.setRunChecks(context.isBlackDuckRunChecks());
-        configuration.info.blackDuckProperties.setAppName(Util.replaceMacro(context.getBlackDuckAppName(), env));
-        configuration.info.blackDuckProperties.setAppVersion(Util.replaceMacro(context.getBlackDuckAppVersion(), env));
-        configuration.info.blackDuckProperties.setReportRecipients(
-                Util.replaceMacro(context.getBlackDuckReportRecipients(), env)
-        );
-        configuration.info.blackDuckProperties.setScopes(Util.replaceMacro(context.getBlackDuckScopes(), env));
-        configuration.info.blackDuckProperties.setIncludePublishedArtifacts(context.isBlackDuckIncludePublishedArtifacts());
-        configuration.info.blackDuckProperties.setAutoCreateMissingComponentRequests(context.isAutoCreateMissingComponentRequests());
-        configuration.info.blackDuckProperties.setAutoDiscardStaleComponentRequests(context.isAutoDiscardStaleComponentRequests());
 
         if (context.isDiscardOldBuilds()) {
             BuildRetention buildRetention = BuildRetentionFactory.createBuildRetention(build, context.isDiscardBuildArtifacts());
@@ -611,20 +582,19 @@ public class ExtractorUtils {
 
     /**
      * Create a temporary directory under a given workspace
-     * @param launcher
-     * @param ws
-     * @throws Exception
      */
-    public static FilePath createAndGetTempDir(hudson.Launcher launcher, FilePath ws) throws Exception {
-        final FilePath tempDirPath = new FilePath(ws.getParent(), ws.getName() + "@tmp");
-        launcher.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
-            public Boolean call() {
-                File tempDirFile = new File(tempDirPath.getRemote());
-                tempDirFile.mkdir();
+    public static FilePath createAndGetTempDir(final FilePath ws) throws IOException, InterruptedException {
+        // The token that combines the project name and unique number to create unique workspace directory.
+        String workspaceList = System.getProperty("hudson.slaves.WorkspaceList");
+        return ws.act(new MasterToSlaveCallable<FilePath, IOException>() {
+            @Override
+            public FilePath call() {
+                final FilePath tempDir = ws.sibling(ws.getName() + Objects.toString(workspaceList, "@") + "tmp").child("artifactory");
+                File tempDirFile = new File(tempDir.getRemote());
+                tempDirFile.mkdirs();
                 tempDirFile.deleteOnExit();
-                return true;
+                return tempDir;
             }
         });
-        return tempDirPath;
     }
 }

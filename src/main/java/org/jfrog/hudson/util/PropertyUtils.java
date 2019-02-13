@@ -16,11 +16,16 @@
 
 package org.jfrog.hudson.util;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import hudson.EnvVars;
 import hudson.FilePath;
+import hudson.Util;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.release.gradle.GradleModule;
 
 import java.io.File;
@@ -96,5 +101,22 @@ public class PropertyUtils {
             }
         });
 
+    }
+
+    public static Multimap<String, String> getDeploymentPropertiesMap(String propertiesStr, EnvVars env) {
+        Multimap<String, String> properties = ArrayListMultimap.create();
+        String[] deploymentProperties = StringUtils.split(propertiesStr, ";");
+        if (deploymentProperties == null) {
+            return properties;
+        }
+        for (String property : deploymentProperties) {
+            String[] split = StringUtils.split(property, '=');
+            if (split.length == 2) {
+                String value = Util.replaceMacro(split[1], env);
+                //Space is not allowed in property key
+                properties.put(split[0].replace(" ", StringUtils.EMPTY), value);
+            }
+        }
+        return properties;
     }
 }

@@ -1,6 +1,0 @@
-<j:jelly xmlns:j="jelly:core"
-         xmlns:t="/lib/hudson">
-    <t:summary icon="${it.iconFileName}">
-        <a href="${it.urlName}">Push to Bintray (deprecated)</a>
-    </t:summary>
-</j:jelly>

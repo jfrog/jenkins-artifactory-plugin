@@ -16,7 +16,6 @@
 package org.jfrog.hudson.release.gradle;
 
 import hudson.AbortException;
-import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.jfrog.build.extractor.release.PropertiesTransformer;

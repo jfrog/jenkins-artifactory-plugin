@@ -7,13 +7,6 @@
     <f:section title="Artifactory">
 
         <f:entry
-            help="/plugin/artifactory/help/ArtifactoryBuilder/help-pushToBintrayEnabled.html"  >
-                <input id="pushToBintrayEnabled" type="checkbox"
-                    name="pushToBintrayEnabled" value="${descriptor.pushToBintrayEnabled}"
-                        field="pushToBintrayEnabled">Enable Push to Bintray (deprecated)
-                </input>
-        </f:entry>
-        <f:entry
             help="/plugin/artifactory/help/ArtifactoryBuilder/help-useCredentialsPlugin.html">
                 <input id="useCredentialsPlugin" type="checkbox" onclick="updateViewForCredentialsMethod(this.checked)"
                    name="useCredentialsPlugin" value="${descriptor.useCredentialsPlugin}"
@@ -36,6 +29,40 @@
                     <f:entry title="URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-url.html">
                         <f:textbox field="artifactoryUrl" value="${server.url}" use="required"/>
                     </f:entry>
+
+                    <f:advanced>
+                        <f:entry>
+                            <table style="width:100%">
+                                <f:entry title="Connection Timeout" field="artifactory.timeout"
+                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
+                                    <f:textbox clazz="number" value="${server.timeout}"/>
+                                </f:entry>
+                                <f:entry field="connectionRetry" title="Number of retries"
+                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
+                                    <select class="setting-input" name="connectionRetry">
+                                        <j:forEach var="r" items="${server.connectionRetries}">
+                                            <f:option selected="${r==server.connectionRetry}"
+                                                      value="${r}">${r}
+                                            </f:option>
+                                        </j:forEach>
+                                    </select>
+                                </f:entry>
+                                <f:entry field="deploymentThreads" title="Number of threads for Generic uploads"
+                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-deploymentThreads.html">
+                                    <select class="setting-input" name="deploymentThreads">
+                                        <j:forEach var="r" items="${server.deploymentsThreads}">
+                                            <f:option selected="${r==server.deploymentThreads}"
+                                                      value="${r}">${r}
+                                            </f:option>
+                                        </j:forEach>
+                                    </select>
+                                </f:entry>
+                                <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
+                                                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
+                                </f:optionalBlock>
+                            </table>
+                        </f:entry>
+                    </f:advanced>
 
                     <f:section title="Default Deployer Credentials" field="deployerCredentialsConfig"
                                name="deployerCredentialsConfig">
@@ -61,29 +88,6 @@
                             </table>
                         </f:block>
                     </f:section>
-                    <f:advanced>
-                        <f:entry>
-                            <table style="width:100%">
-                                <f:entry title="Connection Timeout" field="artifactory.timeout"
-                                     help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
-                                        <f:textbox clazz="number" value="${server.timeout}"/>
-                                </f:entry>
-                                <f:entry field="connectionRetry" title="Number of retries"
-                                    help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
-                                     <select class="setting-input" name="connectionRetry">
-                                         <j:forEach var="r" items="${server.connectionRetries}">
-                                             <f:option selected="${r==server.connectionRetry}"
-                                                value="${r}">${r}
-                                             </f:option>
-                                         </j:forEach>
-                                    </select>
-                                </f:entry>
-                                <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
-                                                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
-                                </f:optionalBlock>
-                            </table>
-                        </f:entry>
-                    </f:advanced>
                     <f:validateButton
                             title="${%Test Connection}" progress="${%Testing...}"
                             method="testConnection"
@@ -129,43 +133,6 @@
                 </table>
             </f:repeatable>
         </f:entry>
-
-        <f:optionalBlock title="Deprecated - Enable Build-Info proxy for Docker images"
-            name="buildInfoProxyEnabled"
-            field="buildInfoProxyEnabled"
-            checked="${descriptor.buildInfoProxyEnabled}">
-
-            <f:block>
-                <p>
-                    Creating build info for docker images no longer requires setting up the Build-Info Proxy.<br/>
-                    Therefore the Pipeline API which uses the Build-Info Proxy is now deprecated.<br/>
-                    Here's the deprecated API:<br/>
-                    def rtDocker = Artifactory.docker [credentialsId: 'credentialsId'], [host: 'tcp://daemon IP:daemon port']<br/>
-                    Please use the new API, which receives an Artifactory server as an argument, instead of credentialsId:<br/>
-                    def rtDocker = Artifactory.docker server: server, [host: 'tcp://daemon IP:daemon port']
-                </p>
-            </f:block>
-
-            <f:entry title="Port" help="/plugin/artifactory/help/ArtifactoryBuilder/help-buildInfoProxyPort.html">
-                <f:textbox id="buildInfoProxyPort" field="buildInfoProxyPort" value="${descriptor.buildInfoProxyPort}"/>
-            </f:entry>
-            <f:entry title="PEM-encoded certificate file path on master" help="/plugin/artifactory/help/ArtifactoryBuilder/help-buildInfoProxyCertPublic.html">
-                <pre id="buildInfoProxyCertPublic">${descriptor.buildInfoProxyCertPublic}</pre>
-            </f:entry>
-            <f:entry title="PEM-encoded private key file path on master" help="/plugin/artifactory/help/ArtifactoryBuilder/help-buildInfoProxyCertPrivate.html">
-                <pre id="buildInfoProxyCertPrivate">${descriptor.buildInfoProxyCertPrivate}</pre>
-            </f:entry>
-
-            <script>
-                var bindToDescriptor = <st:bind value="${descriptor}"/>
-            </script>
-
-            <r:certs title="${%Generate certs and restart proxy}"
-                     progress="${%Generating...}"
-                     bind="bindToDescriptor"/>
-
-        </f:optionalBlock>
-
     </f:section>
     <st:adjunct includes="lib.jfrog.global.global"/>
     <script>

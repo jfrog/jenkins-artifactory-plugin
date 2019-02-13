@@ -31,7 +31,6 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.*;
-import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.util.*;
@@ -62,8 +61,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     /**
      * Repository URL and repository to deploy artifacts to
      */
-    @Deprecated
-    private ServerDetails details = null;
     private final ServerDetails deployerDetails;
     private final ServerDetails resolverDetails;
     private final CredentialsConfig deployerCredentialsConfig;
@@ -81,42 +78,20 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     private final boolean includeEnvVars;
 
     private final boolean deployBuildInfo;
-    private final boolean runChecks;
-    private final String violationRecipients;
-    private final boolean includePublishArtifacts;
-    private final String scopes;
     private final boolean discardOldBuilds;
     private final boolean discardBuildArtifacts;
     private final boolean asyncBuildRetention;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean filterExcludedArtifactsFromBuild;
     private final boolean enableResolveArtifacts;
     private IncludesExcludes envVarsPatterns;
-    private boolean licenseAutoDiscovery;
-    private boolean disableLicenseAutoDiscovery;
     private boolean aggregateBuildIssues;
     private String aggregationBuildStatus;
     private boolean recordAllDependencies;
-    private boolean blackDuckRunChecks;
-    private String blackDuckAppName;
-    private String blackDuckAppVersion;
-    private String blackDuckReportRecipients; //csv
-    private String blackDuckScopes; //csv
-    private boolean blackDuckIncludePublishedArtifacts;
-    private boolean autoCreateMissingComponentRequests;
-    private boolean autoDiscardStaleComponentRequests;
     private String artifactoryCombinationFilter;
     private String customBuildName;
     private boolean overrideBuildName;
-
-    /**
-     * @deprecated: Use org.jfrog.hudson.maven3.ArtifactoryMaven3Configurator#deployBuildInfo
-     */
-    @Deprecated
-    private transient boolean skipBuildInfoDeploy;
     /**
      * @deprecated: Use org.jfrog.hudson.maven3.ArtifactoryMaven3Configurator#getDeployerCredentialsConfig()()
      */
@@ -128,59 +103,47 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     @Deprecated
     private Credentials overridingResolverCredentials;
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private ServerDetails details = null;
+    @Deprecated
+    private final String matrixParams = null;
+
     @DataBoundConstructor
     public ArtifactoryMaven3Configurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
                                          CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                          boolean enableResolveArtifacts, IncludesExcludes artifactDeploymentPatterns,
                                          boolean deployArtifacts, boolean deployBuildInfo, boolean includeEnvVars,
                                          IncludesExcludes envVarsPatterns,
-                                         boolean runChecks, String violationRecipients, boolean includePublishArtifacts,
-                                         String scopes, boolean disableLicenseAutoDiscovery, boolean discardOldBuilds,
-                                         boolean discardBuildArtifacts, boolean asyncBuildRetention, String matrixParams, String deploymentProperties,
+                                         boolean discardOldBuilds, boolean discardBuildArtifacts,
+                                         boolean asyncBuildRetention, String matrixParams, String deploymentProperties,
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean recordAllDependencies,
-                                         boolean blackDuckRunChecks, String blackDuckAppName,
-                                         String blackDuckAppVersion,
-                                         String blackDuckReportRecipients, String blackDuckScopes,
-                                         boolean blackDuckIncludePublishedArtifacts,
-                                         boolean autoCreateMissingComponentRequests,
-                                         boolean autoDiscardStaleComponentRequests,
                                          boolean filterExcludedArtifactsFromBuild,
                                          String customBuildName,
                                          boolean overrideBuildName,
                                          String artifactoryCombinationFilter
     ) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.resolverDetails = resolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.envVarsPatterns = envVarsPatterns;
-        this.runChecks = runChecks;
-        this.violationRecipients = violationRecipients;
-        this.includePublishArtifacts = includePublishArtifacts;
-        this.scopes = scopes;
         this.discardOldBuilds = discardOldBuilds;
         this.discardBuildArtifacts = discardBuildArtifacts;
         this.asyncBuildRetention = asyncBuildRetention;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.recordAllDependencies = recordAllDependencies;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
-        this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
         this.deployBuildInfo = deployBuildInfo;
         this.deployArtifacts = deployArtifacts;
         this.includeEnvVars = includeEnvVars;
-        this.blackDuckRunChecks = blackDuckRunChecks;
-        this.blackDuckAppName = blackDuckAppName;
-        this.blackDuckAppVersion = blackDuckAppVersion;
-        this.blackDuckReportRecipients = blackDuckReportRecipients;
-        this.blackDuckScopes = blackDuckScopes;
-        this.blackDuckIncludePublishedArtifacts = blackDuckIncludePublishedArtifacts;
-        this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
-        this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
         this.enableResolveArtifacts = enableResolveArtifacts;
         this.customBuildName = customBuildName;
@@ -188,7 +151,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public ServerDetails getResolverDetails() {
@@ -248,7 +211,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public IncludesExcludes getArtifactDeploymentPatterns() {
@@ -285,10 +248,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         return null;
     }
 
-    public boolean isIncludePublishArtifacts() {
-        return includePublishArtifacts;
-    }
-
     /**
      * @return The snapshots deployment repository. If not defined the releases deployment repository will be returned
      */
@@ -300,14 +259,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                 null;
     }
 
-    public boolean isLicenseAutoDiscovery() {
-        return licenseAutoDiscovery;
-    }
-
-    public boolean isDisableLicenseAutoDiscovery() {
-        return disableLicenseAutoDiscovery;
-    }
-
     public String getArtifactoryName() {
         return getDeployerDetails() != null ? getDeployerDetails().artifactoryName : null;
     }
@@ -317,56 +268,12 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         return server != null ? server.getUrl() : null;
     }
 
-    public String getScopes() {
-        return scopes;
-    }
-
     public boolean isIncludeEnvVars() {
         return includeEnvVars;
     }
 
     public IncludesExcludes getEnvVarsPatterns() {
         return envVarsPatterns;
-    }
-
-    public String getViolationRecipients() {
-        return violationRecipients;
-    }
-
-    public boolean isRunChecks() {
-        return runChecks;
-    }
-
-    public boolean isBlackDuckRunChecks() {
-        return blackDuckRunChecks;
-    }
-
-    public String getBlackDuckAppName() {
-        return blackDuckAppName;
-    }
-
-    public String getBlackDuckAppVersion() {
-        return blackDuckAppVersion;
-    }
-
-    public String getBlackDuckReportRecipients() {
-        return blackDuckReportRecipients;
-    }
-
-    public String getBlackDuckScopes() {
-        return blackDuckScopes;
-    }
-
-    public boolean isBlackDuckIncludePublishedArtifacts() {
-        return blackDuckIncludePublishedArtifacts;
-    }
-
-    public boolean isAutoCreateMissingComponentRequests() {
-        return autoCreateMissingComponentRequests;
-    }
-
-    public boolean isAutoDiscardStaleComponentRequests() {
-        return autoDiscardStaleComponentRequests;
     }
 
     public boolean isEnableIssueTrackerIntegration() {
@@ -445,18 +352,13 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
 
         PublisherContext.Builder publisherBuilder = new PublisherContext.Builder().artifactoryServer(artifactoryServer)
                 .serverDetails(getDeployerDetails()).deployerOverrider(ArtifactoryMaven3Configurator.this)
-                .runChecks(isRunChecks()).includePublishArtifacts(isIncludePublishArtifacts())
-                .violationRecipients(getViolationRecipients()).scopes(getScopes())
-                .licenseAutoDiscovery(isLicenseAutoDiscovery()).discardOldBuilds(isDiscardOldBuilds())
+                .discardOldBuilds(isDiscardOldBuilds())
                 .deployArtifacts(isDeployArtifacts()).includesExcludes(getArtifactDeploymentPatterns())
                 .skipBuildInfoDeploy(!deployBuildInfo).recordAllDependencies(isRecordAllDependencies())
                 .includeEnvVars(isIncludeEnvVars()).envVarsPatterns(getEnvVarsPatterns())
                 .discardBuildArtifacts(isDiscardBuildArtifacts()).asyncBuildRetention(isAsyncBuildRetention())
                 .deploymentProperties(getDeploymentProperties()).enableIssueTrackerIntegration(isEnableIssueTrackerIntegration())
                 .aggregateBuildIssues(isAggregateBuildIssues()).aggregationBuildStatus(getAggregationBuildStatus())
-                .integrateBlackDuck(isBlackDuckRunChecks(), getBlackDuckAppName(), getBlackDuckAppVersion(),
-                        getBlackDuckReportRecipients(), getBlackDuckScopes(), isBlackDuckIncludePublishedArtifacts(),
-                        isAutoCreateMissingComponentRequests(), isAutoDiscardStaleComponentRequests())
                 .filterExcludedArtifactsFromBuild(isFilterExcludedArtifactsFromBuild())
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .overrideBuildName(isOverrideBuildName())
@@ -503,10 +405,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                     String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryMaven3Configurator.this, build);
                     build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                     build.getActions().add(new UnifiedPromoteBuildAction(build, ArtifactoryMaven3Configurator.this));
-                    // Checks if Push to Bintray is disabled.
-                    if (PluginsUtils.isPushToBintrayEnabled()) {
-                        build.getActions().add(new BintrayPublishAction<ArtifactoryMaven3Configurator>(build, ArtifactoryMaven3Configurator.this));
-                    }
                 }
                 return true;
             }
@@ -637,10 +535,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
 
         public boolean isMultiConfProject() {
             return (item.getClass().isAssignableFrom(MatrixProject.class));
-        }
-
-        public FormValidation doCheckViolationRecipients(@QueryParameter String value) {
-            return FormValidations.validateEmails(value);
         }
 
         public FormValidation doCheckArtifactoryCombinationFilter(@QueryParameter String value)

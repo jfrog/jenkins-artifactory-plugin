@@ -53,6 +53,7 @@ public class ArtifactoryServer implements Serializable {
     private static final Logger log = Logger.getLogger(ArtifactoryServer.class.getName());
 
     private static final int DEFAULT_CONNECTION_TIMEOUT = 300;    // 5 Minutes
+    private static final int DEFAULT_DEPLOYMENT_THREADS_NUMBER = 3;
     private final String url;
     private final String id;
     // Network timeout in seconds to use both for connection establishment and for unanswered requests
@@ -62,6 +63,7 @@ public class ArtifactoryServer implements Serializable {
     // This object will be null instead of 0. In the ArtifactoryBuilder there is a check if the object is null then we are
     // setting to 3 that is the default.
     private Integer connectionRetry;
+    private Integer deploymentThreads;
     /**
      * List of repository keys, last time we checked. Copy on write semantics.
      */
@@ -86,7 +88,7 @@ public class ArtifactoryServer implements Serializable {
 
     @DataBoundConstructor
     public ArtifactoryServer(String serverId, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
-                             CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry) {
+                             CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry, Integer deploymentThreads) {
         this.url = StringUtils.removeEnd(artifactoryUrl, "/");
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
@@ -94,6 +96,7 @@ public class ArtifactoryServer implements Serializable {
         this.bypassProxy = bypassProxy;
         this.id = serverId;
         this.connectionRetry = connectionRetry != null ? connectionRetry : 3;
+        this.deploymentThreads = deploymentThreads != null && deploymentThreads > 0 ? deploymentThreads : DEFAULT_DEPLOYMENT_THREADS_NUMBER;
     }
 
     public String getName() {
@@ -138,6 +141,36 @@ public class ArtifactoryServer implements Serializable {
 
     public void setConnectionRetry(int connectionRetry) {
         this.connectionRetry = connectionRetry;
+    }
+
+    /**
+     * Return number of deployment threads.
+     * To populate the dropdown list from the jelly:
+     * <j:forEach var="r" items="${server.deploymentsThreads}">
+     */
+    @SuppressWarnings("unused")
+    public List<Integer> getDeploymentsThreads() {
+        List<Integer> items = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            items.add(i);
+        }
+        return items;
+    }
+
+    /**
+     * Set the number of deployment threads.
+     * Jelly uses reflection here and 'getDeploymentsThreads()' to get the data by the method and variable (matching) names
+     * <f:option selected="${r==server.deploymentThreads}"
+     *
+     * @param deploymentThreads - Deployment threads number
+     */
+    @SuppressWarnings("unused")
+    public void setDeploymentThreads(int deploymentThreads) {
+        this.deploymentThreads = deploymentThreads;
+    }
+
+    public int getDeploymentThreads() {
+        return deploymentThreads == null ? DEFAULT_DEPLOYMENT_THREADS_NUMBER : deploymentThreads;
     }
 
     public List<String> getLocalRepositoryKeys(Credentials credentials) throws IOException {

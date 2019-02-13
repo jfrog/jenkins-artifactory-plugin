@@ -30,7 +30,7 @@ function updateViewBySpecsParam(isUsesSpec) {
 
         // Deployment section
         // By changing the name the configuration will decide which server to use
-        document.getElementById("artifactory-deployer-spec-dd").getElementsByTagName("table")[0].setAttribute("name", "details");
+        document.getElementById("artifactory-deployer-spec-dd").getElementsByTagName("table")[0].setAttribute("name", "deployerDetails");
         document.getElementById("artifactory-deployer-generic-dd").getElementsByTagName("table")[0].setAttribute("name", "artifactory-deployer-generic-dd");
         document.getElementById("artifactory-deployer-spec-dd").style.display = "";
         document.getElementById("artifactory-deployer-generic-dd").style.display = "none";
@@ -50,7 +50,7 @@ function updateViewBySpecsParam(isUsesSpec) {
         // Deployment section
         // By changing the name the configuration will decide which server to use
         document.getElementById("artifactory-deployer-spec-dd").getElementsByTagName("table")[0].setAttribute("name", "artifactory-deployer-spec-dd");
-        document.getElementById("artifactory-deployer-generic-dd").getElementsByTagName("table")[0].setAttribute("name", "details");
+        document.getElementById("artifactory-deployer-generic-dd").getElementsByTagName("table")[0].setAttribute("name", "deployerDetails");
         document.getElementById("artifactory-deployer-spec-dd").style.display = "none";
         document.getElementById("artifactory-deployer-generic-dd").style.display = "";
         document.getElementById("uploadSpecArea").style.display = "none";

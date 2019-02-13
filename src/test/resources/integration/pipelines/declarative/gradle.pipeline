@@ -1,0 +1,54 @@
+package integration.pipelines.declarative
+
+import org.apache.commons.io.FileUtils
+
+import java.nio.file.Paths
+
+node {
+    def serverId = "Artifactory-1"
+    def buildName = "declarative:gradle test"
+    def buildNumber = "3"
+
+    stage "Configure Artifactory"
+    rtServer(
+            id: serverId,
+            url: "${env.JENKINS_ARTIFACTORY_URL}",
+            username: "${env.JENKINS_ARTIFACTORY_USERNAME}",
+            password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    )
+
+    stage "Configure Gradle build"
+    rtGradleDeployer(
+            id: "GRADLE_DEPLOYER",
+            serverId: serverId,
+            repo: "${LOCAL_REPO1}",
+    )
+
+    rtGradleResolver(
+            id: "GRADLE_RESOLVER",
+            serverId: serverId,
+            repo: "${JCENTER_REMOTE_REPO}",
+    )
+
+    stage "Copy project example"
+    FileUtils.copyDirectory(Paths.get("${GRADLE_PROJECT_PATH}").toFile(), Paths.get(pwd(), "declarative-gradle-example").toFile())
+
+    stage "Run Gradle"
+    rtGradleRun(
+            buildName: buildName,
+            buildNumber: buildNumber,
+            usesPlugin: true,
+            rootDir: 'declarative-gradle-example',
+            buildFile: 'build.gradle',
+            tasks: 'clean artifactoryPublish',
+            deployerId: "GRADLE_DEPLOYER",
+            resolverId: "GRADLE_RESOLVER"
+    )
+
+    stage "Publish build info"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName,
+            buildNumber: buildNumber
+    )
+}

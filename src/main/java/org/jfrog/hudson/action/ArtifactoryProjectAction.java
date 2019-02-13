@@ -54,12 +54,10 @@ public class ArtifactoryProjectAction implements ProminentProjectAction {
     }
 
     private String generateUrlSuffix(AbstractProject<?, ?> project) {
-        return "/webapp/builds/" +
-                Util.rawEncode(ExtractorUtils.sanitizeBuildName(project.getFullName()));
+        return generateUrlSuffix(ExtractorUtils.sanitizeBuildName(project.getFullName()));
     }
 
     private String generateUrlSuffix(String buildName) {
-        return "/webapp/builds/" +
-                Util.rawEncode(buildName);
+        return "/webapp/#/builds/" + Util.rawEncode(buildName) + "/";
     }
 }

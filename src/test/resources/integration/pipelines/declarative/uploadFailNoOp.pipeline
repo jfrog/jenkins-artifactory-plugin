@@ -1,0 +1,27 @@
+package integration.pipelines.declarative
+
+node {
+    def serverId = "Artifactory-1"
+
+    stage "Configuration"
+    rtServer(
+            id: serverId,
+            url: "${env.JENKINS_ARTIFACTORY_URL}",
+            username: "${env.JENKINS_ARTIFACTORY_USERNAME}",
+            password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    )
+
+    stage "Upload"
+    rtUpload(
+            serverId: serverId,
+            spec: """{
+              "files": [
+                {
+                  "pattern": "NOT_EXISTS",
+                  "target": "${LOCAL_REPO1}/"
+                }
+             ]
+            }""",
+            failNoOp: true
+    )
+}

@@ -17,15 +17,14 @@
 package org.jfrog.hudson.gradle;
 
 import com.google.common.base.Charsets;
+import hudson.EnvVars;
 import hudson.FilePath;
-import hudson.remoting.Which;
 import org.apache.commons.io.IOUtils;
 import org.jfrog.hudson.util.PluginDependencyHelper;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 
 
 /**
@@ -38,7 +37,6 @@ public class GradleInitScriptWriter {
 
     /**
      * The gradle initialization script constructor.
-     *
      */
     public GradleInitScriptWriter(FilePath rootPath) {
         this.rootPath = rootPath;
@@ -49,12 +47,12 @@ public class GradleInitScriptWriter {
      *
      * @return The generated script.
      */
-    public String generateInitScript() throws URISyntaxException, IOException, InterruptedException {
+    public String generateInitScript(EnvVars env) throws IOException, InterruptedException {
         StringBuilder initScript = new StringBuilder();
         InputStream templateStream = getClass().getResourceAsStream("/initscripttemplate.gradle");
         String templateAsString = IOUtils.toString(templateStream, Charsets.UTF_8.name());
-        File localGradleExtractorJar = Which.jarFile(getClass().getResource("/initscripttemplate.gradle"));
-        FilePath dependencyDir = PluginDependencyHelper.getActualDependencyDirectory(localGradleExtractorJar, rootPath);
+        File extractorJar = PluginDependencyHelper.getExtractorJar(env);
+        FilePath dependencyDir = PluginDependencyHelper.getActualDependencyDirectory(extractorJar, rootPath);
         String absoluteDependencyDirPath = dependencyDir.getRemote();
         absoluteDependencyDirPath = absoluteDependencyDirPath.replace("\\", "/");
         String str = templateAsString.replace("${pluginLibDir}", absoluteDependencyDirPath);

@@ -1,0 +1,50 @@
+package integration.pipelines.scripted
+
+node {
+    stage "Configuration"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:promotion test"
+    buildInfo.number = "4"
+
+    stage "Upload"
+    def uploadSpec = """{
+      "files": [
+        {
+          "pattern": "${FILES_DIR}",
+          "target": "${LOCAL_REPO1}/"
+        }
+     ]
+    }"""
+    rtServer.upload spec: uploadSpec, buildInfo: buildInfo
+
+    stage "Download"
+    def downloadSpec = """{
+      "files": [
+        {
+          "pattern": "${LOCAL_REPO1}/*",
+          "target": "promotion-test/"
+        }
+     ]
+    }"""
+    rtServer.download spec: downloadSpec, buildInfo: buildInfo
+
+    stage "Publish Build Info"
+    rtServer.publishBuildInfo buildInfo
+
+    stage "Promotion"
+    def promotionConfig = [
+            //Mandatory parameters
+            "buildName"          : buildInfo.name,
+            "buildNumber"        : buildInfo.number,
+            "targetRepo"         : "${LOCAL_REPO2}",
+
+            //Optional parameters
+            "comment"            : "this is the promotion comment",
+            "sourceRepo"         : "${LOCAL_REPO1}",
+            "status"             : "Released",
+            "includeDependencies": true,
+            "failFast"           : true,
+    ]
+    rtServer.promote promotionConfig
+}

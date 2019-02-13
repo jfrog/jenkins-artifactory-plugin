@@ -1,0 +1,51 @@
+# ~~~ How to use Appveyor ~~~
+# Preconditions: Artifactory with external access.
+#
+# = Trigger tests on commits =
+#   1. Create a new project in Appveyor and choose jenkins-artifactory-plugin.
+#   2. In project settings, copy the 'Webhook URL' and create a new 'Push events' Webhook in Github.
+#
+# = Configure Artifactory =
+#   Create a remote Nuget repository in Artifactory:
+#     A. Repository Key: choco
+#     B. Url: https://chocolatey.org
+#     * The test uses Chocolatey package manager to download Maven and Gradle Nuget packages through Artifactory's cache.
+#
+# = Override credentials in Appveyor in case of a fork =
+#   1. In the project at Appveyor - Go to settings -> Environment.
+#   2. Override 'JENKINS_ARTIFACTORY_URL' and 'JENKINS_ARTIFACTORY_USERNAME'.
+#   3. Override 'JENKINS_ARTIFACTORY_PASSWORD' with variable encryption.
+
+image:
+  - Visual Studio 2017
+  - Ubuntu
+stack: jdk 8, node 8
+skip_tags: true
+environment:
+  APPVEYOR_SAVE_CACHE_ON_ERROR: true
+  GRADLE_OPTS: -Dorg.gradle.daemon=false
+  JENKINS_ARTIFACTORY_URL:
+    secure: RIh0gGFDn2JAnLUEEqLsQnZ5H3XFWg1s+Qq8Z4i+Xu+FtQf6Tsu2AnfY4/6AaXJ8
+  JENKINS_ARTIFACTORY_USERNAME:
+    secure: YEB5Wiv9a2vNpUhy+MfL+A==
+  JENKINS_ARTIFACTORY_PASSWORD:
+    secure: Um8o75MQIieSavIemF4ySA==
+
+before_test:
+  - cmd: "choco install maven --version 3.3.9.2 -i -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
+  - cmd: "choco install gradle -i -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
+  - cmd: refreshenv
+  - sh: curl -s "https://get.sdkman.io" | bash
+  - sh: source "/home/appveyor/.sdkman/bin/sdkman-init.sh"
+  - sh: export MAVEN_HOME=/home/appveyor/.sdkman/candidates/maven/current && sdk install maven 3.3.9
+  - sh: export GRADLE_HOME=/home/appveyor/.sdkman/candidates/gradle/current && sdk install gradle
+
+test_script:
+  - mvn -V -B -U clean verify -DskipITs=false
+
+cache:
+  - C:\Users\appveyor\.m2\ -> pom.xml
+  - /home/appveyor/.m2/ -> pom.xml
+  - /home/appveyor/.sdkman/ -> appveyor.yml
+
+build: off

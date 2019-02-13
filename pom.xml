@@ -23,7 +23,7 @@
     </parent>
 
     <artifactId>artifactory</artifactId>
-    <version>2.16.x-SNAPSHOT</version>
+    <version>3.1.x-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>Jenkins Artifactory Plugin</name>
     <description>Integrates Artifactory to Jenkins</description>
@@ -36,11 +36,15 @@
         <!-- TODO: enforcer is full of upper bound dependency issues, including real ones -->
         <enforcer.skip>true</enforcer.skip>
         <findbugs.failOnError>false</findbugs.failOnError>
+        <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
+        <skipITs>true</skipITs>
 
-        <buildinfo.version>2.12.x-SNAPSHOT</buildinfo.version>
-        <buildinfo.maven3.version>2.12.x-SNAPSHOT</buildinfo.maven3.version>
-        <buildinfo.gradle.version>4.8.x-SNAPSHOT</buildinfo.gradle.version>
-        <buildinfo.ivy.version>2.12.x-SNAPSHOT</buildinfo.ivy.version>
+        <buildinfo.version>2.13.1</buildinfo.version>
+        <buildinfo.maven3.version>2.13.1</buildinfo.maven3.version>
+        <buildinfo.gradle.version>4.9.1</buildinfo.gradle.version>
+        <buildinfo.ivy.version>2.13.1</buildinfo.ivy.version>
+        <buildinfo.npm.version>2.13.1</buildinfo.npm.version>
+
     </properties>
 
     <developers>
@@ -108,10 +112,21 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-job</artifactId>
+            <version>2.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.jvnet.hudson.plugins</groupId>
             <artifactId>perforce</artifactId>
             <version>1.3.7</version>
             <optional>true</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -150,14 +165,12 @@
             <artifactId>credentials</artifactId>
             <version>1.22</version>
         </dependency>
-        <!-- usage of jenkins customized xstream is a must for the integration tests -->
         <dependency>
-            <groupId>org.jvnet.hudson</groupId>
-            <artifactId>xstream</artifactId>
-            <version>1.3.1-hudson-8</version>
-            <scope>provided</scope>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>nodejs</artifactId>
+            <version>1.2.7</version>
+            <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-api</artifactId>
@@ -285,6 +298,11 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>org.jfrog.buildinfo</groupId>
+            <artifactId>build-info-extractor-npm</artifactId>
+            <version>${buildinfo.npm.version}</version>
+        </dependency>
+        <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>2.4</version>
@@ -355,32 +373,10 @@
             <version>2.13</version>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>org.codehaus.plexus</groupId>
             <artifactId>plexus-classworlds</artifactId>
             <version>2.5.2</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.littleshoot</groupId>
-            <artifactId>littleproxy</artifactId>
-            <version>1.1.2</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>netty-all</artifactId>
-                    <groupId>io.netty</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>net.lightbody.bmp</groupId>
-            <artifactId>mitm</artifactId>
-            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.docker-java</groupId>
@@ -391,6 +387,10 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>jcl-over-slf4j</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.bouncycastle</groupId>
+                    <artifactId>bcpkix-jdk15on</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -399,6 +399,32 @@
             <version>2.4.12</version>
             <scope>provided</scope>
         </dependency>
+        <!--Tests-->
+        <dependency>
+            <groupId>org.jenkins-ci.main</groupId>
+            <artifactId>jenkins-test-harness</artifactId>
+            <version>2.44</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>5.3.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins.workflow</groupId>
+            <artifactId>workflow-aggregator</artifactId>
+            <version>2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jfrog.artifactory.client</groupId>
+            <artifactId>artifactory-java-client-services</artifactId>
+            <version>2.6.2</version>
+            <scope>test</scope>
+        </dependency>
+        <!--/Tests-->
     </dependencies>
 
     <build>
@@ -417,23 +443,32 @@
                     <goals>deploy</goals>
                 </configuration>
             </plugin>
+            <!--Unit tests-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>2.22.1</version>
                 <configuration>
+                    <systemPropertyVariables>
+                        <!--This will disable JenkinsRule timeout-->
+                        <maven.surefire.debug>true</maven.surefire.debug>
+                    </systemPropertyVariables>
                     <excludes>
                         <exclude>**/InjectedTest.java</exclude>
                         <exclude>**/*ITest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
+            <!--Integration tests-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.8.1</version>
+                <version>2.22.1</version>
                 <configuration>
-                    <skipITs>true</skipITs>
+                    <systemPropertyVariables>
+                        <!--This will disable JenkinsRule timeout-->
+                        <maven.surefire.debug>true</maven.surefire.debug>
+                    </systemPropertyVariables>
                     <includes>
                         <include>**/*ITest.java</include>
                     </includes>
@@ -503,21 +538,6 @@
     </scm>
 
     <profiles>
-        <profile>
-            <id>itest</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-failsafe-plugin</artifactId>
-                        <version>2.8.1</version>
-                        <configuration>
-                            <skipITs>false</skipITs>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <profile>
             <activation>
                 <activeByDefault>true</activeByDefault>

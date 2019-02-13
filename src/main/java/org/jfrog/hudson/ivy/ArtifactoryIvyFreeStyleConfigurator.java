@@ -36,7 +36,6 @@ import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.listener.ArtifactoryBuildListener;
 import org.jfrog.hudson.*;
-import org.jfrog.hudson.BintrayPublish.BintrayPublishAction;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.util.*;
@@ -75,42 +74,22 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     public final boolean deployBuildInfo;
     public final boolean includeEnvVars;
     private final CredentialsConfig deployerCredentialsConfig;
-    private final boolean runChecks;
-    private final String violationRecipients;
-    private final boolean includePublishArtifacts;
-    private final String scopes;
-    private final boolean licenseAutoDiscovery;
-    private final boolean disableLicenseAutoDiscovery;
     private final String ivyPattern;
     private final String artifactPattern;
-    @Deprecated
-    private final Boolean notM2Compatible = null;
     private final Boolean useMavenPatterns;
     private final IncludesExcludes artifactDeploymentPatterns;
     private final boolean discardOldBuilds;
     private final boolean asyncBuildRetention;
     private final boolean passIdentifiedDownstream;
     private final boolean discardBuildArtifacts;
-    @Deprecated
-    private final String matrixParams = null;
     private final String deploymentProperties;
     private final boolean enableIssueTrackerIntegration;
     private final boolean filterExcludedArtifactsFromBuild;
-    @Deprecated
-    private final ServerDetails details = null;
     private ServerDetails deployerDetails;
     private boolean deployArtifacts;
     private IncludesExcludes envVarsPatterns;
     private String aggregationBuildStatus;
     private boolean aggregateBuildIssues;
-    private boolean blackDuckRunChecks;
-    private String blackDuckAppName;
-    private String blackDuckAppVersion;
-    private String blackDuckReportRecipients; //csv
-    private String blackDuckScopes; //csv
-    private boolean blackDuckIncludePublishedArtifacts;
-    private boolean autoCreateMissingComponentRequests;
-    private boolean autoDiscardStaleComponentRequests;
     private String artifactoryCombinationFilter;
     private String customBuildName;
     private boolean overrideBuildName;
@@ -118,54 +97,46 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     @Deprecated
     private Credentials overridingDeployerCredentials;
 
+    /**
+     * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
+     */
+    @Deprecated
+    private final ServerDetails details = null;
+    @Deprecated
+    private final String matrixParams = null;
+    @Deprecated
+    private final Boolean notM2Compatible = null;
+
     @DataBoundConstructor
     public ArtifactoryIvyFreeStyleConfigurator(ServerDetails details, ServerDetails deployerDetails, CredentialsConfig deployerCredentialsConfig,
                                                boolean deployArtifacts, String remotePluginLocation,
                                                boolean includeEnvVars, IncludesExcludes envVarsPatterns,
-                                               boolean deployBuildInfo, boolean runChecks, String violationRecipients,
-                                               boolean includePublishArtifacts, String scopes, boolean disableLicenseAutoDiscovery, String ivyPattern,
+                                               boolean deployBuildInfo, String ivyPattern,
                                                String artifactPattern, Boolean useMavenPatterns, Boolean notM2Compatible, IncludesExcludes artifactDeploymentPatterns,
                                                boolean discardOldBuilds, boolean asyncBuildRetention, boolean passIdentifiedDownstream, boolean discardBuildArtifacts,
                                                String matrixParams, String deploymentProperties, boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
-                                               String aggregationBuildStatus, boolean blackDuckRunChecks, String blackDuckAppName,
-                                               String blackDuckAppVersion, String blackDuckReportRecipients, String blackDuckScopes,
-                                               boolean blackDuckIncludePublishedArtifacts, boolean autoCreateMissingComponentRequests,
-                                               boolean autoDiscardStaleComponentRequests, boolean filterExcludedArtifactsFromBuild,
+                                               String aggregationBuildStatus, boolean filterExcludedArtifactsFromBuild,
                                                String artifactoryCombinationFilter, String customBuildName, boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails != null ? deployerDetails : details;
+        this.deployerDetails = deployerDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.deployArtifacts = deployArtifacts;
         this.remotePluginLocation = remotePluginLocation;
         this.includeEnvVars = includeEnvVars;
         this.envVarsPatterns = envVarsPatterns;
         this.deployBuildInfo = deployBuildInfo;
-        this.runChecks = runChecks;
-        this.violationRecipients = violationRecipients;
-        this.includePublishArtifacts = includePublishArtifacts;
-        this.scopes = scopes;
-        this.disableLicenseAutoDiscovery = disableLicenseAutoDiscovery;
         this.ivyPattern = ivyPattern;
         this.aggregationBuildStatus = aggregationBuildStatus;
         this.filterExcludedArtifactsFromBuild = filterExcludedArtifactsFromBuild;
         this.artifactPattern = clearApostrophes(artifactPattern);
-        this.useMavenPatterns = useMavenPatterns != null ? useMavenPatterns : (notM2Compatible != null && !notM2Compatible);
+        this.useMavenPatterns = useMavenPatterns;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
         this.discardOldBuilds = discardOldBuilds;
         this.asyncBuildRetention = asyncBuildRetention;
         this.passIdentifiedDownstream = passIdentifiedDownstream;
-        this.deploymentProperties = deploymentProperties != null ? deploymentProperties : matrixParams;
+        this.deploymentProperties = deploymentProperties;
         this.enableIssueTrackerIntegration = enableIssueTrackerIntegration;
         this.aggregateBuildIssues = aggregateBuildIssues;
-        this.licenseAutoDiscovery = !disableLicenseAutoDiscovery;
         this.discardBuildArtifacts = discardBuildArtifacts;
-        this.blackDuckRunChecks = blackDuckRunChecks;
-        this.blackDuckAppName = blackDuckAppName;
-        this.blackDuckAppVersion = blackDuckAppVersion;
-        this.blackDuckReportRecipients = blackDuckReportRecipients;
-        this.blackDuckScopes = blackDuckScopes;
-        this.blackDuckIncludePublishedArtifacts = blackDuckIncludePublishedArtifacts;
-        this.autoCreateMissingComponentRequests = autoCreateMissingComponentRequests;
-        this.autoDiscardStaleComponentRequests = autoDiscardStaleComponentRequests;
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
         this.customBuildName = customBuildName;
         this.overrideBuildName = overrideBuildName;
@@ -179,11 +150,11 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     }
 
     public ServerDetails getDeployerDetails() {
-        return deployerDetails != null ? deployerDetails : details;
+        return deployerDetails;
     }
 
     public String getDeploymentProperties() {
-        return deploymentProperties != null ? deploymentProperties : matrixParams;
+        return deploymentProperties;
     }
 
     public boolean isPassIdentifiedDownstream() {
@@ -214,10 +185,6 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         return deployerCredentialsConfig;
     }
 
-    public String getViolationRecipients() {
-        return violationRecipients;
-    }
-
     public String getArtifactPattern() {
         return clearApostrophes(artifactPattern);
     }
@@ -230,28 +197,8 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         return artifactDeploymentPatterns;
     }
 
-    public boolean isRunChecks() {
-        return runChecks;
-    }
-
-    public boolean isIncludePublishArtifacts() {
-        return includePublishArtifacts;
-    }
-
     public boolean isDeployBuildInfo() {
         return deployBuildInfo;
-    }
-
-    public boolean isLicenseAutoDiscovery() {
-        return licenseAutoDiscovery;
-    }
-
-    public boolean isDisableLicenseAutoDiscovery() {
-        return disableLicenseAutoDiscovery;
-    }
-
-    public String getScopes() {
-        return scopes;
     }
 
     public boolean isIncludeEnvVars() {
@@ -285,10 +232,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     }
 
     public boolean isUseMavenPatterns() {
-        if (useMavenPatterns != null) {
-            return useMavenPatterns;
-        }
-        return notM2Compatible != null && !notM2Compatible;
+        return useMavenPatterns;
     }
 
     public boolean isEnableIssueTrackerIntegration() {
@@ -301,38 +245,6 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
 
     public String getAggregationBuildStatus() {
         return aggregationBuildStatus;
-    }
-
-    public boolean isBlackDuckRunChecks() {
-        return blackDuckRunChecks;
-    }
-
-    public String getBlackDuckAppName() {
-        return blackDuckAppName;
-    }
-
-    public String getBlackDuckAppVersion() {
-        return blackDuckAppVersion;
-    }
-
-    public String getBlackDuckReportRecipients() {
-        return blackDuckReportRecipients;
-    }
-
-    public String getBlackDuckScopes() {
-        return blackDuckScopes;
-    }
-
-    public boolean isBlackDuckIncludePublishedArtifacts() {
-        return blackDuckIncludePublishedArtifacts;
-    }
-
-    public boolean isAutoCreateMissingComponentRequests() {
-        return autoCreateMissingComponentRequests;
-    }
-
-    public boolean isAutoDiscardStaleComponentRequests() {
-        return autoDiscardStaleComponentRequests;
     }
 
     public boolean isFilterExcludedArtifactsFromBuild() {
@@ -452,11 +364,6 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                     String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryIvyFreeStyleConfigurator.this, build);
                     build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                     build.getActions().add(new UnifiedPromoteBuildAction(build, ArtifactoryIvyFreeStyleConfigurator.this));
-                    // Checks if Push to Bintray is disabled.
-                    if (PluginsUtils.isPushToBintrayEnabled()) {
-                        build.getActions().add(new BintrayPublishAction<ArtifactoryIvyFreeStyleConfigurator>(build,
-                                ArtifactoryIvyFreeStyleConfigurator.this));
-                    }
                 }
 
                 // Aborted action by the user:
@@ -507,9 +414,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         return new PublisherContext.Builder().
                 artifactoryServer(getArtifactoryServer())
                 .serverDetails(getDeployerDetails()).deployerOverrider(ArtifactoryIvyFreeStyleConfigurator.this)
-                .runChecks(isRunChecks()).includePublishArtifacts(isIncludePublishArtifacts())
-                .violationRecipients(getViolationRecipients()).scopes(getScopes())
-                .licenseAutoDiscovery(isLicenseAutoDiscovery()).discardOldBuilds(isDiscardOldBuilds())
+                .discardOldBuilds(isDiscardOldBuilds())
                 .deployArtifacts(isDeployArtifacts()).includesExcludes(getArtifactDeploymentPatterns())
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
                 .includeEnvVars(isIncludeEnvVars()).envVarsPatterns(getEnvVarsPatterns())
@@ -517,9 +422,6 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                 .deploymentProperties(getDeploymentProperties()).maven2Compatible(isUseMavenPatterns()).artifactsPattern(getArtifactPattern())
                 .ivyPattern(getIvyPattern()).enableIssueTrackerIntegration(isEnableIssueTrackerIntegration())
                 .aggregateBuildIssues(isAggregateBuildIssues()).aggregationBuildStatus(getAggregationBuildStatus())
-                .integrateBlackDuck(isBlackDuckRunChecks(), getBlackDuckAppName(), getBlackDuckAppVersion(),
-                        getBlackDuckReportRecipients(), getBlackDuckScopes(), isBlackDuckIncludePublishedArtifacts(),
-                        isAutoCreateMissingComponentRequests(), isAutoDiscardStaleComponentRequests())
                 .filterExcludedArtifactsFromBuild(isFilterExcludedArtifactsFromBuild())
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .overrideBuildName(isOverrideBuildName())
@@ -618,10 +520,6 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
 
         public boolean isMultiConfProject() {
             return (item.getClass().isAssignableFrom(MatrixProject.class));
-        }
-
-        public FormValidation doCheckViolationRecipients(@QueryParameter String value) {
-            return FormValidations.validateEmails(value);
         }
 
         public FormValidation doCheckArtifactoryCombinationFilter(@QueryParameter String value)
