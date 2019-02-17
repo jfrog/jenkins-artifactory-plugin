@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesCommandType;
 import static org.jfrog.hudson.pipeline.common.Utils.BUILD_INFO;
 import static org.jfrog.hudson.pipeline.common.Utils.appendBuildInfo;
 
@@ -27,6 +28,8 @@ public class ArtifactoryServer implements Serializable {
     public static final String BUILD_NAME = "buildName";
     public static final String BUILD_NUMBER = "buildNumber";
     public static final String FAIL_NO_OP = "failNoOp";
+    public static final String PROPERTIES = "props";
+    public static final String EDIT_PROPERTIES_TYPE = "editType";
 
     private String serverName;
     private String url;
@@ -153,6 +156,68 @@ public class ArtifactoryServer implements Serializable {
         uploadArguments.put(FAIL_NO_OP, failNoOp);
         upload(uploadArguments);
     }
+
+    private Map<String, Object> getPropsObjectMap(Map<String, Object> arguments) {
+        if (!arguments.containsKey(SPEC) || !arguments.containsKey(PROPERTIES)) {
+            throw new IllegalArgumentException(SPEC + PROPERTIES + " are mandatory arguments");
+        }
+
+        List<String> keysAsList = Arrays.asList(SPEC, PROPERTIES, FAIL_NO_OP);
+        if (!keysAsList.containsAll(arguments.keySet())) {
+            throw new IllegalArgumentException("Only the following arguments are allowed, " + keysAsList.toString());
+        }
+
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap(arguments);
+        stepVariables.put(SERVER, this);
+        return stepVariables;
+    }
+
+    @Whitelisted
+    public void setProps(Map<String, Object> propsArguments) {
+        Map<String, Object> stepVariables = getPropsObjectMap(propsArguments);
+        stepVariables.put(EDIT_PROPERTIES_TYPE, EditPropertiesCommandType.SET);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryEditProps", stepVariables);
+    }
+
+    @Whitelisted
+    public void setProps(String spec, String props) {
+        setProps(spec, props, false);
+    }
+
+    @Whitelisted
+    public void setProps(String spec, String props, boolean failNoOp) {
+        Map<String, Object> propsArguments = Maps.newLinkedHashMap();
+        propsArguments.put(SPEC, spec);
+        propsArguments.put(PROPERTIES, props);
+        propsArguments.put(FAIL_NO_OP, failNoOp);
+        setProps(propsArguments);
+    }
+
+    @Whitelisted
+    public void deleteProps(Map<String, Object> propsArguments) {
+        Map<String, Object> stepVariables = getPropsObjectMap(propsArguments);
+        stepVariables.put(EDIT_PROPERTIES_TYPE, EditPropertiesCommandType.DELETE);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryEditProps", stepVariables);
+    }
+
+    @Whitelisted
+    public void deleteProps(String spec, String props) {
+        deleteProps(spec, props, false);
+    }
+
+    @Whitelisted
+    public void deleteProps(String spec, String props, boolean failNoOp) {
+        Map<String, Object> propsArguments = Maps.newLinkedHashMap();
+        propsArguments.put(SPEC, spec);
+        propsArguments.put(PROPERTIES, props);
+        propsArguments.put(FAIL_NO_OP, failNoOp);
+        deleteProps(propsArguments);
+    }
+
 
     @Whitelisted
     public void publishBuildInfo(BuildInfo buildInfo) {
