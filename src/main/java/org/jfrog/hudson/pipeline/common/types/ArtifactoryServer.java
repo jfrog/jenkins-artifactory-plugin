@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesCommandType;
+import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesActionType;
 import static org.jfrog.hudson.pipeline.common.Utils.BUILD_INFO;
 import static org.jfrog.hudson.pipeline.common.Utils.appendBuildInfo;
 
@@ -175,7 +175,7 @@ public class ArtifactoryServer implements Serializable {
     @Whitelisted
     public void setProps(Map<String, Object> propsArguments) {
         Map<String, Object> stepVariables = getPropsObjectMap(propsArguments);
-        stepVariables.put(EDIT_PROPERTIES_TYPE, EditPropertiesCommandType.SET);
+        stepVariables.put(EDIT_PROPERTIES_TYPE, EditPropertiesActionType.SET);
 
         // Throws CpsCallableInvocation - Must be the last line in this method
         cpsScript.invokeMethod("artifactoryEditProps", stepVariables);
@@ -198,7 +198,7 @@ public class ArtifactoryServer implements Serializable {
     @Whitelisted
     public void deleteProps(Map<String, Object> propsArguments) {
         Map<String, Object> stepVariables = getPropsObjectMap(propsArguments);
-        stepVariables.put(EDIT_PROPERTIES_TYPE, EditPropertiesCommandType.DELETE);
+        stepVariables.put(EDIT_PROPERTIES_TYPE, EditPropertiesActionType.DELETE);
 
         // Throws CpsCallableInvocation - Must be the last line in this method
         cpsScript.invokeMethod("artifactoryEditProps", stepVariables);

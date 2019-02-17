@@ -16,18 +16,18 @@ import org.jfrog.hudson.pipeline.common.executors.EditPropsExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesCommandType;
+import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesActionType;
 
 public class EditPropsStep extends AbstractStepImpl {
     private ArtifactoryServer server;
     private String spec;
-    private EditPropertiesCommandType editType;
+    private EditPropertiesActionType editType;
     private String props;
     private boolean failNoOp;
 
     @DataBoundConstructor
     public EditPropsStep(String spec, String props, boolean failNoOp, ArtifactoryServer server,
-                         EditPropertiesCommandType editType) {
+                         EditPropertiesActionType editType) {
         this.spec = spec;
         this.editType = editType;
         this.props = props;
@@ -35,7 +35,7 @@ public class EditPropsStep extends AbstractStepImpl {
         this.failNoOp = failNoOp;
     }
 
-    public EditPropertiesCommandType getEditType() {
+    public EditPropertiesActionType getEditType() {
         return editType;
     }
 

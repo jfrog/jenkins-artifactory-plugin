@@ -20,7 +20,7 @@ import org.jfrog.hudson.util.SpecUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
-import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesCommandType;
+import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesActionType;
 
 public class DeletePropsStep extends AbstractStepImpl {
     protected String serverId;
@@ -91,7 +91,7 @@ public class DeletePropsStep extends AbstractStepImpl {
 
 
             EditPropsExecutor editPropsExecutor = new EditPropsExecutor(artifactoryServer, listener, build, ws, spec,
-                    EditPropertiesCommandType.DELETE, step.props, step.failNoOp);
+                    EditPropertiesActionType.DELETE, step.props, step.failNoOp);
             editPropsExecutor.execute();
             return null;
         }
