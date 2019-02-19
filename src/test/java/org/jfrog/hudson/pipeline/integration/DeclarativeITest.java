@@ -45,4 +45,14 @@ public class DeclarativeITest extends CommonITestsPipeline {
     public void npmTest() throws Exception {
         super.npmTest("declarative:npm test");
     }
+
+    @Test
+    public void setPropsTest() throws Exception {
+        super.setPropsTest("declarative:setProps test");
+    }
+
+    @Test
+    public void deletePropsTest() throws Exception {
+        super.deletePropsTest("declarative:deleteProps test");
+    }
 }

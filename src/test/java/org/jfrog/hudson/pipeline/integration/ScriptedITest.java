@@ -45,4 +45,14 @@ public class ScriptedITest extends CommonITestsPipeline {
     public void npmTest() throws Exception {
         super.npmTest("scripted:npm test");
     }
+
+    @Test
+    public void setPropsTest() throws Exception {
+        super.setPropsTest("scripted:setProps test");
+    }
+
+    @Test
+    public void deletePropsTest() throws Exception {
+        super.deletePropsTest("scripted:deleteProps test");
+    }
 }

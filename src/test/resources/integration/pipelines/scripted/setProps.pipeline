@@ -1,0 +1,49 @@
+package integration.pipelines.scripted
+
+node {
+    stage "Configuration"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:setProps test"
+    buildInfo.number = "3"
+
+    stage "Upload"
+    // Upload all files in 'files' folder with props
+    def uploadSpec = """{
+      "files": [
+        {
+          "pattern": "${FILES_DIR}",
+          "target": "${LOCAL_REPO1}/",
+          "props": "p1=v1;p2=v2"
+        }
+     ]
+    }"""
+    rtServer.upload spec: uploadSpec, buildInfo: buildInfo
+
+    stage "Set Props"
+    // Set a new property on one of the files (a.in)
+    def setPropsSpec = """{
+        "files": [
+            {
+                "pattern": "${LOCAL_REPO1}/a.in"
+            }
+        ]
+    }"""
+    rtServer.setProps spec: setPropsSpec, props: "new-property=yes"
+
+    stage "Download"
+    // Download only files with the new property
+    def downloadSpec = """{
+      "files": [
+        {
+          "pattern": "${LOCAL_REPO1}/*",
+          "target": "setProps-test/",
+          "props": "new-property=yes"
+        }
+     ]
+    }"""
+    rtServer.download spec: downloadSpec, buildInfo: buildInfo
+
+    stage "Publish Build Info"
+    rtServer.publishBuildInfo buildInfo
+}

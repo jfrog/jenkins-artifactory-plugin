@@ -172,4 +172,51 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertTrue(t.getMessage().contains("Fail-no-op: No files were affected in the download process."));
         }
     }
+
+    void setPropsTest(String buildName) throws Exception {
+        Set<String> expectedDependencies = Sets.newHashSet("a.in");
+        String buildNumber = "3";
+
+        WorkflowRun build = runPipeline("setProps");
+        try {
+            // Only a.in is expected to exist in workspace
+            assertTrue("a.in doesn't exist locally", isExistInWorkspace(jenkins, build, "setProps-test", "a.in"));
+            assertFalse("b.in exists locally", isExistInWorkspace(jenkins, build, "setProps-test", "b.in"));
+            assertFalse("c.in exists locally", isExistInWorkspace(jenkins, build, "setProps-test", "c.in"));
+
+            // Make sure all files still exist in artifactory:
+            Arrays.asList("a.in", "b.in", "c.in").forEach(artifactName ->
+                    assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
+
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertModuleDependencies(module, expectedDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void deletePropsTest(String buildName) throws Exception {
+        Set<String> expectedDependencies = Sets.newHashSet("b.in", "c.in");
+        String buildNumber = "3";
+
+        WorkflowRun build = runPipeline("deleteProps");
+        try {
+            // Only b.in, c.in are expected to exist in workspace
+            assertFalse("a.in exists locally", isExistInWorkspace(jenkins, build, "deleteProps-test", "a.in"));
+            for (String fileName : expectedDependencies) {
+                assertTrue(fileName + "doesn't exists locally", isExistInWorkspace(jenkins, build, "deleteProps-test", fileName));
+            }
+
+            // Make sure all files still exist in artifactory:
+            Arrays.asList("a.in", "b.in", "c.in").forEach(artifactName ->
+                    assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
+
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertModuleDependencies(module, expectedDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
 }

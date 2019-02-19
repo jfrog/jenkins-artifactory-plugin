@@ -13,7 +13,7 @@ import java.io.IOException;
 
 import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesActionType;
 
-public class EditPropsExecutor {
+public class EditPropsExecutor implements Executor {
     private final Run build;
     private transient FilePath ws;
     private ArtifactoryServer server;
