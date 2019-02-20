@@ -38,7 +38,7 @@ node {
                        "files": [
                         {
                             "pattern": "${LOCAL_REPO1}/a.in"
-                          }
+                        }
                        ]
                       }""",
             props: "new-property=yes"

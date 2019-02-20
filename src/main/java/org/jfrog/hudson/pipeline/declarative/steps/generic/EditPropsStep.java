@@ -30,7 +30,7 @@ public class EditPropsStep extends AbstractStepImpl {
     private EditPropertiesActionType editType;
 
     @DataBoundConstructor
-    public EditPropsStep(String serverId, EditPropertiesActionType editType) {
+    EditPropsStep(String serverId, EditPropertiesActionType editType) {
         this.serverId = serverId;
         this.editType = editType;
     }
@@ -73,7 +73,6 @@ public class EditPropsStep extends AbstractStepImpl {
             // Set spec
             SpecConfiguration specConfiguration = new SpecConfiguration(step.spec, step.specPath);
             spec = SpecUtils.getSpecStringFromSpecConf(specConfiguration, env, ws, listener.getLogger());
-
 
             EditPropsExecutor editPropsExecutor = new EditPropsExecutor(artifactoryServer, listener, build, ws, spec,
                     step.editType, step.props, step.failNoOp);
