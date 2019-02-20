@@ -29,7 +29,6 @@ public class EditPropsStep extends AbstractStepImpl {
     private boolean failNoOp;
     private EditPropertiesActionType editType;
 
-    @DataBoundConstructor
     EditPropsStep(String serverId, EditPropertiesActionType editType) {
         this.serverId = serverId;
         this.editType = editType;

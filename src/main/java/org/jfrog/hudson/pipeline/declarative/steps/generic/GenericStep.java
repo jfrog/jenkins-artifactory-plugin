@@ -34,7 +34,6 @@ public class GenericStep extends AbstractStepImpl {
     private String specPath;
     boolean failNoOp;
 
-    @DataBoundConstructor
     GenericStep(String serverId) {
         this.serverId = serverId;
     }
