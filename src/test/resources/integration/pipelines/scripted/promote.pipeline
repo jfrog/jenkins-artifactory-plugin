@@ -12,7 +12,8 @@ node {
       "files": [
         {
           "pattern": "${FILES_DIR}",
-          "target": "${LOCAL_REPO1}/"
+          "target": "${LOCAL_REPO1}/",
+          "recursive": "false"
         }
      ]
     }"""

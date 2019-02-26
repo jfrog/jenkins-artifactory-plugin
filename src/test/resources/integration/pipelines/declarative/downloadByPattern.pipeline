@@ -2,7 +2,7 @@ package integration.pipelines.declarative
 
 node {
     def serverId = "Artifactory-1"
-    def buildName = "declarative:upload test"
+    def buildName = "declarative:downloadByPattern test"
     def buildNumber = "3"
 
     stage "Configuration"
@@ -13,16 +13,16 @@ node {
             password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     )
 
-    stage "Upload"
-    rtUpload(
+    stage "Download"
+    rtDownload(
             serverId: serverId,
             buildName: buildName,
             buildNumber: buildNumber,
             spec: """{
               "files": [
                 {
-                  "pattern": "${FILES_DIR}",
-                  "target": "${LOCAL_REPO1}/",
+                  "pattern": "${LOCAL_REPO1}/*",
+                  "target": "downloadByPattern-test/",
                   "recursive": "false"
                 }
              ]

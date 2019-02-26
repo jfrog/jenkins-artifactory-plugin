@@ -1,0 +1,86 @@
+package integration.pipelines.scripted
+
+node {
+    stage "Configuration"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+
+    // First upload files with buildNumber = 3
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:downloadByShaAndBuild test"
+    buildInfo.number = "3"
+
+    stage "Upload"
+    def uploadSpec = """{
+      "files": [
+        {
+          "pattern": "${FILES_DIR}a.in",
+          "target": "${LOCAL_REPO1}/a3",
+          "recursive": "false"
+        }
+     ]
+    }"""
+    rtServer.upload spec: uploadSpec, buildInfo: buildInfo
+
+    stage "Publish Build Info"
+    rtServer.publishBuildInfo buildInfo
+
+    // upload files with buildNumber = 4 and second build name
+    def buildInfo1 = Artifactory.newBuildInfo()
+    buildInfo1.name = "scripted:downloadByShaAndBuild test-second"
+    buildInfo1.number = "4"
+
+    stage "Upload 1"
+    def uploadSpec1 = """{
+      "files": [
+        {
+          "pattern": "${FILES_DIR}a.in",
+          "target": "${LOCAL_REPO1}/a4",
+          "recursive": "false"
+        }
+     ]
+    }"""
+    rtServer.upload spec: uploadSpec1, buildInfo: buildInfo1
+
+    stage "Publish Build Info 1"
+    rtServer.publishBuildInfo buildInfo1
+
+    // Then upload files with buildNumber = 5 and second build name
+    def buildInfo2 = Artifactory.newBuildInfo()
+    buildInfo2.name = "scripted:downloadByShaAndBuild test-second"
+    buildInfo2.number = "5"
+
+    stage "Upload 1"
+    def uploadSpec2 = """{
+      "files": [
+        {
+          "pattern": "${FILES_DIR}a.in",
+          "target": "${LOCAL_REPO1}/a5",
+          "recursive": "false"
+        }
+     ]
+    }"""
+    rtServer.upload spec: uploadSpec2, buildInfo: buildInfo2
+
+    stage "Publish Build Info 1"
+    rtServer.publishBuildInfo buildInfo2
+
+    // At last, download by pattern and build name (without number)
+    def buildInfo3 = Artifactory.newBuildInfo()
+    buildInfo3.name = "scripted:downloadByShaAndBuild test"
+    buildInfo3.number = "6"
+
+    stage "Download"
+    def downloadSpec = """{
+      "files": [
+        {
+          "pattern": "${LOCAL_REPO1}/*",
+          "build": "scripted:downloadByShaAndBuild test",
+          "target": "downloadByShaAndBuild-test/"
+        }
+     ]
+    }"""
+    rtServer.download spec: downloadSpec, buildInfo: buildInfo3
+
+    stage "Publish Build Info 3"
+    rtServer.publishBuildInfo buildInfo3
+}

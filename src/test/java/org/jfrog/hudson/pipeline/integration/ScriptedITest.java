@@ -12,8 +12,38 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
-    public void downloadTest() throws Exception {
-        super.downloadTest("scripted:download test");
+    public void downloadByPatternTest() throws Exception {
+        super.downloadByPatternTest("scripted:downloadByPattern test");
+    }
+
+    @Test
+    public void downloadByAqlTest() throws Exception {
+        super.downloadByAqlTest("scripted:downloadByAql test");
+    }
+
+    @Test
+    public void downloadByPatternAndBuildTest() throws Exception {
+        super.downloadByPatternAndBuildTest("scripted:downloadByPatternAndBuild test");
+    }
+
+    @Test
+    public void downloadByBuildOnlyTest() throws Exception {
+        super.downloadByBuildOnlyTest("scripted:downloadByBuildOnly test");
+    }
+
+    @Test
+    public void downloadNonExistingBuildTest() throws Exception {
+        super.downloadNonExistingBuildTest("scripted:downloadNonExistingBuild test");
+    }
+
+    @Test
+    public void downloadByShaAndBuildTest() throws Exception {
+        super.downloadByShaAndBuildTest("scripted:downloadByShaAndBuild test");
+    }
+
+    @Test
+    public void downloadByShaAndBuildNameTest() throws Exception {
+        super.downloadByShaAndBuildNameTest("scripted:downloadByShaAndBuildName test");
     }
 
     @Test

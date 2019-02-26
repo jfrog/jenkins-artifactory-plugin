@@ -5,7 +5,7 @@ node {
     def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
 
     stage "Download"
-    def uploadSpec = """{
+    def downloadSpec = """{
       "files": [
         {
           "pattern": "${LOCAL_REPO1}/NOT_EXISTS",
@@ -13,5 +13,5 @@ node {
         }
      ]
     }"""
-    rtServer.download spec: uploadSpec, failNoOp: true
+    rtServer.download spec: downloadSpec, failNoOp: true
 }

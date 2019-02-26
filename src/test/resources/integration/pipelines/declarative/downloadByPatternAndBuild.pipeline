@@ -1,0 +1,91 @@
+package integration.pipelines.declarative
+
+node {
+    def serverId = "Artifactory-1"
+
+    stage "Configuration"
+    rtServer(
+            id: serverId,
+            url: "${env.JENKINS_ARTIFACTORY_URL}",
+            username: "${env.JENKINS_ARTIFACTORY_USERNAME}",
+            password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    )
+
+    def buildName = "declarative:downloadByPatternAndBuild test"
+    def buildNumber = "3"
+
+    stage "Upload"
+    rtUpload(
+            serverId: serverId,
+            buildName: buildName,
+            buildNumber: buildNumber,
+            spec: """{
+              "files": [
+                {
+                  "pattern": "${FILES_DIR}",
+                  "target": "${LOCAL_REPO1}/",
+                  "recursive": "false"
+                }
+             ]
+            }"""
+    )
+
+    stage "Publish Build Info"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName,
+            buildNumber: buildNumber
+    )
+
+    def buildName1 = "declarative:downloadByPatternAndBuild test"
+    def buildNumber1 = "4"
+
+    stage "Upload"
+    rtUpload(
+            serverId: serverId,
+            buildName: buildName1,
+            buildNumber: buildNumber1,
+            spec: """{
+              "files": [
+                {
+                  "pattern": "${FILES_DIR_1}",
+                  "target": "${LOCAL_REPO1}/",
+                  "recursive": "false"
+                }
+             ]
+            }"""
+    )
+
+    stage "Publish Build Info"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName1,
+            buildNumber: buildNumber1
+    )
+
+    def buildName2 = "declarative:downloadByPatternAndBuild test"
+    def buildNumber2 = "5"
+
+    stage "Download"
+    rtDownload(
+            serverId: serverId,
+            buildName: buildName2,
+            buildNumber: buildNumber2,
+            spec: """{
+              "files": [
+                {
+                    "pattern": "${LOCAL_REPO1}/a*",
+                    "build": "declarative:downloadByPatternAndBuild test/3",
+                    "target": "downloadByPatternAndBuild-test/"
+                }
+             ]
+            }"""
+    )
+
+    stage "Publish Build Info"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName2,
+            buildNumber: buildNumber2
+    )
+}

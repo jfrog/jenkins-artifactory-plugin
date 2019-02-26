@@ -1,0 +1,54 @@
+package integration.pipelines.scripted
+
+node {
+    stage "Configuration"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:downloadByAql test"
+    buildInfo.number = "3"
+
+    stage "Download"
+    def downloadSpec = """{
+      "files": [
+        {
+          "aql": {
+            "items.find": {
+              "repo": "${LOCAL_REPO1}",
+              "\$or": [
+                {
+                  "\$and": [
+                    {
+                      "path": {
+                        "\$match": "."
+                      },
+                      "name": {
+                        "\$match": "*"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "\$and": [
+                    {
+                      "path": {
+                        "\$match": "*"
+                      },
+                      "name": {
+                        "\$match": "*"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "target": "downloadByAql-test/",
+          "recursive": "false"
+        }
+     ]
+    }"""
+    rtServer.download spec: downloadSpec, buildInfo: buildInfo
+
+    stage "Publish Build Info"
+    rtServer.publishBuildInfo buildInfo
+}

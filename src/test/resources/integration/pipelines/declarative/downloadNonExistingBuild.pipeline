@@ -2,7 +2,7 @@ package integration.pipelines.declarative
 
 node {
     def serverId = "Artifactory-1"
-    def buildName = "declarative:download test"
+    def buildName = "declarative:downloadNonExistingBuild test"
     def buildNumber = "3"
 
     stage "Configuration"
@@ -13,16 +13,17 @@ node {
             password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     )
 
-    stage "Download"
-    rtDownload(
+    stage "Upload"
+    rtUpload(
             serverId: serverId,
             buildName: buildName,
             buildNumber: buildNumber,
             spec: """{
               "files": [
                 {
-                  "pattern": "${LOCAL_REPO1}/*",
-                  "target": "download-test/"
+                  "pattern": "${FILES_DIR}",
+                  "target": "${LOCAL_REPO1}/",
+                  "recursive": "false"
                 }
              ]
             }"""
@@ -33,5 +34,22 @@ node {
             serverId: serverId,
             buildName: buildName,
             buildNumber: buildNumber
+    )
+
+    stage "Download"
+    rtDownload(
+            serverId: serverId,
+            buildName: buildName,
+            buildNumber: buildNumber,
+            spec: """{
+              "files": [
+                {
+                    "pattern": "${LOCAL_REPO1}/*",
+                    "build": "NonExistingBuild/3",
+                    "target": "downloadNonExistingBuild-test/"
+                }
+             ]
+            }""",
+            failNoOp: true
     )
 }

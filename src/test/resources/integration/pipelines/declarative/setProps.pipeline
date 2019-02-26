@@ -24,7 +24,8 @@ node {
                 {
                   "pattern": "${FILES_DIR}",
                   "target": "${LOCAL_REPO1}/",
-                  "props": "p1=v1;p2=v2"
+                  "props": "p1=v1;p2=v2",
+                  "recursive": "false"
                 }
              ]
             }"""

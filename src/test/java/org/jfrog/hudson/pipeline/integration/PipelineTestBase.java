@@ -23,8 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.util.*;
 
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.junit.Assert.fail;
@@ -131,6 +130,7 @@ public class PipelineTestBase {
     private static void createPipelineSubstitution() {
         pipelineSubstitution = new StrSubstitutor(new HashMap<String, String>() {{
             put("FILES_DIR", fixWindowsPath(FILES_PATH.toString() + File.separator + "*"));
+            put("FILES_DIR_1", fixWindowsPath(FILES_PATH.toString() + File.separator + "1" + File.separator + "*"));
             put("MAVEN_PROJECT_PATH", getProjectPath("maven-example"));
             put("GRADLE_PROJECT_PATH", getProjectPath("gradle-example"));
             put("GRADLE_CI_PROJECT_PATH", getProjectPath("gradle-example-ci"));
@@ -207,5 +207,25 @@ public class PipelineTestBase {
         EnvVars envVars = prop.getEnvVars();
         envVars.put("ARTIFACTORY_JARS_LIB", Paths.get("target", "artifactory", "WEB-INF", "lib").toAbsolutePath().toString());
         jenkins.jenkins.getGlobalNodeProperties().add(prop);
+    }
+
+    /**
+     * Returns a set of the files names in a layer of the FILES_PATH directory.
+     * Base = layer 0.
+     */
+    Set<String> getTestFilesNamesByLayer(int layer) {
+        Set<String> names = new HashSet<>();
+        String pathStr = FILES_PATH.toString();
+        pathStr += layer == 0 ? "" : File.separator + layer;
+
+        File folder = new File(pathStr);
+        File[] listOfFiles = folder.listFiles();
+        assert listOfFiles != null;
+        for (File file : listOfFiles) {
+            if (file.isFile()) {
+                names.add(file.getName());
+            }
+        }
+        return names;
     }
 }

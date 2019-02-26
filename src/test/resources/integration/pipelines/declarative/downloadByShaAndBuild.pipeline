@@ -1,0 +1,117 @@
+package integration.pipelines.declarative
+
+node {
+    def serverId = "Artifactory-1"
+
+    stage "Configuration"
+    rtServer(
+            id: serverId,
+            url: "${env.JENKINS_ARTIFACTORY_URL}",
+            username: "${env.JENKINS_ARTIFACTORY_USERNAME}",
+            password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    )
+
+    def buildName = "declarative:downloadByShaAndBuild test"
+    def buildNumber = "3"
+
+    stage "Upload"
+    rtUpload(
+            serverId: serverId,
+            buildName: buildName,
+            buildNumber: buildNumber,
+            spec: """{
+              "files": [
+                {
+                  "pattern": "${FILES_DIR}a.in",
+                  "target": "${LOCAL_REPO1}/a3",
+                  "recursive": "false"
+                }
+             ]
+            }"""
+    )
+
+    stage "Publish Build Info"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName,
+            buildNumber: buildNumber
+    )
+
+    def buildName1 = "declarative:downloadByShaAndBuild test-second"
+    def buildNumber1 = "4"
+
+    stage "Upload 1"
+    rtUpload(
+            serverId: serverId,
+            buildName: buildName1,
+            buildNumber: buildNumber1,
+            spec: """{
+              "files": [
+                {
+                  "pattern": "${FILES_DIR}a.in",
+                  "target": "${LOCAL_REPO1}/a4",
+                  "recursive": "false"
+                }
+             ]
+            }"""
+    )
+
+    stage "Publish Build Info 1"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName1,
+            buildNumber: buildNumber1
+    )
+
+    def buildName2 = "declarative:downloadByShaAndBuild test-second"
+    def buildNumber2 = "5"
+
+    stage "Upload 2"
+    rtUpload(
+            serverId: serverId,
+            buildName: buildName2,
+            buildNumber: buildNumber2,
+            spec: """{
+              "files": [
+                {
+                  "pattern": "${FILES_DIR}a.in",
+                  "target": "${LOCAL_REPO1}/a5",
+                  "recursive": "false"
+                }
+             ]
+            }"""
+    )
+
+    stage "Publish Build Info 2"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName2,
+            buildNumber: buildNumber2
+    )
+
+    def buildName3 = "declarative:downloadByShaAndBuild test"
+    def buildNumber3 = "6"
+
+    stage "Download"
+    rtDownload(
+            serverId: serverId,
+            buildName: buildName3,
+            buildNumber: buildNumber3,
+            spec: """{
+              "files": [
+                {
+                    "pattern": "${LOCAL_REPO1}/*",
+                    "build": "declarative:downloadByShaAndBuild test",
+                    "target": "downloadByShaAndBuild-test/"
+                }
+             ]
+            }"""
+    )
+
+    stage "Publish Build Info"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName3,
+            buildNumber: buildNumber3
+    )
+}

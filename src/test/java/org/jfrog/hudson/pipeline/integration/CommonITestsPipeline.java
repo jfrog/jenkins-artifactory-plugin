@@ -23,31 +23,16 @@ public class CommonITestsPipeline extends PipelineTestBase {
         super(pipelineType);
     }
 
-    void uploadTest(String buildName) throws Exception {
-        Set<String> expectedArtifacts = Sets.newHashSet("a.in", "b.in", "c.in");
+    void downloadByPatternTest(String buildName) throws Exception {
+        Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
         String buildNumber = "3";
 
-        runPipeline("upload");
-        try {
-            Arrays.asList("a.in", "b.in", "c.in").forEach(artifactName ->
-                    assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
-            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
-            Module module = getAndAssertModule(buildInfo, buildName);
-            assertModuleArtifacts(module, expectedArtifacts);
-        } finally {
-            deleteBuild(artifactoryClient, buildName);
-        }
-    }
-
-    void downloadTest(String buildName) throws Exception {
-        Set<String> expectedDependencies = Sets.newHashSet("a.in", "b.in", "c.in");
-        String buildNumber = "3";
-
-        Files.list(FILES_PATH).forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
-        WorkflowRun build = runPipeline("download");
+        Files.list(FILES_PATH).filter(Files::isRegularFile)
+                .forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
+        WorkflowRun build = runPipeline("downloadByPattern");
         try {
             for (String fileName : expectedDependencies) {
-                assertTrue(isExistInWorkspace(jenkins, build, "download-test", fileName));
+                assertTrue(isExistInWorkspace(jenkins, build, "downloadByPattern-test", fileName));
             }
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, buildName);
@@ -57,11 +42,150 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void downloadByAqlTest(String buildName) throws Exception {
+        Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
+        String buildNumber = "3";
+
+        Files.list(FILES_PATH).filter(Files::isRegularFile)
+                .forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
+        WorkflowRun build = runPipeline("downloadByAql");
+        try {
+            for (String fileName : expectedDependencies) {
+                assertTrue(isExistInWorkspace(jenkins, build, "downloadByAql-test", fileName));
+            }
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertModuleDependencies(module, expectedDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void downloadByPatternAndBuildTest(String buildName) throws Exception {
+        Set<String> expectedDependencies = Sets.newHashSet("a.in");
+        String buildNumber = "5";
+
+        Set<String> unexpected = getTestFilesNamesByLayer(0);
+        unexpected.addAll(getTestFilesNamesByLayer(1));
+        unexpected.removeAll(expectedDependencies);
+        WorkflowRun build = runPipeline("downloadByPatternAndBuild");
+        try {
+            assertTrue(isExistInWorkspace(jenkins, build, "downloadByPatternAndBuild-test", "a.in"));
+            for (String fileName : unexpected) {
+                assertFalse(isExistInWorkspace(jenkins, build, "downloadByPatternAndBuild-test", fileName));
+            }
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertModuleDependencies(module, expectedDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void downloadByBuildOnlyTest(String buildName) throws Exception {
+        Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
+        Set<String> unexpected = getTestFilesNamesByLayer(1);
+        String buildNumber = "5";
+
+        WorkflowRun build = runPipeline("downloadByBuildOnly");
+        try {
+            for (String fileName : expectedDependencies) {
+                assertTrue(isExistInWorkspace(jenkins, build, "downloadByBuildOnly-test", fileName));
+            }
+            for (String fileName : unexpected) {
+                assertFalse(isExistInWorkspace(jenkins, build, "downloadByBuildOnly-test", fileName));
+            }
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertModuleDependencies(module, expectedDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void downloadNonExistingBuildTest(String buildName) throws Exception {
+        try {
+            runPipeline("downloadNonExistingBuild");
+            fail("Job expected to fail");
+        } catch (AssertionError t) {
+            assertTrue(t.getMessage().contains("Fail-no-op: No files were affected in the download process."));
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    /**
+     * Upload a file to 2 different builds.
+     * Verify that we don't download files with same sha and different build name and build number.
+     * */
+    void downloadByShaAndBuildTest(String buildName) throws Exception {
+        Set<String> expectedDependencies = Sets.newHashSet("a3");
+        Set<String> unexpected = Sets.newHashSet("a4", "a5");
+        String buildNumber = "6";
+
+        WorkflowRun build = runPipeline("downloadByShaAndBuild");
+        try {
+            // Only a.in should be in workspace
+            assertTrue(isExistInWorkspace(jenkins, build, "downloadByShaAndBuild-test", "a3"));
+            for (String fileName : unexpected) {
+                assertFalse(isExistInWorkspace(jenkins, build, "downloadByShaAndBuild-test", fileName));
+            }
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertModuleDependencies(module, expectedDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+            deleteBuild(artifactoryClient, buildName + "-second");
+        }
+    }
+
+    /**
+     * Upload a file to 2 different builds.
+     * Verify that we don't download files with same sha and build name and different build number.
+     * */
+    void downloadByShaAndBuildNameTest(String buildName) throws Exception {
+        Set<String> expectedDependencies = Sets.newHashSet("a4");
+        Set<String> unexpected = Sets.newHashSet("a3", "a5");
+        String buildNumber = "6";
+
+        WorkflowRun build = runPipeline("downloadByShaAndBuildName");
+        try {
+            // Only a.in should be in workspace
+            assertTrue(isExistInWorkspace(jenkins, build, "downloadByShaAndBuildName-test", "a4"));
+            for (String fileName : unexpected) {
+                assertFalse(isExistInWorkspace(jenkins, build, "downloadByShaAndBuildName-test", fileName));
+            }
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertModuleDependencies(module, expectedDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+            deleteBuild(artifactoryClient, buildName + "-second");
+        }
+    }
+
+    void uploadTest(String buildName) throws Exception {
+        Set<String> expectedArtifacts = getTestFilesNamesByLayer(0);
+        String buildNumber = "3";
+
+        runPipeline("upload");
+        try {
+            expectedArtifacts.forEach(artifactName ->
+                    assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertModuleArtifacts(module, expectedArtifacts);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
     void promotionTest(String buildName) throws Exception {
-        Set<String> expectedDependencies = Sets.newHashSet("a.in", "b.in", "c.in");
+        Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
         String buildNumber = "4";
 
-        Files.list(FILES_PATH).forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
+        Files.list(FILES_PATH).filter(Files::isRegularFile)
+                .forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
         WorkflowRun build = runPipeline("promote");
         try {
             for (String fileName : expectedDependencies) {
@@ -208,8 +332,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
                 assertTrue(fileName + "doesn't exists locally", isExistInWorkspace(jenkins, build, "deleteProps-test", fileName));
             }
 
-            // Make sure all files still exist in artifactory:
-            Arrays.asList("a.in", "b.in", "c.in").forEach(artifactName ->
+            // Make sure all files exist in artifactory:
+            getTestFilesNamesByLayer(0).forEach(artifactName ->
                     assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
 
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);

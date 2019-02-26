@@ -3,8 +3,10 @@ package integration.pipelines.scripted
 node {
     stage "Configuration"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+
+    // First upload files and publish build
     def buildInfo = Artifactory.newBuildInfo()
-    buildInfo.name = "scripted:upload test"
+    buildInfo.name = "scripted:downloadNonExistingBuild test"
     buildInfo.number = "3"
 
     stage "Upload"
@@ -21,4 +23,17 @@ node {
 
     stage "Publish Build Info"
     rtServer.publishBuildInfo buildInfo
+
+    // At last, download by non existing build
+    stage "Download"
+    def downloadSpec = """{
+      "files": [
+        {
+         "pattern": "${LOCAL_REPO1}/*",
+         "build": "NonExistingBuild/3",
+         "target": "downloadNonExistingBuild-test/"
+        }
+     ]
+    }"""
+    rtServer.download spec: downloadSpec, failNoOp: true
 }
