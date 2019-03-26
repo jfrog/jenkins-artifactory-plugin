@@ -24,4 +24,9 @@
              help="/plugin/artifactory/help/Trigger/help-pathToWatch.html">
         <f:textbox field="path" value="${instance.path}"/>
     </f:entry>
+
+    <r:credentials configurationFieldName="deployerCredentialsConfig"
+                   configurationObject="${instance.deployerCredentialsConfig}"
+                   blockTitle="Override default deployer credentials"
+                   elementId="overridingDeployerCredentials-trigger"/>
 </j:jelly>
