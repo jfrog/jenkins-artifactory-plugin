@@ -37,10 +37,12 @@ public class JenkinsBuildInfoLog implements Log {
     public void error(String message) {
         listener.getLogger().println(message);
         logger.severe(message);
+        listener.getLogger().flush();
     }
 
     public void error(String message, Throwable e) {
         listener.getLogger().println(message);
         logger.log(Level.SEVERE, message, e);
+        listener.getLogger().flush();
     }
 }
