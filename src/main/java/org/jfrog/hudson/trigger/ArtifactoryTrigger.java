@@ -56,8 +56,16 @@ public class ArtifactoryTrigger extends Trigger {
                 server.getDeployerCredentialsConfig().providePassword(job),
                 server.createProxyConfiguration(Jenkins.getInstance().proxy),
                 new NullLog())) {
-            ItemLastModified itemLastModified = client.getItemLastModified(path);
-            long responseLastModified = itemLastModified.getLastModified();
+            ItemLastModified itemLastModified = null;
+            long responseLastModified = 0;
+            for (String path: path.split(";")) {
+                ItemLastModified tempItem = client.getItemLastModified(path);
+                long tempResponse = tempItem.getLastModified();
+                if (tempResponse > responseLastModified) {
+                    responseLastModified = tempResponse;
+                    itemLastModified = tempItem;
+                }
+            }
             if (responseLastModified > lastModified) {
                 this.lastModified = responseLastModified;
                 if (job instanceof Project) {
