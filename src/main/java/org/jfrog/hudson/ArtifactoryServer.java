@@ -99,6 +99,12 @@ public class ArtifactoryServer implements Serializable {
         this.deploymentThreads = deploymentThreads != null && deploymentThreads > 0 ? deploymentThreads : DEFAULT_DEPLOYMENT_THREADS_NUMBER;
     }
 
+    @DataBoundConstructor
+    public ArtifactoryServer(String serverId, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
+                             CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry) {
+        this(serverId, artifactoryUrl, deployerCredentialsConfig, resolverCredentialsConfig, timeout, bypassProxy, connectionRetry, DEFAULT_DEPLOYMENT_THREADS_NUMBER);
+    }
+
     public String getName() {
         return id;
     }
