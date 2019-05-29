@@ -2,7 +2,6 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.cli.MissingArgumentException;
@@ -81,7 +80,7 @@ public class XrayScanBuildStep extends AbstractStepImpl {
 
             if (xrayScanResult.isFoundVulnerable()) {
                 if (xrayScanConfig.getFailBuild()) {
-                    throw new Exception("Violations were found by Xray: " + xrayScanResult.toString());
+                    throw new XrayScanException(xrayScanResult);
                 }
                 log.error(xrayScanResult.getScanMessage());
             } else {
@@ -116,6 +115,18 @@ public class XrayScanBuildStep extends AbstractStepImpl {
         @Override
         public boolean isAdvanced() {
             return true;
+        }
+    }
+
+    public static class XrayScanException extends Exception {
+
+        XrayScanException(XrayScanResult xrayScanResult) {
+            super("Violations were found by Xray: " + xrayScanResult, null, true, false);
+        }
+
+        @Override
+        public String toString() {
+            return getLocalizedMessage();
         }
     }
 }
