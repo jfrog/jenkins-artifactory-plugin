@@ -250,29 +250,11 @@ public class ArtifactoryServer implements Serializable {
     @Whitelisted
     public void xrayScan(Map<String, Object> xrayScanParams) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
-        stepVariables.put("xrayScanConfig", createXrayScanConfig(xrayScanParams));
+        stepVariables.put("xrayScanConfig", Utils.createXrayScanConfig(xrayScanParams));
         stepVariables.put(SERVER, this);
 
         // Throws CpsCallableInvocation - Must be the last line in this method
         cpsScript.invokeMethod("xrayScanBuild", stepVariables);
-    }
-
-    private XrayScanConfig createXrayScanConfig(Map<String, Object> xrayScanParams) {
-        final String failBuild = "failBuild";
-
-        List<String> mandatoryArgumentsAsList = Arrays.asList(BUILD_NAME, BUILD_NAME);
-        if (!xrayScanParams.keySet().containsAll(mandatoryArgumentsAsList)) {
-            throw new IllegalArgumentException(mandatoryArgumentsAsList.toString() + " are mandatory arguments");
-        }
-
-        Set<String> xrayScanParamsSet = xrayScanParams.keySet();
-        List<String> keysAsList = Arrays.asList(BUILD_NAME, BUILD_NUMBER, failBuild);
-        if (!keysAsList.containsAll(xrayScanParamsSet)) {
-            throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
-        }
-
-        return new XrayScanConfig((String) xrayScanParams.get(BUILD_NAME),
-                (String) xrayScanParams.get(BUILD_NUMBER), (Boolean) xrayScanParams.get(failBuild));
     }
 
     public String getServerName() {

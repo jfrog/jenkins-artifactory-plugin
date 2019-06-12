@@ -36,6 +36,7 @@ import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.DistributionConfig;
 import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
+import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.*;
 
@@ -44,6 +45,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.*;
+
+import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.BUILD_NAME;
+import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.BUILD_NUMBER;
 
 /**
  * Created by romang on 4/24/16.
@@ -281,8 +285,8 @@ public class Utils {
 
     public static PromotionConfig createPromotionConfig(Map<String, Object> promotionParams, boolean isTargetRepositoryMandatory) {
         final String targetRepository = "targetRepo";
-        List<String> mandatoryParams = new ArrayList<String>(Arrays.asList(ArtifactoryServer.BUILD_NAME, ArtifactoryServer.BUILD_NUMBER));
-        List<String> allowedParams = Arrays.asList(ArtifactoryServer.BUILD_NAME, ArtifactoryServer.BUILD_NUMBER, targetRepository, "sourceRepo", "status", "comment", "includeDependencies", "copy", "failFast");
+        List<String> mandatoryParams = new ArrayList<>(Arrays.asList(BUILD_NAME, BUILD_NUMBER));
+        List<String> allowedParams = Arrays.asList(BUILD_NAME, BUILD_NUMBER, targetRepository, "sourceRepo", "status", "comment", "includeDependencies", "copy", "failFast");
 
         if (isTargetRepositoryMandatory) {
             mandatoryParams.add(targetRepository);
@@ -314,8 +318,8 @@ public class Utils {
     }
 
     public static DistributionConfig createDistributionConfig(Map<String, Object> promotionParams) {
-        List<String> mandatoryParams = new ArrayList<String>(Arrays.asList(ArtifactoryServer.BUILD_NAME, ArtifactoryServer.BUILD_NUMBER, "targetRepo"));
-        List<String> allowedParams = Arrays.asList(ArtifactoryServer.BUILD_NAME, ArtifactoryServer.BUILD_NUMBER, "publish", "overrideExistingFiles", "gpgPassphrase", "async", "targetRepo", "sourceRepos", "dryRun");
+        List<String> mandatoryParams = new ArrayList<>(Arrays.asList(BUILD_NAME, BUILD_NUMBER, "targetRepo"));
+        List<String> allowedParams = Arrays.asList(BUILD_NAME, BUILD_NUMBER, "publish", "overrideExistingFiles", "gpgPassphrase", "async", "targetRepo", "sourceRepos", "dryRun");
 
         if (!promotionParams.keySet().containsAll(mandatoryParams)) {
             throw new IllegalArgumentException(mandatoryParams.toString() + " are mandatory arguments");
@@ -435,5 +439,23 @@ public class Utils {
                 .filter(i -> nodeTool.equals(i.getName()))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public static XrayScanConfig createXrayScanConfig(Map<String, Object> xrayScanParams) {
+        final String failBuild = "failBuild";
+
+        List<String> mandatoryArgumentsAsList = Arrays.asList(BUILD_NAME, BUILD_NAME);
+        if (!xrayScanParams.keySet().containsAll(mandatoryArgumentsAsList)) {
+            throw new IllegalArgumentException(mandatoryArgumentsAsList.toString() + " are mandatory arguments");
+        }
+
+        Set<String> xrayScanParamsSet = xrayScanParams.keySet();
+        List<String> keysAsList = Arrays.asList(BUILD_NAME, BUILD_NUMBER, failBuild);
+        if (!keysAsList.containsAll(xrayScanParamsSet)) {
+            throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
+        }
+
+        return new XrayScanConfig((String) xrayScanParams.get(BUILD_NAME),
+                (String) xrayScanParams.get(BUILD_NUMBER), (Boolean) xrayScanParams.get(failBuild));
     }
 }

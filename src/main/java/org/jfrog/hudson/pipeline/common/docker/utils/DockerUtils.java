@@ -318,7 +318,7 @@ public class DockerUtils implements Serializable {
         return layersNum;
     }
 
-    private static DockerClient getDockerClient(String host) {
+    public static DockerClient getDockerClient(String host) {
         NettyDockerCmdExecFactory nettyDockerCmdExecFactory;
 
         nettyDockerCmdExecFactory = new NettyDockerCmdExecFactory();

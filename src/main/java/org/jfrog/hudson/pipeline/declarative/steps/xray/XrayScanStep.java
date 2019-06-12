@@ -1,40 +1,47 @@
-package org.jfrog.hudson.pipeline.scripted.steps;
+package org.jfrog.hudson.pipeline.declarative.steps.xray;
 
 import com.google.inject.Inject;
 import hudson.Extension;
+import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.XrayExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
-import org.jfrog.hudson.pipeline.common.types.XrayScanResult;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
-public class XrayScanBuildStep extends AbstractStepImpl {
+import java.util.Map;
 
-    private ArtifactoryServer server;
-    private XrayScanConfig xrayScanConfig;
+/**
+ * @author Alexei Vainshtein
+ */
+@SuppressWarnings("unused")
+public class XrayScanStep extends AbstractStepImpl {
+
+    private String serverId;
+    private Map<String, Object> params;
 
     @DataBoundConstructor
-    public XrayScanBuildStep(XrayScanConfig xrayScanConfig, ArtifactoryServer server) {
-        this.xrayScanConfig = xrayScanConfig;
-        this.server = server;
+    public XrayScanStep(String serverId) {
+        this.serverId = serverId;
     }
 
-    public ArtifactoryServer getServer() {
-        return server;
+    @DataBoundSetter
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
     }
 
-    public XrayScanConfig getXrayScanConfig() {
-        return xrayScanConfig;
-    }
-
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<XrayScanResult> {
+    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
         private static final long serialVersionUID = 1L;
+        @Inject(optional = true)
+        private transient XrayScanStep step;
 
         @StepContextParameter
         private transient Run build;
@@ -42,35 +49,33 @@ public class XrayScanBuildStep extends AbstractStepImpl {
         @StepContextParameter
         private transient TaskListener listener;
 
-        @Inject(optional = true)
-        private transient XrayScanBuildStep step;
+        @StepContextParameter
+        private transient FilePath ws;
 
         @Override
-        protected XrayScanResult run() throws Exception {
-            XrayScanConfig xrayScanConfig = step.getXrayScanConfig();
-            ArtifactoryServer server = step.getServer();
+        protected Void run() throws Exception {
+            XrayScanConfig xrayScanConfig = Utils.createXrayScanConfig(step.params);
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
             XrayExecutor xrayExecutor = new XrayExecutor(xrayScanConfig, listener, server, build);
             xrayExecutor.execute();
-            return xrayExecutor.getXrayScanResult();
+            return null;
         }
     }
 
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
-
         public DescriptorImpl() {
-            super(XrayScanBuildStep.Execution.class);
+            super(XrayScanStep.Execution.class);
         }
 
         @Override
-        // The step is invoked by ArtifactoryServer by the step name
         public String getFunctionName() {
-            return "xrayScanBuild";
+            return "xrayScan";
         }
 
         @Override
         public String getDisplayName() {
-            return "Xray build scanning";
+            return "run Xray scan";
         }
 
         @Override
