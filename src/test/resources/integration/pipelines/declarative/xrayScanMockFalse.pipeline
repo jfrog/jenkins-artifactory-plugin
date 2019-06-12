@@ -1,0 +1,25 @@
+package integration.pipelines.declarative
+/**/
+node {
+    def serverId = "Artifactory-1"
+    def buildName = "declarative:xrayScanMockFalse test"
+    def buildNumber = "3"
+
+    stage "Configure Artifactory"
+    rtServer(
+            id: serverId,
+            url: "http://127.0.0.1:9999",
+            username: "admin",
+            password: "password"
+    )
+
+    stage('Xray Scan')
+    xrayScan(
+            serverId: serverId,
+            params: [
+                    buildName  : buildName,
+                    buildNumber: buildNumber,
+                    'failBuild': false
+            ]
+    )
+}

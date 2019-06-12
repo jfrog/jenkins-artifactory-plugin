@@ -85,4 +85,25 @@ public class DeclarativeITest extends CommonITestsPipeline {
     public void deletePropsTest() throws Exception {
         super.deletePropsTest("declarative:deleteProps test");
     }
+
+    @Test
+    public void dockerPushTest() throws Exception {
+        super.dockerPushTest("declarative:dockerPush test");
+    }
+
+    @Test
+    public void xrayScanFailTrueTest() throws Exception {
+        if (!ITestUtils.shouldRunXrayTest()) {
+            return;
+        }
+        super.xrayScanTest("declarative:xrayScanFailBuildTrue test", true);
+    }
+
+    @Test
+    public void xrayScanFailFalseTest() throws Exception {
+        if (!ITestUtils.shouldRunXrayTest()) {
+            return;
+        }
+        super.xrayScanTest("declarative:xrayScanFailBuildFalse test", false);
+    }
 }
