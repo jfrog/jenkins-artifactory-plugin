@@ -20,6 +20,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 /**
  * Created by romang on 5/2/16.
  */
+@SuppressWarnings("unused")
 public class DockerPushStep extends AbstractStepImpl {
 
     private final String image;

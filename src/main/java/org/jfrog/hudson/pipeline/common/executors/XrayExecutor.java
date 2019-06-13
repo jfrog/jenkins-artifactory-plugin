@@ -35,13 +35,6 @@ public class XrayExecutor implements Executor {
 
     @Override
     public void execute() throws Exception {
-        if (StringUtils.isEmpty(xrayScanConfig.getBuildName())) {
-            throw new MissingArgumentException("Xray scan build name is mandatory");
-        }
-
-        if (StringUtils.isEmpty(xrayScanConfig.getBuildNumber())) {
-            throw new MissingArgumentException("Xray scan build number is mandatory");
-        }
         Log log = new JenkinsBuildInfoLog(listener);
         CredentialsConfig credentialsConfig = server.createCredentialsConfig();
         ArtifactoryXrayClient client = new ArtifactoryXrayClient(server.getUrl(), credentialsConfig.provideUsername(build.getParent()),

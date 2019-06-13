@@ -150,7 +150,7 @@ public class PipelineTestBase {
      * @param projectName - The project name - 'maven-example', 'gradle-example', etc.
      * @return the specific test source files dir
      */
-    protected static String getProjectPath(String projectName) {
+    static String getProjectPath(String projectName) {
         Path projectPath = getIntegrationDir().resolve(projectName).toAbsolutePath();
         return fixWindowsPath(projectPath.toString());
     }

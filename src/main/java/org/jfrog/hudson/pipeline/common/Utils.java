@@ -444,7 +444,7 @@ public class Utils {
     public static XrayScanConfig createXrayScanConfig(Map<String, Object> xrayScanParams) {
         final String failBuild = "failBuild";
 
-        List<String> mandatoryArgumentsAsList = Arrays.asList(BUILD_NAME, BUILD_NAME);
+        List<String> mandatoryArgumentsAsList = Arrays.asList(BUILD_NAME, BUILD_NUMBER);
         if (!xrayScanParams.keySet().containsAll(mandatoryArgumentsAsList)) {
             throw new IllegalArgumentException(mandatoryArgumentsAsList.toString() + " are mandatory arguments");
         }

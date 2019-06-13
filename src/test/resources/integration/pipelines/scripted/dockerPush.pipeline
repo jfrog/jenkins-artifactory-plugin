@@ -1,0 +1,16 @@
+package integration.pipelines.scripted
+
+node {
+    def imageName = "${env.JENKINS_ARTIFACTORY_DOCKER_IMAGE}"
+    def targetRepo = "${env.JENKINS_ARTIFACTORY_DOCKER_REPO}"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+
+    stage "dockerPush"
+    def rtDocker = Artifactory.docker (rtServer, "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}")
+    def buildInfo = rtDocker.push imageName, targetRepo
+    buildInfo.name = "scripted:dockerPush test"
+    buildInfo.number = "3"
+
+    stage "Publish Build Info"
+    rtServer.publishBuildInfo buildInfo
+}

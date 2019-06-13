@@ -14,6 +14,7 @@ import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
 import org.jfrog.hudson.pipeline.common.types.XrayScanResult;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+@SuppressWarnings("unused")
 public class XrayScanBuildStep extends AbstractStepImpl {
 
     private ArtifactoryServer server;

@@ -1,0 +1,38 @@
+package integration.pipelines.scripted
+
+import org.apache.commons.io.FileUtils
+
+import java.nio.file.Paths
+
+node {
+    stage "Configure Artifactory"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:xrayScanFailBuildFalse test"
+    buildInfo.number = "3"
+
+    stage "Configure Gradle build"
+    def rtGradle = Artifactory.newGradleBuild()
+    rtGradle.deployer repo: "${LOCAL_REPO1}", server: rtServer
+    rtGradle.resolver repo: "${JCENTER_REMOTE_REPO}", server: rtServer
+    rtGradle.usesPlugin = true
+
+    stage "Copy project example"
+    FileUtils.copyDirectory(Paths.get("${GRADLE_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-gradle-example").toFile())
+
+    stage "Run Gradle"
+    rtGradle.run rootDir: "scripted-gradle-example", buildFile: "build.gradle", tasks: "clean artifactoryPublish", buildInfo: buildInfo
+
+    stage "Publish build info"
+    rtServer.publishBuildInfo buildInfo
+
+    stage "Xray Scan"
+    def scanConfig = [
+            'buildName'      : buildInfo.name,
+            'buildNumber'    : buildInfo.number,
+            'failBuild'      : false
+    ]
+    def scanResult = rtServer.xrayScan scanConfig
+    echo scanResult as String
+
+}

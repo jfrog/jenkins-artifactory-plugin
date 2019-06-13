@@ -1,0 +1,23 @@
+package integration.pipelines.scripted
+
+import org.apache.commons.io.FileUtils
+
+import java.nio.file.Paths
+
+node {
+    stage "Configure Artifactory"
+    def rtServer = Artifactory.newServer url: "http://127.0.0.1:9999", username: "admin", password: "password"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:xrayScanMockTrue test"
+    buildInfo.number = "3"
+
+    stage "Xray Scan"
+    def scanConfig = [
+            'buildName'      : buildInfo.name,
+            'buildNumber'    : buildInfo.number,
+            'failBuild'      : true
+    ]
+    def scanResult = rtServer.xrayScan scanConfig
+    echo scanResult as String
+
+}

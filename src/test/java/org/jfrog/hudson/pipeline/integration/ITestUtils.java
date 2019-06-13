@@ -241,7 +241,7 @@ class ITestUtils {
         return URLEncoder.encode(buildName, "UTF-8").replace("+", "%20");
     }
 
-    protected static Boolean shouldRunXrayTest() {
+    static Boolean shouldRunXrayTest() {
         String xrayDisable = System.getenv("JENKINS_XRAY_TEST_ENABLE");
         return xrayDisable == null ? true : Boolean.valueOf(xrayDisable);
     }

@@ -379,12 +379,20 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void xrayScanTest(String buildName, boolean failBuild) throws Exception {
-        String useMock = System.getenv("JENKINS_XRAY_USE_MOCK");
-        String pipelineJobName = getPipelineJobName(failBuild, Boolean.valueOf(useMock));
+        String str = String.valueOf(failBuild);
+        xrayScanTest(buildName, "xrayScanFailBuild"+str.substring(0, 1).toUpperCase() + str.substring(1), failBuild, false);
+    }
+
+    void xrayScanMockTest(String buildName, boolean failBuild) throws Exception {
+        String str = String.valueOf(failBuild);
+        xrayScanTest(buildName, "xrayScanMock"+str.substring(0, 1).toUpperCase() + str.substring(1), failBuild, true);
+    }
+
+    private void xrayScanTest(String buildName, String pipelineJobName, boolean failBuild, boolean useMock) throws Exception {
         try {
             // Start mock server if needed.
-            if (Boolean.valueOf(useMock)) {
-                MockServer.start(pipelineJobName);
+            if (useMock) {
+                MockServer.start(pipelineJobName, pipelineType.toString());
             }
             runPipeline(pipelineJobName);
             if (failBuild) {
@@ -392,30 +400,13 @@ public class CommonITestsPipeline extends PipelineTestBase {
             }
         } catch (AssertionError t) {
             assertTrue(t.getMessage().contains("Violations were found by Xray:"));
-            assertTrue(t.getMessage().contains("Build declarative:" + pipelineJobName +" test number 3 was scanned by Xray and 1 Alerts were generated"));
+            assertTrue(t.getMessage().contains("Build " + pipelineType.toString() + ":" + pipelineJobName + " test number 3 was scanned by Xray and 1 Alerts were generated"));
         } finally {
-            if (Boolean.valueOf(useMock)) {
+            if (useMock) {
                 MockServer.stop();
             } else {
                 deleteBuild(artifactoryClient, buildName);
             }
         }
-    }
-
-    /**
-     * @return the pipeline job file name that should be used.
-     */
-    private String getPipelineJobName(boolean failBuild, boolean useMock) {
-        if (useMock) {
-            if (failBuild) {
-                return "xrayScanMockTrue";
-            } else {
-                return "xrayScanMockFalse";
-            }
-        }
-        if (failBuild) {
-            return "xrayScanFailBuildTrue";
-        }
-        return "xrayScanFailBuildFalse";
     }
 }
