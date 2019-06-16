@@ -30,6 +30,10 @@ environment:
     secure: YEB5Wiv9a2vNpUhy+MfL+A==
   JENKINS_ARTIFACTORY_PASSWORD:
     secure: Um8o75MQIieSavIemF4ySA==
+  JENKINS_ARTIFACTORY_DOCKER_IMAGE:
+    ecosysjfrog-docker-jenkins-tests.jfrog.io:1
+  JENKINS_ARTIFACTORY_DOCKER_REPO:
+    docker-jenkins-tests
 
 before_test:
   - cmd: "choco install maven --version 3.3.9.2 -i -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
