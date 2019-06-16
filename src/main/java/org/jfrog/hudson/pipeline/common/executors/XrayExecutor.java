@@ -2,7 +2,6 @@ package org.jfrog.hudson.pipeline.common.executors;
 
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;

@@ -32,13 +32,13 @@ public class PluginsUtils {
     private static ObjectMapper mapper;
 
     public static ListBoxModel fillPluginCredentials(Item project) {
+        if (project == null || !project.hasPermission(Item.CONFIGURE)) {
+            return new StandardListBoxModel();
+        }
         return fillPluginCredentials(project, ACL.SYSTEM);
     }
 
     public static ListBoxModel fillPluginCredentials(Item project, Authentication authentication) {
-        if (project == null || !project.hasPermission(Item.CONFIGURE)) {
-            return new StandardListBoxModel();
-        }
         List<DomainRequirement> domainRequirements = Collections.emptyList();
         return new StandardListBoxModel()
                 .withEmptySelection()

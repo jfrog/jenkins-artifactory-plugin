@@ -16,6 +16,7 @@
 
 package org.jfrog.hudson;
 
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import hudson.Extension;
 import hudson.model.*;
 import hudson.security.ACL;
@@ -72,7 +73,14 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         @SuppressWarnings("unused")
         @RequirePOST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
-            return PluginsUtils.fillPluginCredentials(project, ACL.SYSTEM);
+            try {
+                if (User.get(Jenkins.getAuthentication()).hasPermission(Jenkins.ADMINISTER)) {
+                    return PluginsUtils.fillPluginCredentials(project, ACL.SYSTEM);
+                }
+            } catch (NullPointerException npe) {
+                FormValidation.error(npe.toString());
+            }
+            return new StandardListBoxModel();
         }
 
         /**
