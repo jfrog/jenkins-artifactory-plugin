@@ -380,20 +380,11 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void xrayScanTest(String buildName, boolean failBuild) throws Exception {
         String str = String.valueOf(failBuild);
-        xrayScanTest(buildName, "xrayScanFailBuild"+str.substring(0, 1).toUpperCase() + str.substring(1), failBuild, false);
+        xrayScanTest(buildName, "xrayScanFailBuild"+str.substring(0, 1).toUpperCase() + str.substring(1), failBuild);
     }
 
-    void xrayScanMockTest(String buildName, boolean failBuild) throws Exception {
-        String str = String.valueOf(failBuild);
-        xrayScanTest(buildName, "xrayScanMock"+str.substring(0, 1).toUpperCase() + str.substring(1), failBuild, true);
-    }
-
-    private void xrayScanTest(String buildName, String pipelineJobName, boolean failBuild, boolean useMock) throws Exception {
+    private void xrayScanTest(String buildName, String pipelineJobName, boolean failBuild) throws Exception {
         try {
-            // Start mock server if needed.
-            if (useMock) {
-                MockServer.start(pipelineJobName, pipelineType.toString());
-            }
             runPipeline(pipelineJobName);
             if (failBuild) {
                 fail("Job expected to fail");
@@ -402,11 +393,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertTrue(t.getMessage().contains("Violations were found by Xray:"));
             assertTrue(t.getMessage().contains("Build " + pipelineType.toString() + ":" + pipelineJobName + " test number 3 was scanned by Xray and 1 Alerts were generated"));
         } finally {
-            if (useMock) {
-                MockServer.stop();
-            } else {
-                deleteBuild(artifactoryClient, buildName);
-            }
+            deleteBuild(artifactoryClient, buildName);
         }
     }
 }

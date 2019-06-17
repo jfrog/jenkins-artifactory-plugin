@@ -36,13 +36,10 @@ public class DockerPushStep extends AbstractStepImpl {
     private ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
 
     @DataBoundConstructor
-    public DockerPushStep(String serverId) {
+    public DockerPushStep(String serverId, String image, String targetRepo) {
         this.serverId = serverId;
-    }
-
-    @DataBoundSetter
-    public void setImage(String image) {
         this.image = image;
+        this.targetRepo = targetRepo;
     }
 
     @DataBoundSetter
@@ -58,11 +55,6 @@ public class DockerPushStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String buildName) {
         this.buildName = buildName;
-    }
-
-    @DataBoundSetter
-    public void setTargetRepo(String targetRepo) {
-        this.targetRepo = targetRepo;
     }
 
     @DataBoundSetter
@@ -99,16 +91,6 @@ public class DockerPushStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            if (step.image == null) {
-                getContext().onFailure(new MissingArgumentException("Missing 'image' parameter"));
-                return null;
-            }
-
-            if (step.targetRepo == null) {
-                getContext().onFailure(new MissingArgumentException("Missing 'targetRepo' parameter"));
-                return null;
-            }
-
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.buildName, step.buildNumber);
             org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
             DockerExecutor dockerExecutor = new DockerExecutor(pipelineServer, buildInfo, build, step.image, step.targetRepo, step.host, launcher, step.properties, listener);
