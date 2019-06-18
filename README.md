@@ -33,9 +33,11 @@ To run unit tests execute the following command:
 * The *JENKINS_ARTIFACTORY_URL* environment variable should be set to the Artifactory URL.
 * The *JENKINS_ARTIFACTORY_USERNAME* environment variable should be set to the Artifactory username.
 * The *JENKINS_ARTIFACTORY_PASSWORD* environment variable should be set to the Artifactory password.
+* The *JENKINS_ARTIFACTORY_DOCKER_DOMAIN* environment variable should be set to the Artifactory Docker domain.
+* The *JENKINS_ARTIFACTORY_DOCKER_REPO* environment variable should be set to the Artifactory Docker repository.
+* The *JENKINS_ARTIFACTORY_DOCKER_HOST* environment variable should be set to the Docker host. Optional.
 * The *MAVEN_HOME* environment variable should be set to the local maven installation path.
 * The *GRADLE_HOME* environment variable should be set to the local gradle installation path.
-
 To run integration tests execute the following command:
 ```
 > mvn clean verify -DskipITs=false

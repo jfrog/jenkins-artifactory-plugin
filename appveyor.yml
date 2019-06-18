@@ -30,8 +30,8 @@ environment:
     secure: YEB5Wiv9a2vNpUhy+MfL+A==
   JENKINS_ARTIFACTORY_PASSWORD:
     secure: Um8o75MQIieSavIemF4ySA==
-  JENKINS_ARTIFACTORY_DOCKER_IMAGE:
-    ecosysjfrog-docker-jenkins-tests.jfrog.io:1
+  JENKINS_ARTIFACTORY_DOCKER_DOMAIN:
+    ecosysjfrog-docker-jenkins-tests.jfrog.io
   JENKINS_ARTIFACTORY_DOCKER_REPO:
     docker-jenkins-tests
 
