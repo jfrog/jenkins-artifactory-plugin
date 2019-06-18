@@ -88,6 +88,9 @@ public class ScriptedITest extends CommonITestsPipeline {
 
     @Test
     public void dockerPushTest() throws Exception {
+        if (System.getProperty("os.name").contains("Windows")) {
+            return;
+        }
         super.dockerPushTest("scripted:dockerPush test");
     }
 
