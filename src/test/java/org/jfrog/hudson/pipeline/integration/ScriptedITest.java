@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.integration;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.junit.Test;
 
 /**
@@ -88,7 +89,7 @@ public class ScriptedITest extends CommonITestsPipeline {
 
     @Test
     public void dockerPushTest() throws Exception {
-        if (System.getProperty("os.name").contains("Windows")) {
+        if (SystemUtils.IS_OS_WINDOWS) {
             return;
         }
         super.dockerPushTest("scripted:dockerPush test");

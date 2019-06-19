@@ -322,7 +322,9 @@ public class DockerUtils implements Serializable {
         NettyDockerCmdExecFactory nettyDockerCmdExecFactory;
 
         nettyDockerCmdExecFactory = new NettyDockerCmdExecFactory();
-        if (StringUtils.isEmpty(host)) {
+        // If users are using open JDK and the host is null
+        // then instead of null object, the host will become the word "null"
+        if (StringUtils.isEmpty(host) || host.equalsIgnoreCase("null")) {
             return DockerClientBuilder.getInstance().withDockerCmdExecFactory(nettyDockerCmdExecFactory).build();
         }
 
