@@ -355,7 +355,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             // Get image name
             String domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_DOMAIN");
             if (StringUtils.isBlank(domainName)) {
-                throw new MissingArgumentException("Docker host is not provided");
+                throw new MissingArgumentException("Docker domain is not provided");
             }
             if (!StringUtils.endsWith(domainName, "/")) {
                 domainName += "/";
