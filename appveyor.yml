@@ -47,7 +47,7 @@ before_test:
 
 test_script:
   - docker pull hello-world
-  - docker tag ecosysjfrog-docker-jenkins-tests.jfrog.io/jfrog_artifactory_jenkins_tests:2
+  - docker tag hello-world ecosysjfrog-docker-jenkins-tests.jfrog.io/jfrog_artifactory_jenkins_tests:2
   - mvn -V -B -U clean verify -DskipITs=false
 
 cache:
