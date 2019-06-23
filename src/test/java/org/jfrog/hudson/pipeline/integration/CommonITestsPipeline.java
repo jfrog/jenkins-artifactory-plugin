@@ -366,7 +366,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             String projectPath = getProjectPath("docker-example");
             // Build the docker image with the name provided from env.
             BuildImageCmd buildImageCmd = dockerClient.buildImageCmd(Paths.get(projectPath).toFile()).withTags(new HashSet<>(Arrays.asList(imageName)));
-            buildImageCmd.exec(new BuildImageResultCallback());
+            buildImageCmd.exec(new BuildImageResultCallback()).awaitImageId();
             // Run pipeline
             runPipeline("dockerPush");
             String buildNumber = "3";

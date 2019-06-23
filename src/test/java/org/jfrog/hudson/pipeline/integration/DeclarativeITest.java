@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.integration;
 
 import org.apache.commons.lang3.SystemUtils;
+import org.junit.Assume;
 import org.junit.Test;
 
 /**
@@ -89,9 +90,7 @@ public class DeclarativeITest extends CommonITestsPipeline {
 
     @Test
     public void dockerPushTest() throws Exception {
-        if (SystemUtils.IS_OS_WINDOWS) {
-            return;
-        }
+        Assume.assumeFalse(SystemUtils.IS_OS_WINDOWS);
         super.dockerPushTest("declarative:dockerPush test");
     }
 
