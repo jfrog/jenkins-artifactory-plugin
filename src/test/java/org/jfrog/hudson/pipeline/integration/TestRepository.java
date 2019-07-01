@@ -1,7 +1,5 @@
 package org.jfrog.hudson.pipeline.integration;
 
-import java.util.Arrays;
-
 /**
  * @author yahavi
  */
@@ -20,10 +18,6 @@ enum TestRepository {
 
     public String getRepoName() {
         return repoName;
-    }
-
-    public static String[] toArray() {
-        return Arrays.stream(values()).map(TestRepository::getRepoName).toArray(String[]::new);
     }
 
     @Override
