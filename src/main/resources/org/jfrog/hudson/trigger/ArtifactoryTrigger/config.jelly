@@ -20,8 +20,8 @@
              help="/descriptor/hudson.triggers.TimerTrigger/help/spec">
         <f:textbox  field="spec" value="${instance.spec}"/>
     </f:entry>
-    <f:entry  title="Path to watch:"
-             help="/plugin/artifactory/help/Trigger/help-pathToWatch.html">
-        <f:textbox field="path" value="${instance.path}"/>
+    <f:entry  title="Paths to watch:"
+             help="/plugin/artifactory/help/Trigger/help-pathsToWatch.html">
+        <f:textbox field="paths" value="${instance.paths}"/>
     </f:entry>
 </j:jelly>
