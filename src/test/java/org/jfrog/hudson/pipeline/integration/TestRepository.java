@@ -6,11 +6,11 @@ import java.util.Arrays;
  * @author yahavi
  */
 enum TestRepository {
-    LOCAL_REPO1("jenkins-tests-local-1"),
-    LOCAL_REPO2("jenkins-tests-local-2"),
-    JCENTER_REMOTE_REPO("jenkins-tests-jcenter"),
-    NPM_LOCAL("jenkins-tests-npm-local"),
-    NPM_REMOTE("jenkins-tests-npm-remote");
+    LOCAL_REPO1("jenkins-artifactory-tests-local-1"),
+    LOCAL_REPO2("jenkins-artifactory-tests-local-2"),
+    JCENTER_REMOTE_REPO("jenkins-artifactory-tests-jcenter"),
+    NPM_LOCAL("jenkins-artifactory-tests-npm-local"),
+    NPM_REMOTE("jenkins-artifactory-tests-npm-remote");
 
     private String repoName;
 

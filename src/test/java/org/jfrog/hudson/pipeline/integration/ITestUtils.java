@@ -26,6 +26,9 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.jfrog.artifactory.client.model.impl.RepositoryTypeImpl.*;
@@ -35,6 +38,9 @@ import static org.junit.Assert.*;
  * @author yahavi
  */
 class ITestUtils {
+
+    private static Pattern REPO_PATTERN = Pattern.compile("^jenkins-artifactory-tests(-\\w*)+-(\\d*)$");
+    private static long currentTime = System.currentTimeMillis();
 
     /**
      * Get the integration tests dir.
@@ -72,9 +78,35 @@ class ITestUtils {
      */
     private static void cleanUpRepositoryType(Artifactory artifactoryClient, RepositoryType repositoryType) {
         artifactoryClient.repositories().list(repositoryType).stream()
+                // Get repository key
                 .map(LightweightRepository::getKey)
-                .filter(repoKey -> org.apache.commons.lang3.StringUtils.startsWithAny(repoKey, TestRepository.toArray()))
-                .forEach(repoKey -> artifactoryClient.repository(repoKey).delete());
+
+                // Match repository
+                .map(REPO_PATTERN::matcher)
+                .filter(Matcher::matches)
+
+                // Filter repositories newer than 1 hour
+                .filter(ITestUtils::isRepositoryOld)
+
+                // Get repository key
+                .map(Matcher::group)
+
+                // Create repository handle
+                .map(artifactoryClient::repository)
+
+                // Delete repository
+                .forEach(RepositoryHandle::delete);
+    }
+
+    /**
+     * Return true if the repository created more than an hour ago.
+     *
+     * @param repoMatcher - Repo regex matcher on REPO_PATTERN
+     * @return true if the repository created more than an hour ago
+     */
+    private static boolean isRepositoryOld(Matcher repoMatcher) {
+        long repoTimestamp = Long.parseLong(repoMatcher.group(2));
+        return TimeUnit.MILLISECONDS.toHours(currentTime - repoTimestamp) >= 1;
     }
 
     /**
