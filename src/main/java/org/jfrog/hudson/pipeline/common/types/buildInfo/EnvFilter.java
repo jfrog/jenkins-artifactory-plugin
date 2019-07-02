@@ -9,7 +9,7 @@ import org.jfrog.hudson.pipeline.common.types.Filter;
  */
 public class EnvFilter extends Filter {
 
-    private final String DEFAULT_EXCLUDE_PATTERN = "*password*,*secret*,*key*,*PSW";
+    private final String DEFAULT_EXCLUDE_PATTERN = "*password*,*secret*,*key*,*psw*";
 
     public EnvFilter() {
         reset();

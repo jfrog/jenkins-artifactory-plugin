@@ -215,7 +215,7 @@
                                              field="excludePatterns"
                                              help="/plugin/artifactory/help/common/help-envVarsExcludePatterns.html">
                                         <f:textbox value="${envVarsPatterns.excludePatterns}"
-                                                   default="*password*,*secret*,*key*,*PSW"/>
+                                                   default="*password*,*secret*,*key*"/>
                                     </f:entry>
                                 </f:section>
                             </table>
