@@ -106,7 +106,7 @@ class ITestUtils {
      */
     private static boolean isRepositoryOld(Matcher repoMatcher) {
         long repoTimestamp = Long.parseLong(repoMatcher.group(2));
-        return TimeUnit.MILLISECONDS.toHours(currentTime - repoTimestamp) >= 1;
+        return TimeUnit.MILLISECONDS.toHours(currentTime - repoTimestamp) >= 2;
     }
 
     /**
