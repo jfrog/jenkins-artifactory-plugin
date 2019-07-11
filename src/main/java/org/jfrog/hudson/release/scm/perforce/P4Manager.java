@@ -38,7 +38,7 @@ public class P4Manager extends AbstractPerforceManager<PerforceScm> {
         try {
             String clientString = getClientString();
             if (connection.isClient(clientString)) {
-                ClientHelper perforceClient = new ClientHelper(credentials, buildListener, clientString);
+                ClientHelper perforceClient = new ClientHelper(credentials, buildListener, clientString, "");
                 IClient client = perforceClient.getClient();
                 try {
                     this.perforce = new PerforceClient(server, client);
