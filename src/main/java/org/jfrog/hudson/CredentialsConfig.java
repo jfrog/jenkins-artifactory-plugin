@@ -1,12 +1,22 @@
 package org.jfrog.hudson;
 
+import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.Extension;
+import hudson.model.AbstractDescribableImpl;
+import hudson.model.Descriptor;
 import hudson.model.Item;
+import hudson.security.ACL;
+import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
+import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.Serializable;
+import org.kohsuke.stapler.interceptor.RequirePOST;
 
 /**
  * Configuration for all available credentials providers - Legacy credentials method or credentials plugin
@@ -15,7 +25,7 @@ import java.io.Serializable;
  *
  * @author Aviad Shikloshi
  */
-public class CredentialsConfig implements Serializable {
+public class CredentialsConfig extends AbstractDescribableImpl<CredentialsConfig> implements Serializable {
 
     public static final CredentialsConfig EMPTY_CREDENTIALS_CONFIG =
             new CredentialsConfig(new Credentials(StringUtils.EMPTY, StringUtils.EMPTY), StringUtils.EMPTY, false);
@@ -129,5 +139,26 @@ public class CredentialsConfig implements Serializable {
 
     public boolean isUsingCredentialsPlugin() {
         return (PluginsUtils.isCredentialsPluginEnabled() && StringUtils.isNotEmpty(credentialsId)) || ignoreCredentialPluginDisabled;
+    }
+
+    @Extension
+    public static class DescriptorImpl extends Descriptor<CredentialsConfig> {
+
+        @Override
+        @NonNull
+        public String getDisplayName() {
+            return "Artifactory Credential Config";
+        }
+
+        @SuppressWarnings("unused")
+        @RequirePOST
+        public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
+            Jenkins jenkins = Jenkins.getInstance();
+            if (jenkins.hasPermission(Jenkins.ADMINISTER)) {
+                return PluginsUtils.fillPluginCredentials(project, ACL.SYSTEM);
+            }
+            return new StandardListBoxModel();
+        }
+
     }
 }

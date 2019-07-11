@@ -17,8 +17,13 @@
 package org.jfrog.hudson;
 
 import com.google.common.collect.Lists;
+import edu.umd.cs.findbugs.annotations.NonNull;
+import hudson.Extension;
+import hudson.model.AbstractDescribableImpl;
+import hudson.model.Descriptor;
 import hudson.model.Item;
 import hudson.model.TaskListener;
+import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
@@ -43,21 +48,20 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.kohsuke.stapler.DataBoundSetter;
 
 /**
  * Represents an artifactory instance.
  *
  * @author Yossi Shaul
  */
-public class ArtifactoryServer implements Serializable {
+public class ArtifactoryServer extends AbstractDescribableImpl<ArtifactoryServer> implements Serializable {
     private static final Logger log = Logger.getLogger(ArtifactoryServer.class.getName());
 
-    private static final int DEFAULT_CONNECTION_TIMEOUT = 300;    // 5 Minutes
-    private static final int DEFAULT_DEPLOYMENT_THREADS_NUMBER = 3;
     private final String url;
     private final String id;
     // Network timeout in seconds to use both for connection establishment and for unanswered requests
-    private int timeout = DEFAULT_CONNECTION_TIMEOUT;
+    private int timeout = DescriptorImpl.DEFAULT_CONNECTION_TIMEOUT;
     private boolean bypassProxy;
     // This object is set to Integer instead of int so upon starting if it's missing (due to upgrade from previous version)
     // This object will be null instead of 0. In the ArtifactoryBuilder there is a check if the object is null then we are
@@ -86,17 +90,27 @@ public class ArtifactoryServer implements Serializable {
 
     private CredentialsConfig resolverCredentialsConfig;
 
-    @DataBoundConstructor
+    @Deprecated
     public ArtifactoryServer(String serverId, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
                              CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry, Integer deploymentThreads) {
         this.url = StringUtils.removeEnd(artifactoryUrl, "/");
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
-        this.timeout = timeout > 0 ? timeout : DEFAULT_CONNECTION_TIMEOUT;
         this.bypassProxy = bypassProxy;
         this.id = serverId;
-        this.connectionRetry = connectionRetry != null ? connectionRetry : 3;
-        this.deploymentThreads = deploymentThreads != null && deploymentThreads > 0 ? deploymentThreads : DEFAULT_DEPLOYMENT_THREADS_NUMBER;
+        setTimeout(timeout);
+        setConnectionRetry(connectionRetry);
+        setDeploymentThreads(deploymentThreads);
+    }
+
+    @DataBoundConstructor
+    public ArtifactoryServer(String id, String url) {
+        this.id = id;
+        this.url = StringUtils.removeEnd(url, "/");;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public String getName() {
@@ -107,8 +121,18 @@ public class ArtifactoryServer implements Serializable {
         return url != null ? url : getName();
     }
 
+    @DataBoundSetter
+    public void setDeployerCredentialsConfig(CredentialsConfig deployerCredentialsConfig) {
+        this.deployerCredentialsConfig = deployerCredentialsConfig;
+    }
+
     public CredentialsConfig getDeployerCredentialsConfig() {
         return deployerCredentialsConfig;
+    }
+
+    @DataBoundSetter
+    public void setResolverCredentialsConfig(CredentialsConfig resolverCredentialsConfig) {
+        this.resolverCredentialsConfig = resolverCredentialsConfig;
     }
 
     public CredentialsConfig getResolverCredentialsConfig() {
@@ -119,42 +143,33 @@ public class ArtifactoryServer implements Serializable {
         return timeout;
     }
 
+    @DataBoundSetter
+    public void setTimeout(int timeout) {
+        this.timeout = timeout > 0 ? timeout : DescriptorImpl.DEFAULT_CONNECTION_TIMEOUT;
+    }
+
+    @DataBoundSetter
+    public void setBypassProxy(boolean bypassProxy) {
+        this.bypassProxy = bypassProxy;
+    }
+
     public boolean isBypassProxy() {
         return bypassProxy;
     }
 
     // To populate the dropdown list from the jelly
-    public List<Integer> getConnectionRetries() {
-        List<Integer> items = new ArrayList<Integer>();
-        for (int i = 0; i < 10; i++) {
-            items.add(i);
-        }
-        return items;
-    }
+
 
     public int getConnectionRetry() {
         if (connectionRetry == null) {
-            connectionRetry = 3;
+            connectionRetry = DescriptorImpl.DEFAULT_CONNECTION_RETRY_NUMBER;
         }
         return connectionRetry;
     }
 
-    public void setConnectionRetry(int connectionRetry) {
-        this.connectionRetry = connectionRetry;
-    }
-
-    /**
-     * Return number of deployment threads.
-     * To populate the dropdown list from the jelly:
-     * <j:forEach var="r" items="${server.deploymentsThreads}">
-     */
-    @SuppressWarnings("unused")
-    public List<Integer> getDeploymentsThreads() {
-        List<Integer> items = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            items.add(i);
-        }
-        return items;
+    @DataBoundSetter
+    public void setConnectionRetry(Integer connectionRetry) {
+        this.connectionRetry = connectionRetry != null ? connectionRetry : DescriptorImpl.DEFAULT_CONNECTION_RETRY_NUMBER;
     }
 
     /**
@@ -165,12 +180,13 @@ public class ArtifactoryServer implements Serializable {
      * @param deploymentThreads - Deployment threads number
      */
     @SuppressWarnings("unused")
-    public void setDeploymentThreads(int deploymentThreads) {
-        this.deploymentThreads = deploymentThreads;
+    @DataBoundSetter
+    public void setDeploymentThreads(Integer deploymentThreads) {
+        this.deploymentThreads = deploymentThreads != null && deploymentThreads > 0 ? deploymentThreads : DescriptorImpl.DEFAULT_DEPLOYMENT_THREADS_NUMBER;
     }
 
     public int getDeploymentThreads() {
-        return deploymentThreads == null ? DEFAULT_DEPLOYMENT_THREADS_NUMBER : deploymentThreads;
+        return deploymentThreads == null ? DescriptorImpl.DEFAULT_DEPLOYMENT_THREADS_NUMBER : deploymentThreads;
     }
 
     public List<String> getLocalRepositoryKeys(Credentials credentials) throws IOException {
@@ -413,5 +429,36 @@ public class ArtifactoryServer implements Serializable {
         public ConverterImpl(XStream2 xstream) {
             super(xstream);
         }
+    }
+
+    @Extension
+    public static class DescriptorImpl extends Descriptor<ArtifactoryServer> {
+
+        public static final int DEFAULT_DEPLOYMENT_THREADS_NUMBER = 3;
+        public static final int DEFAULT_CONNECTION_RETRY_NUMBER = 3;
+        public static final int DEFAULT_CONNECTION_TIMEOUT = 300;    // 5 Minutes
+
+        @Override
+        @NonNull
+        public String getDisplayName() {
+            return "Artifactory Server";
+        }
+
+        public ListBoxModel doFillConnectionRetryItems() {
+            ListBoxModel items = new ListBoxModel();
+            for (int i = 0; i < 10; i++) {
+                items.add(String.valueOf(i));
+            }
+            return items;
+        }
+
+        public ListBoxModel doFillDeploymentThreadsItems() {
+            ListBoxModel items = new ListBoxModel();
+            for (int i = 0; i < 10; i++) {
+                items.add(String.valueOf(i));
+            }
+            return items;
+        }
+
     }
 }

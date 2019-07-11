@@ -1,0 +1,30 @@
+<?jelly escape-by-default='true'?>
+
+<jelly:jelly xmlns:jelly="jelly:core" xmlns:f="/lib/form">
+  <f:entry field="id" title="Server ID" help="/plugin/artifactory/help/ArtifactoryBuilder/help-serverId.html">
+    <f:textbox/>
+  </f:entry>
+  <f:entry field="url" title="URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-url.html">
+    <f:textbox/>
+  </f:entry>
+  <f:entry field="deployerCredentialsConfig" title="Default Deployer Credentials">
+    <f:property field="deployerCredentialsConfig"/>
+  </f:entry>
+  <f:advanced>
+    <f:entry field="timeout" title="Connection Timeout" help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
+      <f:number default="${descriptor.DEFAULT_CONNECTION_TIMEOUT}" />
+    </f:entry>
+    <f:entry field="connectionRetry" title="Number of retries" help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
+      <f:select default="${descriptor.DEFAULT_CONNECTION_RETRY_NUMBER}" />
+    </f:entry>
+    <f:entry field="deploymentThreads" title="Number of threads for Generic uploads"
+      help="/plugin/artifactory/help/ArtifactoryBuilder/help-deploymentThreads.html">
+      <f:select default="${descriptor.DEFAULT_DEPLOYMENT_THREADS_NUMBER}" />
+    </f:entry>
+    <f:entry field="bypassProxy" help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
+      <f:checkbox title="Bypass HTTP Proxy" />
+    </f:entry>
+    <f:optionalProperty field="resolverCredentialsConfig" title="Use Different Resolver Credentials"/>
+  </f:advanced>
+</jelly:jelly>
+
