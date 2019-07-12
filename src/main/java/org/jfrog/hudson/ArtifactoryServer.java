@@ -443,22 +443,5 @@ public class ArtifactoryServer extends AbstractDescribableImpl<ArtifactoryServer
         public String getDisplayName() {
             return "Artifactory Server";
         }
-
-        public ListBoxModel doFillConnectionRetryItems() {
-            ListBoxModel items = new ListBoxModel();
-            for (int i = 0; i < 10; i++) {
-                items.add(String.valueOf(i));
-            }
-            return items;
-        }
-
-        public ListBoxModel doFillDeploymentThreadsItems() {
-            ListBoxModel items = new ListBoxModel();
-            for (int i = 0; i < 10; i++) {
-                items.add(String.valueOf(i));
-            }
-            return items;
-        }
-
     }
 }

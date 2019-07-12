@@ -12,14 +12,14 @@
   </f:entry>
   <f:advanced>
     <f:entry field="timeout" title="Connection Timeout" help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
-      <f:number default="${descriptor.DEFAULT_CONNECTION_TIMEOUT}" />
+      <f:number clazz="positive-number" min="100" step="50" default="${descriptor.DEFAULT_CONNECTION_TIMEOUT}" />
     </f:entry>
     <f:entry field="connectionRetry" title="Number of retries" help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
-      <f:select default="${descriptor.DEFAULT_CONNECTION_RETRY_NUMBER}" />
+      <f:number clazz="positive-number" min="1" max="10" step="1" default="${descriptor.DEFAULT_CONNECTION_RETRY_NUMBER}" />
     </f:entry>
     <f:entry field="deploymentThreads" title="Number of threads for Generic uploads"
       help="/plugin/artifactory/help/ArtifactoryBuilder/help-deploymentThreads.html">
-      <f:select default="${descriptor.DEFAULT_DEPLOYMENT_THREADS_NUMBER}" />
+      <f:number clazz="positive-number" min="1" max="10" step="1" default="${descriptor.DEFAULT_DEPLOYMENT_THREADS_NUMBER}" />
     </f:entry>
     <f:entry field="bypassProxy" help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
       <f:checkbox title="Bypass HTTP Proxy" />
