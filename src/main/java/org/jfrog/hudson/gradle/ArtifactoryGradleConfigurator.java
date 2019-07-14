@@ -17,8 +17,6 @@
 package org.jfrog.hudson.gradle;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
-import com.tikal.jenkins.plugins.multijob.MultiJobProject;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -29,12 +27,8 @@ import hudson.model.*;
 import hudson.model.listeners.RunListener;
 import hudson.plugins.gradle.Gradle;
 import hudson.tasks.BuildWrapper;
-import hudson.tasks.BuildWrapperDescriptor;
-import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
-import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask;
 import org.jfrog.hudson.*;
@@ -53,15 +47,16 @@ import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Gradle-Artifactory plugin configuration, allows to add the server details, deployment username/password, as well as
@@ -661,184 +656,33 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     @Extension(optional = true)
-    public static class DescriptorImpl extends BuildWrapperDescriptor {
-        private AbstractProject<?, ?> item;
+    public static class DescriptorImpl extends AbstractBuildWrapperDescriptor {
+        private static final String DISPLAY_NAME = "Gradle-Artifactory Integration";
+        private static final String CONFIG_PREFIX = "gradle";
 
         public DescriptorImpl() {
-            super(ArtifactoryGradleConfigurator.class);
-            load();
+            super(ArtifactoryGradleConfigurator.class, DISPLAY_NAME, CONFIG_PREFIX);
         }
 
         protected DescriptorImpl(Class<? extends BuildWrapper> clazz) {
-            super(clazz);
+            super(clazz, DISPLAY_NAME, CONFIG_PREFIX);
         }
 
-        @Override
-        public boolean isApplicable(AbstractProject<?, ?> item) {
-            this.item = item;
-            return item.getClass().isAssignableFrom(FreeStyleProject.class) ||
-                    item.getClass().isAssignableFrom(MatrixProject.class) ||
-                    (Jenkins.getInstance().getPlugin(PluginsUtils.MULTIJOB_PLUGIN_ID) != null &&
-                            item.getClass().isAssignableFrom(MultiJobProject.class));
-        }
-
-        private List<Repository> refreshRepositories(ArtifactoryServer artifactoryServer, CredentialsConfig credentialsConfig)
-                throws IOException {
-            List<String> releaseRepositoryKeysFirst = RepositoriesUtils.getLocalRepositories(artifactoryServer.getUrl(),
-                    credentialsConfig, artifactoryServer, item);
-            Collections.sort(releaseRepositoryKeysFirst);
-            List<Repository> releaseRepositories = RepositoriesUtils.createRepositoriesList(releaseRepositoryKeysFirst);
-            return releaseRepositories;
-        }
-
-        private List<VirtualRepository> refreshVirtualRepositories(ArtifactoryServer artifactoryServer,
-                                                                   CredentialsConfig credentialsConfig) throws IOException {
-            List<VirtualRepository> virtualRepositories = RepositoriesUtils.getVirtualRepositoryKeys(artifactoryServer.getUrl(),
-                    credentialsConfig, artifactoryServer, item);
-            Collections.sort(virtualRepositories);
-            return virtualRepositories;
-        }
-
-        private List<PluginSettings> refreshUserPlugins(ArtifactoryServer artifactoryServer, final CredentialsConfig credentialsConfigs) {
-            List<UserPluginInfo> pluginInfoList = artifactoryServer.getStagingUserPluginInfo(new DeployerOverrider() {
-                public boolean isOverridingDefaultDeployer() {
-                    return credentialsConfigs != null && credentialsConfigs.isCredentialsProvided();
-                }
-
-                public Credentials getOverridingDeployerCredentials() {
-                    return null;
-                }
-
-                public CredentialsConfig getDeployerCredentialsConfig() {
-                    return credentialsConfigs;
-                }
-            }, item);
-
-            ArrayList<PluginSettings> list = new ArrayList<PluginSettings>(pluginInfoList.size());
-            for (UserPluginInfo p : pluginInfoList) {
-                Map<String, String> paramsMap = Maps.newHashMap();
-                List<UserPluginInfoParam> params = p.getPluginParams();
-                for (UserPluginInfoParam param : params) {
-                    paramsMap.put(((String) param.getKey()), ((String) param.getDefaultValue()));
-                }
-
-                PluginSettings plugin = new PluginSettings(p.getPluginName(), paramsMap);
-                list.add(plugin);
-            }
-
-            return list;
-        }
-
-        /**
-         * This method triggered from the client side by Ajax call.
-         * The Element that trig is the "Refresh Repositories" button.
-         *
-         * @param url                 Artifactory url
-         * @param credentialsId       credentials Id if using Credentials plugin
-         * @param username            credentials legacy mode username
-         * @param password            credentials legacy mode password
-         * @param overrideCredentials credentials legacy mode overridden
-         * @return {@link org.jfrog.hudson.util.RefreshServerResponse} object that represents the response of the repositories
-         */
         @SuppressWarnings("unused")
         @JavaScriptMethod
         public RefreshServerResponse refreshFromArtifactory(String url, String credentialsId, String username, String password, boolean overrideCredentials) {
-            RefreshServerResponse response = new RefreshServerResponse();
-            CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId, overrideCredentials);
-            try {
-                ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(
-                        url, getArtifactoryServers());
-                List<Repository> releaseRepositories = refreshRepositories(artifactoryServer, credentialsConfig);
-                List<PluginSettings> userPluginKeys = refreshUserPlugins(artifactoryServer, credentialsConfig);
-
-                response.setRepositories(releaseRepositories);
-                response.setUserPlugins(userPluginKeys);
-                response.setSuccess(true);
-            } catch (Exception e) {
-                response.setResponseMessage(e.getMessage());
-                response.setSuccess(false);
-            }
-            return response;
+            return super.refreshDeployersFromArtifactory(url, credentialsId, username, password, overrideCredentials, true);
         }
 
-        /**
-         * This method is triggered from the client side by ajax call.
-         * The method is triggered by the "Refresh Repositories" button.
-         *
-         * @param url           Artifactory url
-         * @param credentialsId credentials Id if using Credentials plugin
-         * @param username      credentials legacy mode username
-         * @param password      credentials legacy mode password
-         * @return {@link org.jfrog.hudson.util.RefreshServerResponse} object that represents the response of the repositories
-         */
-        @SuppressWarnings("unused")
         @JavaScriptMethod
-        public RefreshServerResponse refreshResolversFromArtifactory(String url, String credentialsId,
-                                                                     String username, String password, boolean overrideCredentials) {
-            RefreshServerResponse response = new RefreshServerResponse();
-            CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId, overrideCredentials);
-            ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url, RepositoriesUtils.getArtifactoryServers());
-
-            try {
-                List<VirtualRepository> virtualRepositories = refreshVirtualRepositories(artifactoryServer, credentialsConfig);
-                response.setVirtualRepositories(virtualRepositories);
-                response.setSuccess(true);
-            } catch (Exception e) {
-                response.setResponseMessage(e.getMessage());
-                response.setSuccess(false);
-            }
-
-            return response;
+        public RefreshServerResponse refreshResolversFromArtifactory(String url, String credentialsId, String username, String password, boolean overrideCredentials) {
+            return super.refreshResolversFromArtifactory(url, credentialsId, username, password, overrideCredentials);
         }
 
         @SuppressWarnings("unused")
         @RequirePOST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
             return PluginsUtils.fillPluginCredentials(project);
-        }
-
-        @Override
-        public String getDisplayName() {
-            return "Gradle-Artifactory Integration";
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-            req.bindParameters(this, "gradle");
-            save();
-            return true;
-        }
-
-        public boolean isMultiConfProject() {
-            return (item.getClass().isAssignableFrom(MatrixProject.class));
-        }
-
-        @Override
-        public BuildWrapper newInstance(StaplerRequest req, JSONObject formData) throws FormException {
-            ArtifactoryGradleConfigurator wrapper = (ArtifactoryGradleConfigurator) super.newInstance(req, formData);
-            return wrapper;
-        }
-
-        public FormValidation doCheckArtifactoryCombinationFilter(@QueryParameter String value)
-                throws IOException, InterruptedException {
-            return FormValidations.validateArtifactoryCombinationFilter(value);
-        }
-
-        /**
-         * Returns the list of {@link org.jfrog.hudson.ArtifactoryServer} configured.
-         *
-         * @return can be empty but never null.
-         */
-        public List<ArtifactoryServer> getArtifactoryServers() {
-            return RepositoriesUtils.getArtifactoryServers();
-        }
-
-        public boolean isUseCredentialsPlugin() {
-            return PluginsUtils.isUseCredentialsPlugin();
-        }
-
-        public boolean isJiraPluginEnabled() {
-            return (Jenkins.getInstance().getPlugin("jira") != null);
         }
     }
 

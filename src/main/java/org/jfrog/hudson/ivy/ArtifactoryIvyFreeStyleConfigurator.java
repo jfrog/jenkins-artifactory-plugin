@@ -17,7 +17,6 @@
 package org.jfrog.hudson.ivy;
 
 import com.google.common.collect.Iterables;
-import com.tikal.jenkins.plugins.multijob.MultiJobProject;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -27,12 +26,8 @@ import hudson.model.*;
 import hudson.remoting.Which;
 import hudson.tasks.Ant;
 import hudson.tasks.BuildWrapper;
-import hudson.tasks.BuildWrapperDescriptor;
-import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
-import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.listener.ArtifactoryBuildListener;
 import org.jfrog.hudson.*;
@@ -44,8 +39,6 @@ import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
@@ -53,7 +46,6 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -447,103 +439,24 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     }
 
     @Extension(optional = true)
-    public static class DescriptorImpl extends BuildWrapperDescriptor {
-
-        private AbstractProject<?, ?> item;
+    public static class DescriptorImpl extends AbstractBuildWrapperDescriptor {
+        private static final String DISPLAY_NAME = "Ant/Ivy-Artifactory Integration";
+        private static final String CONFIG_PREFIX = "ivy";
 
         public DescriptorImpl() {
-            super(ArtifactoryIvyFreeStyleConfigurator.class);
-            load();
+            super(ArtifactoryIvyFreeStyleConfigurator.class, DISPLAY_NAME, CONFIG_PREFIX);
         }
 
-        @Override
-        public boolean isApplicable(AbstractProject<?, ?> item) {
-            this.item = item;
-            return item.getClass().isAssignableFrom(FreeStyleProject.class) ||
-                    item.getClass().isAssignableFrom(MatrixProject.class) ||
-                    (Jenkins.getInstance().getPlugin(PluginsUtils.MULTIJOB_PLUGIN_ID) != null &&
-                            item.getClass().isAssignableFrom(MultiJobProject.class));
-        }
-
-        /**
-         * This method triggered from the client side by Ajax call.
-         * The Element that trig is the "Refresh Repositories" button.
-         *
-         * @param url                 Artifactory url
-         * @param credentialsId       credentials Id if using Credentials plugin
-         * @param username            credentials legacy mode username
-         * @param password            credentials legacy mode password
-         * @param overrideCredentials credentials legacy mode overridden
-         * @return {@link org.jfrog.hudson.util.RefreshServerResponse} object that represents the response of the repositories
-         */
+        @SuppressWarnings("unused")
         @JavaScriptMethod
         public RefreshServerResponse refreshFromArtifactory(String url, String credentialsId, String username, String password, boolean overrideCredentials) {
-            RefreshServerResponse response = new RefreshServerResponse();
-            CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId, overrideCredentials);
-            ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url,
-                    RepositoriesUtils.getArtifactoryServers());
-
-            try {
-                List<String> releaseRepositoryKeysFirst = RepositoriesUtils.getLocalRepositories(url, credentialsConfig,
-                        artifactoryServer, item);
-                Collections.sort(releaseRepositoryKeysFirst);
-                List<Repository> releaseRepositoryList = RepositoriesUtils.createRepositoriesList(releaseRepositoryKeysFirst);
-                response.setRepositories(releaseRepositoryList);
-                response.setSuccess(true);
-
-            } catch (Exception e) {
-                response.setResponseMessage(e.getMessage());
-                response.setSuccess(false);
-            }
-
-            /*
-            * In case of Exception, we write error in the Javascript scope!
-            * */
-            return response;
+            return super.refreshDeployersFromArtifactory(url, credentialsId, username, password, overrideCredentials, false);
         }
 
         @SuppressWarnings("unused")
         @RequirePOST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
             return PluginsUtils.fillPluginCredentials(project);
-        }
-
-        @Override
-        public String getDisplayName() {
-            return "Ant/Ivy-Artifactory Integration";
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-            req.bindParameters(this, "ivy");
-            save();
-            return true;
-        }
-
-        public boolean isMultiConfProject() {
-            return (item.getClass().isAssignableFrom(MatrixProject.class));
-        }
-
-        public FormValidation doCheckArtifactoryCombinationFilter(@QueryParameter String value)
-                throws IOException, InterruptedException {
-            return FormValidations.validateArtifactoryCombinationFilter(value);
-        }
-
-        /**
-         * Returns the list of {@link org.jfrog.hudson.ArtifactoryServer} configured.
-         *
-         * @return can be empty but never null.
-         */
-        public List<ArtifactoryServer> getArtifactoryServers() {
-            return RepositoriesUtils.getArtifactoryServers();
-        }
-
-        public boolean isUseCredentialsPlugin() {
-            return PluginsUtils.isUseCredentialsPlugin();
-        }
-
-        public boolean isJiraPluginEnabled() {
-            return (Jenkins.getInstance().getPlugin("jira") != null);
         }
     }
 

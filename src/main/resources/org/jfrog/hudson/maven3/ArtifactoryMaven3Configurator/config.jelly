@@ -19,6 +19,7 @@
          xmlns:r="/lib/jfrog"
          xmlns:st="jelly:stapler">
     <f:section title="${%Artifactory Configuration}">
+        <j:set var="uniqueId" value="${h.generateId()}"/>
         <f:dropdownList name="deployerDetails" title="${%Artifactory server}">
             <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
                 <f:dropdownListBlock value="${s.name}" title="${s.url}" selected="${s.name==instance.artifactoryName}">
@@ -26,14 +27,14 @@
                         <input type="hidden" name="artifactoryName" value="${s.name}"/>
                         <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.url}" value="${s.url}"/>
                         <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
-                        <r:dynamicRepos id="maven3RepositoryKeys-${s.url}"
+                        <r:dynamicRepos id="maven3RepositoryKeys-${s.url}-${uniqueId}"
                                         title="Target releases repository"
                                         field="deployReleaseRepository"
                                         repositoryConf="${instance.deployerDetails.deployReleaseRepository}"
                                         repositories="${instance.releaseRepositoryList}"
                                         helpUrl="/plugin/artifactory/help/common/help-deployReleases.html"/>
 
-                        <r:dynamicRepos id="maven3SnapshotsRepositoryKeys-${s.url}"
+                        <r:dynamicRepos id="maven3SnapshotsRepositoryKeys-${s.url}-${uniqueId}"
                                         title="Target snapshots repository"
                                         field="deploySnapshotRepository"
                                         repositoryConf="${instance.deployerDetails.deploySnapshotRepository}"
@@ -44,20 +45,19 @@
                             var maven3DeployBind =
                             <st:bind value="${descriptor}"/>;
                         </script>
-                        <r:repos title="${%Refresh Repositories}" progress="${%Refreshing...}"
-                                 bind="maven3DeployBind"
+                        <r:repos bind="maven3DeployBind"
                                  jsFunction="artifactoryMaven3Configurator"
                                  repoUrl="artifactoryUrlDeploy${s.url}"
-                                 credentialsDescriber="overridingDeployerCredentials-maven3"/>
+                                 credentialsDescriber="overridingDeployerCredentials-maven3-${uniqueId}"/>
                     </f:nested>
                 </f:dropdownListBlock>
             </j:forEach>
         </f:dropdownList>
 
-        <r:credentials configurationFieldName="deployerCredentialsConfig"
+        <r:credentials configurationFieldName="deployerCredentialsConfig-${uniqueId}"
                        configurationObject="${instance.deployerCredentialsConfig}"
                        blockTitle="Override default deployer credentials"
-                       elementId="overridingDeployerCredentials-maven3"/>
+                       elementId="overridingDeployerCredentials-maven3-${uniqueId}"/>
 
         <f:block>
             <table style="width:100%">
@@ -84,13 +84,13 @@
                                            id="downloadSnapshotRepositoryDisplayName-maven3-${s.url}"
                                            value="${instance.resolverDetails.downloadSnapshotRepositoryDisplayName}"/>
 
-                                    <r:dynamicRepos id="maven3NativeReleaseRepositoryKeys-${s.url}"
+                                    <r:dynamicRepos id="maven3NativeReleaseRepositoryKeys-${s.url}-${uniqueId}"
                                                     title="Resolution releases repository"
                                                     field="resolveReleaseRepository"
                                                     repositoryConf="${instance.resolverDetails.resolveReleaseRepository}"
                                                     repositories="${instance.resolveReleaseRepositoryList}"/>
 
-                                    <r:dynamicRepos id="maven3NativeSnapshotRepositoryKeys-${s.url}"
+                                    <r:dynamicRepos id="maven3NativeSnapshotRepositoryKeys-${s.url}-${uniqueId}"
                                                     title="Resolution snapshots repository"
                                                     field="resolveSnapshotRepository"
                                                     repositoryConf="${instance.resolverDetails.resolveSnapshotRepository}"
@@ -99,32 +99,31 @@
                                         var maven3ResolveBind =
                                         <st:bind value="${descriptor}"/>
                                     </script>
-                                    <r:repos title="${%Refresh Repositories}" progress="${%Refreshing...}"
-                                             bind="maven3ResolveBind"
+                                    <r:repos bind="maven3ResolveBind"
                                              jsFunction="artifactoryMaven3NativeConfigurator"
                                              repoUrl="artifactoryUrlResolve${s.url}"
-                                             credentialsDescriber="overridingResolverCredentials-maven3"/>
+                                             credentialsDescriber="overridingResolverCredentials-maven3-${uniqueId}"/>
                                 </f:nested>
                             </f:dropdownListBlock>
                         </j:forEach>
                     </f:dropdownList>
 
-                    <r:credentials configurationFieldName="resolverCredentialsConfig"
+                    <r:credentials configurationFieldName="resolverCredentialsConfig-${uniqueId}"
                                    configurationObject="${instance.resolverCredentialsConfig}"
                                    blockTitle="Override default resolver credentials"
-                                   elementId="overridingResolverCredentials-maven3"/>
+                                   elementId="overridingResolverCredentials-maven3-${uniqueId}"/>
                 </f:optionalBlock>
             </table>
         </f:block>
         <f:block>
             <table style="width:100%">
                 <f:optionalBlock field="overrideBuildName"
-                              help="/plugin/artifactory/help/common/help-overrideBuildName.html"
-                              title="Override build name" inline="true"
-                              checked="${instance.overrideBuildName}">
+                                 help="/plugin/artifactory/help/common/help-overrideBuildName.html"
+                                 title="Override build name" inline="true"
+                                 checked="${instance.overrideBuildName}">
                     <f:block>
                         <f:entry title="Build name" field="customBuildName"
-                                                            help="/plugin/artifactory/help/common/help-customizedBuildName.html">
+                                 help="/plugin/artifactory/help/common/help-customizedBuildName.html">
                             <f:textbox value="${instance.customBuildName}"/>
                         </f:entry>
                     </f:block>

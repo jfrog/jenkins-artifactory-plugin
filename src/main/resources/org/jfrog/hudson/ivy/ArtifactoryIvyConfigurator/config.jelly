@@ -3,6 +3,7 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:r="/lib/jfrog" xmlns:c="/lib/credentials">
 
     <f:section title="${%Artifactory Configuration}">
+        <j:set var="uniqueId" value="${h.generateId()}"/>
         <f:dropdownList name="deployerDetails" title="${%Artifactory server}">
             <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
                 <f:dropdownListBlock value="${s.name}" title="${s.url}" selected="${s.name==instance.artifactoryName}">
@@ -11,7 +12,7 @@
                         <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.url}" value="${s.url}"/>
                         <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
 
-                        <r:dynamicRepos id="publishRepositoryKey-${s.url}"
+                        <r:dynamicRepos id="publishRepositoryKey-${s.url}-${uniqueId}"
                                         title="Target Repository"
                                         field="deployReleaseRepository"
                                         repositoryConf="${instance.deployerDetails.deployReleaseRepository}"
@@ -22,36 +23,35 @@
                             var ivyDeployBind =
                             <st:bind value="${descriptor}"/>
                         </script>
-                        <r:repos title="${%Refresh Repositories}" progress="${%Refreshing...}"
-                                 bind="ivyDeployBind"
+                        <r:repos bind="ivyDeployBind"
                                  jsFunction="artifactoryIvyConfigurator"
                                  repoUrl="artifactoryUrlDeploy${s.url}"
-                                 credentialsDescriber="overridingDeployerCredentials-ivy-project"/>
+                                 credentialsDescriber="overridingDeployerCredentials-ivy-project-${uniqueId}"/>
                     </f:nested>
                 </f:dropdownListBlock>
             </j:forEach>
         </f:dropdownList>
 
-        <r:credentials configurationFieldName="deployerCredentialsConfig"
+        <r:credentials configurationFieldName="deployerCredentialsConfig-${uniqueId}"
                        configurationObject="${instance.deployerCredentialsConfig}"
                        blockTitle="Override default deployer credentials"
-                       elementId="overridingDeployerCredentials-ivy-project"/>
+                       elementId="overridingDeployerCredentials-ivy-project-${uniqueId}"/>
 
-       <f:block>
-           <table style="width:100%">
-               <f:optionalBlock field="overrideBuildName"
-                             help="/plugin/artifactory/help/common/help-overrideBuildName.html"
-                             title="Override build name" inline="true"
-                             checked="${instance.overrideBuildName}">
-                   <f:block>
-                       <f:entry title="Build name" field="customBuildName"
-                                                           help="/plugin/artifactory/help/common/help-customizedBuildName.html">
-                           <f:textbox value="${instance.customBuildName}"/>
-                       </f:entry>
-                   </f:block>
-               </f:optionalBlock>
-           </table>
-       </f:block>
+        <f:block>
+            <table style="width:100%">
+                <f:optionalBlock field="overrideBuildName"
+                                 help="/plugin/artifactory/help/common/help-overrideBuildName.html"
+                                 title="Override build name" inline="true"
+                                 checked="${instance.overrideBuildName}">
+                    <f:block>
+                        <f:entry title="Build name" field="customBuildName"
+                                 help="/plugin/artifactory/help/common/help-customizedBuildName.html">
+                            <f:textbox value="${instance.customBuildName}"/>
+                        </f:entry>
+                    </f:block>
+                </f:optionalBlock>
+            </table>
+        </f:block>
         <f:block>
             <table style="width:100%">
                 <f:optionalBlock name="deployArtifacts"

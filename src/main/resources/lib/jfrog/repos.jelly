@@ -2,11 +2,8 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler"
          xmlns:f="/lib/form">
     <st:documentation>
-        <st:attribute name="title" use="required">
-            Caption of the value button. Should be internationalized.
-        </st:attribute>
-        <st:attribute name="progress">
-            Caption of the text shown while the AJAX call is in progress.
+        <st:attribute name="uniqueId">
+            Form unique id
         </st:attribute>
         <st:attribute name="bind" use="required">
             Caption of the controls we want to refresh.
@@ -27,9 +24,10 @@
 
     <f:entry>
         <div style="float:right">
-            <input type="button" value="${title}" class="yui-button validate-button"
+            <input type="button" value="${%Refresh Repositories}" class="yui-button validate-button"
                    onclick="repos(this,
                                 '${jsFunction}',
+                                '${uniqueId}',
                                 '${repoUrl}',
                                 '${credentialsDescriber}',
                                  ${bind})"/>
@@ -37,7 +35,7 @@
         </div>
         <div style="display:none;">
             <img src="${imagesURL}/spinner.gif"/>
-            ${attrs.progress}
+            ${%Refreshing...}
         </div>
         <div><!-- this is where the error message goes --></div>
         <div><!-- this is where the warning message goes --></div>

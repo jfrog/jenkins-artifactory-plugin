@@ -1,8 +1,5 @@
-<j:jelly xmlns:j="jelly:core"
-         xmlns:f="/lib/form"
-         xmlns:r="/lib/jfrog"
-         xmlns:st="jelly:stapler"
-        >
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:r="/lib/jfrog" xmlns:st="jelly:stapler">
+    <j:set var="uniqueId" value="${h.generateId()}"/>
     <f:dropdownList name="resolverDetails" title="${%Artifactory server}">
         <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
             <f:dropdownListBlock value="${s.name}" title="${s.url}" selected="${s.name==instance.artifactoryName}">
@@ -10,13 +7,13 @@
                     <input type="hidden" name="artifactoryName" value="${s.name}"/>
                     <input type="hidden" name="artifactoryUrl" id="artifactoryUrlResolver${s.url}" value="${s.url}"/>
                     <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
-                    <r:dynamicRepos id="maven3NativeReleaseRepositoryKeys-${s.url}"
+                    <r:dynamicRepos id="maven3NativeReleaseRepositoryKeys-${s.url}-${uniqueId}"
                                     title="Resolution releases repository"
                                     field="resolveReleaseRepository"
                                     repositories="${instance.virtualRepositoryList}"
                                     repositoryConf="${instance.resolverDetails.resolveReleaseRepository}"/>
 
-                    <r:dynamicRepos id="maven3NativeSnapshotRepositoryKeys-${s.url}"
+                    <r:dynamicRepos id="maven3NativeSnapshotRepositoryKeys-${s.url}-${uniqueId}"
                                     title="Resolution snapshots repository"
                                     field="resolveSnapshotRepository"
                                     repositories="${instance.virtualRepositoryList}"
@@ -25,17 +22,16 @@
                         var maven3NativeResolveBind =
                         <st:bind value="${descriptor}"/>
                     </script>
-                    <r:repos title="${%Refresh Repositories}" progress="${%Refreshing...}"
-                             bind="maven3NativeResolveBind"
+                    <r:repos bind="maven3NativeResolveBind"
                              jsFunction="artifactoryMaven3NativeConfigurator"
                              repoUrl="artifactoryUrlResolver${s.url}"
-                             credentialsDescriber="overridingResolverCredentials"/>
+                             credentialsDescriber="overridingResolverCredentials-${uniqueId}"/>
                 </f:nested>
             </f:dropdownListBlock>
         </j:forEach>
     </f:dropdownList>
-    <r:credentials configurationFieldName="resolverCredentialsConfig"
+    <r:credentials configurationFieldName="resolverCredentialsConfig-${uniqueId}"
                    configurationObject="${instance.resolverCredentialsConfig}"
                    blockTitle="Override default resolver credentials"
-                   elementId="overridingResolverCredentials"/>
+                   elementId="overridingResolverCredentials-${uniqueId}"/>
 </j:jelly>

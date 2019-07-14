@@ -1,90 +1,84 @@
 /**
  * @author Dima Nevelev
  */
-
-function setSpecView(isUsesSpec, legacyDownloadPatternLength, legacyUploadPatternLength) {
-    if (isUsesSpec === null || isUsesSpec.length === 0) {
-      if (legacyUploadPatternLength === 0 && legacyDownloadPatternLength === 0) {
-          document.getElementById("useSpecs_true").setAttribute("checked", "true");
-          updateViewBySpecsParam("true");
-      }  else {
-          document.getElementById("useSpecs_false").setAttribute("checked", "true");
-          updateViewBySpecsParam("false");
-      }
-    } else {
-        updateViewBySpecsParam(isUsesSpec)
+function setSpecView(isUsesSpec, legacyDownloadPatternLength, legacyUploadPatternLength, uniqueId) {
+    if (!isUsesSpec) {
+        isUsesSpec = legacyUploadPatternLength === 0 && legacyDownloadPatternLength === 0 ? "true" : "false";
+        getElementByUniqueId("useSpecs_" + isUsesSpec, uniqueId).setAttribute("checked", "true");
     }
+    updateViewBySpecsParam(isUsesSpec, uniqueId)
 }
 
-function updateViewBySpecsParam(isUsesSpec) {
+function updateViewBySpecsParam(isUsesSpec, uniqueId) {
+    // Resolution section
+    let downloadSpecArea = getElementByUniqueId("downloadSpecArea", uniqueId);
+    let resolveLegacyPatternArea = getElementByUniqueId("resolvePatternArea", uniqueId);
+    let resolverSpec = getElementByUniqueId("artifactory-resolver-spec-dd", uniqueId);
+    let resolverLegacy = getElementByUniqueId("artifactory-resolver-generic-dd", uniqueId);
+
+    // Deployment section
+    let uploadSpecArea = getElementByUniqueId("uploadSpecArea", uniqueId);
+    let deployLegacyPatternArea = getElementByUniqueId("deployPatternArea", uniqueId);
+    let deployerSpec = getElementByUniqueId("artifactory-deployer-spec-dd", uniqueId);
+    let deployerLegacy = getElementByUniqueId("artifactory-deployer-generic-dd", uniqueId);
+
+    let specView = "none", legacyView = "none";
     if (isUsesSpec === "true") {
         // Resolution section
         // By changing the name the configuration will decide which server to use
-        document.getElementById("artifactory-resolver-spec-dd").getElementsByTagName("table")[0].setAttribute("name", "resolverDetails");
-        document.getElementById("artifactory-resolver-generic-dd").getElementsByTagName("table")[0].setAttribute("name", "artifactory-resolver-generic-dd");
-        document.getElementById("artifactory-resolver-spec-dd").style.display = "";
-        document.getElementById("artifactory-resolver-generic-dd").style.display = "none";
-        document.getElementById("downloadSpecArea").style.display = "";
-        document.getElementById("resolvePatternArea").style.display = "none";
-
+        resolverSpec.getElementsByTagName("table")[0].setAttribute("name", "resolverDetails");
+        resolverLegacy.getElementsByTagName("table")[0].setAttribute("name", "artifactory-resolver-generic-dd");
 
         // Deployment section
         // By changing the name the configuration will decide which server to use
-        document.getElementById("artifactory-deployer-spec-dd").getElementsByTagName("table")[0].setAttribute("name", "deployerDetails");
-        document.getElementById("artifactory-deployer-generic-dd").getElementsByTagName("table")[0].setAttribute("name", "artifactory-deployer-generic-dd");
-        document.getElementById("artifactory-deployer-spec-dd").style.display = "";
-        document.getElementById("artifactory-deployer-generic-dd").style.display = "none";
-        document.getElementById("uploadSpecArea").style.display = "";
-        document.getElementById("deployPatternArea").style.display = "none";
+        deployerSpec.getElementsByTagName("table")[0].setAttribute("name", "deployerDetails");
+        deployerLegacy.getElementsByTagName("table")[0].setAttribute("name", "artifactory-deployer-generic-dd");
 
+        specView = "";
     } else {
         // Resolution section
         // By changing the name the configuration will decide which server to use
-        document.getElementById("artifactory-resolver-spec-dd").getElementsByTagName("table")[0].setAttribute("name", "artifactory-resolver-spec-dd");
-        document.getElementById("artifactory-resolver-generic-dd").getElementsByTagName("table")[0].setAttribute("name", "resolverDetails");
-        document.getElementById("artifactory-resolver-spec-dd").style.display = "none";
-        document.getElementById("artifactory-resolver-generic-dd").style.display = "";
-        document.getElementById("downloadSpecArea").style.display = "none";
-        document.getElementById("resolvePatternArea").style.display = "";
+        resolverSpec.getElementsByTagName("table")[0].setAttribute("name", "artifactory-resolver-spec-dd");
+        resolverLegacy.getElementsByTagName("table")[0].setAttribute("name", "resolverDetails");
 
         // Deployment section
         // By changing the name the configuration will decide which server to use
-        document.getElementById("artifactory-deployer-spec-dd").getElementsByTagName("table")[0].setAttribute("name", "artifactory-deployer-spec-dd");
-        document.getElementById("artifactory-deployer-generic-dd").getElementsByTagName("table")[0].setAttribute("name", "deployerDetails");
-        document.getElementById("artifactory-deployer-spec-dd").style.display = "none";
-        document.getElementById("artifactory-deployer-generic-dd").style.display = "";
-        document.getElementById("uploadSpecArea").style.display = "none";
-        document.getElementById("deployPatternArea").style.display = "";
+        deployerSpec.getElementsByTagName("table")[0].setAttribute("name", "artifactory-deployer-spec-dd");
+        deployerLegacy.getElementsByTagName("table")[0].setAttribute("name", "deployerDetails");
+
+        legacyView = "";
     }
+    resolverSpec.style.display = downloadSpecArea.style.display = deployerSpec.style.display = uploadSpecArea.style.display = specView;
+    resolverLegacy.style.display = resolveLegacyPatternArea.style.display = deployerLegacy.style.display = deployLegacyPatternArea.style.display = legacyView;
 }
 
-function fixView(configurationSectionSize) {
-    var elementsToFix = ["artifactory-deployer-generic-dd",
-                         "artifactory-deployer-spec-dd",
-                         "deployPatternArea",
-                         "uploadSpecArea",
-                         "artifactory-resolver-generic-dd",
-                         "artifactory-resolver-spec-dd",
-                         "resolvePatternArea",
-                         "downloadSpecArea"];
-    var elementsToSkip = ["Spec",
-                          "File Path"];
-    var numberOfElements = elementsToFix.length;
-    var numberOfInnerElements = 0;
+function fixView(configurationSectionSize, uniqueId) {
+    let elementsToFix = ["artifactory-deployer-generic-dd",
+        "artifactory-deployer-spec-dd",
+        "deployPatternArea",
+        "uploadSpecArea",
+        "artifactory-resolver-generic-dd",
+        "artifactory-resolver-spec-dd",
+        "resolvePatternArea",
+        "downloadSpecArea"];
+    let elementsToSkip = ["Spec", "File Path"];
+    let numberOfElements = elementsToFix.length;
+    let numberOfInnerElements = 0;
     // 161 is the length of the longest label element in pixels ("Artifactory resolver server")
-    var newLabelSize = 100 * 161 / configurationSectionSize;
+    let newLabelSize = 100 * 161 / configurationSectionSize;
     // label size lower than 12 look bad next to checkbox
     newLabelSize = newLabelSize < 12 ? 12 : newLabelSize;
 
-    for (var i = 0; i < numberOfElements; i++) {
-        numberOfInnerElements = document.getElementById(elementsToFix[i]).parentElement.getElementsByClassName("setting-name").length;
-        for (var j = 0; j < numberOfInnerElements; j++) {
-            if (elementsToSkip.indexOf(document.getElementById(elementsToFix[i]).parentElement.getElementsByClassName("setting-name")[j].textContent) == -1) {
+    for (let i = 0; i < numberOfElements; i++) {
+        let element = getElementByUniqueId(elementsToFix[i], uniqueId);
+        numberOfInnerElements = element.parentElement.getElementsByClassName("setting-name").length;
+        for (let j = 0; j < numberOfInnerElements; j++) {
+            if (elementsToSkip.indexOf(element.parentElement.getElementsByClassName("setting-name")[j].textContent) === -1) {
                 try {
-                    document.getElementById(elementsToFix[i]).parentElement.getElementsByClassName("setting-name")[j].setAttribute("width", newLabelSize + "%");
+                    element.parentElement.getElementsByClassName("setting-name")[j].setAttribute("width", newLabelSize + "%");
                 } catch (e) {
                     console.log(e);
-                    console.log(document.getElementById(elementsToFix[i]).parentElement.getElementsByClassName("setting-name")[j]);
+                    console.log(element.parentElement.getElementsByClassName("setting-name")[j]);
                 }
             }
         }

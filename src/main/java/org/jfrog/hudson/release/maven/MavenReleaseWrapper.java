@@ -27,10 +27,11 @@ import hudson.maven.ModuleName;
 import hudson.model.*;
 import hudson.model.listeners.RunListener;
 import hudson.tasks.BuildWrapper;
-import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.ListBoxModel;
+import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.maven.transformer.SnapshotNotAllowedException;
+import org.jfrog.hudson.AbstractBuildWrapperDescriptor;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.release.ReleaseAction;
@@ -38,7 +39,9 @@ import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.release.scm.AbstractScmCoordinator;
 import org.jfrog.hudson.release.scm.ScmCoordinator;
 import org.jfrog.hudson.release.scm.git.GitCoordinator;
+import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.StaplerRequest;
 
 import java.io.IOException;
 import java.util.*;
@@ -325,30 +328,30 @@ public class MavenReleaseWrapper extends BuildWrapper {
     }
 
     @Extension
-    public static final class DescriptorImpl extends BuildWrapperDescriptor {
+    public static final class DescriptorImpl extends AbstractBuildWrapperDescriptor {
+        private static final String DISPLAY_NAME = "Enable Artifactory release management";
 
         public DescriptorImpl() {
-            super(MavenReleaseWrapper.class);
-            load();
+            super(MavenReleaseWrapper.class, DISPLAY_NAME, "");
         }
 
         /**
-         * This wrapper applied to maven projects with subversion only.
+         * This wrapper applied to maven projects.
          *
          * @param item The current project
-         * @return True for maven projects with subversion as the scm
+         * @return True for maven projects
          */
         @Override
         public boolean isApplicable(AbstractProject<?, ?> item) {
-            return (item instanceof MavenModuleSet)/* && (item.getScm() instanceof SubversionSCM)*/;
+            this.item = item;
+            Class<?> itemClass = item.getClass();
+            return (item instanceof MavenModuleSet) ||
+                    PluginsUtils.PROMOTION_BUILD_PLUGIN_CLASS.equals(itemClass.getSimpleName());
         }
 
-        /**
-         * @return The message to be displayed next to the checkbox in the job configuration.
-         */
         @Override
-        public String getDisplayName() {
-            return "Enable Artifactory release management";
+        public boolean configure(StaplerRequest req, JSONObject json) {
+            return true;
         }
 
         @Override

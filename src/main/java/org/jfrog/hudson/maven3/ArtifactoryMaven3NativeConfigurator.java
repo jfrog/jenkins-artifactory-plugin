@@ -7,10 +7,8 @@ import hudson.maven.MavenModuleSet;
 import hudson.maven.MavenModuleSetBuild;
 import hudson.model.*;
 import hudson.tasks.BuildWrapper;
-import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
-import net.sf.json.JSONObject;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.util.*;
@@ -18,7 +16,6 @@ import org.jfrog.hudson.util.converters.DeployerResolverOverriderConverter;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
@@ -152,59 +149,25 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
     }
 
     @Extension
-    public static class DescriptorImpl extends BuildWrapperDescriptor {
-        private AbstractProject<?, ?> item;
+    public static class DescriptorImpl extends AbstractBuildWrapperDescriptor {
+        private static final String DISPLAY_NAME = "Resolve artifacts from Artifactory";
+        private static final String CONFIG_PREFIX = "maven";
 
         public DescriptorImpl() {
-            super(ArtifactoryMaven3NativeConfigurator.class);
-            load();
+            super(ArtifactoryMaven3NativeConfigurator.class, DISPLAY_NAME, CONFIG_PREFIX);
         }
 
         @Override
         public boolean isApplicable(AbstractProject<?, ?> item) {
             this.item = item;
-            return MavenModuleSet.class.equals(item.getClass());
+            Class<?> itemClass = item.getClass();
+            return MavenModuleSet.class.equals(itemClass) ||
+                    PluginsUtils.PROMOTION_BUILD_PLUGIN_CLASS.equals(itemClass.getSimpleName());
         }
 
-        private List<VirtualRepository> refreshVirtualRepositories(ArtifactoryServer artifactoryServer, CredentialsConfig credentialsConfig)
-                throws IOException {
-            List<VirtualRepository> virtualRepositoryKeys = RepositoriesUtils.getVirtualRepositoryKeys(artifactoryServer.getUrl(),
-                    credentialsConfig, artifactoryServer, item);
-            Collections.sort(virtualRepositoryKeys);
-            return virtualRepositoryKeys;
-        }
-
-        /**
-         * This method triggered from the client side by Ajax call.
-         * The Element that trig is the "Refresh Repositories" button.
-         *
-         * @param url                 Artifactory url
-         * @param credentialsId       credentials Id if using Credentials plugin
-         * @param username            credentials legacy mode username
-         * @param password            credentials legacy mode password
-         * @param overrideCredentials credentials legacy mode overridden
-         * @return {@link org.jfrog.hudson.util.RefreshServerResponse} object that represents the response of the repositories
-         */
         @JavaScriptMethod
         public RefreshServerResponse refreshResolversFromArtifactory(String url, String credentialsId, String username, String password, boolean overrideCredentials) {
-            RefreshServerResponse response = new RefreshServerResponse();
-            CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId, overrideCredentials);
-            ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url, getArtifactoryServers());
-
-            try {
-                List<VirtualRepository> virtualRepositoryKeys = refreshVirtualRepositories(artifactoryServer, credentialsConfig);
-                response.setVirtualRepositories(virtualRepositoryKeys);
-                response.setSuccess(true);
-                return response;
-            } catch (Exception e) {
-                response.setResponseMessage(e.getMessage());
-                response.setSuccess(false);
-            }
-
-            /*
-            * In case of Exception, we write the error in the Javascript scope!
-            * */
-            return response;
+            return super.refreshResolversFromArtifactory(url, credentialsId, username, password, overrideCredentials);
         }
 
         @SuppressWarnings("unused")
@@ -214,33 +177,8 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
         }
 
         @Override
-        public String getDisplayName() {
-            return "Resolve artifacts from Artifactory";
-        }
-
-        @Override
         public String getHelpFile() {
             return "/plugin/artifactory/help/ArtifactoryMaven3NativeConfigurator/help.html";
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-            req.bindParameters(this, "maven");
-            save();
-            return true;
-        }
-
-        /**
-         * Returns the list of {@link org.jfrog.hudson.ArtifactoryServer} configured.
-         *
-         * @return can be empty but never null.
-         */
-        public List<ArtifactoryServer> getArtifactoryServers() {
-            return RepositoriesUtils.getArtifactoryServers();
-        }
-
-        public boolean isUseCredentialsPlugin() {
-            return PluginsUtils.isUseCredentialsPlugin();
         }
     }
 

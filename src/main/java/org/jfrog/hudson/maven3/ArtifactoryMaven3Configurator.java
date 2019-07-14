@@ -16,19 +16,13 @@
 
 package org.jfrog.hudson.maven3;
 
-import com.tikal.jenkins.plugins.multijob.MultiJobProject;
 import hudson.Extension;
 import hudson.Launcher;
 import hudson.matrix.MatrixConfiguration;
-import hudson.matrix.MatrixProject;
 import hudson.model.*;
 import hudson.tasks.BuildWrapper;
-import hudson.tasks.BuildWrapperDescriptor;
-import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
-import jenkins.model.Jenkins;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;
@@ -40,14 +34,11 @@ import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.QueryParameter;
-import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -422,99 +413,24 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     @Extension(optional = true)
-    public static class DescriptorImpl extends BuildWrapperDescriptor {
-        private AbstractProject<?, ?> item;
+    public static class DescriptorImpl extends AbstractBuildWrapperDescriptor {
+        private static final String DISPLAY_NAME = "Maven3-Artifactory Integration";
+        private static final String CONFIG_PREFIX = "maven3";
 
         public DescriptorImpl() {
-            super(ArtifactoryMaven3Configurator.class);
+            super(ArtifactoryMaven3Configurator.class, DISPLAY_NAME, CONFIG_PREFIX);
             load();
         }
 
-        @Override
-        public boolean isApplicable(AbstractProject<?, ?> item) {
-            this.item = item;
-            return item.getClass().isAssignableFrom(FreeStyleProject.class) ||
-                    item.getClass().isAssignableFrom(MatrixProject.class) ||
-                    (Jenkins.getInstance().getPlugin(PluginsUtils.MULTIJOB_PLUGIN_ID) != null &&
-                            item.getClass().isAssignableFrom(MultiJobProject.class));
-        }
-
-        private List<VirtualRepository> refreshVirtualRepositories(ArtifactoryServer artifactoryServer, CredentialsConfig credentialsConfig, Item item)
-                throws IOException {
-            List<VirtualRepository> virtualRepositoryList = RepositoriesUtils.getVirtualRepositoryKeys(artifactoryServer.getUrl(),
-                    credentialsConfig, artifactoryServer, item);
-            Collections.sort(virtualRepositoryList);
-            return virtualRepositoryList;
-        }
-
-        /**
-         * This method triggered from the client side by Ajax call.
-         * The Element that trig is the "Refresh Repositories" button.
-         *
-         * @param url                 Artifactory url
-         * @param credentialsId       credentials Id if using Credentials plugin
-         * @param username            credentials legacy mode username
-         * @param password            credentials legacy mode password
-         * @param overrideCredentials credentials legacy mode overridden
-         * @return {@link org.jfrog.hudson.util.RefreshServerResponse} object that represents the response of the repositories
-         */
-        @JavaScriptMethod
-        public RefreshServerResponse refreshFromArtifactory(String url, String credentialsId, String username, String password, boolean overrideCredentials) {
-            RefreshServerResponse response = new RefreshServerResponse();
-            CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId, overrideCredentials);
-            ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url, getArtifactoryServers());
-
-            try {
-                List<String> releaseRepositoryKeysFirst = RepositoriesUtils.getLocalRepositories(url, credentialsConfig,
-                        artifactoryServer, item);
-
-                Collections.sort(releaseRepositoryKeysFirst);
-                List<Repository> releaseRepositoryList = RepositoriesUtils.createRepositoriesList(releaseRepositoryKeysFirst);
-                response.setRepositories(releaseRepositoryList);
-                response.setSuccess(true);
-
-                return response;
-            } catch (Exception e) {
-                response.setResponseMessage(e.getMessage());
-                response.setSuccess(false);
-            }
-
-            /*
-            * In case of Exception, we write error in the Javascript scope!
-            * */
-            return response;
-        }
-
-        /**
-         * This method is triggered from the client side by ajax call.
-         * The method is triggered by the "Refresh Repositories" button.
-         *
-         * @param url           Artifactory url
-         * @param credentialsId credentials Id if using Credentials plugin
-         * @param username      credentials legacy mode username
-         * @param password      credentials legacy mode password
-         * @return {@link org.jfrog.hudson.util.RefreshServerResponse} object that represents the response of the repositories
-         */
         @SuppressWarnings("unused")
         @JavaScriptMethod
+        public RefreshServerResponse refreshFromArtifactory(String url, String credentialsId, String username, String password, boolean overrideCredentials) {
+            return super.refreshDeployersFromArtifactory(url, credentialsId, username, password, overrideCredentials, false);
+        }
+
+        @JavaScriptMethod
         public RefreshServerResponse refreshResolversFromArtifactory(String url, String credentialsId, String username, String password, boolean overrideCredentials) {
-            RefreshServerResponse response = new RefreshServerResponse();
-            CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId, overrideCredentials);
-            ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url, getArtifactoryServers());
-
-            try {
-                List<VirtualRepository> virtualRepositoryList = refreshVirtualRepositories(artifactoryServer, credentialsConfig, item);
-                response.setVirtualRepositories(virtualRepositoryList);
-                response.setSuccess(true);
-            } catch (Exception e) {
-                response.setResponseMessage(e.getMessage());
-                response.setSuccess(false);
-            }
-
-            /*
-            * In case of Exception, we write the error in the Javascript scope!
-            * */
-            return response;
+            return super.refreshResolversFromArtifactory(url, credentialsId, username, password, overrideCredentials);
         }
 
         @SuppressWarnings("unused")
@@ -522,45 +438,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
             return PluginsUtils.fillPluginCredentials(project);
         }
-
-        @Override
-        public String getDisplayName() {
-            return "Maven3-Artifactory Integration";
-        }
-
-        @Override
-        public boolean configure(StaplerRequest req, JSONObject json) throws FormException {
-            req.bindParameters(this, "maven3");
-            save();
-            return true;
-        }
-
-        public boolean isMultiConfProject() {
-            return (item.getClass().isAssignableFrom(MatrixProject.class));
-        }
-
-        public FormValidation doCheckArtifactoryCombinationFilter(@QueryParameter String value)
-                throws IOException, InterruptedException {
-            return FormValidations.validateArtifactoryCombinationFilter(value);
-        }
-
-        /**
-         * Returns the list of {@link org.jfrog.hudson.ArtifactoryServer} configured.
-         *
-         * @return can be empty but never null.
-         */
-        public List<ArtifactoryServer> getArtifactoryServers() {
-            return RepositoriesUtils.getArtifactoryServers();
-        }
-
-        public boolean isJiraPluginEnabled() {
-            return (Jenkins.getInstance().getPlugin("jira") != null);
-        }
-
-        public boolean isUseCredentialsPlugin() {
-            return PluginsUtils.isUseCredentialsPlugin();
-        }
-
     }
 
     /**
