@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * @author yahavi
  */
-public class AbstractBuildWrapperDescriptor extends BuildWrapperDescriptor {
+public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescriptor {
     protected AbstractProject<?, ?> item;
     private String configPrefix;
     private String displayName;
