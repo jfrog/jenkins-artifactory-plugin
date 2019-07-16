@@ -8,6 +8,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.Hudson;
 import hudson.model.Item;
+import hudson.model.Queue;
+import hudson.model.queue.Tasks;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
 import org.acegisecurity.Authentication;
@@ -57,9 +59,13 @@ public class PluginsUtils {
     public static Credentials credentialsLookup(String credentialsId, Item item) {
         UsernamePasswordCredentials usernamePasswordCredentials = CredentialsMatchers.firstOrNull(
                 CredentialsProvider.lookupCredentials(
-                        UsernamePasswordCredentials.class, item, ACL.SYSTEM,
+                        UsernamePasswordCredentials.class,
+                        item,
+                        item instanceof Queue.Task
+                            ? Tasks.getAuthenticationOf((Queue.Task) item)
+                            : ACL.SYSTEM,
                         Collections.<DomainRequirement>emptyList()),
-                CredentialsMatchers.allOf(CredentialsMatchers.withId(credentialsId))
+                CredentialsMatchers.withId(credentialsId)
         );
 
         if (usernamePasswordCredentials != null) {
