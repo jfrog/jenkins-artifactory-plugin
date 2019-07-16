@@ -1,13 +1,19 @@
 package org.jfrog.hudson.pipeline.common.types.deployers;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
-import hudson.FilePath;
-import hudson.model.TaskListener;
-import hudson.remoting.VirtualChannel;
-import jenkins.MasterToSlaveFileCallable;
-import jenkins.model.Jenkins;
+
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.util.FileChecksumCalculator;
@@ -27,11 +33,12 @@ import org.jfrog.hudson.util.IncludesExcludes;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import hudson.FilePath;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
+import jenkins.model.Jenkins;
 
 /**
  * Created by Tamirh on 04/08/2016.
@@ -171,7 +178,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         cpsScript.invokeMethod("deployArtifacts", stepVariables);
     }
 
-    public void deployArtifacts(BuildInfo buildInfo, TaskListener listener, FilePath ws) throws IOException, InterruptedException {
+    public void deployArtifacts(BuildInfo buildInfo, TaskListener listener, FilePath ws, Run build) throws IOException, InterruptedException {
         if (buildInfo.getDeployableArtifacts().isEmpty()) {
             listener.getLogger().println("No artifacts for deployment were found");
             return;
@@ -179,7 +186,13 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         String agentName = Utils.getAgentName(ws);
         if (buildInfo.getAgentName().equals(agentName)) {
             org.jfrog.hudson.ArtifactoryServer artifactoryServer = Utils.prepareArtifactoryServer(null, server);
-            Credentials credentials = getDeployerCredentialsConfig().getCredentials(null);
+            Credentials credentials = getDeployerCredentialsConfig().getCredentials(build.getParent());
+            // Credentials.EMPTY_CREDENTIALS can only be returned when credentialsId is used.
+            if (credentials == Credentials.EMPTY_CREDENTIALS) {
+                throw new RuntimeException(String.format(
+                    "No matching credentials was found in Jenkins for the supplied credentialsId: '%s' ",
+                    getDeployerCredentialsConfig().getCredentialsId()));
+            }
             org.jfrog.build.client.ProxyConfiguration proxy = RepositoriesUtils.createProxyConfiguration(Jenkins.getInstance().proxy);
             Set<DeployDetails> deploySet = ws.act(new DeployDetailsCallable(buildInfo.getDeployableArtifacts(), listener, this));
             if (deploySet != null && deploySet.size() > 0) {
