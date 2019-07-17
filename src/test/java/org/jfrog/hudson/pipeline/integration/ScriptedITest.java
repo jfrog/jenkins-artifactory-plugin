@@ -94,7 +94,7 @@ public class ScriptedITest extends CommonITestsPipeline {
         super.dockerPushTest("scripted:dockerPush test");
     }
 
-  /*  @Test
+    @Test
     public void xrayScanFailTrueTest() throws Exception {
         if (!ITestUtils.shouldRunXrayTest()) {
             return;
@@ -108,5 +108,5 @@ public class ScriptedITest extends CommonITestsPipeline {
             return;
         }
         super.xrayScanTest("declarative:xrayScanFailBuildFalse test", false);
-    }*/
+    }
 }
