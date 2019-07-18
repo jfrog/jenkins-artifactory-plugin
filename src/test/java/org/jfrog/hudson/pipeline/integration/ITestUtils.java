@@ -85,7 +85,7 @@ class ITestUtils {
                 .map(REPO_PATTERN::matcher)
                 .filter(Matcher::matches)
 
-                // Filter repositories newer than 1 hour
+                // Filter repositories newer than 2 hours
                 .filter(ITestUtils::isRepositoryOld)
 
                 // Get repository key
@@ -102,7 +102,7 @@ class ITestUtils {
      * Return true if the repository created more than an hour ago.
      *
      * @param repoMatcher - Repo regex matcher on REPO_PATTERN
-     * @return true if the repository created more than an hour ago
+     * @return true if the repository created more than 2 hours ago
      */
     private static boolean isRepositoryOld(Matcher repoMatcher) {
         long repoTimestamp = Long.parseLong(repoMatcher.group(2));
