@@ -99,10 +99,10 @@ class ITestUtils {
     }
 
     /**
-     * Return true if the repository created more than 2 hours ago.
+     * Return true if the repository was created more than 2 hours ago.
      *
      * @param repoMatcher - Repo regex matcher on REPO_PATTERN
-     * @return true if the repository created more than 2 hours ago
+     * @return true if the repository was created more than 2 hours ago
      */
     private static boolean isRepositoryOld(Matcher repoMatcher) {
         long repoTimestamp = Long.parseLong(repoMatcher.group(2));
