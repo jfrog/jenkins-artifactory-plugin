@@ -99,7 +99,7 @@ class ITestUtils {
     }
 
     /**
-     * Return true if the repository created more than an hour ago.
+     * Return true if the repository created more than 2 hours ago.
      *
      * @param repoMatcher - Repo regex matcher on REPO_PATTERN
      * @return true if the repository created more than 2 hours ago
