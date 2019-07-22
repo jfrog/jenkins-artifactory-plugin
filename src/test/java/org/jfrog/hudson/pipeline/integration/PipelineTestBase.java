@@ -6,6 +6,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -16,6 +18,7 @@ import org.jfrog.artifactory.client.impl.ArtifactoryRequestImpl;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.junit.*;
+import org.junit.rules.TestName;
 import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
@@ -35,6 +38,8 @@ public class PipelineTestBase {
 
     @ClassRule // The Jenkins instance
     public static JenkinsRule jenkins = new JenkinsRule();
+    protected Logger log = LogManager.getRootLogger();
+    @Rule public TestName testName = new TestName();
 
     private static final String ARTIFACTORY_URL = System.getenv("JENKINS_ARTIFACTORY_URL");
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_ARTIFACTORY_USERNAME");
@@ -63,7 +68,9 @@ public class PipelineTestBase {
     }
 
     @Before
-    public void createRepos() {
+    public void beforeTest() {
+        log.info("Running test: " + pipelineType + " / " + testName.getMethodName());
+        // Create repositories
         Arrays.stream(TestRepository.values()).forEach(this::createRepo);
     }
 

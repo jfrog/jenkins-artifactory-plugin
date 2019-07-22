@@ -395,8 +395,14 @@ public class CommonITestsPipeline extends PipelineTestBase {
                 fail("Job expected to fail");
             }
         } catch (AssertionError t) {
-            assertTrue(t.getMessage().contains("Violations were found by Xray:"));
-            assertTrue(t.getMessage().contains("Build " + pipelineType.toString() + ":" + pipelineJobName + " test number 3 was scanned by Xray and 1 Alerts were generated"));
+            String expecting = "Violations were found by Xray:";
+            assertTrue("Expecting message to include: " + expecting + ". Found: " + t.getMessage(),
+                    t.getMessage().contains(expecting));
+
+            expecting = "Build " + pipelineType.toString() + ":" + pipelineJobName
+                    + " test number 3 was scanned by Xray and 1 Alerts were generated";
+            assertTrue("Expecting message to include: " + expecting + ". Found: " + t.getMessage(),
+                    t.getMessage().contains(expecting));
         } finally {
             deleteBuild(artifactoryClient, buildName);
         }
