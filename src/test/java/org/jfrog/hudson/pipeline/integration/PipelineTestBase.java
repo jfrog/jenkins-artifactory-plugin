@@ -38,7 +38,7 @@ public class PipelineTestBase {
 
     @ClassRule // The Jenkins instance
     public static JenkinsRule jenkins = new JenkinsRule();
-    protected Logger log = LogManager.getRootLogger();
+    private Logger log = LogManager.getRootLogger();
     @Rule public TestName testName = new TestName();
 
     private static final String ARTIFACTORY_URL = System.getenv("JENKINS_ARTIFACTORY_URL");

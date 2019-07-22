@@ -44,6 +44,8 @@ before_test:
   - sh: source "/home/appveyor/.sdkman/bin/sdkman-init.sh"
   - sh: export MAVEN_HOME=/home/appveyor/.sdkman/candidates/maven/current && sdk install maven 3.3.9
   - sh: export GRADLE_HOME=/home/appveyor/.sdkman/candidates/gradle/current && sdk install gradle
+  - sh: touch tests.log
+  - sh: tail -f tests.log &
 
 test_script:
   - mvn -V -B -U clean verify -DskipITs=false
