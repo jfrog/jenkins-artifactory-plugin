@@ -20,7 +20,7 @@ public class SpecUtils {
         if (StringUtils.isNotBlank(specConfiguration.getFilePath())) {
             String filePath = specConfiguration.getFilePath().trim();
             filePath = Util.replaceMacro(filePath, env);
-            String spec = buildDownloadSpecPath(filePath, workspace, logger).readToString();
+            String spec = buildSpecPath(filePath, workspace, logger).readToString();
             return Util.replaceMacro(spec.trim(), env);
         }
         if (StringUtils.isNotBlank(specConfiguration.getSpec())) {
@@ -29,7 +29,7 @@ public class SpecUtils {
         return "";
     }
 
-    private static FilePath buildDownloadSpecPath(String providedPath, FilePath workingDir, PrintStream logger)
+    private static FilePath buildSpecPath(String providedPath, FilePath workingDir, PrintStream logger)
             throws IOException, InterruptedException {
 
         FilePath relativeFile = new FilePath(workingDir, providedPath);

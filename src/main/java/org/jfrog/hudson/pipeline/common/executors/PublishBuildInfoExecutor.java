@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.common.executors;
 
+import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
@@ -14,17 +15,20 @@ public class PublishBuildInfoExecutor implements Executor {
     private TaskListener listener;
     private BuildInfo buildInfo;
     private Run build;
+    private FilePath ws;
 
-    public PublishBuildInfoExecutor(Run build, TaskListener listener, BuildInfo buildInfo, ArtifactoryServer pipelineServer) {
+    public PublishBuildInfoExecutor(Run build, TaskListener listener, BuildInfo buildInfo, ArtifactoryServer pipelineServer, FilePath ws) {
         this.pipelineServer = pipelineServer;
         this.buildInfo = buildInfo;
         this.listener = listener;
         this.build = build;
+        this.ws = ws;
     }
 
     @Override
     public void execute() throws Exception {
         BuildInfoAccessor buildInfoAccessor = new BuildInfoAccessor(buildInfo);
+        buildInfoAccessor.appendVcs(Utils.extractVcs(ws));
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
         try (ArtifactoryBuildInfoClient client = buildInfoAccessor.createArtifactoryClient(server, build, listener)) {
             buildInfoAccessor.createDeployer(build, listener, server, client).deploy();

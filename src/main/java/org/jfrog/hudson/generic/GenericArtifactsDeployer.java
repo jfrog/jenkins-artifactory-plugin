@@ -5,7 +5,6 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
 import hudson.model.BuildListener;
-import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
@@ -27,7 +26,7 @@ import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.UploadSpecHelper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.util.*;
 
 import java.io.File;
@@ -96,20 +95,11 @@ public class GenericArtifactsDeployer {
     private ArrayListMultimap<String, String> getbuildPropertiesMap() {
         ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
         String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build);
-        properties.put("build.name", buildName);
-        properties.put("build.number", BuildUniqueIdentifierHelper.getBuildNumber(build));
-        properties.put("build.timestamp", build.getTimestamp().getTime().getTime() + "");
-        Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
-        if (parent != null) {
-            properties.put("build.parentName", ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
-            properties.put("build.parentNumber", parent.getUpstreamBuild() + "");
-        }
-        String revision = ExtractorUtils.getVcsRevision(env);
-        if (StringUtils.isNotBlank(revision)) {
-            properties.put(BuildInfoFields.VCS_REVISION, revision);
-        }
+        properties.put(BuildInfoFields.BUILD_NAME, buildName);
+        properties.put(BuildInfoFields.BUILD_NUMBER, BuildUniqueIdentifierHelper.getBuildNumber(build));
+        Utils.addTimestampAndParentToProps(properties, build);
+        Utils.addVcsDetailsToProps(env, properties);
         properties.putAll(PropertyUtils.getDeploymentPropertiesMap(configurator.getDeploymentProperties(), env));
-
         return properties;
     }
 
@@ -125,10 +115,6 @@ public class GenericArtifactsDeployer {
         private PatternType patternType = PatternType.ANT;
         private String spec;
         private Set<DeployDetails> deployableArtifacts;
-
-        public enum PatternType {
-            ANT, WILDCARD
-        }
 
         public FilesDeployerCallable(TaskListener listener, Multimap<String, String> patternPairs,
                                      ArtifactoryServer server, Credentials credentials, String repositoryKey,
@@ -233,10 +219,10 @@ public class GenericArtifactsDeployer {
                 String pattern = entry.getKey();
                 String targetPath = entry.getValue();
                 Multimap<String, File> publishingData =
-                    PublishedItemsHelper.buildPublishingData(workspace, pattern, targetPath);
+                        PublishedItemsHelper.buildPublishingData(workspace, pattern, targetPath);
 
                 if (publishingData != null) {
-                listener.getLogger().println(
+                    listener.getLogger().println(
                             "For pattern: " + pattern + " " + publishingData.size() + " artifacts were found");
                     result.putAll(publishingData);
                 } else {
@@ -276,6 +262,10 @@ public class GenericArtifactsDeployer {
             result.add(builder.build());
 
             return result;
+        }
+
+        public enum PatternType {
+            ANT, WILDCARD
         }
     }
 }

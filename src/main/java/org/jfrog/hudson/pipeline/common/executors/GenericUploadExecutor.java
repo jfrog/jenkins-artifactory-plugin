@@ -48,6 +48,9 @@ public class GenericUploadExecutor implements Executor {
         Credentials credentials = new Credentials(server.getDeployerCredentialsConfig().provideUsername(build.getParent()),
                 server.getDeployerCredentialsConfig().providePassword(build.getParent()));
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(server);
+
+        new BuildInfoAccessor(buildInfo).appendVcs(Utils.extractVcs(ws));
+
         List<Artifact> deployedArtifacts = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
                 server, credentials, Utils.getPropertiesMap(buildInfo, build, context), proxyConfiguration));
         if (failNoOp && deployedArtifacts.isEmpty()) {

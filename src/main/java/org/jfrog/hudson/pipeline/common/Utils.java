@@ -80,11 +80,7 @@ public class Utils {
             return new org.jfrog.hudson.ArtifactoryServer(null, pipelineServer.getUrl(), credentials,
                     credentials, pipelineServer.getConnection().getTimeout(), pipelineServer.isBypassProxy(), pipelineServer.getConnection().getRetry(), pipelineServer.getDeploymentThreads());
         }
-        org.jfrog.hudson.ArtifactoryServer server = RepositoriesUtils.getArtifactoryServer(artifactoryServerID, RepositoriesUtils.getArtifactoryServers());
-        if (server == null) {
-            return null;
-        }
-        return server;
+        return RepositoriesUtils.getArtifactoryServer(artifactoryServerID, RepositoriesUtils.getArtifactoryServers());
     }
 
     public static BuildInfo prepareBuildinfo(Run build, BuildInfo buildinfo) {
@@ -139,21 +135,32 @@ public class Utils {
         return result;
     }
 
-    public static String extractVcsRevision(FilePath filePath) throws IOException, InterruptedException {
+    public static Vcs extractVcs(FilePath filePath) throws IOException, InterruptedException {
+        FilePath dotGitPath = getDotGitPath(filePath);
+        if (dotGitPath == null) {
+            return new Vcs();
+        }
+
+        return dotGitPath.act(new MasterToSlaveFileCallable<Vcs>() {
+            public Vcs invoke(File f, VirtualChannel channel) throws IOException {
+                FileRepository repository = new FileRepository(f);
+                ObjectId head = repository.resolve(Constants.HEAD);
+                String revision = head.getName();
+                String url = repository.getConfig().getString("remote", Constants.DEFAULT_REMOTE_NAME, "url");
+                return new Vcs(url, revision);
+            }
+        });
+    }
+
+    public static FilePath getDotGitPath(FilePath filePath) throws IOException, InterruptedException {
         if (filePath == null) {
-            return "";
+            return null;
         }
-        FilePath dotGitPath = new FilePath(filePath, ".git");
+        FilePath dotGitPath = new FilePath(filePath, Constants.DOT_GIT);
         if (dotGitPath.exists()) {
-            return dotGitPath.act(new MasterToSlaveFileCallable<String>() {
-                public String invoke(File f, VirtualChannel channel) throws IOException, InterruptedException {
-                    FileRepository repository = new FileRepository(f);
-                    ObjectId head = repository.resolve(Constants.HEAD);
-                    return head.getName();
-                }
-            });
+            return dotGitPath;
         }
-        return extractVcsRevision(filePath.getParent());
+        return getDotGitPath(filePath.getParent());
     }
 
     public static Computer getCurrentComputer(Launcher launcher) {
@@ -368,27 +375,39 @@ public class Utils {
         ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
 
         if (buildInfo.getName() != null) {
-            properties.put("build.name", buildInfo.getName());
+            properties.put(BuildInfoFields.BUILD_NAME, buildInfo.getName());
         } else {
-            properties.put("build.name", BuildUniqueIdentifierHelper.getBuildName(build));
+            properties.put(BuildInfoFields.BUILD_NAME, BuildUniqueIdentifierHelper.getBuildName(build));
         }
         if (buildInfo.getNumber() != null) {
-            properties.put("build.number", buildInfo.getNumber());
+            properties.put(BuildInfoFields.BUILD_NUMBER, buildInfo.getNumber());
         } else {
-            properties.put("build.number", BuildUniqueIdentifierHelper.getBuildNumber(build));
+            properties.put(BuildInfoFields.BUILD_NUMBER, BuildUniqueIdentifierHelper.getBuildNumber(build));
         }
-        properties.put("build.timestamp", build.getTimestamp().getTime().getTime() + "");
+        addTimestampAndParentToProps(properties, build);
+        EnvVars env = context.get(EnvVars.class);
+        addVcsDetailsToProps(env, properties);
+        return properties;
+    }
+
+    public static void addTimestampAndParentToProps(ArrayListMultimap<String, String> properties, Run build) {
+        properties.put(BuildInfoFields.BUILD_TIMESTAMP, build.getTimestamp().getTime().getTime() + "");
         Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
         if (parent != null) {
-            properties.put("build.parentName", ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
-            properties.put("build.parentNumber", parent.getUpstreamBuild() + "");
+            properties.put(BuildInfoFields.BUILD_PARENT_NAME, ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
+            properties.put(BuildInfoFields.BUILD_PARENT_NUMBER, parent.getUpstreamBuild() + "");
         }
-        EnvVars env = context.get(EnvVars.class);
+    }
+
+    public static void addVcsDetailsToProps(EnvVars env, ArrayListMultimap<String, String> properties) {
         String revision = ExtractorUtils.getVcsRevision(env);
         if (StringUtils.isNotBlank(revision)) {
             properties.put(BuildInfoFields.VCS_REVISION, revision);
         }
-        return properties;
+        String gitUrl = ExtractorUtils.getVcsUrl(env);
+        if (StringUtils.isNotBlank(gitUrl)) {
+            properties.put(BuildInfoFields.VCS_URL, gitUrl);
+        }
     }
 
     public static String replaceTildeWithUserHome(String path) {

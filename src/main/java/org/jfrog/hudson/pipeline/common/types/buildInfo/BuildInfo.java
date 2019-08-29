@@ -46,9 +46,10 @@ public class BuildInfo implements Serializable {
     // The candidates artifacts to be deployed in the 'deployArtifacts' step.
     private List<DeployDetails> deployableArtifacts = new CopyOnWriteArrayList<>();
     private List<Dependency> publishedDependencies = new CopyOnWriteArrayList<>();
-
+    private List<Vcs> vcs = new ArrayList<>();
     private List<Module> modules = new CopyOnWriteArrayList<>();
     private Env env = new Env();
+    private TrackedIssues issues = new TrackedIssues();
     private String agentName;
 
     private transient DockerBuildInfoHelper dockerBuildInfoHelper = new DockerBuildInfoHelper(this);
@@ -63,11 +64,13 @@ public class BuildInfo implements Serializable {
         this();
         this.name = BuildUniqueIdentifierHelper.getBuildName(build);
         this.number = BuildUniqueIdentifierHelper.getBuildNumber(build);
+        issues.setBuildName(name);
     }
 
     @Whitelisted
     public void setName(String name) {
         this.name = name;
+        issues.setBuildName(name);
     }
 
     @Whitelisted
@@ -145,6 +148,8 @@ public class BuildInfo implements Serializable {
         tempEnv.append(this.env);
         tempEnv.append(other.env);
         this.env = tempEnv;
+
+        this.issues.append(other.issues);
     }
 
     public void append(Build other) {
@@ -167,11 +172,17 @@ public class BuildInfo implements Serializable {
         if (other.getBuildDependencies() != null) {
             this.buildDependencies.addAll(other.getBuildDependencies());
         }
+        this.issues.getIssues().append(other.getIssues());
     }
 
     @Whitelisted
     public Env getEnv() {
         return env;
+    }
+
+    @Whitelisted
+    public TrackedIssues getIssues() {
+        return issues;
     }
 
     @Whitelisted
@@ -241,6 +252,10 @@ public class BuildInfo implements Serializable {
         return env.getSysVars();
     }
 
+    Issues getIssuesField() {
+        return issues.getIssues();
+    }
+
     BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryBuildInfoClient client)
             throws InterruptedException, NoSuchAlgorithmException, IOException {
         addDefaultModuleToModules(name);
@@ -265,6 +280,7 @@ public class BuildInfo implements Serializable {
 
     public void setCpsScript(CpsScript cpsScript) {
         this.env.setCpsScript(cpsScript);
+        this.issues.setCpsScript(cpsScript);
     }
 
     public List<Module> getModules() {
@@ -314,6 +330,11 @@ public class BuildInfo implements Serializable {
     @SuppressWarnings("unused") // For serialization/deserialization
     public void setEnv(Env env) {
         this.env = env;
+    }
+
+    @SuppressWarnings("unused") // For serialization/deserialization
+    public void setIssues(TrackedIssues trackedIssues) {
+        this.issues = trackedIssues;
     }
 
     private void addModule(Module other) {
@@ -372,5 +393,15 @@ public class BuildInfo implements Serializable {
             properties.put("build.timestamp", buildInfo.getStartDate().getTime() + "");
             return properties;
         }
+    }
+
+    public void appendVcs(Vcs vcs) {
+        if (vcs != null) {
+            this.vcs.add(vcs);
+        }
+    }
+
+    public List<Vcs> getVcs() {
+        return vcs;
     }
 }

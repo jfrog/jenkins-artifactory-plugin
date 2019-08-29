@@ -23,10 +23,7 @@ import org.jfrog.hudson.util.IncludesExcludes;
 import org.jfrog.hudson.util.IssuesTrackerHelper;
 
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Handles build info creation and deployment
@@ -92,6 +89,16 @@ public class AbstractBuildInfoDeployer {
         String revision = ExtractorUtils.getVcsRevision(env);
         if (StringUtils.isNotBlank(revision)) {
             builder.vcsRevision(revision);
+        }
+        String url = ExtractorUtils.getVcsUrl(env);
+        if (StringUtils.isNotBlank(url)) {
+            builder.vcsUrl(url);
+        }
+        Vcs vcs = new Vcs(url, revision);
+        if (!vcs.isEmpty()) {
+            ArrayList<Vcs> vcsList = new ArrayList<>();
+            vcsList.add(vcs);
+            builder.vcs(vcsList);
         }
 
         addBuildInfoProperties(builder);

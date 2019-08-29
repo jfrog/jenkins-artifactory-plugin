@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.declarative.steps;
 
 import com.google.inject.Inject;
+import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Run;
@@ -9,38 +10,50 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.common.executors.PublishBuildInfoExecutor;
-import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.SpecConfiguration;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
+import org.jfrog.hudson.util.SpecUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 @SuppressWarnings("unused")
-public class PublishBuildInfoStep extends AbstractStepImpl {
+public class CollectIssuesStep extends AbstractStepImpl {
 
-    public static final String STEP_NAME = "rtPublishBuildInfo";
-    private String buildNumber;
-    private String buildName;
-    private String serverId;
+    public static final String STEP_NAME = "rtCollectIssues";
+    private String config;
+    private String configPath;
+    private String customBuildNumber;
+    private String customBuildName;
 
     @DataBoundConstructor
-    public PublishBuildInfoStep(String serverId) {
-        this.serverId = serverId;
+    public CollectIssuesStep() {
+    }
+
+    @DataBoundSetter
+    public void setConfig(String config) {
+        this.config = config;
+    }
+
+    @DataBoundSetter
+    public void setConfigPath(String configPath) {
+        this.configPath = configPath;
     }
 
     @DataBoundSetter
     public void setBuildName(String buildName) {
-        this.buildName = buildName;
+        this.customBuildName = buildName;
     }
 
     @DataBoundSetter
     public void setBuildNumber(String buildNumber) {
-        this.buildNumber = buildNumber;
+        this.customBuildNumber = buildNumber;
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<Void> {
         private static final long serialVersionUID = 1L;
+        protected String config;
 
         @StepContextParameter
         private transient Run build;
@@ -51,17 +64,23 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
         @StepContextParameter
         private transient TaskListener listener;
 
+        @StepContextParameter
+        private transient EnvVars env;
+
         @Inject(optional = true)
-        private transient PublishBuildInfoStep step;
+        private transient CollectIssuesStep step;
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.buildName, step.buildNumber);
-            if (buildInfo == null) {
-                throw new RuntimeException("Build " + DeclarativePipelineUtils.createBuildInfoId(build, step.buildName, step.buildNumber) + " does not exist!");
-            }
-            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
-            new PublishBuildInfoExecutor(build, listener, buildInfo, server, ws).execute();
+            // Set spec
+            SpecConfiguration specConfiguration = new SpecConfiguration(step.config, step.configPath);
+            config = SpecUtils.getSpecStringFromSpecConf(specConfiguration, env, ws, listener.getLogger());
+
+            // Get build info
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
+
+            buildInfo.getIssues().collectBuildIssues(build, listener, ws, buildInfo.getName(), config);
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }
@@ -70,7 +89,7 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(PublishBuildInfoStep.Execution.class);
+            super(CollectIssuesStep.Execution.class);
         }
 
         @Override
@@ -80,7 +99,7 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
 
         @Override
         public String getDisplayName() {
-            return "Publish build info";
+            return "Collect issues";
         }
 
         @Override

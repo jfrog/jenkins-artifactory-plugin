@@ -18,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by romang on 4/25/16.
@@ -56,20 +57,39 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
         if (StringUtils.isNotEmpty(buildinfoAccessor.getBuildNumber())) {
             buildInfo.setNumber(buildinfoAccessor.getBuildNumber());
         }
-        addVcsDataToBuild(build);
+
+        if (buildinfoAccessor.getIssuesField() != null && !buildinfoAccessor.getIssuesField().isEmpty()) {
+            buildInfo.setIssues(buildinfoAccessor.getIssuesField());
+        }
+
+        addVcsDataToBuild(build, buildinfoAccessor);
     }
 
-    private void addVcsDataToBuild(Run build) {
+    private void addVcsDataToBuild(Run build, BuildInfoAccessor buildinfoAccessor) {
+        List<Vcs> vcsList = getVcsFromGitPlugin(build);
+
+        // If collected VCS in a different flow
+        if (buildinfoAccessor.getVcs() != null && !buildinfoAccessor.getVcs().isEmpty()) {
+            vcsList.addAll(buildinfoAccessor.getVcs());
+        }
+
+        // Keep only distinct values
+        vcsList = vcsList.stream().distinct().collect(Collectors.toList());
+        buildInfo.setVcs(vcsList);
+    }
+
+    private List<Vcs> getVcsFromGitPlugin(Run build) {
         if (Jenkins.getInstance().getPlugin(PluginsUtils.GIT_PLUGIN_ID) == null) {
-            return;
+            return new ArrayList<>();
         }
         List<Vcs> vcsList = Utils.extractVcsBuildData(build);
-        buildInfo.setVcs(vcsList);
+        // For backward compatibility:
         if (!vcsList.isEmpty()) {
             Vcs lastVcs = vcsList.get(vcsList.size() - 1);
             buildInfo.setVcsUrl(lastVcs.getUrl());
             buildInfo.setVcsRevision(lastVcs.getRevision());
         }
+        return vcsList;
     }
 
     public void deploy() throws IOException {

@@ -48,9 +48,8 @@ public class MavenExecutor implements Executor {
     public void execute() throws Exception {
         Deployer deployer = getDeployer(mavenBuild);
         deployer.createPublisherBuildInfoDetails(buildInfo);
-        String revision = Utils.extractVcsRevision(new FilePath(ws, pom));
         EnvVars extendedEnv = new EnvVars(env);
-        extendedEnv.put(ExtractorUtils.GIT_COMMIT, revision);
+        ExtractorUtils.setVcsDetailsToEnv(new FilePath(ws, pom), extendedEnv);
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
         MavenGradleEnvExtractor envExtractor = new MavenGradleEnvExtractor(build,
                 buildInfo, deployer, mavenBuild.getResolver(), listener, launcher, tempDir, extendedEnv);

@@ -166,9 +166,9 @@ public class ArtifactsDeployer {
                 .artifactPath(artifactPath)
                 .targetRepository(getTargetRepository(mavenArtifact.version))
                 .md5(mavenArtifact.md5sum).sha1(checksums.get(SHA1))
-                .addProperty("build.name", ExtractorUtils.sanitizeBuildName(mavenModuleSetBuild.getParent().getFullName()))
-                .addProperty("build.number", mavenModuleSetBuild.getNumber() + "")
-                .addProperty("build.timestamp", mavenBuild.getTimestamp().getTime().getTime() + "");
+                .addProperty(BuildInfoFields.BUILD_NAME, ExtractorUtils.sanitizeBuildName(mavenModuleSetBuild.getParent().getFullName()))
+                .addProperty(BuildInfoFields.BUILD_NUMBER, mavenModuleSetBuild.getNumber() + "")
+                .addProperty(BuildInfoFields.BUILD_TIMESTAMP, mavenBuild.getTimestamp().getTime().getTime() + "");
 
         String identifier = BuildUniqueIdentifierHelper.getUpstreamIdentifier(rootBuild);
         if (StringUtils.isNotBlank(identifier)) {
@@ -177,12 +177,16 @@ public class ArtifactsDeployer {
 
         Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(mavenModuleSetBuild);
         if (parent != null) {
-            builder.addProperty("build.parentName", ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()))
-                    .addProperty("build.parentNumber", parent.getUpstreamBuild() + "");
+            builder.addProperty(BuildInfoFields.BUILD_PARENT_NAME, ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()))
+                    .addProperty(BuildInfoFields.BUILD_PARENT_NUMBER, parent.getUpstreamBuild() + "");
         }
         String revision = ExtractorUtils.getVcsRevision(env);
         if (StringUtils.isNotBlank(revision)) {
             builder.addProperty(BuildInfoFields.VCS_REVISION, revision);
+        }
+        String url = ExtractorUtils.getVcsUrl(env);
+        if (StringUtils.isNotBlank(url)) {
+            builder.addProperty(BuildInfoFields.VCS_URL, url);
         }
         addDeploymentProperties(builder);
         DeployDetails deployDetails = builder.build();
@@ -211,7 +215,7 @@ public class ArtifactsDeployer {
 
     /**
      * @return Return the target deployment repository. Either the releases repository (default) or snapshots if defined
-     *         and the deployed version is a snapshot.
+     * and the deployed version is a snapshot.
      */
     public String getTargetRepository(String version) {
         if (targetSnapshotsRepository != null && version.endsWith("SNAPSHOT")) {

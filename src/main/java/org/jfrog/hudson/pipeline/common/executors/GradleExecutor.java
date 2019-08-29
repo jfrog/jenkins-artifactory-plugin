@@ -58,9 +58,8 @@ public class GradleExecutor implements Executor {
         buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         Deployer deployer = gradleBuild.getDeployer();
         deployer.createPublisherBuildInfoDetails(buildInfo);
-        String revision = Utils.extractVcsRevision(new FilePath(ws, rootDir));
         extendedEnv = new EnvVars(env);
-        extendedEnv.put(ExtractorUtils.GIT_COMMIT, revision);
+        ExtractorUtils.setVcsDetailsToEnv(new FilePath(ws, rootDir), extendedEnv);
         tempDir = ExtractorUtils.createAndGetTempDir(ws);
         MavenGradleEnvExtractor envExtractor = new MavenGradleEnvExtractor(build,
                 buildInfo, deployer, gradleBuild.getResolver(), listener, launcher, tempDir, extendedEnv);
