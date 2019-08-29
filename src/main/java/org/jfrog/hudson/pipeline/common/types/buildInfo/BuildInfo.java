@@ -64,13 +64,13 @@ public class BuildInfo implements Serializable {
         this();
         this.name = BuildUniqueIdentifierHelper.getBuildName(build);
         this.number = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        issues.setBuildName(name);
+        this.issues.setBuildName(name);
     }
 
     @Whitelisted
     public void setName(String name) {
         this.name = name;
-        issues.setBuildName(name);
+        this.issues.setBuildName(name);
     }
 
     @Whitelisted

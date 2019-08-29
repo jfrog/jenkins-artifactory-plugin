@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.common;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
@@ -69,7 +70,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
         List<Vcs> vcsList = getVcsFromGitPlugin(build);
 
         // If collected VCS in a different flow
-        if (buildinfoAccessor.getVcs() != null && !buildinfoAccessor.getVcs().isEmpty()) {
+        if (CollectionUtils.isNotEmpty(buildinfoAccessor.getVcs())) {
             vcsList.addAll(buildinfoAccessor.getVcs());
         }
 

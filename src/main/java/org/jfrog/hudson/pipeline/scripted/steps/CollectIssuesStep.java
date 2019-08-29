@@ -12,10 +12,11 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jfrog.hudson.pipeline.common.executors.CollectIssuesExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.TrackedIssues;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-
+@SuppressWarnings("unused")
 public class CollectIssuesStep extends AbstractStepImpl {
 
     private TrackedIssues trackedIssues;
@@ -59,7 +60,9 @@ public class CollectIssuesStep extends AbstractStepImpl {
         @Whitelisted
         @Override
         protected Boolean run() throws Exception {
-            step.getTrackedIssues().collectBuildIssues(build, listener, ws, step.getTrackedIssues().getBuildName(), step.getConfig());
+            CollectIssuesExecutor collectIssuesExecutor = new CollectIssuesExecutor(build, listener, ws,
+                    step.getTrackedIssues().getBuildName(), step.getConfig(), step.getTrackedIssues());
+            collectIssuesExecutor.execute();
             return true;
         }
     }

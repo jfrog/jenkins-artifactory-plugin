@@ -11,6 +11,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.SpecConfiguration;
+import org.jfrog.hudson.pipeline.common.executors.CollectIssuesExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -79,7 +80,9 @@ public class CollectIssuesStep extends AbstractStepImpl {
             // Get build info
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
 
-            buildInfo.getIssues().collectBuildIssues(build, listener, ws, buildInfo.getName(), config);
+            CollectIssuesExecutor collectIssuesExecutor = new CollectIssuesExecutor(build, listener, ws, buildInfo.getName(), config, buildInfo.getIssues());
+            collectIssuesExecutor.execute();
+
             DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
