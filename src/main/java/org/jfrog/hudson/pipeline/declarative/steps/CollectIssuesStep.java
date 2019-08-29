@@ -27,9 +27,11 @@ public class CollectIssuesStep extends AbstractStepImpl {
     private String configPath;
     private String customBuildNumber;
     private String customBuildName;
+    private String serverId;
 
     @DataBoundConstructor
-    public CollectIssuesStep() {
+    public CollectIssuesStep(String serverId) {
+        this.serverId = serverId;
     }
 
     @DataBoundSetter
@@ -80,7 +82,11 @@ public class CollectIssuesStep extends AbstractStepImpl {
             // Get build info
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
 
-            CollectIssuesExecutor collectIssuesExecutor = new CollectIssuesExecutor(build, listener, ws, buildInfo.getName(), config, buildInfo.getIssues());
+            // Get server
+            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
+
+            // Collect issues
+            CollectIssuesExecutor collectIssuesExecutor = new CollectIssuesExecutor(build, listener, ws, buildInfo.getName(), config, buildInfo.getIssues(), pipelineServer);
             collectIssuesExecutor.execute();
 
             DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build, new JenkinsBuildInfoLog(listener));

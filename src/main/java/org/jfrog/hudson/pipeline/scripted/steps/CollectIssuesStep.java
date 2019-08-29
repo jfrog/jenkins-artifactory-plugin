@@ -13,6 +13,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.common.executors.CollectIssuesExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.TrackedIssues;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -20,11 +21,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 public class CollectIssuesStep extends AbstractStepImpl {
 
     private TrackedIssues trackedIssues;
+    private ArtifactoryServer server;
     private String config;
 
     @DataBoundConstructor
-    public CollectIssuesStep(TrackedIssues trackedIssues, String config) {
+    public CollectIssuesStep(TrackedIssues trackedIssues, ArtifactoryServer server, String config) {
         this.trackedIssues = trackedIssues;
+        this.server = server;
         this.config = config;
     }
 
@@ -34,6 +37,10 @@ public class CollectIssuesStep extends AbstractStepImpl {
 
     public String getConfig() {
         return config;
+    }
+
+    public ArtifactoryServer getServer() {
+        return server;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Boolean> {
@@ -61,7 +68,7 @@ public class CollectIssuesStep extends AbstractStepImpl {
         @Override
         protected Boolean run() throws Exception {
             CollectIssuesExecutor collectIssuesExecutor = new CollectIssuesExecutor(build, listener, ws,
-                    step.getTrackedIssues().getBuildName(), step.getConfig(), step.getTrackedIssues());
+                    step.getTrackedIssues().getBuildName(), step.getConfig(), step.getTrackedIssues(), step.getServer());
             collectIssuesExecutor.execute();
             return true;
         }

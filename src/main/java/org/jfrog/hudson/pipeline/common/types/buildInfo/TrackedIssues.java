@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.Issues;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -32,9 +33,10 @@ public class TrackedIssues implements Serializable {
 
     // Used to invoke the step in a scripted pipeline
     @Whitelisted
-    public void collect(String config) {
+    public void collect(ArtifactoryServer server, String config) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("trackedIssues", this);
+        stepVariables.put("server", server);
         stepVariables.put("config", config);
 
         // Throws CpsCallableInvocation - Must be the last line in this method
