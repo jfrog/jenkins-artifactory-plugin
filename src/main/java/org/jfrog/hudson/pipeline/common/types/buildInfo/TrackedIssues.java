@@ -35,7 +35,7 @@ public class TrackedIssues implements Serializable {
     @Whitelisted
     public void collect(ArtifactoryServer server, String config) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
-        stepVariables.put("trackedIssues", this);
+        stepVariables.put("issues", this);
         stepVariables.put("server", server);
         stepVariables.put("config", config);
 
