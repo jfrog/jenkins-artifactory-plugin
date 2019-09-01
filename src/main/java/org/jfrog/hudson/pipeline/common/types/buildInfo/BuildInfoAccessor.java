@@ -4,7 +4,10 @@ import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
-import org.jfrog.build.api.*;
+import org.jfrog.build.api.Artifact;
+import org.jfrog.build.api.Dependency;
+import org.jfrog.build.api.Module;
+import org.jfrog.build.api.Vcs;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryServer;
@@ -42,8 +45,8 @@ public class BuildInfoAccessor {
         return this.buildInfo.getSysVars();
     }
 
-    public Issues getIssuesField() {
-        return this.buildInfo.getIssuesField();
+    public org.jfrog.build.api.Issues getIssues() {
+        return this.buildInfo.getConvertedIssues();
     }
 
     public List<BuildDependency> getBuildDependencies() {

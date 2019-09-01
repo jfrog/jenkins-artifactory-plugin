@@ -97,7 +97,8 @@ public class GenericArtifactsDeployer {
         String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build);
         properties.put(BuildInfoFields.BUILD_NAME, buildName);
         properties.put(BuildInfoFields.BUILD_NUMBER, BuildUniqueIdentifierHelper.getBuildNumber(build));
-        Utils.addTimestampAndParentToProps(properties, build);
+        properties.put(BuildInfoFields.BUILD_TIMESTAMP, build.getTimestamp().getTime().getTime() + "");
+        Utils.addParentBuildProps(properties, build);
         Utils.addVcsDetailsToProps(env, properties);
         properties.putAll(PropertyUtils.getDeploymentPropertiesMap(configurator.getDeploymentProperties(), env));
         return properties;

@@ -49,7 +49,7 @@ public class BuildInfo implements Serializable {
     private List<Vcs> vcs = new ArrayList<>();
     private List<Module> modules = new CopyOnWriteArrayList<>();
     private Env env = new Env();
-    private TrackedIssues issues = new TrackedIssues();
+    private Issues issues = new Issues();
     private String agentName;
 
     private transient DockerBuildInfoHelper dockerBuildInfoHelper = new DockerBuildInfoHelper(this);
@@ -172,7 +172,7 @@ public class BuildInfo implements Serializable {
         if (other.getBuildDependencies() != null) {
             this.buildDependencies.addAll(other.getBuildDependencies());
         }
-        this.issues.getIssues().append(other.getIssues());
+        this.issues.convertAndAppend(other.getIssues());
     }
 
     @Whitelisted
@@ -181,7 +181,7 @@ public class BuildInfo implements Serializable {
     }
 
     @Whitelisted
-    public TrackedIssues getIssues() {
+    public Issues getIssues() {
         return issues;
     }
 
@@ -252,8 +252,8 @@ public class BuildInfo implements Serializable {
         return env.getSysVars();
     }
 
-    Issues getIssuesField() {
-        return issues.getIssues();
+    org.jfrog.build.api.Issues getConvertedIssues() {
+        return this.issues.convertFromPipelineIssues();
     }
 
     BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryBuildInfoClient client)
@@ -333,8 +333,8 @@ public class BuildInfo implements Serializable {
     }
 
     @SuppressWarnings("unused") // For serialization/deserialization
-    public void setIssues(TrackedIssues trackedIssues) {
-        this.issues = trackedIssues;
+    public void setIssues(Issues issues) {
+        this.issues = issues;
     }
 
     private void addModule(Module other) {

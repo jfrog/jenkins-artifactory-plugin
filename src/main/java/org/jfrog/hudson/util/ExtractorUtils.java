@@ -109,7 +109,7 @@ public class ExtractorUtils {
         return url;
     }
 
-    public static void setVcsDetailsToEnv(FilePath filePath, EnvVars env) throws IOException, InterruptedException {
+    public static void addVcsDetailsToEnv(FilePath filePath, EnvVars env) throws IOException, InterruptedException {
         Vcs vcs = Utils.extractVcs(filePath);
         env.put(GIT_COMMIT, StringUtils.defaultIfEmpty(vcs.getRevision(), ""));
         env.put(GIT_URL, StringUtils.defaultIfEmpty(vcs.getUrl(), ""));

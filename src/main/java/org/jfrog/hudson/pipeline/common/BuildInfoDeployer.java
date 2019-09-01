@@ -59,8 +59,8 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
             buildInfo.setNumber(buildinfoAccessor.getBuildNumber());
         }
 
-        if (buildinfoAccessor.getIssuesField() != null && !buildinfoAccessor.getIssuesField().isEmpty()) {
-            buildInfo.setIssues(buildinfoAccessor.getIssuesField());
+        if (buildinfoAccessor.getIssues() != null && !buildinfoAccessor.getIssues().isEmpty()) {
+            buildInfo.setIssues(buildinfoAccessor.getIssues());
         }
 
         addVcsDataToBuild(build, buildinfoAccessor);

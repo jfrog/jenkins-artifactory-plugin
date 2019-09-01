@@ -384,14 +384,14 @@ public class Utils {
         } else {
             properties.put(BuildInfoFields.BUILD_NUMBER, BuildUniqueIdentifierHelper.getBuildNumber(build));
         }
-        addTimestampAndParentToProps(properties, build);
+        properties.put(BuildInfoFields.BUILD_TIMESTAMP, build.getTimestamp().getTime().getTime() + "");
+        addParentBuildProps(properties, build);
         EnvVars env = context.get(EnvVars.class);
         addVcsDetailsToProps(env, properties);
         return properties;
     }
 
-    public static void addTimestampAndParentToProps(ArrayListMultimap<String, String> properties, Run build) {
-        properties.put(BuildInfoFields.BUILD_TIMESTAMP, build.getTimestamp().getTime().getTime() + "");
+    public static void addParentBuildProps(ArrayListMultimap<String, String> properties, Run build) {
         Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
         if (parent != null) {
             properties.put(BuildInfoFields.BUILD_PARENT_NAME, ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
