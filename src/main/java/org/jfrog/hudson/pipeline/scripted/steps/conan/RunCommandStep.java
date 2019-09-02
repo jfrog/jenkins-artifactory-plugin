@@ -22,6 +22,7 @@ import org.jfrog.build.api.Vcs;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.ExtractorUtils;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
@@ -120,7 +121,7 @@ public class RunCommandStep extends AbstractStepImpl {
             FilePath buildProperties = new FilePath(conanHomeDirectory, ".conan").child("artifacts.properties");
             final String buildName = buildInfo.getName();
             final String buildNumber = buildInfo.getNumber();
-            final Vcs vcs = Utils.extractVcs(ws);
+            final Vcs vcs = Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener));
             final long startTime = buildInfo.getStartDate().getTime();
             buildProperties.touch(System.currentTimeMillis());
             buildProperties.act(new MasterToSlaveFileCallable<Boolean>() {

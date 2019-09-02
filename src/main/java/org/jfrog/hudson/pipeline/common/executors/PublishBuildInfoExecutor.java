@@ -8,6 +8,7 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 public class PublishBuildInfoExecutor implements Executor {
 
@@ -28,7 +29,7 @@ public class PublishBuildInfoExecutor implements Executor {
     @Override
     public void execute() throws Exception {
         BuildInfoAccessor buildInfoAccessor = new BuildInfoAccessor(buildInfo);
-        buildInfoAccessor.appendVcs(Utils.extractVcs(ws));
+        buildInfoAccessor.appendVcs(Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
         try (ArtifactoryBuildInfoClient client = buildInfoAccessor.createArtifactoryClient(server, build, listener)) {
             buildInfoAccessor.createDeployer(build, listener, server, client).deploy();

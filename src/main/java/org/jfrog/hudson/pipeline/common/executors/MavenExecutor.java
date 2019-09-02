@@ -49,7 +49,7 @@ public class MavenExecutor implements Executor {
         Deployer deployer = getDeployer(mavenBuild);
         deployer.createPublisherBuildInfoDetails(buildInfo);
         EnvVars extendedEnv = new EnvVars(env);
-        ExtractorUtils.setVcsDetailsToEnv(new FilePath(ws, pom), extendedEnv);
+        ExtractorUtils.setVcsDetailsToEnv(new FilePath(ws, pom), extendedEnv, listener);
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
         MavenGradleEnvExtractor envExtractor = new MavenGradleEnvExtractor(build,
                 buildInfo, deployer, mavenBuild.getResolver(), listener, launcher, tempDir, extendedEnv);
