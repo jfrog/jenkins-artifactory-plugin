@@ -143,6 +143,7 @@ public class PipelineTestBase {
             put("GRADLE_CI_PROJECT_PATH", getProjectPath("gradle-example-ci"));
             put("NPM_PROJECT_PATH", getProjectPath("npm-example"));
             put("DOCKER_PROJECT_PATH", getProjectPath("docker-example"));
+            put("COLLECT_ISSUES_PATH", getProjectPath("collectIssues-example"));
             put("LOCAL_REPO1", getRepoKey(TestRepository.LOCAL_REPO1));
             put("LOCAL_REPO2", getRepoKey(TestRepository.LOCAL_REPO2));
             put("JCENTER_REMOTE_REPO", getRepoKey(TestRepository.JCENTER_REMOTE_REPO));

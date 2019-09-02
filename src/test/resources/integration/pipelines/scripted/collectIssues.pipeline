@@ -1,0 +1,35 @@
+package integration.pipelines.scripted
+
+node {
+    // Move to the scope of the test's git
+    dir("${COLLECT_ISSUES_PATH}") {
+        stage "Configuration"
+            def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+
+            // Create build info
+            def buildInfo = Artifactory.newBuildInfo()
+            buildInfo.name = "scripted:collectIssues test"
+            buildInfo.number = "3"
+
+        // Collect issues
+        stage "Collect Issues"
+            issuesCollectionConfig = """{
+                "version": 1,
+                "issues": {
+                    "trackerName": "TESTING",
+                    "regexp": "([a-zA-Z]+-[0-9]*)\\s-\\s(.*)",
+                    "keyGroupIndex": 1,
+                    "summaryGroupIndex": 2,
+                    "trackerUrl": "http://TESTING.com",
+                    "aggregate": "true",
+                    "aggregationStatus": "RELEASE"
+                }
+            }"""
+
+            buildInfo.issues.collect(rtServer, issuesCollectionConfig)
+
+        stage "Publish Build Info"
+            rtServer.publishBuildInfo buildInfo
+    }
+
+}

@@ -7,6 +7,7 @@ import com.github.dockerjava.core.command.BuildImageResultCallback;
 import com.google.common.collect.Sets;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.build.api.Build;
@@ -14,6 +15,7 @@ import org.jfrog.build.api.Module;
 import org.jfrog.hudson.pipeline.common.docker.utils.DockerUtils;
 import org.junit.Test;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -406,6 +408,33 @@ public class CommonITestsPipeline extends PipelineTestBase {
                     t.getMessage().contains(expecting));
         } finally {
             deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void collectIssuesTest(String buildName) throws Exception {
+        File collectIssuesExample = new File(getIntegrationDir().toFile(), "collectIssues-example");
+        File dotGitPath = new File(collectIssuesExample, ".git");
+        // Copy the provided folder and create .git
+        FileUtils.deleteDirectory(dotGitPath);
+        FileUtils.copyDirectory(new File(collectIssuesExample, "buildaddgit_.git_suffix"), dotGitPath);
+
+        String buildNumber = "3";
+        // Clear older build if exists
+        deleteBuild(artifactoryClient, buildName);
+        WorkflowRun build = runPipeline("collectIssues");
+        try {
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            // Assert Issues
+            assertNotNull(buildInfo.getIssues());
+            assertNotNull(buildInfo.getIssues().getAffectedIssues());
+            assertEquals(4, buildInfo.getIssues().getAffectedIssues().size());
+            // Assert Vcs
+            assertTrue(CollectionUtils.isNotEmpty(buildInfo.getVcs()));
+            assertEquals("b033a0e508bdb52eee25654c9e12db33ff01b8ff", buildInfo.getVcs().get(0).getRevision());
+            assertEquals("https://github.com/jfrog/jfrog-cli-go.git", buildInfo.getVcs().get(0).getUrl());
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+            FileUtils.deleteDirectory(dotGitPath);
         }
     }
 }

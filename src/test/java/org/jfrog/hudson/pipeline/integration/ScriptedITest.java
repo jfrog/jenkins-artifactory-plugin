@@ -109,4 +109,9 @@ public class ScriptedITest extends CommonITestsPipeline {
         }
         super.xrayScanTest("declarative:xrayScanFailBuildFalse test", false);
     }
+
+    @Test
+    public void collectIssuesTest() throws Exception {
+        super.collectIssuesTest("scripted:collectIssues test");
+    }
 }

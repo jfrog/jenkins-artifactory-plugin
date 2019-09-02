@@ -168,7 +168,7 @@ class ITestUtils {
      * @return build info for the specified build name and number
      */
     static Build getBuildInfo(ArtifactoryBuildInfoClient buildInfoClient, String buildName, String buildNumber) throws IOException {
-        return buildInfoClient.getBuildInfo(encodeBuildName(buildName), buildNumber);
+        return buildInfoClient.getBuildInfo(buildName, buildNumber);
     }
 
     /**
