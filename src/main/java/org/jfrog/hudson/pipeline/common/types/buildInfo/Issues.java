@@ -107,7 +107,9 @@ public class Issues implements Serializable {
         this.affectedIssues.addAll(affectedIssuesToAppend);
     }
 
-    // Used to invoke the step in a scripted pipeline
+    /**
+     * Used to invoke the step in a scripted pipeline
+     * */
     @Whitelisted
     public void collect(ArtifactoryServer server, String config) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
