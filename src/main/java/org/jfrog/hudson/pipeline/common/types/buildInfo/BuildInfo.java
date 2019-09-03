@@ -396,7 +396,7 @@ public class BuildInfo implements Serializable {
     }
 
     public void appendVcs(Vcs vcs) {
-        if (vcs != null) {
+        if (vcs != null && !this.vcs.contains(vcs)) {
             this.vcs.add(vcs);
         }
     }

@@ -12,6 +12,7 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.util.Credentials;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,7 +50,7 @@ public class GenericUploadExecutor implements Executor {
                 server.getDeployerCredentialsConfig().providePassword(build.getParent()));
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(server);
 
-        new BuildInfoAccessor(buildInfo).appendVcs(Utils.extractVcs(ws));
+        new BuildInfoAccessor(buildInfo).appendVcs(Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
 
         List<Artifact> deployedArtifacts = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
                 server, credentials, Utils.getPropertiesMap(buildInfo, build, context), proxyConfiguration));

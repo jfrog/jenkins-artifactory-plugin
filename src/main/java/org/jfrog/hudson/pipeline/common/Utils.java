@@ -21,9 +21,6 @@ import jenkins.plugins.nodejs.tools.NodeJSInstallation;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
-import org.eclipse.jgit.lib.Constants;
-import org.eclipse.jgit.lib.ObjectId;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.BuildInfoFields;
@@ -31,6 +28,7 @@ import org.jfrog.build.api.Vcs;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
+import org.jfrog.build.extractor.clientConfiguration.util.GitUtils;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
@@ -135,32 +133,12 @@ public class Utils {
         return result;
     }
 
-    public static Vcs extractVcs(FilePath filePath) throws IOException, InterruptedException {
-        FilePath dotGitPath = getDotGitPath(filePath);
-        if (dotGitPath == null) {
-            return new Vcs();
-        }
-
-        return dotGitPath.act(new MasterToSlaveFileCallable<Vcs>() {
+    public static Vcs extractVcs(FilePath filePath, Log log) throws IOException, InterruptedException {
+        return filePath.act(new MasterToSlaveFileCallable<Vcs>() {
             public Vcs invoke(File f, VirtualChannel channel) throws IOException {
-                FileRepository repository = new FileRepository(f);
-                ObjectId head = repository.resolve(Constants.HEAD);
-                String revision = head.getName();
-                String url = repository.getConfig().getString("remote", Constants.DEFAULT_REMOTE_NAME, "url");
-                return new Vcs(url, revision);
+                return GitUtils.extractVcs(f, log);
             }
         });
-    }
-
-    public static FilePath getDotGitPath(FilePath filePath) throws IOException, InterruptedException {
-        if (filePath == null) {
-            return null;
-        }
-        FilePath dotGitPath = new FilePath(filePath, Constants.DOT_GIT);
-        if (dotGitPath.exists()) {
-            return dotGitPath;
-        }
-        return getDotGitPath(filePath.getParent());
     }
 
     public static Computer getCurrentComputer(Launcher launcher) {
