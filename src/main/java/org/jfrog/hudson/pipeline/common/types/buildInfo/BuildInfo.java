@@ -283,6 +283,7 @@ public class BuildInfo implements Serializable {
         this.issues.setCpsScript(cpsScript);
     }
 
+    @Whitelisted
     public List<Module> getModules() {
         return modules;
     }
