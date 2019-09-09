@@ -1,17 +1,33 @@
 package org.jfrog.hudson.pipeline.common.types.buildInfo;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ArrayListMultimap;
-import hudson.FilePath;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.remoting.VirtualChannel;
-import jenkins.MasterToSlaveFileCallable;
+import java.io.File;
+import java.io.IOException;
+import java.io.Serializable;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
-import org.jfrog.build.api.*;
+import org.jfrog.build.api.Artifact;
+import org.jfrog.build.api.BaseBuildFileBean;
+import org.jfrog.build.api.Build;
+import org.jfrog.build.api.BuildInfoProperties;
+import org.jfrog.build.api.Dependency;
+import org.jfrog.build.api.Module;
+import org.jfrog.build.api.Vcs;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.client.DeployableArtifactDetail;
@@ -22,14 +38,14 @@ import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.BuildInfoDeployer;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ArrayListMultimap;
+
+import hudson.FilePath;
+import hudson.model.Run;
+import hudson.model.TaskListener;
+import hudson.remoting.VirtualChannel;
+import jenkins.MasterToSlaveFileCallable;
 
 /**
  * Created by romang on 4/26/16.
@@ -271,11 +287,8 @@ public class BuildInfo implements Serializable {
             return;
         }
 
-        ModuleBuilder moduleBuilder = new ModuleBuilder()
-                .id(moduleId)
-                .artifacts(deployedArtifacts)
-                .dependencies(publishedDependencies);
-        modules.add(moduleBuilder.build());
+        Module module = createDefaultModule(moduleId);
+        modules.add(module);
     }
 
     public void setCpsScript(CpsScript cpsScript) {
@@ -285,6 +298,31 @@ public class BuildInfo implements Serializable {
 
     public List<Module> getModules() {
         return modules;
+    }
+
+    /**
+     *
+     * Returns the list of registered modules, same as {@link #getModules()}, plus 
+     * the default module. <br/>
+     *
+     * The default module is dynamically computed at the time of the call using the current captured 
+     * information of deployed artifacts and dependencies. Similarly, the returned list is populated at 
+     * call time with the current list of modules registered in this info object and the 
+     * computed default module; therefore subsequent calls <br/>
+     *
+     * Note that changes to the returned collection will have no effect on the actual information
+     * captured in this object.
+     *
+     * @return
+     *          a {@link List} of {@link Module}s containing the currently registered modules
+     *          and the default one built of the deployed artifacts information, never <code>null</code>.
+     *
+     */
+    @Whitelisted
+    public List<Module> getModulesWithDefault() {
+        List<Module> result = new ArrayList<Module>(modules);
+        result.add(createDefaultModule(name));
+        return result;
     }
 
     @SuppressWarnings("unused") // For serialization/deserialization
@@ -403,5 +441,25 @@ public class BuildInfo implements Serializable {
 
     public List<Vcs> getVcs() {
         return vcs;
+    }
+
+    /**
+     *
+     * Creates the default {@link Module} according to the currently captured 
+     * information and returns it. The default module is the one that is constituted 
+     * of the currently captured deployed artifacts and and published dependencies 
+     * by this build info object. If no deployed artifacts or dependencies have been 
+     * captured, the module will be 'empty'
+     *
+     * @param moduleId
+     * @return
+     */
+    private Module createDefaultModule(String moduleId) {
+        ModuleBuilder moduleBuilder = new ModuleBuilder()
+                .id(moduleId)
+                .artifacts(deployedArtifacts)
+                .dependencies(publishedDependencies);
+
+        return moduleBuilder.build();
     }
 }
