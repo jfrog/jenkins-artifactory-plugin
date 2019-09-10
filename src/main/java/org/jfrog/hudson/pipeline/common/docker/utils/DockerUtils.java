@@ -27,7 +27,7 @@ import java.util.List;
 public class DockerUtils implements Serializable {
 
     /**
-     * Get image Id from imageTag using DockerBuildInfoHelper client.
+     * Get image Id from imageTag using DockerClient.
      *
      * @param imageTag
      * @param host

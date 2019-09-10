@@ -49,7 +49,6 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
         }
 
         buildInfo.setModules(new ArrayList<Module>(buildinfoAccessor.getModules()));
-        this.buildInfo.setBuildDependencies(new ArrayList<BuildDependency>(buildinfoAccessor.getBuildDependencies()));
 
         if (StringUtils.isNotEmpty(buildinfoAccessor.getBuildName())) {
             buildInfo.setName(buildinfoAccessor.getBuildName());

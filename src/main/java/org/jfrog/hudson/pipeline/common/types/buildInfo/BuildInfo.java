@@ -41,7 +41,6 @@ public class BuildInfo implements Serializable {
     private String number; // Build number
     private Date startDate;
     private BuildRetention retention;
-    private List<BuildDependency> buildDependencies = new CopyOnWriteArrayList<>();
     private List<Artifact> deployedArtifacts = new CopyOnWriteArrayList<>();
     // The candidates artifacts to be deployed in the 'deployArtifacts' step.
     private List<DeployDetails> deployableArtifacts = new CopyOnWriteArrayList<>();
@@ -51,8 +50,6 @@ public class BuildInfo implements Serializable {
     private Env env = new Env();
     private Issues issues = new Issues();
     private String agentName;
-
-    private transient DockerBuildInfoHelper dockerBuildInfoHelper = new DockerBuildInfoHelper(this);
 
     // Default constructor to allow serialization
     public BuildInfo() {
@@ -141,8 +138,6 @@ public class BuildInfo implements Serializable {
         this.deployedArtifacts.addAll(other.deployedArtifacts);
         this.deployableArtifacts.addAll(other.deployableArtifacts);
         this.publishedDependencies.addAll(other.publishedDependencies);
-        this.buildDependencies.addAll(other.buildDependencies);
-        this.dockerBuildInfoHelper.append(other.dockerBuildInfoHelper);
 
         Env tempEnv = new Env();
         tempEnv.append(this.env);
@@ -168,9 +163,6 @@ public class BuildInfo implements Serializable {
         }
         if (other.getModules() != null) {
             other.getModules().forEach(this::addModule);
-        }
-        if (other.getBuildDependencies() != null) {
-            this.buildDependencies.addAll(other.getBuildDependencies());
         }
         this.issues.convertAndAppend(other.getIssues());
     }
@@ -226,22 +218,11 @@ public class BuildInfo implements Serializable {
         this.agentName = agentName;
     }
 
-    protected void appendBuildDependencies(List<BuildDependency> dependencies) {
-        if (dependencies == null) {
-            return;
-        }
-        buildDependencies.addAll(dependencies);
-    }
-
     void appendPublishedDependencies(List<Dependency> dependencies) {
         if (dependencies == null) {
             return;
         }
         publishedDependencies.addAll(dependencies);
-    }
-
-    List<BuildDependency> getBuildDependencies() {
-        return buildDependencies;
     }
 
     Map<String, String> getEnvVars() {
@@ -290,11 +271,6 @@ public class BuildInfo implements Serializable {
     @SuppressWarnings("unused") // For serialization/deserialization
     public void setRetention(BuildRetention retention) {
         this.retention = retention;
-    }
-
-    @SuppressWarnings("unused") // For serialization/deserialization
-    public void setBuildDependencies(List<BuildDependency> buildDependencies) {
-        this.buildDependencies = buildDependencies;
     }
 
     @SuppressWarnings("unused") // For serialization/deserialization
