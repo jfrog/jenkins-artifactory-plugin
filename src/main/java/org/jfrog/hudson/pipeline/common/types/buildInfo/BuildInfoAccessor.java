@@ -49,10 +49,6 @@ public class BuildInfoAccessor {
         return this.buildInfo.getConvertedIssues();
     }
 
-    public List<BuildDependency> getBuildDependencies() {
-        return this.buildInfo.getBuildDependencies();
-    }
-
     public Date getStartDate() {
         return this.buildInfo.getStartDate();
     }

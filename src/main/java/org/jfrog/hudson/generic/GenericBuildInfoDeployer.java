@@ -52,7 +52,6 @@ public class GenericBuildInfoDeployer extends AbstractBuildInfoDeployer {
         this.build = build;
         this.buildInfo = createBuildInfo("Generic", "", BuildType.GENERIC);
         createDeployDetailsAndAddToBuildInfo(deployedArtifacts, publishedDependencies);
-        buildInfo.setBuildDependencies(buildDependencies);
     }
 
     public void deploy() throws IOException {
