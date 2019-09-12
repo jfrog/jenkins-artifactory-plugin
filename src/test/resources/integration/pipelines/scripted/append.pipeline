@@ -1,0 +1,53 @@
+package integration.pipelines.scripted
+
+node {
+    // Move to the scope of the test's git
+    dir("${COLLECT_ISSUES_PATH}") {
+         // Create build info
+        def buildInfo = Artifactory.newBuildInfo()
+        buildInfo.name = "scripted:appendBuildInfo test"
+        buildInfo.number = "3"
+        // Create another buildInfo
+        def buildInfoUpload = Artifactory.newBuildInfo()
+        buildInfoUpload.name = "buildInfo tmp"
+        buildInfoUpload.number = "13"
+
+        stage "Configuration"
+            def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+
+        // Collect issues
+        stage "Collect Issues"
+            issuesCollectionConfig = """{
+                "version": 1,
+                "issues": {
+                    "trackerName": "TESTING",
+                    "regexp": "([a-zA-Z]+-[0-9]*)\\s-\\s(.*)",
+                    "keyGroupIndex": 1,
+                    "summaryGroupIndex": 2,
+                    "trackerUrl": "http://TESTING.com",
+                    "aggregate": "true",
+                    "aggregationStatus": "RELEASE"
+                }
+            }"""
+
+            buildInfo.issues.collect(rtServer, issuesCollectionConfig)
+
+        // Upload with another buildInfo
+        stage "Upload"
+             def uploadSpec = """{
+               "files": [
+                 {
+                   "pattern": "${FILES_DIR}",
+                   "target": "${LOCAL_REPO1}/",
+                   "recursive": "false"
+                 }
+              ]
+             }"""
+             rtServer.upload spec: uploadSpec, buildInfo: buildInfoUpload
+
+        stage "Publish Build Info"
+            buildInfo.append buildInfoUpload
+            rtServer.publishBuildInfo buildInfo
+    }
+
+}
