@@ -9,6 +9,7 @@ import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.build.api.BuildInfoProperties;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -125,5 +126,24 @@ public class Env implements Serializable {
 
     public void setCpsScript(CpsScript cpsScript) {
         this.cpsScript = cpsScript;
+    }
+
+    public Properties convertToProperties() {
+        Properties properties = new Properties();
+        Map<String, String> envVars = getEnvVars();
+        Map<String, String> sysVars = getSysVars();
+        if (envVars != null) {
+            for (Map.Entry<String, String> entry : envVars.entrySet()) {
+                properties.put(BuildInfoProperties.BUILD_INFO_ENVIRONMENT_PREFIX + entry.getKey(), entry.getValue());
+            }
+        }
+
+        if (sysVars != null) {
+            for (Map.Entry<String, String> entry : sysVars.entrySet()) {
+                properties.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return properties;
     }
 }

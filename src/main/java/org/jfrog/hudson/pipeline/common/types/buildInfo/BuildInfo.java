@@ -127,37 +127,34 @@ public class BuildInfo implements Serializable {
 
     @Whitelisted
     public void append(BuildInfo other) {
-        this.modules.addAll(other.modules);
-        this.deployedArtifacts.addAll(other.deployedArtifacts);
         this.deployableArtifacts.addAll(other.deployableArtifacts);
-        this.publishedDependencies.addAll(other.publishedDependencies);
-
-        Env tempEnv = new Env();
-        tempEnv.append(this.env);
-        tempEnv.append(other.env);
-        this.env = tempEnv;
-
-        this.issues.append(other.issues);
+        this.append(other.convertToBuild());
     }
 
     public void append(Build other) {
-        Properties properties = other.getProperties();
-        Env otherEnv = new Env();
+        Build appendedBuild = this.convertToBuild();
+        appendedBuild.append(other);
+
+        this.setModules(appendedBuild.getModules());
+
+        Issues appendedIssues = Issues.convertToPipelineIssues(appendedBuild.getIssues());
+        appendedIssues.setBuildName(this.getIssues().getBuildName());
+        appendedIssues.setCpsScript(this.getIssues().getCpsScript());
+        this.setIssues(appendedIssues);
+
+        Properties properties = appendedBuild.getProperties();
+        Env appendedEnv = new Env();
         if (properties != null) {
             for (String key : properties.stringPropertyNames()) {
                 boolean isEnvVar = StringUtils.startsWith(key, BuildInfoProperties.BUILD_INFO_ENVIRONMENT_PREFIX);
                 if (isEnvVar) {
-                    otherEnv.getEnvVars().put(StringUtils.substringAfter(key, BuildInfoProperties.BUILD_INFO_ENVIRONMENT_PREFIX), properties.getProperty(key));
+                    appendedEnv.getEnvVars().put(StringUtils.substringAfter(key, BuildInfoProperties.BUILD_INFO_ENVIRONMENT_PREFIX), properties.getProperty(key));
                 } else {
-                    otherEnv.getSysVars().put(key, properties.getProperty(key));
+                    appendedEnv.getSysVars().put(key, properties.getProperty(key));
                 }
             }
-            this.env.append(otherEnv);
+            this.setEnv(appendedEnv);
         }
-        if (other.getModules() != null) {
-            other.getModules().forEach(this::addModule);
-        }
-        this.issues.convertAndAppend(other.getIssues());
     }
 
     @Whitelisted
@@ -321,5 +318,16 @@ public class BuildInfo implements Serializable {
 
     public List<Vcs> getVcs() {
         return vcs;
+    }
+
+    private Build convertToBuild() {
+        BuildInfoBuilder builder = new BuildInfoBuilder(name)
+                .number(number)
+                .started(Long.toString(startDate.getTime()))
+                .modules(modules)
+                .issues(getConvertedIssues())
+                .properties(env.convertToProperties());
+
+        return builder.build();
     }
 }
