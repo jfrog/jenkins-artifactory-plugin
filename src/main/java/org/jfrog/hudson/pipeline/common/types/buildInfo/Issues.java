@@ -51,7 +51,7 @@ public class Issues implements Serializable {
     /**
      * Converts Issues of type org.jfrog.build.api.Issues to pipeline Issues
      */
-    private Issues convertToPipelineIssues(org.jfrog.build.api.Issues issuesToConvert) {
+    static Issues convertToPipelineIssues(org.jfrog.build.api.Issues issuesToConvert) {
         if (issuesToConvert == null) {
             return null;
         }
@@ -160,6 +160,10 @@ public class Issues implements Serializable {
 
     public void setBuildName(String buildName) {
         this.buildName = buildName;
+    }
+
+    public CpsScript getCpsScript() {
+        return cpsScript;
     }
 
     public void setCpsScript(CpsScript cpsScript) {
