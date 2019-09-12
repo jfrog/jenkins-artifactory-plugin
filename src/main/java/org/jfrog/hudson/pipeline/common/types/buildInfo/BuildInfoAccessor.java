@@ -4,10 +4,12 @@ import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.Vcs;
+import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryServer;
@@ -33,8 +35,21 @@ public class BuildInfoAccessor {
         this.buildInfo = buildInfo;
     }
 
-    public void appendPublishedDependencies(List<Dependency> resolvedDependencies) {
-        this.buildInfo.appendPublishedDependencies(resolvedDependencies);
+    public void appendPublishedDependencies(List<Dependency> dependencies) {
+        Module defaultModule = new ModuleBuilder()
+                .id(buildInfo.getName())
+                .dependencies(dependencies)
+                .build();
+        Module currentModule = buildInfo.getModules().stream()
+                // Check if the default module already exists.
+                .filter(module -> StringUtils.equals(module.getId(), getBuildName()))
+                .findAny()
+                .orElse(null);
+        if (currentModule != null) {
+            currentModule.append(defaultModule);
+        } else {
+            buildInfo.getModules().add(defaultModule);
+        }
     }
 
     public Map<String, String> getEnvVars() {
@@ -73,7 +88,20 @@ public class BuildInfoAccessor {
     }
 
     public void appendDeployedArtifacts(List<Artifact> artifacts) {
-        this.buildInfo.appendDeployedArtifacts(artifacts);
+        Module defaultModule = new ModuleBuilder()
+                .id(buildInfo.getName())
+                .artifacts(artifacts)
+                .build();
+        Module currentModule = buildInfo.getModules().stream()
+                // Check if the default module already exists.
+                .filter(module -> StringUtils.equals(module.getId(), getBuildName()))
+                .findAny()
+                .orElse(null);
+        if (currentModule != null) {
+            currentModule.append(defaultModule);
+        } else {
+            buildInfo.getModules().add(defaultModule);
+        }
     }
 
     public ArtifactoryBuildInfoClient createArtifactoryClient(ArtifactoryServer server, Run build, TaskListener listener) {
