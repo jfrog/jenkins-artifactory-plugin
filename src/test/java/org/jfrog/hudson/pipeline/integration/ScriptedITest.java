@@ -105,4 +105,9 @@ public class ScriptedITest extends CommonITestsPipeline {
     public void collectIssuesTest() throws Exception {
         super.collectIssuesTest("scripted:collectIssues test");
     }
+
+    @Test
+    public void appendBuildInfoTest() throws Exception {
+        super.appendBuildInfoTest("scripted:appendBuildInfo test");
+    }
 }

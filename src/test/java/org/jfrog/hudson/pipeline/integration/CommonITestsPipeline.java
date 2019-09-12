@@ -442,4 +442,37 @@ public class CommonITestsPipeline extends PipelineTestBase {
             deleteBuild(artifactoryClient, buildName);
         }
     }
+
+    void appendBuildInfoTest(String buildName) throws Exception {
+        File collectIssuesExample = new File(getIntegrationDir().toFile(), "collectIssues-example");
+        File dotGitPath = new File(collectIssuesExample, ".git");
+        // Copy the provided folder and create .git
+        FileUtils.deleteDirectory(dotGitPath);
+        FileUtils.copyDirectory(new File(collectIssuesExample, "buildaddgit_.git_suffix"), dotGitPath);
+
+        Set<String> expectedArtifacts = getTestFilesNamesByLayer(0);
+        String buildNumber = "3";
+        // Clear older build if exists
+        deleteBuild(artifactoryClient, buildName);
+        WorkflowRun build = runPipeline("append");
+        try {
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            // Assert Issues
+            assertNotNull(buildInfo.getIssues());
+            assertNotNull(buildInfo.getIssues().getAffectedIssues());
+            assertEquals(4, buildInfo.getIssues().getAffectedIssues().size());
+            // Assert Vcs
+            assertTrue(CollectionUtils.isNotEmpty(buildInfo.getVcs()));
+            assertEquals("b033a0e508bdb52eee25654c9e12db33ff01b8ff", buildInfo.getVcs().get(0).getRevision());
+            assertEquals("https://github.com/jfrog/jfrog-cli-go.git", buildInfo.getVcs().get(0).getUrl());
+            // Assert artifacts
+            expectedArtifacts.forEach(artifactName ->
+                    assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
+            Module module = getAndAssertModule(buildInfo, "buildInfo tmp");
+            assertModuleArtifacts(module, expectedArtifacts);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+            FileUtils.deleteDirectory(dotGitPath);
+        }
+    }
 }
