@@ -247,7 +247,7 @@ public class GradleReleaseWrapper {
 
         if (!modified && !modulesByName.isEmpty() && releaseVersion) {
             build.setResult(Result.FAILURE);
-            listener.fatalError("Could not find the defined release properties in this build's gradle.properties . Please check the release properties defined in the job configuration.\n");
+            listener.fatalError("Could not modify the defined release properties. The properties are either absent from this build's gradle.properties or already equal in value. Please check the release properties defined in the job configuration.\n");
             throw new Run.RunnerAbortedException();
         }
         return modified;
