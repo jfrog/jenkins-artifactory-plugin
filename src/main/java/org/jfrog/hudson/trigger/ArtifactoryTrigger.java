@@ -8,6 +8,7 @@ import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
+import org.jenkinsci.Symbol;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ItemLastModified;
@@ -123,6 +124,7 @@ public class ArtifactoryTrigger extends Trigger {
         return (DescriptorImpl) super.getDescriptor();
     }
 
+    @Symbol("artifactory")
     @Extension
     public static final class DescriptorImpl extends TriggerDescriptor {
 
