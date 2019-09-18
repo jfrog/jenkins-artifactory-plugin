@@ -13,6 +13,7 @@ import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
 import org.jfrog.hudson.pipeline.common.types.XrayScanResult;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
+import org.jfrog.hudson.XrayScanResultAction;
 
 /**
  * @author Alexei Vainshtein
@@ -22,7 +23,7 @@ public class XrayExecutor implements Executor {
     private XrayScanConfig xrayScanConfig;
     private TaskListener listener;
     private ArtifactoryServer server;
-    private Run build;
+    private final Run build;
     private XrayScanResult xrayScanResult;
 
     public XrayExecutor(XrayScanConfig xrayScanConfig, TaskListener listener, ArtifactoryServer server, Run build) {
@@ -46,6 +47,7 @@ public class XrayExecutor implements Executor {
         xrayScanResult = new XrayScanResult(buildScanResult);
 
         if (xrayScanResult.isFoundVulnerable()) {
+            addXrayResultAction(xrayScanResult.getScanUrl());
             if (xrayScanConfig.getFailBuild()) {
                 throw new XrayScanException(xrayScanResult);
             }
@@ -61,6 +63,13 @@ public class XrayExecutor implements Executor {
 
     public XrayScanResult getXrayScanResult() {
         return xrayScanResult;
+    }
+
+    private void addXrayResultAction(String xrayUrl) {
+        synchronized (build) {
+            XrayScanResultAction action = new XrayScanResultAction(xrayUrl, build);
+            build.addAction(action);
+        }
     }
 
     public static class XrayScanException extends Exception {
