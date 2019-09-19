@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline.integration;
 
 import hudson.EnvVars;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
@@ -70,10 +71,11 @@ public class PipelineTestBase {
     }
 
     @Before
-    public void beforeTest() {
+    public void beforeTest() throws IOException {
         log.info("Running test: " + pipelineType + " / " + testName.getMethodName());
         // Create repositories
         Arrays.stream(TestRepository.values()).forEach(this::createRepo);
+        FileUtils.cleanDirectory(testTemporaryFolder.getRoot().getAbsoluteFile());
     }
 
     @After
