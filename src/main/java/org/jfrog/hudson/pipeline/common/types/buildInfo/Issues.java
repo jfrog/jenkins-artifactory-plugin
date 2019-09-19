@@ -13,6 +13,8 @@ import java.util.Set;
 
 @SuppressWarnings("unused")
 public class Issues implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private transient CpsScript cpsScript;
     private String buildName;
     private String trackerName;
@@ -167,6 +169,8 @@ public class Issues implements Serializable {
     }
 
     public static class Issue implements Serializable {
+        private static final long serialVersionUID = 1L;
+
         private String key;
         private String url;
         private String summary;

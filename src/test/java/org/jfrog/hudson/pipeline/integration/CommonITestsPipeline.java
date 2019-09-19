@@ -413,9 +413,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void collectIssuesTest(String buildName) throws Exception {
         File collectIssuesExample = new File(getIntegrationDir().toFile(), "collectIssues-example");
-        File dotGitPath = new File(collectIssuesExample, ".git");
-        // Copy the provided folder and create .git
-        FileUtils.deleteDirectory(dotGitPath);
+        File dotGitPath = testTemporaryFolder.newFolder(".git");
+        // Copy the provided folder to .git in the tmp folder
         FileUtils.copyDirectory(new File(collectIssuesExample, "buildaddgit_.git_suffix"), dotGitPath);
 
         String buildNumber = "3";
@@ -434,7 +433,6 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertEquals("https://github.com/jfrog/jfrog-cli-go.git", buildInfo.getVcs().get(0).getUrl());
         } finally {
             deleteBuild(artifactoryClient, buildName);
-            FileUtils.deleteDirectory(dotGitPath);
         }
     }
 }
