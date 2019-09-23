@@ -334,7 +334,9 @@ public class DockerUtils implements Serializable {
       if (envVars.containsKey(DefaultDockerClientConfig.DOCKER_HOST)) {
           configBuilder.withDockerHost(envVars.get(DefaultDockerClientConfig.DOCKER_HOST));
       } else {
-          if (!StringUtils.isEmpty(host)) {
+          // If open JDK is used and the host is null
+          // then instead of a null reference, the host is the string "null".
+          if (!StringUtils.isEmpty(host) && !host.equalsIgnoreCase("null")) {
               configBuilder.withDockerHost(host);
           }
       }
