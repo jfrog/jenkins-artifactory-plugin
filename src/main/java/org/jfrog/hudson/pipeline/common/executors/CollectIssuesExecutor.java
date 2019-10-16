@@ -43,12 +43,10 @@ public class CollectIssuesExecutor implements Executor {
     }
 
     public void execute() throws IOException, InterruptedException {
-        // Get all necessary arguments for the command
-        IssuesCollector collector = new IssuesCollector();
         ArtifactoryBuildInfoClientBuilder clientBuilder = getBuildInfoClientBuilder(pipelineServer, build, listener);
 
         // Collect issues
-        org.jfrog.build.api.Issues newIssues = ws.act(new CollectIssuesCallable(collector, new JenkinsBuildInfoLog(listener), config, clientBuilder, buildName));
+        org.jfrog.build.api.Issues newIssues = ws.act(new CollectIssuesCallable(new JenkinsBuildInfoLog(listener), config, clientBuilder, buildName));
 
         // Convert and append Issues
         this.issues.convertAndAppend(newIssues);
@@ -62,15 +60,13 @@ public class CollectIssuesExecutor implements Executor {
     }
 
     public static class CollectIssuesCallable extends MasterToSlaveFileCallable<org.jfrog.build.api.Issues> {
-        private IssuesCollector issuesCollector;
         private Log logger;
         private String config;
         private ArtifactoryBuildInfoClientBuilder clientBuilder;
         private String buildName;
 
-        CollectIssuesCallable(IssuesCollector issuesCollector, Log logger, String config, ArtifactoryBuildInfoClientBuilder clientBuilder,
+        CollectIssuesCallable(Log logger, String config, ArtifactoryBuildInfoClientBuilder clientBuilder,
                               String buildName) {
-            this.issuesCollector = issuesCollector;
             this.logger = logger;
             this.config = config;
             this.clientBuilder = clientBuilder;
@@ -78,6 +74,7 @@ public class CollectIssuesExecutor implements Executor {
         }
 
         public org.jfrog.build.api.Issues invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
+            IssuesCollector issuesCollector = new IssuesCollector();
             return issuesCollector.collectIssues(file, logger, config, clientBuilder, buildName);
         }
     }
