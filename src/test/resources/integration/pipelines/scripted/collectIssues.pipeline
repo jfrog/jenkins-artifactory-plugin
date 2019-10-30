@@ -1,6 +1,6 @@
 package integration.pipelines.scripted
 
-node {
+node("TestSlave") {
     // Move to the scope of the test's git
     dir("${TEST_TEMP_FOLDER}") {
         stage "Configuration"

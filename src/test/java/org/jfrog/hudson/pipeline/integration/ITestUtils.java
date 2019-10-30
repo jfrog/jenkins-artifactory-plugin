@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.integration;
 
 import hudson.FilePath;
+import hudson.model.Slave;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -16,7 +17,6 @@ import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -130,14 +130,14 @@ class ITestUtils {
     /**
      * Return true if the file exists in the workspace under the input directory.
      *
-     * @param jenkins  - Jenkins instance
+     * @param slave    - Jenkins slave
      * @param build    - Jenkins job
      * @param dir      - Directory under workspace
      * @param fileName - File name to search
      * @return true if the file exists in the workspace under the input directory
      */
-    static boolean isExistInWorkspace(JenkinsRule jenkins, WorkflowRun build, String dir, String fileName) throws IOException, InterruptedException {
-        FilePath ws = jenkins.getInstance().getWorkspaceFor(build.getParent());
+    static boolean isExistInWorkspace(Slave slave, WorkflowRun build, String dir, String fileName) throws IOException, InterruptedException {
+        FilePath ws = slave.getWorkspaceFor(build.getParent());
         if (ws == null) {
             throw new IOException("Workspace for " + build.getDisplayName() + " not found");
         }
@@ -271,10 +271,5 @@ class ITestUtils {
 
     private static String encodeBuildName(String buildName) throws UnsupportedEncodingException {
         return URLEncoder.encode(buildName, "UTF-8").replace("+", "%20");
-    }
-
-    static Boolean shouldRunXrayTest() {
-        String xrayDisable = System.getenv("JENKINS_XRAY_TEST_ENABLE");
-        return xrayDisable == null ? true : Boolean.valueOf(xrayDisable);
     }
 }

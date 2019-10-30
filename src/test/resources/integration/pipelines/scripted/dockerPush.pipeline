@@ -1,6 +1,6 @@
 package integration.pipelines.scripted
 
-node {
+node("TestSlave") {
     def domainName = "${env.JENKINS_ARTIFACTORY_DOCKER_DOMAIN}"
     if (!domainName.endsWith("/")) {
         domainName += "/"

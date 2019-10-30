@@ -1,6 +1,6 @@
 package integration.pipelines.declarative
 
-node {
+node("TestSlave") {
     def serverId = "Artifactory-1"
     def buildName = "declarative:upload test"
     def buildNumber = "3"

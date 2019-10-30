@@ -1,24 +1,29 @@
 package org.jfrog.hudson.pipeline.integration;
 
-import hudson.EnvVars;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.BuildImageCmd;
 import com.github.dockerjava.core.command.BuildImageResultCallback;
 import com.google.common.collect.Sets;
+import hudson.EnvVars;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Module;
 import org.jfrog.hudson.pipeline.common.docker.utils.DockerUtils;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.junit.Assert.*;
@@ -41,7 +46,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         WorkflowRun build = runPipeline("downloadByPattern");
         try {
             for (String fileName : expectedDependencies) {
-                assertTrue(isExistInWorkspace(jenkins, build, "downloadByPattern-test", fileName));
+                assertTrue(isExistInWorkspace(slave, build, "downloadByPattern-test", fileName));
             }
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, buildName);
@@ -60,7 +65,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         WorkflowRun build = runPipeline("downloadByAql");
         try {
             for (String fileName : expectedDependencies) {
-                assertTrue(isExistInWorkspace(jenkins, build, "downloadByAql-test", fileName));
+                assertTrue(isExistInWorkspace(slave, build, "downloadByAql-test", fileName));
             }
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, buildName);
@@ -79,9 +84,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
         unexpected.removeAll(expectedDependencies);
         WorkflowRun build = runPipeline("downloadByPatternAndBuild");
         try {
-            assertTrue(isExistInWorkspace(jenkins, build, "downloadByPatternAndBuild-test", "a.in"));
+            assertTrue(isExistInWorkspace(slave, build, "downloadByPatternAndBuild-test", "a.in"));
             for (String fileName : unexpected) {
-                assertFalse(isExistInWorkspace(jenkins, build, "downloadByPatternAndBuild-test", fileName));
+                assertFalse(isExistInWorkspace(slave, build, "downloadByPatternAndBuild-test", fileName));
             }
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, buildName);
@@ -99,10 +104,10 @@ public class CommonITestsPipeline extends PipelineTestBase {
         WorkflowRun build = runPipeline("downloadByBuildOnly");
         try {
             for (String fileName : expectedDependencies) {
-                assertTrue(isExistInWorkspace(jenkins, build, "downloadByBuildOnly-test", fileName));
+                assertTrue(isExistInWorkspace(slave, build, "downloadByBuildOnly-test", fileName));
             }
             for (String fileName : unexpected) {
-                assertFalse(isExistInWorkspace(jenkins, build, "downloadByBuildOnly-test", fileName));
+                assertFalse(isExistInWorkspace(slave, build, "downloadByBuildOnly-test", fileName));
             }
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, buildName);
@@ -135,9 +140,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
         WorkflowRun build = runPipeline("downloadByShaAndBuild");
         try {
             // Only a.in should be in workspace
-            assertTrue(isExistInWorkspace(jenkins, build, "downloadByShaAndBuild-test", "a3"));
+            assertTrue(isExistInWorkspace(slave, build, "downloadByShaAndBuild-test", "a3"));
             for (String fileName : unexpected) {
-                assertFalse(isExistInWorkspace(jenkins, build, "downloadByShaAndBuild-test", fileName));
+                assertFalse(isExistInWorkspace(slave, build, "downloadByShaAndBuild-test", fileName));
             }
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, buildName);
@@ -160,9 +165,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
         WorkflowRun build = runPipeline("downloadByShaAndBuildName");
         try {
             // Only a.in should be in workspace
-            assertTrue(isExistInWorkspace(jenkins, build, "downloadByShaAndBuildName-test", "a4"));
+            assertTrue(isExistInWorkspace(slave, build, "downloadByShaAndBuildName-test", "a4"));
             for (String fileName : unexpected) {
-                assertFalse(isExistInWorkspace(jenkins, build, "downloadByShaAndBuildName-test", fileName));
+                assertFalse(isExistInWorkspace(slave, build, "downloadByShaAndBuildName-test", fileName));
             }
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, buildName);
@@ -198,7 +203,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         WorkflowRun build = runPipeline("promote");
         try {
             for (String fileName : expectedDependencies) {
-                assertTrue(isExistInWorkspace(jenkins, build, "promotion-test", fileName));
+                assertTrue(isExistInWorkspace(slave, build, "promotion-test", fileName));
             }
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, buildName);
@@ -313,9 +318,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
         WorkflowRun build = runPipeline("setProps");
         try {
             // Only a.in is expected to exist in workspace
-            assertTrue("a.in doesn't exist locally", isExistInWorkspace(jenkins, build, "setProps-test", "a.in"));
-            assertFalse("b.in exists locally", isExistInWorkspace(jenkins, build, "setProps-test", "b.in"));
-            assertFalse("c.in exists locally", isExistInWorkspace(jenkins, build, "setProps-test", "c.in"));
+            assertTrue("a.in doesn't exist locally", isExistInWorkspace(slave, build, "setProps-test", "a.in"));
+            assertFalse("b.in exists locally", isExistInWorkspace(slave, build, "setProps-test", "b.in"));
+            assertFalse("c.in exists locally", isExistInWorkspace(slave, build, "setProps-test", "c.in"));
 
             // Make sure all files still exist in artifactory:
             Arrays.asList("a.in", "b.in", "c.in").forEach(artifactName ->
@@ -336,9 +341,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
         WorkflowRun build = runPipeline("deleteProps");
         try {
             // Only b.in, c.in are expected to exist in workspace
-            assertFalse("a.in exists locally", isExistInWorkspace(jenkins, build, "deleteProps-test", "a.in"));
+            assertFalse("a.in exists locally", isExistInWorkspace(slave, build, "deleteProps-test", "a.in"));
             for (String fileName : expectedDependencies) {
-                assertTrue(fileName + "doesn't exists locally", isExistInWorkspace(jenkins, build, "deleteProps-test", fileName));
+                assertTrue(fileName + "doesn't exists locally", isExistInWorkspace(slave, build, "deleteProps-test", fileName));
             }
 
             // Make sure all files exist in artifactory:
@@ -354,6 +359,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void dockerPushTest(String buildName) throws Exception {
+        Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS);
         try {
             // Get image name
             String domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_DOMAIN");
@@ -387,8 +393,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void xrayScanTest(String buildName, boolean failBuild) throws Exception {
+        Assume.assumeTrue("Skipping Xray tests", JENKINS_XRAY_TEST_ENABLE == null || Boolean.parseBoolean(JENKINS_XRAY_TEST_ENABLE));
         String str = String.valueOf(failBuild);
-        xrayScanTest(buildName, "xrayScanFailBuild"+str.substring(0, 1).toUpperCase() + str.substring(1), failBuild);
+        xrayScanTest(buildName, "xrayScanFailBuild" + str.substring(0, 1).toUpperCase() + str.substring(1), failBuild);
     }
 
     private void xrayScanTest(String buildName, String pipelineJobName, boolean failBuild) throws Exception {
@@ -420,7 +427,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         String buildNumber = "3";
         // Clear older build if exists
         deleteBuild(artifactoryClient, buildName);
-        WorkflowRun build = runPipeline("collectIssues");
+        runPipeline("collectIssues");
         try {
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             // Assert Issues

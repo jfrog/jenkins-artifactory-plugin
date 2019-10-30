@@ -4,7 +4,7 @@ import org.apache.commons.io.FileUtils
 
 import java.nio.file.Paths
 
-node {
+node("TestSlave") {
     def serverId = "Artifactory-1"
     def buildName = "declarative:npm test"
     def buildNumber = "3"

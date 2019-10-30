@@ -1,6 +1,6 @@
 package integration.pipelines.declarative
 
-node {
+node("TestSlave") {
     def buildName = "declarative:dockerPush test"
     def buildNumber = "3"
     def host = "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}"
