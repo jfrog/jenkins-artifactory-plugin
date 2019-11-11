@@ -1,6 +1,6 @@
 <j:jelly xmlns:j="jelly:core"
          xmlns:t="/lib/hudson">
     <t:summary icon="${it.iconFileName}">
-        <a href="${it.urlName}" target="_blank">Xray Scan Result</a>
+        <a href="${it.urlName}" target="_blank">Xray Scan Report</a>
     </t:summary>
 </j:jelly>

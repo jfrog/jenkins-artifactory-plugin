@@ -23,14 +23,14 @@ public class XrayScanResultAction implements BuildBadgeAction {
     }
 
     public String getDisplayName() {
-        return "Xray Scan  Result";
+        return "Xray Scan Report";
     }
 
     public String getUrlName() {
         if (StringUtils.isNotEmpty(url)) {
             return url;
         }
-        return "xray_scan_result";
+        return "xray_scan_report";
     }
 
     public void setUrl(String url) {
