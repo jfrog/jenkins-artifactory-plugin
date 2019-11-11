@@ -284,19 +284,29 @@ public class ArtifactoryServer implements Serializable {
         return createArtifactoryClient(userName, password, proxyConfiguration, new NullLog());
     }
 
+    public ArtifactoryBuildInfoClient createArtifactoryClient(String userName, String password, String accessToken,
+                                                              ProxyConfiguration proxyConfiguration) {
+        return createArtifactoryClient(userName, password, accessToken, proxyConfiguration, new NullLog());
+    }
+
     /**
      * This method might run on slaves, this is why we provide it with a proxy from the master config
      */
     public ArtifactoryBuildInfoClient createArtifactoryClient(String userName, String password,
                                                               ProxyConfiguration proxyConfiguration, Log logger) {
-        ArtifactoryBuildInfoClientBuilder clientBuilder = createBuildInfoClientBuilder(userName, password, proxyConfiguration, logger);
+        return createArtifactoryClient(userName, password, StringUtils.EMPTY, proxyConfiguration, new NullLog());
+    }
+
+    public ArtifactoryBuildInfoClient createArtifactoryClient(String userName, String password, String accessToken,
+                                                              ProxyConfiguration proxyConfiguration, Log logger) {
+        ArtifactoryBuildInfoClientBuilder clientBuilder = createBuildInfoClientBuilder(userName, password, accessToken, proxyConfiguration, logger);
         return clientBuilder.build();
     }
 
-    public ArtifactoryBuildInfoClientBuilder createBuildInfoClientBuilder(String userName, String password, ProxyConfiguration proxyConfiguration, Log logger) {
+    public ArtifactoryBuildInfoClientBuilder createBuildInfoClientBuilder(String userName, String password, String accessToken, ProxyConfiguration proxyConfiguration, Log logger) {
         ArtifactoryBuildInfoClientBuilder clientBuilder = new ArtifactoryBuildInfoClientBuilder();
         clientBuilder.setArtifactoryUrl(url).setUsername(userName)
-                .setPassword(password).setLog(logger).setConnectionRetry(getConnectionRetry())
+                .setPassword(password).setAccessToken(accessToken).setLog(logger).setConnectionRetry(getConnectionRetry())
                 .setConnectionTimeout(timeout);
         if (!bypassProxy) {
             clientBuilder.setProxyConfiguration(proxyConfiguration);
@@ -344,7 +354,12 @@ public class ArtifactoryServer implements Serializable {
      */
     public ArtifactoryDependenciesClient createArtifactoryDependenciesClient(String userName, String password,
                                                                              ProxyConfiguration proxyConfiguration, TaskListener listener) {
-        ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(url, userName, password,
+        return createArtifactoryDependenciesClient(userName, password, StringUtils.EMPTY, proxyConfiguration, listener);
+    }
+
+    public ArtifactoryDependenciesClient createArtifactoryDependenciesClient(String userName, String password, String accessToken,
+                                                                             ProxyConfiguration proxyConfiguration, TaskListener listener) {
+        ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(url, userName, password, accessToken,
                 new JenkinsBuildInfoLog(listener));
         client.setConnectionTimeout(timeout);
         setRetryParams(client);

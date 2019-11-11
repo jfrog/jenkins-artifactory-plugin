@@ -17,18 +17,20 @@ public class EditPropertiesCallable extends MasterToSlaveFileCallable<Boolean> {
     private Log log;
     private String username;
     private String password;
+    private String accessToken;
     private String serverUrl;
     private String spec;
     private ProxyConfiguration proxyConfig;
     private EditPropertiesActionType editType;
     private String props;
 
-    public EditPropertiesCallable(Log log, String username, String password, String serverUrl, String spec,
+    public EditPropertiesCallable(Log log, String username, String password, String accessToken, String serverUrl, String spec,
                                   ProxyConfiguration proxyConfig, EditPropertiesActionType editType, String props)
             throws IOException, InterruptedException {
         this.log = log;
         this.username = username;
         this.password = password;
+        this.accessToken = accessToken;
         this.serverUrl = serverUrl;
         this.spec = spec;
         this.proxyConfig = proxyConfig;
@@ -41,7 +43,7 @@ public class EditPropertiesCallable extends MasterToSlaveFileCallable<Boolean> {
             return false;
         }
         SpecsHelper specsHelper = new SpecsHelper(log);
-        ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(serverUrl, username, password, log);
+        ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(serverUrl, username, password, accessToken, log);
         if (proxyConfig != null) {
             client.setProxyConfiguration(proxyConfig);
         }

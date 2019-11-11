@@ -56,7 +56,8 @@ public class CollectIssuesExecutor implements Executor {
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(new ArtifactoryConfigurator(server), server);
         return server.createBuildInfoClientBuilder(preferredDeployer.provideUsername(build.getParent()),
-                preferredDeployer.providePassword(build.getParent()), server.createProxyConfiguration(Jenkins.getInstance().proxy), new JenkinsBuildInfoLog(listener));
+                preferredDeployer.providePassword(build.getParent()), preferredDeployer.provideAccessToken(build.getParent()),
+                server.createProxyConfiguration(Jenkins.getInstance().proxy), new JenkinsBuildInfoLog(listener));
     }
 
     public static class CollectIssuesCallable extends MasterToSlaveFileCallable<org.jfrog.build.api.Issues> {

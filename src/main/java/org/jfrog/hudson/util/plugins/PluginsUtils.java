@@ -5,6 +5,7 @@ import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.*;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.Hudson;
 import hudson.model.Item;
@@ -13,18 +14,20 @@ import hudson.model.queue.Tasks;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
 import org.acegisecurity.Authentication;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.util.Credentials;
+import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+
 
 public class PluginsUtils {
     public static final String MULTIJOB_PLUGIN_ID = "jenkins-multijob-plugin";
@@ -48,6 +51,7 @@ public class PluginsUtils {
                 .withMatching(
                         CredentialsMatchers.anyOf(
                                 CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class),
+                                CredentialsMatchers.instanceOf(StringCredentialsImpl.class),
                                 CredentialsMatchers.instanceOf(StandardCertificateCredentials.class)
                         ),
                         CredentialsProvider.lookupCredentials(StandardCredentials.class,
@@ -57,7 +61,7 @@ public class PluginsUtils {
                 );
     }
 
-    public static Credentials credentialsLookup(String credentialsId, Item item) {
+    public static Credentials usernamePasswordCredentialsLookup(String credentialsId, Item item) {
         UsernamePasswordCredentials usernamePasswordCredentials = CredentialsMatchers.firstOrNull(
                 CredentialsProvider.lookupCredentials(
                         UsernamePasswordCredentials.class,
@@ -74,6 +78,44 @@ public class PluginsUtils {
                     usernamePasswordCredentials.getPassword().getPlainText());
         }
         return Credentials.EMPTY_CREDENTIALS;
+    }
+
+    public static StringCredentialsImpl accessTokenCredentialsLookup(String credentialsId, Item item) {
+        StringCredentialsImpl accessTokenPasswordCredentials = CredentialsMatchers.firstOrNull(
+                CredentialsProvider.lookupCredentials(
+                        StringCredentialsImpl.class,
+                        item,
+                        item instanceof Queue.Task
+                                ? Tasks.getAuthenticationOf((Queue.Task) item)
+                                : ACL.SYSTEM,
+                        Collections.<DomainRequirement>emptyList()),
+                CredentialsMatchers.withId(credentialsId)
+        );
+
+        return accessTokenPasswordCredentials;
+    }
+
+    public static String extractUsernameFromToken(String accessToken) throws IOException {
+        String payload = StringUtils.split(accessToken, '.')[1];
+        byte[] decodedPayload = Base64.getDecoder().decode(payload);
+        String jsonStr = new String(decodedPayload, StandardCharsets.UTF_8);
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        TokenPayload payloadObject = mapper.readValue(jsonStr, TokenPayload.class);
+        int usernameStartIndex = payloadObject.sub.lastIndexOf("/") + 1;
+        return payloadObject.sub.substring(usernameStartIndex);
+    }
+
+    private static class TokenPayload {
+        private String sub;
+
+        public void setSub(String sub) {
+            this.sub = sub;
+        }
+
+        public String getSub() {
+            return sub;
+        }
     }
 
     public static boolean isUseCredentialsPlugin() {

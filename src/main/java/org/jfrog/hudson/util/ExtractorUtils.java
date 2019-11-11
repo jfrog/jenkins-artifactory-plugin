@@ -162,7 +162,7 @@ public class ExtractorUtils {
     }
 
     public static ArtifactoryClientConfiguration getArtifactoryClientConfiguration(Map<String, String> env, Run build,
-                                                                                   BuildInfo pipelineBuildInfo, TaskListener listener, PublisherContext publisherContext, ResolverContext resolverContext) throws UnsupportedEncodingException {
+                                                                                   BuildInfo pipelineBuildInfo, TaskListener listener, PublisherContext publisherContext, ResolverContext resolverContext) throws IOException {
         ArtifactoryClientConfiguration configuration = new ArtifactoryClientConfiguration(new NullLog());
         if (build instanceof AbstractBuild) {
             addBuildRootIfNeeded((AbstractBuild) build, configuration);
@@ -215,7 +215,7 @@ public class ExtractorUtils {
     }
 
     private static void setResolverInfo(ArtifactoryClientConfiguration configuration, Run build,
-                                        ResolverContext context, Map<String, String> env) {
+                                        ResolverContext context, Map<String, String> env) throws java.io.IOException {
         configuration.setTimeout(context.getServer().getTimeout());
         setRetryParams(configuration, context.getServer());
         configuration.resolver.setContextUrl(context.getServerDetails().getArtifactoryUrl());
@@ -225,6 +225,10 @@ public class ExtractorUtils {
         replaceRepositoryInputForValues(configuration, build, inputDownloadReleaseKey, inputDownloadSnapshotKey, env);
         CredentialsConfig preferredResolver = CredentialManager.getPreferredResolver(context.getResolverOverrider(),
                 context.getServer());
+        String accessToken = preferredResolver.provideAccessToken(build.getParent());
+        if (StringUtils.isNotEmpty(accessToken)) {
+            preferredResolver.convertAccessTokenToUsernamePassword(accessToken);
+        }
         if (StringUtils.isNotBlank(preferredResolver.provideUsername(build.getParent()))) {
             configuration.resolver.setUsername(preferredResolver.provideUsername(build.getParent()));
             configuration.resolver.setPassword(preferredResolver.providePassword(build.getParent()));
@@ -256,7 +260,7 @@ public class ExtractorUtils {
      * Set all the parameters relevant for publishing artifacts and build info
      */
     private static void setPublisherInfo(Map<String, String> env, Run build, BuildInfo pipelineBuildInfo, PublisherContext context,
-                                         ArtifactoryClientConfiguration configuration) {
+                                         ArtifactoryClientConfiguration configuration) throws IOException {
         configuration.setActivateRecorder(Boolean.TRUE);
         String buildName;
         String buildNumber;
@@ -323,6 +327,10 @@ public class ExtractorUtils {
         ArtifactoryServer artifactoryServer = context.getArtifactoryServer();
         if (artifactoryServer != null) {
             CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(context.getDeployerOverrider(), artifactoryServer);
+            String accessToken = preferredDeployer.provideAccessToken(build.getParent());
+            if (StringUtils.isNotEmpty(accessToken)) {
+                preferredDeployer.convertAccessTokenToUsernamePassword(accessToken);
+            }
             if (StringUtils.isNotBlank(preferredDeployer.provideUsername(build.getParent()))) {
                 configuration.publisher.setUsername(preferredDeployer.provideUsername(build.getParent()));
                 configuration.publisher.setPassword(preferredDeployer.providePassword(build.getParent()));

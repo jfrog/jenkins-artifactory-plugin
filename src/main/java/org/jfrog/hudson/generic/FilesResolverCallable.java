@@ -21,15 +21,17 @@ public class FilesResolverCallable extends MasterToSlaveFileCallable<List<Depend
     private Log log;
     private String username;
     private String password;
+    private String accessToken;
     private String serverUrl;
     private String downloadSpec;
     private ProxyConfiguration proxyConfig;
 
-    public FilesResolverCallable(Log log, String username, String password, String serverUrl, String downloadSpec,
-                                 ProxyConfiguration proxyConfig) throws IOException, InterruptedException {
+    public FilesResolverCallable(Log log, String username, String password, String accessoken, String serverUrl,
+                                 String downloadSpec, ProxyConfiguration proxyConfig) throws IOException, InterruptedException {
         this.log = log;
         this.username = username;
         this.password = password;
+        this.accessToken = accessoken;
         this.serverUrl = serverUrl;
         this.downloadSpec = downloadSpec;
         this.proxyConfig = proxyConfig;
@@ -40,7 +42,7 @@ public class FilesResolverCallable extends MasterToSlaveFileCallable<List<Depend
             return Lists.newArrayList();
         }
         SpecsHelper specsHelper = new SpecsHelper(log);
-        ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(serverUrl, username, password, log);
+        ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(serverUrl, username, password, accessToken, log);
         if (proxyConfig != null) {
             client.setProxyConfiguration(proxyConfig);
         }

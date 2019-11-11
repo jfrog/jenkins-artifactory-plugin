@@ -75,8 +75,8 @@ public class GenericArtifactsDeployer {
         if (configurator.isUseSpecs()) {
             String spec = SpecUtils.getSpecStringFromSpecConf(configurator.getUploadSpec(), env, workingDir, listener.getLogger());
             artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, spec, artifactoryServer,
-                    credentialsConfig.getCredentials(build.getParent()), propertiesToAdd,
-                    ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
+                    credentialsConfig.getCredentials(build.getParent()), credentialsConfig.provideAccessToken(build.getParent()),
+                    propertiesToAdd, ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
         } else {
             String deployPattern = Util.replaceMacro(configurator.getDeployPattern(), env);
             deployPattern = StringUtils.replace(deployPattern, "\r\n", "\n");
@@ -111,6 +111,7 @@ public class GenericArtifactsDeployer {
         private Multimap<String, String> patternPairs;
         private ArtifactoryServer server;
         private Credentials credentials;
+        private String accessToken;
         private ArrayListMultimap<String, String> buildProperties;
         private ProxyConfiguration proxyConfiguration;
         private PatternType patternType = PatternType.ANT;
@@ -130,23 +131,25 @@ public class GenericArtifactsDeployer {
         }
 
         public FilesDeployerCallable(TaskListener listener, String spec,
-                                     ArtifactoryServer server, Credentials credentials,
+                                     ArtifactoryServer server, Credentials credentials, String accessToken,
                                      ArrayListMultimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration) {
             this.listener = listener;
             this.spec = spec;
             this.server = server;
             this.credentials = credentials;
+            this.accessToken = accessToken;
             this.buildProperties = buildProperties;
             this.proxyConfiguration = proxyConfiguration;
         }
 
         public FilesDeployerCallable(TaskListener listener, Set<DeployDetails> deployableArtifacts,
-                                     ArtifactoryServer server, Credentials credentials,
+                                     ArtifactoryServer server, Credentials credentials, String accessToken,
                                      ProxyConfiguration proxyConfiguration) {
             this.listener = listener;
             this.deployableArtifacts = deployableArtifacts;
             this.server = server;
             this.credentials = credentials;
+            this.accessToken = accessToken;
             this.proxyConfiguration = proxyConfiguration;
         }
 
@@ -156,7 +159,7 @@ public class GenericArtifactsDeployer {
 
             // Create ArtifactoryClientBuilder
             ArtifactoryBuildInfoClientBuilder clientBuilder = server.createBuildInfoClientBuilder(credentials.getUsername(),
-                    credentials.getPassword(), proxyConfiguration, log);
+                    credentials.getPassword(), accessToken, proxyConfiguration, log);
 
             if (StringUtils.isNotEmpty(spec)) {
                 // Option 1. Upload - Use file specs.

@@ -7,6 +7,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Module;
+import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.docker.DockerImage;
@@ -53,8 +54,13 @@ public class DockerExecutor implements Executor {
     public void execute() throws Exception {
         JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
 
-        String username = pipelineServer.createCredentialsConfig().provideUsername(build.getParent());
-        String password = pipelineServer.createCredentialsConfig().providePassword(build.getParent());
+        CredentialsConfig credentialsConfig = pipelineServer.createCredentialsConfig();
+        String accessToken = credentialsConfig.provideAccessToken(build.getParent());
+        if (StringUtils.isNotEmpty(accessToken)) {
+            credentialsConfig.convertAccessTokenToUsernamePassword(accessToken);
+        }
+        String username = credentialsConfig.provideUsername(build.getParent());
+        String password = credentialsConfig.providePassword(build.getParent());
 
         String imageId = DockerAgentUtils.getImageIdFromAgent(launcher, imageTag, host, envVars);
         DockerAgentUtils.pushImage(launcher, logger, imageTag, username, password, host, envVars);

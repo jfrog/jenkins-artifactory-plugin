@@ -107,7 +107,8 @@ public class BuildInfoAccessor {
     public ArtifactoryBuildInfoClient createArtifactoryClient(ArtifactoryServer server, Run build, TaskListener listener) {
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(new ArtifactoryConfigurator(server), server);
         return server.createArtifactoryClient(preferredDeployer.provideUsername(build.getParent()),
-                preferredDeployer.providePassword(build.getParent()), server.createProxyConfiguration(Jenkins.getInstance().proxy), new JenkinsBuildInfoLog(listener));
+                preferredDeployer.providePassword(build.getParent()), preferredDeployer.provideAccessToken(build.getParent()),
+                server.createProxyConfiguration(Jenkins.getInstance().proxy), new JenkinsBuildInfoLog(listener));
     }
 
     public BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryServer server, ArtifactoryBuildInfoClient client)

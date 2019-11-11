@@ -134,12 +134,12 @@ public class DockerImage implements Serializable {
         try {
             dependenciesClient = server.createArtifactoryDependenciesClient(
                     preferredResolver.provideUsername(build.getParent()), preferredResolver.providePassword(build.getParent()),
-                    server.createProxyConfiguration(Jenkins.getInstance().proxy), listener);
+                    preferredResolver.provideAccessToken(build.getParent()), server.createProxyConfiguration(Jenkins.getInstance().proxy), listener);
 
             CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(config, server);
             propertyChangeClient = server.createArtifactoryClient(
                     preferredDeployer.provideUsername(build.getParent()), preferredDeployer.providePassword(build.getParent()),
-                    server.createProxyConfiguration(Jenkins.getInstance().proxy));
+                    preferredDeployer.provideAccessToken(build.getParent()), server.createProxyConfiguration(Jenkins.getInstance().proxy));
 
             Module buildInfoModule = new Module();
             buildInfoModule.setId(imageTag.substring(imageTag.indexOf("/") + 1));

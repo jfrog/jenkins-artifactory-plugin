@@ -290,8 +290,13 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         ArtifactoryServer resolverServer = getArtifactoryResolverServer();
         CredentialsConfig preferredResolver = CredentialManager.getPreferredResolver(ArtifactoryGenericConfigurator.this,
                 resolverServer);
-        String username = preferredResolver.provideUsername(build.getProject());
-        String password = preferredResolver.providePassword(build.getProject());
+        String username = StringUtils.EMPTY;
+        String password = StringUtils.EMPTY;
+        String accessToken = preferredResolver.provideAccessToken(build.getProject());
+        if (StringUtils.isEmpty(accessToken)) {
+            username = preferredResolver.provideUsername(build.getProject());
+            password = preferredResolver.providePassword(build.getProject());
+        }
 
         ProxyConfiguration proxyConfiguration = null;
         hudson.ProxyConfiguration proxy = Jenkins.getInstance().proxy;
@@ -306,7 +311,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                         build.getExecutor().getCurrentWorkspace(), listener.getLogger());
                 FilePath workspace = build.getExecutor().getCurrentWorkspace();
                 publishedDependencies = workspace.act(new FilesResolverCallable(
-                        new JenkinsBuildInfoLog(listener), username, password, resolverServer.getUrl(), spec, proxyConfiguration));
+                        new JenkinsBuildInfoLog(listener), username, password, accessToken, resolverServer.getUrl(), spec, proxyConfiguration));
             } else {
                 dependenciesClient = resolverServer.createArtifactoryDependenciesClient(username, password, proxyConfiguration, listener);
                 GenericArtifactsResolver artifactsResolver = new GenericArtifactsResolver(build, listener, dependenciesClient);

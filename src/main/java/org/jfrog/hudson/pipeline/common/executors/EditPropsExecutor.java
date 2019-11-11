@@ -40,6 +40,7 @@ public class EditPropsExecutor implements Executor {
         Boolean success = ws.act(new EditPropertiesCallable(new JenkinsBuildInfoLog(listener),
             preferredDeployer.provideUsername(build.getParent()),
             preferredDeployer.providePassword(build.getParent()),
+                preferredDeployer.provideAccessToken(build.getParent()),
             server.getUrl(), spec, Utils.getProxyConfiguration(server), editType, props));
 
         if (failNoOp && !success) {
