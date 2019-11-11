@@ -51,6 +51,6 @@ public class GenericDownloadExecutor implements Executor {
         if (failNoOp && resolvedDependencies.isEmpty()) {
             throw new RuntimeException("Fail-no-op: No files were affected in the download process.");
         }
-        new BuildInfoAccessor(this.buildInfo).appendPublishedDependencies(resolvedDependencies);
+        new BuildInfoAccessor(this.buildInfo).appendDependencies(resolvedDependencies);
     }
 }

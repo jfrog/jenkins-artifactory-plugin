@@ -35,7 +35,7 @@ public class BuildInfoAccessor {
         this.buildInfo = buildInfo;
     }
 
-    public void appendPublishedDependencies(List<Dependency> dependencies) {
+    public void appendDependencies(List<Dependency> dependencies) {
         Module defaultModule = new ModuleBuilder()
                 .id(buildInfo.getName())
                 .dependencies(dependencies)
@@ -87,7 +87,7 @@ public class BuildInfoAccessor {
         }
     }
 
-    public void appendDeployedArtifacts(List<Artifact> artifacts) {
+    public void appendArtifacts(List<Artifact> artifacts) {
         Module defaultModule = new ModuleBuilder()
                 .id(buildInfo.getName())
                 .artifacts(artifacts)

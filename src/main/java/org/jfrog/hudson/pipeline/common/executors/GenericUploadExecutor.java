@@ -57,6 +57,6 @@ public class GenericUploadExecutor implements Executor {
         if (failNoOp && deployedArtifacts.isEmpty()) {
             throw new RuntimeException("Fail-no-op: No files were affected in the upload process.");
         }
-        new BuildInfoAccessor(buildInfo).appendDeployedArtifacts(deployedArtifacts);
+        new BuildInfoAccessor(buildInfo).appendArtifacts(deployedArtifacts);
     }
 }

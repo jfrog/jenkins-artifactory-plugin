@@ -137,7 +137,7 @@ public class BuildInfo implements Serializable {
 
         this.setModules(appendedBuild.getModules());
 
-        Issues appendedIssues = Issues.convertToPipelineIssues(appendedBuild.getIssues());
+        Issues appendedIssues = Issues.toPipelineIssues(appendedBuild.getIssues());
         appendedIssues.setBuildName(this.getIssues().getBuildName());
         appendedIssues.setCpsScript(this.getIssues().getCpsScript());
         this.setIssues(appendedIssues);
@@ -326,7 +326,7 @@ public class BuildInfo implements Serializable {
                 .started(Long.toString(startDate.getTime()))
                 .modules(modules)
                 .issues(getConvertedIssues())
-                .properties(env.convertToProperties());
+                .properties(env.toProperties());
 
         return builder.build();
     }

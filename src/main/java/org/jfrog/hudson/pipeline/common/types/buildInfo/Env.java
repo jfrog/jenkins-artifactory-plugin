@@ -128,7 +128,7 @@ public class Env implements Serializable {
         this.cpsScript = cpsScript;
     }
 
-    public Properties convertToProperties() {
+    public Properties toProperties() {
         Properties properties = new Properties();
         Map<String, String> envVars = getEnvVars();
         Map<String, String> sysVars = getSysVars();
