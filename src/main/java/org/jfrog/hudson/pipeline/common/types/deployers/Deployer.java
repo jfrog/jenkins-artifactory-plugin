@@ -187,22 +187,16 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         String agentName = Utils.getAgentName(ws);
         if (buildInfo.getAgentName().equals(agentName)) {
             org.jfrog.hudson.ArtifactoryServer artifactoryServer = Utils.prepareArtifactoryServer(null, server);
-            CredentialsConfig credentialsConfig = getDeployerCredentialsConfig();
-            String accessToken = credentialsConfig.provideAccessToken(build.getParent());
-            Credentials credentials = Credentials.EMPTY_CREDENTIALS;
-            if (StringUtils.isEmpty(accessToken)) {
-                credentials = credentialsConfig.getCredentials(build.getParent());
-                // Credentials.EMPTY_CREDENTIALS can only be returned when credentialsId is used.
-                if (credentials == Credentials.EMPTY_CREDENTIALS) {
-                    throw new RuntimeException(String.format(
-                            "No matching credentials was found in Jenkins for the supplied credentialsId: '%s' ",
-                            getDeployerCredentialsConfig().getCredentialsId()));
-                }
+            Credentials credentials = getDeployerCredentialsConfig().provideCredentials(build.getParent());
+            if (credentials == Credentials.EMPTY_CREDENTIALS) {
+                throw new RuntimeException(String.format(
+                        "No matching credentials was found in Jenkins for the supplied credentialsId: '%s' ",
+                        getDeployerCredentialsConfig().getCredentialsId()));
             }
             org.jfrog.build.client.ProxyConfiguration proxy = RepositoriesUtils.createProxyConfiguration(Jenkins.getInstance().proxy);
             Set<DeployDetails> deploySet = ws.act(new DeployDetailsCallable(buildInfo.getDeployableArtifacts(), listener, this));
             if (deploySet != null && deploySet.size() > 0) {
-                ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, deploySet, artifactoryServer, credentials, accessToken, proxy));
+                ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, deploySet, artifactoryServer, credentials, proxy));
             } else if (deploySet == null) {
                 throw new RuntimeException("Deployment failed");
             }

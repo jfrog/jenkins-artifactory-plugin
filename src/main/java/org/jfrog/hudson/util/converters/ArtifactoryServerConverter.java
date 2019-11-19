@@ -50,13 +50,15 @@ public class ArtifactoryServerConverter extends XStream2.PassthruConverter<Artif
         Class<? extends ArtifactoryServer> overriderClass = server.getClass();
         Field deployerCredentialsField = overriderClass.getDeclaredField("deployerCredentials");
         deployerCredentialsField.setAccessible(true);
-        Object deployerCredentials = deployerCredentialsField.get(server);
+        Object deployerCredentialsObj = deployerCredentialsField.get(server);
 
         Field deployerCredentialsConfigField = overriderClass.getDeclaredField("deployerCredentialsConfig");
         deployerCredentialsConfigField.setAccessible(true);
 
-        if (deployerCredentials != null) {
-            deployerCredentialsConfigField.set(server, new CredentialsConfig((Credentials) deployerCredentials, StringUtils.EMPTY, true));
+        if (deployerCredentialsObj != null) {
+            Credentials deployerCredentials = (Credentials) deployerCredentialsObj;
+            deployerCredentialsConfigField.set(server, new CredentialsConfig(deployerCredentials.getUsername(),
+                    deployerCredentials.getPassword(), StringUtils.EMPTY, true));
         } else {
             if (deployerCredentialsConfigField.get(server) == null) {
                 deployerCredentialsConfigField.set(server, CredentialsConfig.EMPTY_CREDENTIALS_CONFIG);
@@ -71,10 +73,11 @@ public class ArtifactoryServerConverter extends XStream2.PassthruConverter<Artif
         Field resolverCredentialsConfig = overriderClass.getDeclaredField("resolverCredentialsConfig");
         resolverCredentialsConfig.setAccessible(true);
         resolverCredentialsField.setAccessible(true);
-        Object resolverCredentials = resolverCredentialsField.get(server);
+        Object resolverCredentialsObj = resolverCredentialsField.get(server);
 
-        if (resolverCredentials != null) {
-            resolverCredentialsConfig.set(server, new CredentialsConfig((Credentials) resolverCredentials, StringUtils.EMPTY, true));
+        if (resolverCredentialsObj != null) {
+            Credentials resolverCredentials = (Credentials) resolverCredentialsObj;
+            resolverCredentialsConfig.set(server, new CredentialsConfig(resolverCredentials.getUsername(), resolverCredentials.getPassword(), StringUtils.EMPTY, true));
         } else {
             if (resolverCredentialsConfig.get(server) == null) {
                 resolverCredentialsConfig.set(server, CredentialsConfig.EMPTY_CREDENTIALS_CONFIG);

@@ -95,29 +95,6 @@ public class PluginsUtils {
         return accessTokenPasswordCredentials;
     }
 
-    public static String extractUsernameFromToken(String accessToken) throws IOException {
-        String payload = StringUtils.split(accessToken, '.')[1];
-        byte[] decodedPayload = Base64.getDecoder().decode(payload);
-        String jsonStr = new String(decodedPayload, StandardCharsets.UTF_8);
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        TokenPayload payloadObject = mapper.readValue(jsonStr, TokenPayload.class);
-        int usernameStartIndex = payloadObject.sub.lastIndexOf("/") + 1;
-        return payloadObject.sub.substring(usernameStartIndex);
-    }
-
-    private static class TokenPayload {
-        private String sub;
-
-        public void setSub(String sub) {
-            this.sub = sub;
-        }
-
-        public String getSub() {
-            return sub;
-        }
-    }
-
     public static boolean isUseCredentialsPlugin() {
         return getDescriptor().getUseCredentialsPlugin();
     }

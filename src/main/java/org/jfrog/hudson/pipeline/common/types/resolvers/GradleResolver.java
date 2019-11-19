@@ -39,7 +39,7 @@ public class GradleResolver extends Resolver {
             CredentialsConfig resolverCredentials = CredentialManager.getPreferredResolver(
                     this, getArtifactoryServer());
             resolverContext = new ResolverContext(getArtifactoryServer(), getResolverDetails(),
-                    resolverCredentials.getCredentials(build.getParent()), this);
+                    resolverCredentials.provideCredentials(build.getParent()), this);
         }
         return resolverContext;
     }

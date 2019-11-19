@@ -38,9 +38,7 @@ public class EditPropsExecutor implements Executor {
     public void execute() throws IOException, InterruptedException {
         CredentialsConfig preferredDeployer = server.getDeployerCredentialsConfig();
         Boolean success = ws.act(new EditPropertiesCallable(new JenkinsBuildInfoLog(listener),
-            preferredDeployer.provideUsername(build.getParent()),
-            preferredDeployer.providePassword(build.getParent()),
-                preferredDeployer.provideAccessToken(build.getParent()),
+                preferredDeployer.provideCredentials(build.getParent()),
             server.getUrl(), spec, Utils.getProxyConfiguration(server), editType, props));
 
         if (failNoOp && !success) {

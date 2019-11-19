@@ -41,7 +41,7 @@ public class DistributionExecutor implements Executor {
     public void execute() throws IOException {
         ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(server);
         CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, server);
-        ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideUsername(build.getParent()), deployerConfig.providePassword(build.getParent()),
+        ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
                 ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy));
 
         DistributionBuilder distributionBuilder = new DistributionBuilder()

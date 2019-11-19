@@ -338,8 +338,8 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
         ArtifactoryServer server = getArtifactoryServer();
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(this, server);
-        ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideUsername(((MavenModuleSetBuild) build).getProject()),
-                preferredDeployer.providePassword(((MavenModuleSetBuild) build).getProject()), server.createProxyConfiguration(Jenkins.getInstance().proxy));
+        ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideCredentials(((MavenModuleSetBuild) build).getProject()),
+                server.createProxyConfiguration(Jenkins.getInstance().proxy));
         server.setLog(listener, client);
         try {
             verifySupportedArtifactoryVersion(client);
@@ -463,7 +463,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
                 }
 
                 public Credentials getOverridingDeployerCredentials() {
-                    return credentialsConfig.getCredentials(item);
+                    return credentialsConfig.provideCredentials(item);
                 }
 
                 public CredentialsConfig getDeployerCredentialsConfig() {

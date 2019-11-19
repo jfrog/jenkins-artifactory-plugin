@@ -55,8 +55,7 @@ public class ArtifactoryTrigger extends Trigger {
         String[] paths = this.paths.split(";");
         for (String path : paths) {
             try (ArtifactoryBuildInfoClient client = server.createArtifactoryClient(
-                    server.getDeployerCredentialsConfig().provideUsername(job),
-                    server.getDeployerCredentialsConfig().providePassword(job),
+                    server.getDeployerCredentialsConfig().provideCredentials(job),
                     server.createProxyConfiguration(Jenkins.getInstance().proxy),
                     new NullLog())) {
                 ItemLastModified itemLastModified = client.getItemLastModified(StringUtils.trimToEmpty(path));

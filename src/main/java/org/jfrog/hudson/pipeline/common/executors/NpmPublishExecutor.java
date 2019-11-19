@@ -18,6 +18,7 @@ import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.deployers.NpmDeployer;
 import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.NpmBuild;
+import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import java.io.IOException;
@@ -70,12 +71,10 @@ public class NpmPublishExecutor implements Executor {
     private ArtifactoryBuildInfoClientBuilder createArtifactoryClientBuilder(Deployer deployer) throws IOException {
         ArtifactoryServer server = deployer.getArtifactoryServer();
         CredentialsConfig preferredDeployer = server.getDeployerCredentialsConfig();
-        String accessToken = preferredDeployer.provideAccessToken(build.getParent());
-        if (StringUtils.isNotEmpty(accessToken)) {
-            preferredDeployer.convertAccessTokenToUsernamePassword(accessToken);
+        Credentials deployerCredentials = preferredDeployer.provideCredentials(build.getParent());
+        if (StringUtils.isNotEmpty(deployerCredentials.getAccessToken())) {
+            deployerCredentials = deployerCredentials.convertAccessTokenToUsernamePassword();
         }
-        return server.createBuildInfoClientBuilder(preferredDeployer.provideUsername(build.getParent()),
-                preferredDeployer.providePassword(build.getParent()),
-                ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy), logger);
+        return server.createBuildInfoClientBuilder(deployerCredentials, ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy), logger);
     }
 }

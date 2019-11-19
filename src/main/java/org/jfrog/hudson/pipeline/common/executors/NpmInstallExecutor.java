@@ -16,6 +16,7 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.NpmBuild;
 import org.jfrog.hudson.pipeline.common.types.resolvers.NpmResolver;
+import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import java.io.IOException;
@@ -68,12 +69,10 @@ public class NpmInstallExecutor implements Executor {
     private ArtifactoryDependenciesClientBuilder createArtifactoryClientBuilder(NpmResolver resolver) throws IOException {
         ArtifactoryServer server = resolver.getArtifactoryServer();
         CredentialsConfig preferredResolver = server.getResolvingCredentialsConfig();
-        String accessToken = preferredResolver.provideAccessToken(build.getParent());
-        if (StringUtils.isNotEmpty(accessToken)) {
-            preferredResolver.convertAccessTokenToUsernamePassword(accessToken);
+        Credentials resolverCredentials = preferredResolver.provideCredentials(build.getParent());
+        if (StringUtils.isNotEmpty(resolverCredentials.getAccessToken())) {
+            resolverCredentials = resolverCredentials.convertAccessTokenToUsernamePassword();
         }
-        return server.createDependenciesClientBuilder(preferredResolver.provideUsername(build.getParent()),
-                preferredResolver.providePassword(build.getParent()),
-                ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy), logger);
+        return server.createDependenciesClientBuilder(resolverCredentials, ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy), logger);
     }
 }

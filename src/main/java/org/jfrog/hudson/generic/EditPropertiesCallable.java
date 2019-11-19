@@ -7,6 +7,7 @@ import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
+import org.jfrog.hudson.util.Credentials;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,13 +25,13 @@ public class EditPropertiesCallable extends MasterToSlaveFileCallable<Boolean> {
     private EditPropertiesActionType editType;
     private String props;
 
-    public EditPropertiesCallable(Log log, String username, String password, String accessToken, String serverUrl, String spec,
+    public EditPropertiesCallable(Log log, Credentials credentials, String serverUrl, String spec,
                                   ProxyConfiguration proxyConfig, EditPropertiesActionType editType, String props)
             throws IOException, InterruptedException {
         this.log = log;
-        this.username = username;
-        this.password = password;
-        this.accessToken = accessToken;
+        this.username = credentials.getUsername();
+        this.password = credentials.getPassword();
+        this.accessToken = credentials.getAccessToken();
         this.serverUrl = serverUrl;
         this.spec = spec;
         this.proxyConfig = proxyConfig;

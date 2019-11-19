@@ -16,6 +16,7 @@ import org.jfrog.hudson.pipeline.common.docker.utils.DockerUtils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
+import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import java.util.Properties;
@@ -55,15 +56,13 @@ public class DockerExecutor implements Executor {
         JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
 
         CredentialsConfig credentialsConfig = pipelineServer.createCredentialsConfig();
-        String accessToken = credentialsConfig.provideAccessToken(build.getParent());
-        if (StringUtils.isNotEmpty(accessToken)) {
-            credentialsConfig.convertAccessTokenToUsernamePassword(accessToken);
+        Credentials credentials = credentialsConfig.provideCredentials(build.getParent());
+        if (StringUtils.isNotEmpty(credentials.getAccessToken())) {
+            credentials = credentials.convertAccessTokenToUsernamePassword();
         }
-        String username = credentialsConfig.provideUsername(build.getParent());
-        String password = credentialsConfig.providePassword(build.getParent());
 
         String imageId = DockerAgentUtils.getImageIdFromAgent(launcher, imageTag, host, envVars);
-        DockerAgentUtils.pushImage(launcher, logger, imageTag, username, password, host, envVars);
+        DockerAgentUtils.pushImage(launcher, logger, imageTag, credentials, host, envVars);
         DockerImage image = new DockerImage(imageId, imageTag, targetRepo, buildInfo.hashCode(), properties);
 
         String parentId = DockerAgentUtils.getParentIdFromAgent(launcher, imageId, host, envVars);

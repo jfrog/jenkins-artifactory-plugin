@@ -64,7 +64,7 @@ public class MavenGradleEnvExtractor implements Executor {
                 CredentialsConfig resolverCredentials = CredentialManager.getPreferredResolver(resolver,
                         resolver.getArtifactoryServer());
                 resolverContext = new ResolverContext(resolver.getArtifactoryServer(), resolver.getResolverDetails(),
-                        resolverCredentials.getCredentials(build.getParent()), resolver);
+                        resolverCredentials.provideCredentials(build.getParent()), resolver);
             }
 
             ArtifactoryClientConfiguration configuration = ExtractorUtils.getArtifactoryClientConfiguration(

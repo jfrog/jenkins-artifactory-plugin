@@ -7,11 +7,11 @@ import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.client.artifactoryXrayResponse.ArtifactoryXrayResponse;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryXrayClient;
-import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
 import org.jfrog.hudson.pipeline.common.types.XrayScanResult;
+import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.XrayScanResultAction;
 
@@ -36,9 +36,9 @@ public class XrayExecutor implements Executor {
     @Override
     public void execute() throws Exception {
         Log log = new JenkinsBuildInfoLog(listener);
-        CredentialsConfig credentialsConfig = server.createCredentialsConfig();
-        ArtifactoryXrayClient client = new ArtifactoryXrayClient(server.getUrl(), credentialsConfig.provideUsername(build.getParent()),
-                credentialsConfig.providePassword(build.getParent()), log);
+        Credentials credentials = server.createCredentialsConfig().provideCredentials(build.getParent());
+        ArtifactoryXrayClient client = new ArtifactoryXrayClient(server.getUrl(), credentials.getUsername(),
+                credentials.getPassword(), log);
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(Utils.prepareArtifactoryServer(null, server));
         if (proxyConfiguration != null) {
             client.setProxyConfiguration(proxyConfiguration);

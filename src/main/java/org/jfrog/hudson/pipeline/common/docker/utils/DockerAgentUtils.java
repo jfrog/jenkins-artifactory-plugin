@@ -9,6 +9,7 @@ import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.pipeline.common.docker.DockerImage;
+import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import java.io.IOException;
@@ -179,7 +180,7 @@ public class DockerAgentUtils implements Serializable {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static boolean pushImage(Launcher launcher, final JenkinsBuildInfoLog log, final String imageTag, final String username, final String password, final String host, final EnvVars envVars)
+    public static boolean pushImage(Launcher launcher, final JenkinsBuildInfoLog log, final String imageTag, final Credentials credentials, final String host, final EnvVars envVars)
             throws IOException, InterruptedException {
 
         return launcher.getChannel().call(new  MasterToSlaveCallable<Boolean, IOException>() {
@@ -190,7 +191,7 @@ public class DockerAgentUtils implements Serializable {
                 }
 
                 log.info(message);
-                DockerUtils.pushImage(imageTag, username, password, host, envVars);
+                DockerUtils.pushImage(imageTag, credentials.getUsername(), credentials.getPassword(), host, envVars);
                 return true;
             }
         });
@@ -209,12 +210,12 @@ public class DockerAgentUtils implements Serializable {
      * @throws IOException
      * @throws InterruptedException
      */
-    public static boolean pullImage(Launcher launcher, final String imageTag, final String username, final String password, final String host, final EnvVars envVars)
+    public static boolean pullImage(Launcher launcher, final String imageTag, Credentials credentials, final String host, final EnvVars envVars)
             throws IOException, InterruptedException {
 
         return launcher.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
             public Boolean call() throws IOException {
-                DockerUtils.pullImage(imageTag, username, password, host, envVars);
+                DockerUtils.pullImage(imageTag, credentials.getUsername(), credentials.getPassword(), host, envVars);
                 return true;
             }
         });

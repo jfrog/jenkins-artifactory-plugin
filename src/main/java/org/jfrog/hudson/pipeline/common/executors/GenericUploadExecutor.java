@@ -46,15 +46,13 @@ public class GenericUploadExecutor implements Executor {
     }
 
     public void execute() throws IOException, InterruptedException {
-        String accessToken = server.getDeployerCredentialsConfig().provideAccessToken(build.getParent());
-        Credentials credentials = new Credentials(server.getDeployerCredentialsConfig().provideUsername(build.getParent()),
-                server.getDeployerCredentialsConfig().providePassword(build.getParent()));
+        Credentials credentials = server.getDeployerCredentialsConfig().provideCredentials(build.getParent());
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(server);
 
         new BuildInfoAccessor(buildInfo).appendVcs(Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
 
         List<Artifact> deployedArtifacts = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
-                server, credentials, accessToken, Utils.getPropertiesMap(buildInfo, build, context), proxyConfiguration));
+                server, credentials, Utils.getPropertiesMap(buildInfo, build, context), proxyConfiguration));
         if (failNoOp && deployedArtifacts.isEmpty()) {
             throw new RuntimeException("Fail-no-op: No files were affected in the upload process.");
         }

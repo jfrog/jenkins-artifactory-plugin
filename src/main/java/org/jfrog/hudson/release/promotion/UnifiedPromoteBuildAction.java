@@ -386,7 +386,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                 long started = System.currentTimeMillis();
                 listener.getLogger().println("Promoting build ....");
 
-                client = artifactoryServer.createArtifactoryClient(deployerConfig.provideUsername(build.getParent()), deployerConfig.providePassword(build.getParent()),
+                client = artifactoryServer.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
                         artifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy));
 
                 if ((promotionPlugin != null) &&

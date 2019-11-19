@@ -63,11 +63,12 @@ public abstract class RepositoriesUtils {
             throws IOException {
         List<VirtualRepository> virtualRepositories;
         CredentialsConfig preferredResolver = CredentialManager.getPreferredResolver(credentialsConfig, artifactoryServer);
+        Credentials resolverCredentials = preferredResolver.provideCredentials(item);
 
         ArtifactoryBuildInfoClient client;
-        if (StringUtils.isNotBlank(preferredResolver.provideUsername(item))) {
-            client = new ArtifactoryBuildInfoClient(url, preferredResolver.provideUsername(item),
-                    preferredResolver.providePassword(item), new NullLog());
+        if (StringUtils.isNotBlank(resolverCredentials.getUsername()) || StringUtils.isNotBlank(resolverCredentials.getAccessToken())) {
+            client = new ArtifactoryBuildInfoClient(url, resolverCredentials.getUsername(), resolverCredentials.getPassword(),
+                    resolverCredentials.getAccessToken(), new NullLog());
         } else {
             client = new ArtifactoryBuildInfoClient(url, new NullLog());
         }
@@ -90,11 +91,12 @@ public abstract class RepositoriesUtils {
                                                     ArtifactoryServer artifactoryServer, Item item) throws IOException {
         List<String> localRepository;
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(credentialsConfig, artifactoryServer);
+        Credentials deployerCredentials = preferredDeployer.provideCredentials(item);
 
         ArtifactoryBuildInfoClient client;
-        if (StringUtils.isNotBlank(preferredDeployer.provideUsername(item))) {
-            client = new ArtifactoryBuildInfoClient(url, preferredDeployer.provideUsername(item),
-                    preferredDeployer.providePassword(item), new NullLog());
+        if (StringUtils.isNotBlank(deployerCredentials.getUsername()) || StringUtils.isNotBlank(deployerCredentials.getAccessToken())) {
+            client = new ArtifactoryBuildInfoClient(url, deployerCredentials.getUsername(), deployerCredentials.getPassword(),
+                    deployerCredentials.getAccessToken(), new NullLog());
         } else {
             client = new ArtifactoryBuildInfoClient(url, new NullLog());
         }

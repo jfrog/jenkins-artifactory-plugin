@@ -83,15 +83,16 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
         if (overrider instanceof DeployerOverrider) {
             Field overridingDeployerCredentialsField = overriderClass.getDeclaredField("overridingDeployerCredentials");
             overridingDeployerCredentialsField.setAccessible(true);
-            Object overridingDeployerCredentials = overridingDeployerCredentialsField.get(overrider);
+            Object overridingDeployerCredentialsObj = overridingDeployerCredentialsField.get(overrider);
 
             Field deployerCredentialsConfigField = overriderClass.getDeclaredField("deployerCredentialsConfig");
             deployerCredentialsConfigField.setAccessible(true);
 
-            if (overridingDeployerCredentials != null) {
+            if (overridingDeployerCredentialsObj != null) {
+                Credentials overridingDeployerCredentials = (Credentials) overridingDeployerCredentialsObj;
                 boolean shouldOverride = ((DeployerOverrider)overrider).getOverridingDeployerCredentials() != null;
-                deployerCredentialsConfigField.set(overrider, new CredentialsConfig((Credentials) overridingDeployerCredentials,
-                        StringUtils.EMPTY, shouldOverride));
+                deployerCredentialsConfigField.set(overrider, new CredentialsConfig(overridingDeployerCredentials.getUsername(),
+                        overridingDeployerCredentials.getPassword(), StringUtils.EMPTY, shouldOverride));
             } else {
                 if (deployerCredentialsConfigField.get(overrider) == null) {
                     deployerCredentialsConfigField.set(overrider, CredentialsConfig.EMPTY_CREDENTIALS_CONFIG);
@@ -105,13 +106,15 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
         if (overrider instanceof ResolverOverrider) {
             Field resolverCredentialsField = overriderClass.getDeclaredField("overridingResolverCredentials");
             resolverCredentialsField.setAccessible(true);
-            Object resolverCredentials = resolverCredentialsField.get(overrider);
+            Object resolverCredentialsObj = resolverCredentialsField.get(overrider);
 
             Field resolverCredentialsConfigField = overriderClass.getDeclaredField("resolverCredentialsConfig");
             resolverCredentialsConfigField.setAccessible(true);
-            if (resolverCredentials != null) {
+            if (resolverCredentialsObj != null) {
+                Credentials resolverCredentials = (Credentials) resolverCredentialsObj;
                 boolean shouldOverride = ((ResolverOverrider)overrider).getOverridingResolverCredentials() != null;
-                CredentialsConfig credentialsConfig = new CredentialsConfig((Credentials) resolverCredentials, StringUtils.EMPTY, shouldOverride);
+                CredentialsConfig credentialsConfig = new CredentialsConfig(resolverCredentials.getUsername(),
+                        resolverCredentials.getPassword(), StringUtils.EMPTY, shouldOverride);
                 resolverCredentialsConfigField.set(overrider, credentialsConfig);
             } else {
                 if (resolverCredentialsConfigField.get(overrider) == null) {

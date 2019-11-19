@@ -9,6 +9,7 @@ import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
+import org.jfrog.hudson.util.Credentials;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,12 +27,12 @@ public class FilesResolverCallable extends MasterToSlaveFileCallable<List<Depend
     private String downloadSpec;
     private ProxyConfiguration proxyConfig;
 
-    public FilesResolverCallable(Log log, String username, String password, String accessoken, String serverUrl,
+    public FilesResolverCallable(Log log, Credentials credentials, String serverUrl,
                                  String downloadSpec, ProxyConfiguration proxyConfig) throws IOException, InterruptedException {
         this.log = log;
-        this.username = username;
-        this.password = password;
-        this.accessToken = accessoken;
+        this.username = credentials.getUsername();
+        this.password = credentials.getPassword();
+        this.accessToken = credentials.getAccessToken();
         this.serverUrl = serverUrl;
         this.downloadSpec = downloadSpec;
         this.proxyConfig = proxyConfig;

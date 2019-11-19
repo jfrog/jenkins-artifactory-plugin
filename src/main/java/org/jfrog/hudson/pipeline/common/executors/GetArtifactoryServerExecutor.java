@@ -6,6 +6,7 @@ import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
+import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 
@@ -58,8 +59,9 @@ public class GetArtifactoryServerExecutor implements Executor {
         if (PluginsUtils.isCredentialsPluginEnabled()) {
             artifactoryServer.setCredentialsId(server.getResolvingCredentialsConfig().getCredentialsId());
         } else {
-            artifactoryServer.setUsername(server.getResolvingCredentialsConfig().provideUsername(build.getParent()));
-            artifactoryServer.setPassword(server.getResolvingCredentialsConfig().providePassword(build.getParent()));
+            Credentials serverCredentials = server.getResolvingCredentialsConfig().provideCredentials(build.getParent());
+            artifactoryServer.setUsername(serverCredentials.getUsername());
+            artifactoryServer.setPassword(serverCredentials.getPassword());
         }
         artifactoryServer.setBypassProxy(server.isBypassProxy());
         artifactoryServer.getConnection().setRetry(server.getConnectionRetry());
