@@ -445,9 +445,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void appendBuildInfoTest(String buildName) throws Exception {
         File collectIssuesExample = new File(getIntegrationDir().toFile(), "collectIssues-example");
-        File dotGitPath = new File(collectIssuesExample, ".git");
-        // Copy the provided folder and create .git
-        FileUtils.deleteDirectory(dotGitPath);
+        File dotGitPath = testTemporaryFolder.newFolder(".git");
+        // Copy the provided folder to .git in the tmp folder
         FileUtils.copyDirectory(new File(collectIssuesExample, "buildaddgit_.git_suffix"), dotGitPath);
 
         Set<String> expectedArtifacts = getTestFilesNamesByLayer(0);

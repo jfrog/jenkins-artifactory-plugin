@@ -2,7 +2,7 @@ package integration.pipelines.scripted
 
 node {
     // Move to the scope of the test's git
-    dir("${COLLECT_ISSUES_PATH}") {
+    dir("${TEST_TEMP_FOLDER}") {
          // Create build info
         def buildInfo = Artifactory.newBuildInfo()
         buildInfo.name = "scripted:appendBuildInfo test"
