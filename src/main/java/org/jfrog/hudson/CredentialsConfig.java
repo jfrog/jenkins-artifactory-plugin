@@ -81,7 +81,7 @@ public class CredentialsConfig implements Serializable {
         return isUsingCredentialsPlugin() ? PluginsUtils.usernamePasswordCredentialsLookup(credentialsId, item).getUsername() : username;
     }
     /**
-     * Not like getPassword this will return the username of the current Credentials mode of the system (legacy/credentials plugin)
+     * Not like getPassword this will return the password of the current Credentials mode of the system (legacy/credentials plugin)
      *
      * @return the password that should be apply in this configuration
      */

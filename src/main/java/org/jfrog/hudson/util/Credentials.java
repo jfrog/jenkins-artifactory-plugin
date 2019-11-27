@@ -47,7 +47,7 @@ public class Credentials implements Serializable {
     private Credentials(String username, String password, String accessToken) {
         this.username = username;
         this.password = Scrambler.scramble(password);
-        this.accessToken = accessToken;
+        this.accessToken = Scrambler.scramble(accessToken);
 
     }
 
@@ -84,7 +84,8 @@ public class Credentials implements Serializable {
     }
 
     public Credentials convertAccessTokenToUsernamePassword() throws java.io.IOException {
-        return new Credentials(extractUsernameFromToken(accessToken), accessToken);
+        String descrambledToken = Scrambler.descramble(accessToken);
+        return new Credentials(extractUsernameFromToken(descrambledToken), descrambledToken);
     }
 
     /**
@@ -127,6 +128,6 @@ public class Credentials implements Serializable {
      * @return Access token
      */
     public String getAccessToken() {
-        return accessToken;
+        return Scrambler.descramble(accessToken);
     }
 }
