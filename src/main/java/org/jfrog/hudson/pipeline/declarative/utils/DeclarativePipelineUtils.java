@@ -80,13 +80,20 @@ public class DeclarativePipelineUtils {
         }
         JsonNode jsonNode = buildDataFile.get(CreateServerStep.STEP_NAME);
         ArtifactoryServer server = Utils.mapper().treeToValue(jsonNode, ArtifactoryServer.class);
-        String credentialsId = jsonNode.get("credentialsId").asText();
-        if (!credentialsId.isEmpty()) {
-            server.setCredentialsId(credentialsId);
-        } else {
-            server.setUsername(jsonNode.get("username").asText());
-            server.setPassword(jsonNode.get("password").asText());
+        JsonNode credentialsId = jsonNode.get("credentialsId");
+        if (credentialsId != null && !credentialsId.asText().isEmpty()) {
+            server.setCredentialsId(credentialsId.asText());
+            return server;
         }
+        JsonNode username = jsonNode.get("username");
+        if (username != null) {
+            server.setUsername(username.asText());
+        }
+        JsonNode password = jsonNode.get("password");
+        if (password != null) {
+            server.setPassword(password.asText());
+        }
+
         return server;
     }
 
