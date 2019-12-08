@@ -41,6 +41,7 @@ public class NpmPublishStep extends AbstractStepImpl {
     private String customBuildNumber;
     private String customBuildName;
     private String deployerId;
+    private String javaArgs;
     private String path;
 
     @DataBoundConstructor
@@ -61,6 +62,11 @@ public class NpmPublishStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setDeployerId(String deployerId) {
         this.deployerId = deployerId;
+    }
+
+    @DataBoundSetter
+    public void setJavaArgs(String javaArgs) {
+        this.javaArgs = javaArgs;
     }
 
     @DataBoundSetter
@@ -99,7 +105,7 @@ public class NpmPublishStep extends AbstractStepImpl {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
             String npmExe = Utils.getNpmExe(ws, listener, env, launcher, step.npmBuild.getTool());
-            NpmPublishExecutor npmPublishExecutor = new NpmPublishExecutor(getContext(), buildInfo, step.npmBuild, npmExe, step.path, ws, env, listener, build);
+            NpmPublishExecutor npmPublishExecutor = new NpmPublishExecutor(listener, buildInfo, launcher, step.npmBuild, step.javaArgs, npmExe, step.path, ws, env, build);
             npmPublishExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(npmPublishExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
             return null;

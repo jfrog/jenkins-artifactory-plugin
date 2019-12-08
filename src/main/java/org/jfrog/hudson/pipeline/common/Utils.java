@@ -21,6 +21,7 @@ import jenkins.plugins.nodejs.tools.NodeJSInstallation;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.BuildInfoFields;
@@ -222,11 +223,10 @@ public class Utils {
         });
     }
 
-    public static void exeConan(ArgumentListBuilder args, FilePath pwd, Launcher launcher, TaskListener listener, EnvVars env) {
-        boolean failed;
+    public static void exeConan(ArgumentListBuilder args, FilePath ws, Launcher launcher, TaskListener listener, EnvVars env) {
         try {
-            if (!pwd.exists()) {
-                pwd.mkdirs();
+            if (!ws.exists()) {
+                ws.mkdirs();
             }
             if (launcher.isUnix()) {
                 boolean hasMaskedArguments = args.hasMaskedArguments();
@@ -244,15 +244,47 @@ public class Utils {
             } else {
                 args = args.toWindowsCommand();
             }
-            int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(pwd).join();
-            failed = (exitValue != 0);
         } catch (Exception e) {
             listener.error("Couldn't execute the conan client executable. " + e.getMessage());
             throw new Run.RunnerAbortedException();
         }
-        if (failed) {
-            throw new Run.RunnerAbortedException();
+        launch("Conan", launcher, args, env, listener, ws);
+    }
+
+    /**
+     * Launch a process. Throw a RuntimeException in case of an error.
+     *
+     * @param taskName - The task name - Maven, Gradle, npm, etc.
+     * @param launcher - The launcher
+     * @param args     - The arguments
+     * @param env      - Task environment
+     * @param listener - Task listener
+     * @param ws       - The workspace
+     */
+    public static void launch(String taskName, Launcher launcher, ArgumentListBuilder args, EnvVars env, TaskListener listener, FilePath ws) {
+        boolean failed;
+        try {
+            int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(ws).join();
+            failed = (exitValue != 0);
+        } catch (Exception e) {
+            listener.error("Couldn't execute " + taskName + " task. " + ExceptionUtils.getMessage(e));
+            failed = true;
         }
+        if (failed) {
+            throw new RuntimeException(taskName + " build failed");
+        }
+    }
+
+    public static String getJavaPathBuilder(String jdkBinPath, Launcher launcher) {
+        StringBuilder javaPathBuilder = new StringBuilder();
+        if (StringUtils.isNotBlank(jdkBinPath)) {
+            javaPathBuilder.append(jdkBinPath).append("/");
+        }
+        javaPathBuilder.append("java");
+        if (!launcher.isUnix()) {
+            javaPathBuilder.append(".exe");
+        }
+        return javaPathBuilder.toString();
     }
 
     public static String escapeUnixArgument(String arg) {

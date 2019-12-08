@@ -25,12 +25,14 @@ public class NpmPublishStep extends AbstractStepImpl {
 
     private BuildInfo buildInfo;
     private NpmBuild npmBuild;
+    private String javaArgs;
     private String path;
 
     @DataBoundConstructor
-    public NpmPublishStep(BuildInfo buildInfo, NpmBuild npmBuild, String path, String args) {
+    public NpmPublishStep(BuildInfo buildInfo, NpmBuild npmBuild, String path, String javaArgs, String args) {
         this.buildInfo = buildInfo;
         this.npmBuild = npmBuild;
+        this.javaArgs = javaArgs;
         this.path = path;
     }
 
@@ -58,7 +60,7 @@ public class NpmPublishStep extends AbstractStepImpl {
         @Override
         protected BuildInfo run() throws Exception {
             String npmExe = Utils.getNpmExe(ws, listener, env, launcher, step.npmBuild.getTool());
-            NpmPublishExecutor npmPublishExecutor = new NpmPublishExecutor(getContext(), step.buildInfo, step.npmBuild, npmExe, step.path, ws, env, listener, build);
+            NpmPublishExecutor npmPublishExecutor = new NpmPublishExecutor(listener, step.buildInfo, launcher, step.npmBuild, step.javaArgs, npmExe, step.path, ws, env, build);
             npmPublishExecutor.execute();
             return npmPublishExecutor.getBuildInfo();
         }

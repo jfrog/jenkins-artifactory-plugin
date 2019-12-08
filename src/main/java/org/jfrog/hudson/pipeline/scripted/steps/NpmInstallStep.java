@@ -25,13 +25,15 @@ public class NpmInstallStep extends AbstractStepImpl {
 
     private BuildInfo buildInfo;
     private NpmBuild npmBuild;
+    private String javaArgs;
     private String path;
     private String args;
 
     @DataBoundConstructor
-    public NpmInstallStep(BuildInfo buildInfo, NpmBuild npmBuild, String path, String args) {
+    public NpmInstallStep(BuildInfo buildInfo, NpmBuild npmBuild, String javaArgs, String path, String args) {
         this.buildInfo = buildInfo;
         this.npmBuild = npmBuild;
+        this.javaArgs = javaArgs;
         this.path = path;
         this.args = args;
     }
@@ -60,7 +62,7 @@ public class NpmInstallStep extends AbstractStepImpl {
         @Override
         protected BuildInfo run() throws Exception {
             String npmExe = Utils.getNpmExe(ws, listener, env, launcher, step.npmBuild.getTool());
-            NpmInstallExecutor npmInstallExecutor = new NpmInstallExecutor(step.buildInfo, step.npmBuild, npmExe, step.args, ws, step.path, env, listener, build);
+            NpmInstallExecutor npmInstallExecutor = new NpmInstallExecutor(step.buildInfo, launcher, step.npmBuild, step.javaArgs, npmExe, step.args, ws, step.path, env, listener, build);
             npmInstallExecutor.execute();
             return npmInstallExecutor.getBuildInfo();
         }

@@ -40,6 +40,7 @@ public class NpmInstallStep extends AbstractStepImpl {
     private String customBuildNumber;
     private String customBuildName;
     private String resolverId;
+    private String javaArgs;
     private String path;
     private String args;
 
@@ -61,6 +62,11 @@ public class NpmInstallStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setResolverId(String resolverId) {
         this.resolverId = resolverId;
+    }
+
+    @DataBoundSetter
+    public void setJavaArgs(String javaArgs) {
+        this.javaArgs = javaArgs;
     }
 
     @DataBoundSetter
@@ -104,7 +110,7 @@ public class NpmInstallStep extends AbstractStepImpl {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             String npmExe = Utils.getNpmExe(ws, listener, env, launcher, step.npmBuild.getTool());
-            NpmInstallExecutor npmInstallExecutor = new NpmInstallExecutor(buildInfo, step.npmBuild, npmExe, step.args, ws, step.path, env, listener, build);
+            NpmInstallExecutor npmInstallExecutor = new NpmInstallExecutor(buildInfo, launcher, step.npmBuild, step.javaArgs, npmExe, step.args, ws, step.path, env, listener, build);
             npmInstallExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(npmInstallExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
             return null;
