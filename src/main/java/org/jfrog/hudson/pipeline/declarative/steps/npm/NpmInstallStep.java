@@ -40,7 +40,7 @@ public class NpmInstallStep extends AbstractStepImpl {
     private String customBuildNumber;
     private String customBuildName;
     private String resolverId;
-    private String javaArgs;
+    private String javaArgs; // Added to allow java remote debugging
     private String path;
     private String args;
 

@@ -66,10 +66,7 @@ public class MavenExecutor implements Executor {
         }
         Maven3Builder maven3Builder = new Maven3Builder(mavenBuild.getTool(), pom, goals, mavenOpts);
         convertJdkPath(launcher, extendedEnv);
-        boolean buildResult = maven3Builder.perform(build, launcher, listener, extendedEnv, ws, tempDir);
-        if (!buildResult) {
-            throw new RuntimeException("Maven build failed");
-        }
+        maven3Builder.perform(build, launcher, listener, extendedEnv, ws, tempDir);
         String generatedBuildPath = extendedEnv.get(BuildInfoFields.GENERATED_BUILD_INFO);
         buildInfo.append(Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath));
         buildInfo.appendDeployableArtifacts(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), tempDir, listener);

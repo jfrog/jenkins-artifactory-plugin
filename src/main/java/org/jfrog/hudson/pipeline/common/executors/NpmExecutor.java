@@ -66,14 +66,14 @@ public abstract class NpmExecutor implements Executor {
         buildInfo.setAgentName(Utils.getAgentName(ws));
     }
 
-    String copyExtractorJars(FilePath tempDir) throws IOException, InterruptedException {
+    private String copyExtractorJars(FilePath tempDir) throws IOException, InterruptedException {
         File extractorJar = PluginDependencyHelper.getExtractorJar(env);
         FilePath dependencyDir = PluginDependencyHelper.getActualDependencyDirectory(extractorJar, tempDir);
         String absoluteDependencyDirPath = dependencyDir.getRemote();
         return absoluteDependencyDirPath.replace("\\", "/");
     }
 
-    ArgumentListBuilder getArgs(String absoluteDependencyDirPath, String classToExecute) {
+    private ArgumentListBuilder getArgs(String absoluteDependencyDirPath, String classToExecute) {
         ArgumentListBuilder args = new ArgumentListBuilder();
         args.add(Utils.getJavaPathBuilder(env.get("PATH+JDK"), launcher));
         if (StringUtils.isNotBlank(javaArgs)) {

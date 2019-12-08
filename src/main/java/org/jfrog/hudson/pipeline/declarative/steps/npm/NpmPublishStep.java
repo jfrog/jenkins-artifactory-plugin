@@ -41,7 +41,7 @@ public class NpmPublishStep extends AbstractStepImpl {
     private String customBuildNumber;
     private String customBuildName;
     private String deployerId;
-    private String javaArgs;
+    private String javaArgs; // Added to allow java remote debugging
     private String path;
 
     @DataBoundConstructor

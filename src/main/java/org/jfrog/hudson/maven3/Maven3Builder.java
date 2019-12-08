@@ -92,11 +92,12 @@ public class Maven3Builder extends Builder {
             throw new Run.RunnerAbortedException();
         }
         ArgumentListBuilder args = buildMavenCmdLine(build, listener, env, launcher, mavenHome, ws, ws);
-        return RunMaven(launcher, listener, env, workDir, args);
+        RunMaven(launcher, listener, env, workDir, args);
+        return true;
     }
 
     // Used by Pipeline jobs only
-    public boolean perform(Run<?, ?> build, Launcher launcher, TaskListener listener, EnvVars env, FilePath workDir, FilePath tempDir)
+    public void perform(Run<?, ?> build, Launcher launcher, TaskListener listener, EnvVars env, FilePath workDir, FilePath tempDir)
             throws InterruptedException, IOException {
         listener.getLogger().println("Jenkins Artifactory Plugin version: " + ActionableHelper.getArtifactoryPluginVersion());
         FilePath mavenHome = getMavenHome(listener, env, launcher);
@@ -106,16 +107,15 @@ public class Maven3Builder extends Builder {
                     ". This could be because this build is running inside a Docker container.");
         }
         ArgumentListBuilder args = buildMavenCmdLine(build, listener, env, launcher, mavenHome, workDir, tempDir);
-        return RunMaven(launcher, listener, env, workDir, args);
+        RunMaven(launcher, listener, env, workDir, args);
     }
 
-    private boolean RunMaven(Launcher launcher, TaskListener listener, EnvVars env, FilePath workDir, ArgumentListBuilder args) throws IOException {
+    private void RunMaven(Launcher launcher, TaskListener listener, EnvVars env, FilePath workDir, ArgumentListBuilder args) throws IOException {
         try {
             Utils.launch("Maven", launcher, args, env, listener, workDir);
         } finally {
             ActionableHelper.deleteFilePath(workDir, classworldsConfPath);
         }
-        return true;
     }
 
     @Override
