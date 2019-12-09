@@ -18,7 +18,6 @@ import org.jfrog.hudson.util.PluginDependencyHelper;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Paths;
 
 /**
  * @author yahavi
@@ -79,7 +78,7 @@ public abstract class NpmExecutor implements Executor {
         if (StringUtils.isNotBlank(javaArgs)) {
             args.add(javaArgs.split("\\s+"));
         }
-        args.add("-cp", Paths.get(absoluteDependencyDirPath, "*").toString());
+        args.add("-cp", absoluteDependencyDirPath + "/*");
         args.add("org.jfrog.build.extractor.npm.extractor." + classToExecute);
         if (!launcher.isUnix()) {
             return args.toWindowsCommand();
