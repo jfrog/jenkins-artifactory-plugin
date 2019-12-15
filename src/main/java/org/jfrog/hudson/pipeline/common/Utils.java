@@ -362,14 +362,14 @@ public class Utils {
      * @param stepVariables step variables map
      * @return the build info
      */
-    public static BuildInfo appendBuildInfo(CpsScript cpsScript, Map<String, Object> stepVariables) {
+    public static void appendBuildInfo(CpsScript cpsScript, Map<String, Object> stepVariables) {
         BuildInfo buildInfo = (BuildInfo) stepVariables.get(BUILD_INFO);
         if (buildInfo == null) {
             buildInfo = (BuildInfo) cpsScript.invokeMethod("newBuildInfo", Maps.newLinkedHashMap());
             stepVariables.put(BUILD_INFO, buildInfo);
         }
         buildInfo.setCpsScript(cpsScript);
-        return buildInfo;
+        //return buildInfo;
     }
 
     public static ProxyConfiguration getProxyConfiguration(org.jfrog.hudson.ArtifactoryServer server) {

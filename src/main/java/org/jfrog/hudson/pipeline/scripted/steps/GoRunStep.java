@@ -11,25 +11,25 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.common.executors.GoPublishExecutor;
+import org.jfrog.hudson.pipeline.common.executors.GoRunExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.GoBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 @SuppressWarnings("unused")
-public class GoPublishStep extends AbstractStepImpl {
+public class GoRunStep extends AbstractStepImpl {
 
     private BuildInfo buildInfo;
     private GoBuild goBuild;
     private String path;
-    private String version;
+    private String goCmdArgs;
 
     @DataBoundConstructor
-    public GoPublishStep(BuildInfo buildInfo, GoBuild goBuild, String path, String version, String args) {
+    public GoRunStep(BuildInfo buildInfo, GoBuild goBuild, String path, String goCmdArgs, String args) {
         this.buildInfo = buildInfo;
         this.goBuild = goBuild;
         this.path = path;
-        this.version = version;
+        this.goCmdArgs = goCmdArgs;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
@@ -51,13 +51,13 @@ public class GoPublishStep extends AbstractStepImpl {
         private transient Run build;
 
         @Inject(optional = true)
-        private transient GoPublishStep step;
+        private transient GoRunStep step;
 
         @Override
         protected BuildInfo run() throws Exception {
-            GoPublishExecutor goPublishExecutor = new GoPublishExecutor(getContext(), step.buildInfo, step.goBuild, step.path, step.version, ws, listener, build);
-            goPublishExecutor.execute();
-            return goPublishExecutor.getBuildInfo();
+            GoRunExecutor goRunExecutor = new GoRunExecutor(getContext(), step.buildInfo, step.goBuild, step.path, step.goCmdArgs, ws, listener, env, build);
+            goRunExecutor.execute();
+            return goRunExecutor.getBuildInfo();
         }
     }
 
@@ -65,17 +65,17 @@ public class GoPublishStep extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(GoPublishStep.Execution.class);
+            super(GoRunStep.Execution.class);
         }
 
         @Override
         public String getFunctionName() {
-            return "artifactoryGoPublish";
+            return "artifactoryGoRun";
         }
 
         @Override
         public String getDisplayName() {
-            return "Run Artifactory Go Publish command";
+            return "Run Artifactory Go command";
         }
 
         @Override

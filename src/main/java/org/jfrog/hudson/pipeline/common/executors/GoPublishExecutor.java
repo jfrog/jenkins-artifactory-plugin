@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.common.executors;
 
-import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -10,13 +9,13 @@ import org.jfrog.build.api.Build;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.go.GoPublishCallable;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.deployers.GoDeployer;
 import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.GoBuild;
+import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 public class GoPublishExecutor implements Executor {
@@ -61,11 +60,12 @@ public class GoPublishExecutor implements Executor {
 
     private ArtifactoryBuildInfoClientBuilder createArtifactoryClientBuilder(Deployer deployer) {
         ArtifactoryServer server = deployer.getArtifactoryServer();
-        CredentialsConfig preferredDeployer = server.getDeployerCredentialsConfig();
+        Credentials deployerCredentials = server.getDeployerCredentialsConfig().provideCredentials(build.getParent());
         return new ArtifactoryBuildInfoClientBuilder()
                 .setArtifactoryUrl(server.getUrl())
-                .setUsername(preferredDeployer.provideUsername(build.getParent()))
-                .setPassword(preferredDeployer.providePassword(build.getParent()))
+                .setUsername(deployerCredentials.getUsername())
+                .setPassword(deployerCredentials.getPassword())
+                .setAccessToken(deployerCredentials.getAccessToken())
                 .setProxyConfiguration(ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy))
                 .setLog(logger)
                 .setConnectionRetry(server.getConnectionRetry())
