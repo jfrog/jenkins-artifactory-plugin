@@ -137,23 +137,29 @@ public class BuildInfo implements Serializable {
 
         this.setModules(appendedBuild.getModules());
 
+        /* Since we have different object to represent issues and environment vars in Build-info and Jenkins
+         *  We need to  convert the appended Build-info's inner objects to Jenkins inner objects.
+         */
+
         Issues appendedIssues = Issues.toPipelineIssues(appendedBuild.getIssues());
         appendedIssues.setBuildName(this.getIssues().getBuildName());
         appendedIssues.setCpsScript(this.getIssues().getCpsScript());
         this.setIssues(appendedIssues);
 
         Properties properties = appendedBuild.getProperties();
-        Env appendedEnv = new Env();
+        Map<String, String> appendedEnvVar = new HashMap<>();
+        Map<String, String> appendedSysVar = new HashMap<>();
         if (properties != null) {
             for (String key : properties.stringPropertyNames()) {
                 boolean isEnvVar = StringUtils.startsWith(key, BuildInfoProperties.BUILD_INFO_ENVIRONMENT_PREFIX);
                 if (isEnvVar) {
-                    appendedEnv.getEnvVars().put(StringUtils.substringAfter(key, BuildInfoProperties.BUILD_INFO_ENVIRONMENT_PREFIX), properties.getProperty(key));
+                    appendedEnvVar.put(StringUtils.substringAfter(key, BuildInfoProperties.BUILD_INFO_ENVIRONMENT_PREFIX), properties.getProperty(key));
                 } else {
-                    appendedEnv.getSysVars().put(key, properties.getProperty(key));
+                    appendedSysVar.put(key, properties.getProperty(key));
                 }
             }
-            this.setEnv(appendedEnv);
+            this.getEnv().setEnvVars(appendedEnvVar);
+            this.getEnv().setSysVars(appendedSysVar);
         }
     }
 
