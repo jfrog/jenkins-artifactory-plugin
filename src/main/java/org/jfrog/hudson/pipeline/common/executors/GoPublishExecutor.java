@@ -13,7 +13,7 @@ import org.jfrog.hudson.go.GoPublishCallable;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
-import org.jfrog.hudson.pipeline.common.types.deployers.GoDeployer;
+import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
 import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.GoBuild;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -46,7 +46,7 @@ public class GoPublishExecutor implements Executor {
 
     @Override
     public void execute() throws Exception {
-        GoDeployer deployer = (GoDeployer) goBuild.getDeployer();
+        NpmGoDeployer deployer = (NpmGoDeployer) goBuild.getDeployer();
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }

@@ -5,7 +5,7 @@ import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
 
-public class GoResolver extends Resolver {
+public class NpmGoResolver extends Resolver {
     private String repo;
 
     @Whitelisted

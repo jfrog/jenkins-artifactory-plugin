@@ -26,7 +26,7 @@ public class GoRunCallable extends MasterToSlaveFileCallable<Build> {
     private EnvVars env;
 
     /**
-     * @param coCmdArgs - Artifactory repository to deploy the artifacts.
+     * @param goCmdArgs - Artifactory repository to deploy the artifacts.
      * @param path      - Path to directory that contains go.mod.
      * @param logger    - The logger.
      */
@@ -38,7 +38,7 @@ public class GoRunCallable extends MasterToSlaveFileCallable<Build> {
         this.buildInfoClientBuilder = null;
     }
 
-    public void setResolverFetails(ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder, String resolutionRepository, String username, String password) {
+    public void setResolverDetails(ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder, String resolutionRepository, String username, String password) {
         this.buildInfoClientBuilder = buildInfoClientBuilder;
         this.resolutionRepository = resolutionRepository;
         this.resolverUsername = username;
@@ -49,6 +49,6 @@ public class GoRunCallable extends MasterToSlaveFileCallable<Build> {
     public Build invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
         Path basePath = file.toPath();
         Path packagePath = StringUtils.isBlank(path) ? basePath : basePath.resolve(Utils.replaceTildeWithUserHome(path));
-        return new GoRun(buildInfoClientBuilder, goCmdArgs, packagePath, resolutionRepository, resolverUsername, resolverPassword, logger, env).execute();
+        return new GoRun(goCmdArgs, packagePath, buildInfoClientBuilder, resolutionRepository, resolverUsername, resolverPassword, logger, env).execute();
     }
 }

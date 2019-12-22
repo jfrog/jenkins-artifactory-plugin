@@ -3,8 +3,8 @@ package org.jfrog.hudson.pipeline.common.types.packageManagerBuilds;
 import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.GoDeployer;
-import org.jfrog.hudson.pipeline.common.types.resolvers.GoResolver;
+import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
+import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,8 +17,8 @@ import static org.jfrog.hudson.pipeline.common.Utils.appendBuildInfo;
 public class GoBuild extends PackageManagerBuild {
 
     public GoBuild() {
-        deployer = new GoDeployer();
-        resolver = new GoResolver();
+        deployer = new NpmGoDeployer();
+        resolver = new NpmGoResolver();
     }
 
     @Whitelisted
@@ -28,7 +28,14 @@ public class GoBuild extends PackageManagerBuild {
 
     @Whitelisted
     public void deployer(Map<String, Object> deployerArguments) throws Exception {
-        setDeployer(deployerArguments, Arrays.asList("repo", "server", "deployArtifacts", "includeEnvVars"));
+        setDeployer(deployerArguments, Arrays.asList("repo", "server", "includeEnvVars"));
+    }
+
+    @Whitelisted
+    public void run(Map<String, Object> args) {
+        Map<String, Object> stepVariables = prepareGoRunStep(args, Arrays.asList("path", "args", "buildInfo"));
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryGoRun", stepVariables);
     }
 
     @Whitelisted
@@ -59,13 +66,6 @@ public class GoBuild extends PackageManagerBuild {
         stepVariables.put("version", version);
         stepVariables.put(BUILD_INFO, buildInfo);
         return stepVariables;
-    }
-
-    @Whitelisted
-    public void run(Map<String, Object> args) {
-        Map<String, Object> stepVariables = prepareGoRunStep(args, Arrays.asList("path", "args", "buildInfo"));
-        // Throws CpsCallableInvocation - Must be the last line in this method
-        cpsScript.invokeMethod("artifactoryGoRun", stepVariables);
     }
 
     private Map<String, Object> prepareGoRunStep(Map<String, Object> args, List<String> keysAsList) {

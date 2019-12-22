@@ -17,7 +17,7 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.GoPublishExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.GoDeployer;
+import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
 import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.GoBuild;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -41,7 +41,6 @@ public class GoPublishStep extends AbstractStepImpl {
     private String deployerId;
     private String path;
     private String version;
-    private String args;
 
     @DataBoundConstructor
     public GoPublishStep() {
@@ -71,11 +70,6 @@ public class GoPublishStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setVersion(String version) {
         this.version = version;
-    }
-
-    @DataBoundSetter
-    public void setArgs(String args) {
-        this.args = args;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
@@ -117,7 +111,7 @@ public class GoPublishStep extends AbstractStepImpl {
             if (buildDataFile == null) {
                 throw new IOException("Deployer " + step.deployerId + " doesn't exist!");
             }
-            GoDeployer deployer = Utils.mapper().treeToValue(buildDataFile.get(GoDeployerStep.STEP_NAME), GoDeployer.class);
+            NpmGoDeployer deployer = Utils.mapper().treeToValue(buildDataFile.get(GoDeployerStep.STEP_NAME), NpmGoDeployer.class);
             deployer.setServer(getArtifactoryServer(buildNumber, buildDataFile));
             step.goBuild.setDeployer(deployer);
             addProperties(buildDataFile);

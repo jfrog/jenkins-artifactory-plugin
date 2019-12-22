@@ -11,7 +11,7 @@ import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
-public class NpmDeployer extends Deployer {
+public class NpmGoDeployer extends Deployer {
     private String repo;
 
     @Override
@@ -24,7 +24,7 @@ public class NpmDeployer extends Deployer {
 
     @Whitelisted
     public void deployArtifacts(BuildInfo buildInfo) {
-        throw new IllegalStateException("The 'deployArtifacts' method is not supported for npm builds. Please use the 'publish' method instead.");
+        throw new IllegalStateException("The 'deployArtifacts' method is not supported. Please use the 'publish' method under the relevant build instead.");
     }
 
     @Whitelisted

@@ -2,7 +2,8 @@ package org.jfrog.hudson.pipeline.declarative.steps.npm;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jfrog.hudson.pipeline.common.types.deployers.NpmDeployer;
+import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
+import org.jfrog.hudson.pipeline.declarative.steps.common.NpmGoDeployerResolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -11,15 +12,15 @@ import java.util.List;
 /**
  * @author yahavi
  */
-public class NpmDeployerStep extends NpmDeployerResolver {
+public class NpmDeployerStep extends NpmGoDeployerResolver {
 
     static final String STEP_NAME = "rtNpmDeployer";
-    private NpmDeployer npmDeployer;
+    private NpmGoDeployer npmDeployer;
 
     @DataBoundConstructor
     public NpmDeployerStep(String id, String serverId, String repo) {
         super(STEP_NAME, id, serverId);
-        npmDeployer = new NpmDeployer();
+        npmDeployer = new NpmGoDeployer();
         npmDeployer.setRepo(repo);
         buildDataFile.putPOJO(npmDeployer);
     }

@@ -7,9 +7,9 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.NpmDeployer;
+import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
 import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.NpmBuild;
-import org.jfrog.hudson.pipeline.common.types.resolvers.NpmResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
 
 /**
  * Created by Yahav Itzhak on 25 Nov 2018.
@@ -25,10 +25,10 @@ public class NpmInstallExecutor extends NpmExecutor {
 
     @Override
     public void execute() throws Exception {
-        NpmResolver resolver = (NpmResolver) npmBuild.getResolver();
+        NpmGoResolver resolver = (NpmGoResolver) npmBuild.getResolver();
         if (resolver.isEmpty()) {
             throw new IllegalStateException("Resolver must be configured with resolution repository and Artifactory server");
         }
-        super.execute(new NpmDeployer(), resolver, args, "NpmInstall");
+        super.execute(new NpmGoDeployer(), resolver, args, "NpmInstall");
     }
 }

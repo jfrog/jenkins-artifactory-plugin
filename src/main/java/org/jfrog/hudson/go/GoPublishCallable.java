@@ -1,8 +1,6 @@
 package org.jfrog.hudson.go;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.jcraft.jsch.IO;
-import hudson.model.Run;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang3.StringUtils;
@@ -10,10 +8,7 @@ import org.jfrog.build.api.Build;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.build.extractor.go.extractor.GoPublish;
-import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.types.resolvers.GoResolver;
 
 import java.io.File;
 import java.io.IOException;
