@@ -77,6 +77,11 @@ public class DeclarativeITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void goTest() throws Exception {
+        super.goTest("declarative:go test");
+    }
+
+    @Test
     public void setPropsTest() throws Exception {
         super.setPropsTest("declarative:setProps test");
     }

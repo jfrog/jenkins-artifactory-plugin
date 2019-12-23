@@ -8,7 +8,9 @@ enum TestRepository {
     LOCAL_REPO2("jenkins-artifactory-tests-local-2"),
     JCENTER_REMOTE_REPO("jenkins-artifactory-tests-jcenter"),
     NPM_LOCAL("jenkins-artifactory-tests-npm-local"),
-    NPM_REMOTE("jenkins-artifactory-tests-npm-remote");
+    NPM_REMOTE("jenkins-artifactory-tests-npm-remote"),
+    GO_LOCAL("jenkins-artifactory-tests-go-local"),
+    GO_REMOTE("jenkins-artifactory-tests-go-remote");
 
     private String repoName;
 

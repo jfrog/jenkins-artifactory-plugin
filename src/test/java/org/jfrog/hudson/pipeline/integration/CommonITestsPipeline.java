@@ -288,6 +288,21 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void goTest(String buildName) throws Exception {
+        Set<String> expectedArtifact = Sets.newHashSet("github.com/you/hello:v1.0.0.zip", "github.com/you/hello:v1.0.0.mod", "github.com/you/hello:v1.0.0.info");
+        Set<String> expectedDependencies = Sets.newHashSet("rsc.io/sampler:v1.3.0", "golang.org/x/text:v0.0.0-20170915032832-14c0d48ead0c", "rsc.io/quote:v1.5.2");
+        String buildNumber = "7";
+        try {
+            runPipeline("go");
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, "github.com/you/hello");
+            assertModuleDependencies(module, expectedDependencies);
+            assertModuleArtifacts(module, expectedArtifact);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
     @Test
     public void uploadFailNoOpTest() throws Exception {
         try {

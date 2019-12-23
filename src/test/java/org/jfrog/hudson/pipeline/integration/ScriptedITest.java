@@ -77,6 +77,11 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void goTest() throws Exception {
+        super.goTest("scripted:go test");
+    }
+
+    @Test
     public void setPropsTest() throws Exception {
         super.setPropsTest("scripted:setProps test");
     }
