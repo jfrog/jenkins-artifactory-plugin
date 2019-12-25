@@ -1,9 +1,11 @@
 package org.jfrog.hudson;
 
 import hudson.model.Item;
+import hudson.util.XStream2;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.jfrog.hudson.util.Credentials;
+import org.jfrog.hudson.util.converters.CredentialsConfigConverter;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -25,6 +27,13 @@ public class CredentialsConfig implements Serializable {
     private String credentialsId;
     private Boolean overridingCredentials;
     private boolean ignoreCredentialPluginDisabled; //We need this for the pipeline flow we can set credentials although the credentials plugin is disabled
+
+    /**
+     * @deprecated: Use org.jfrog.hudson.CredentialsConfig#username and org.jfrog.hudson.CredentialsConfig#password
+     * Convert by org.jfrog.hudson.util.converters.CredentialsConfigConverter
+     */
+    @Deprecated
+    private Credentials credentials = null;
 
     /**
      * Constructed from the build configuration (Maven, Gradle, Ivy, Freestyle, etc)
@@ -137,5 +146,14 @@ public class CredentialsConfig implements Serializable {
 
     public boolean isUsingCredentialsPlugin() {
         return (PluginsUtils.isCredentialsPluginEnabled() && StringUtils.isNotEmpty(credentialsId)) || ignoreCredentialPluginDisabled;
+    }
+
+    /**
+     * Page Converter
+     */
+    public static final class ConverterImpl extends CredentialsConfigConverter {
+        public ConverterImpl(XStream2 xstream) {
+            super(xstream);
+        }
     }
 }
