@@ -18,7 +18,7 @@ import org.jfrog.hudson.pipeline.common.executors.GradleExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer;
-import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.GradleBuild;
+import org.jfrog.hudson.pipeline.common.types.builds.GradleBuild;
 import org.jfrog.hudson.pipeline.common.types.resolvers.GradleResolver;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;

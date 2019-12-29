@@ -8,7 +8,7 @@ import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
-import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
 import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
 
 /**

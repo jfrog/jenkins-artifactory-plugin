@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.common.types.packageManagerBuilds;
+package org.jfrog.hudson.pipeline.common.types.builds;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.json.JSONObject;

@@ -14,7 +14,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.NpmInstallExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**

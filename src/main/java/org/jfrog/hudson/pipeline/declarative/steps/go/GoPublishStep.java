@@ -18,7 +18,7 @@ import org.jfrog.hudson.pipeline.common.executors.GoPublishExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
-import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.GoBuild;
+import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;

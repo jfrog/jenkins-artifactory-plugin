@@ -17,7 +17,7 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.NpmInstallExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
 import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;

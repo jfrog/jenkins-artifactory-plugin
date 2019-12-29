@@ -369,7 +369,6 @@ public class Utils {
             stepVariables.put(BUILD_INFO, buildInfo);
         }
         buildInfo.setCpsScript(cpsScript);
-        //return buildInfo;
     }
 
     public static ProxyConfiguration getProxyConfiguration(org.jfrog.hudson.ArtifactoryServer server) {

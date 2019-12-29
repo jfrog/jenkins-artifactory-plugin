@@ -18,7 +18,7 @@ import org.jfrog.hudson.pipeline.common.executors.MavenExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer;
-import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.MavenBuild;
+import org.jfrog.hudson.pipeline.common.types.builds.MavenBuild;
 import org.jfrog.hudson.pipeline.common.types.resolvers.MavenResolver;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;

@@ -11,7 +11,7 @@ import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
-import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
 import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.PluginDependencyHelper;

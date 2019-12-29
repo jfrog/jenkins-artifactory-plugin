@@ -4,7 +4,7 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.GoBuild;
+import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class CreateGoBuildStep extends AbstractStepImpl {

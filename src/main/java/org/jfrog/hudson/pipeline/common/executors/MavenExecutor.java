@@ -13,7 +13,7 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer;
-import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.MavenBuild;
+import org.jfrog.hudson.pipeline.common.types.builds.MavenBuild;
 import org.jfrog.hudson.util.ExtractorUtils;
 
 public class MavenExecutor implements Executor {

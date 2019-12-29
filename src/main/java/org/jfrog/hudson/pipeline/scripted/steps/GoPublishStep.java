@@ -13,7 +13,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepEx
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.common.executors.GoPublishExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.packageManagerBuilds.GoBuild;
+import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 @SuppressWarnings("unused")
