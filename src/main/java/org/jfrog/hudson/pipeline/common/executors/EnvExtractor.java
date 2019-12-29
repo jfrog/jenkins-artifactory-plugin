@@ -50,7 +50,7 @@ public abstract class EnvExtractor implements Executor {
 
     protected abstract void addExtraConfiguration(ArtifactoryClientConfiguration configuration);
 
-    private PublisherContext createPublisherContext() {
+    private PublisherContext createPublisherContext() throws IOException {
         return publisher.getContextBuilder().build();
     }
 

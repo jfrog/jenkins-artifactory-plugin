@@ -72,6 +72,21 @@ public class GradleDeployerStep extends GradleDeployerResolver {
         buildDataFile.put("properties", String.join(";", properties));
     }
 
+    @DataBoundSetter
+    public void setRepo(String repo) {
+        gradleDeployer.setRepo(repo);
+    }
+
+    @DataBoundSetter
+    public void setSnapshotRepo(String snapshotRepo) {
+        gradleDeployer.setSnapshotRepo(snapshotRepo);
+    }
+
+    @DataBoundSetter
+    public void setReleaseRepo(String releaseRepo) {
+        gradleDeployer.setReleaseRepo(releaseRepo);
+    }
+
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 

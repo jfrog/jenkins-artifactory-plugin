@@ -10,24 +10,52 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
+import java.io.IOException;
+
 /**
  * Created by Tamirh on 16/08/2016.
  */
 public class GradleDeployer extends Deployer {
+    private static final String repoValidationMessage = "The Deployer should be set with either 'repo' or both 'releaseRepo' and 'snapshotRepo'";
     private Boolean deployMavenDescriptors;
     private Boolean deployIvyDescriptors;
     private String ivyPattern = "[organisation]/[module]/ivy-[revision].xml";
     private String artifactPattern = "[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]";
     private boolean mavenCompatible = true;
     private String repo;
+    private String releaseRepo;
+    private String snapshotRepo;
 
     @Override
     @JsonIgnore
-    public ServerDetails getDetails() {
-        RepositoryConf releaesRepositoryConf = new RepositoryConf(repo, repo, false);
+    public ServerDetails getDetails() throws IOException {
+        validateRepositories();
+        RepositoryConf snapshotRepositoryConf = null;
+        RepositoryConf releaseRepositoryConf = null;
+        if (StringUtils.isNotEmpty(repo)) {
+            releaseRepositoryConf = new RepositoryConf(repo, repo, false);
+        } else {
+            releaseRepositoryConf = new RepositoryConf(releaseRepo, releaseRepo, false);
+            snapshotRepositoryConf = new RepositoryConf(snapshotRepo, snapshotRepo, false);
+        }
+
         String serverName = server == null ? "" : server.getServerName();
         String url = server == null ? "" : server.getUrl();
-        return new ServerDetails(serverName, url, releaesRepositoryConf, null, releaesRepositoryConf, null, "", "");
+        return new ServerDetails(serverName, url, releaseRepositoryConf, snapshotRepositoryConf, releaseRepositoryConf, null, "", "");
+    }
+
+    @JsonIgnore
+    private void validateRepositories() throws IOException {
+        if (StringUtils.isNotEmpty(repo)) {
+            if (StringUtils.isNotEmpty(releaseRepo) || StringUtils.isNotEmpty(snapshotRepo)) {
+                throw new IOException(repoValidationMessage);
+            }
+            return;
+        }
+
+        if (StringUtils.isEmpty(releaseRepo) || StringUtils.isEmpty(snapshotRepo)) {
+            throw new IOException(repoValidationMessage);
+        }
     }
 
     @Whitelisted
@@ -95,16 +123,40 @@ public class GradleDeployer extends Deployer {
         this.repo = repo;
     }
 
+    @Whitelisted
+    public String getSnapshotRepo() {
+        return snapshotRepo;
+    }
+
+    @Whitelisted
+    public void setSnapshotRepo(String snapshotRepo) {
+        this.snapshotRepo = snapshotRepo;
+    }
+
+    @Whitelisted
+    public String getReleaseRepo() {
+        return releaseRepo;
+    }
+
+    @Whitelisted
+    public void setReleaseRepo(String releaseRepo) {
+        this.releaseRepo = releaseRepo;
+    }
+
     public boolean isEmpty() {
-        return server == null || StringUtils.isEmpty(repo);
+        return server == null || (StringUtils.isEmpty(repo) && StringUtils.isEmpty(snapshotRepo) &&
+                StringUtils.isEmpty(releaseRepo));
     }
 
     public String getTargetRepository(String deployPath) {
-        return repo;
+        if (StringUtils.isNotBlank(snapshotRepo) && deployPath.contains("-SNAPSHOT")) {
+            return snapshotRepo;
+        }
+        return StringUtils.isNotBlank(releaseRepo) ? releaseRepo : repo;
     }
 
     @JsonIgnore
-    public PublisherContext.Builder getContextBuilder() {
+    public PublisherContext.Builder getContextBuilder() throws IOException {
         return new PublisherContext.Builder()
                 .artifactoryServer(getArtifactoryServer())
                 .serverDetails(getDetails())

@@ -155,9 +155,9 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         this.customBuildName = customBuildName;
     }
 
-    public abstract ServerDetails getDetails();
+    public abstract ServerDetails getDetails() throws IOException;
 
-    public abstract PublisherContext.Builder getContextBuilder();
+    public abstract PublisherContext.Builder getContextBuilder() throws IOException;
 
     public abstract boolean isEmpty();
 

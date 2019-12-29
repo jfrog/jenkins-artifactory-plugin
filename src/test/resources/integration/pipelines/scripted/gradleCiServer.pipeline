@@ -13,7 +13,7 @@ node("TestSlave") {
 
     stage "Configure Gradle build"
     def rtGradle = Artifactory.newGradleBuild()
-    rtGradle.deployer repo: "${LOCAL_REPO1}", server: rtServer
+    rtGradle.deployer releaseRepo: "${LOCAL_REPO1}", snapshotRepo: "{LOCAL_REPO1}", server: rtServer
     rtGradle.resolver repo: "${JCENTER_REMOTE_REPO}", server: rtServer
 
     stage "Copy project example"

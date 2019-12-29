@@ -21,7 +21,8 @@ node("TestSlave") {
     rtGradleDeployer(
             id: "GRADLE_DEPLOYER",
             serverId: serverId,
-            repo: "${LOCAL_REPO1}",
+            releaseRepo: "${LOCAL_REPO1}",
+            snapshotRepo: "${LOCAL_REPO1}",
     )
 
     rtGradleResolver(
