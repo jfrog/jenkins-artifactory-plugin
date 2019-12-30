@@ -14,7 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~test
-  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
@@ -45,7 +47,7 @@
         <buildinfo.ivy.version>2.13.x-SNAPSHOT</buildinfo.ivy.version>
         <buildinfo.npm.version>2.13.x-SNAPSHOT</buildinfo.npm.version>
 
-    </properties>   
+    </properties>
 
     <developers>
         <developer>
@@ -540,6 +542,15 @@
                 </executions>
             </plugin>
         </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>animal-sniffer-maven-plugin</artifactId>
+                    <version>1.18</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
     <scm>
@@ -561,7 +572,7 @@
                     <url>http://oss.jfrog.org/artifactory/jfrog-dependencies</url>
                 </repository>
                 <repository>
-                    <snapshots />
+                    <snapshots/>
                     <id>snapshots</id>
                     <name>libs-snapshot</name>
                     <url>http://oss.jfrog.org/artifactory/libs-snapshot</url>
@@ -577,7 +588,7 @@
                     <url>http://oss.jfrog.org/artifactory/jfrog-dependencies</url>
                 </pluginRepository>
                 <pluginRepository>
-                    <snapshots />
+                    <snapshots/>
                     <id>snapshots</id>
                     <name>plugins-snapshot</name>
                     <url>http://oss.jfrog.org/artifactory/plugins-snapshot</url>
