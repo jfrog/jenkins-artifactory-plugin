@@ -22,9 +22,8 @@ import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Build;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
-
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Result of the redeploy publisher. Currently only a link to Artifactory build info.
@@ -33,7 +32,7 @@ import java.util.List;
  */
 public class BuildInfoResultAction implements BuildBadgeAction {
 
-    private List<PublishedBuildDetails> publishedBuildsDetails = new ArrayList<PublishedBuildDetails>();
+    private List<PublishedBuildDetails> publishedBuildsDetails = new CopyOnWriteArrayList<>();
     private final Run build;
     @Deprecated
     private String url;
@@ -73,7 +72,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         if (StringUtils.isNotEmpty(url)) {
             return url;
         } else if (publishedBuildsDetails == null) {
-            publishedBuildsDetails = new ArrayList<PublishedBuildDetails>();
+            publishedBuildsDetails = new CopyOnWriteArrayList<>();
         }
         // For backward compatibility if publishedBuildsDetails is empty calculate it from the old structs.
         if (publishedBuildsDetails.size() == 0 && artifactoryRedeployPublisher != null && build != null) {
