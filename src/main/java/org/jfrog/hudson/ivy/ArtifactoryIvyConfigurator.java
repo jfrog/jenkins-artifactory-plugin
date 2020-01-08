@@ -219,6 +219,11 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         return server != null ? server.getUrl() : null;
     }
 
+    public boolean isArtifactoryUnify() {
+        ArtifactoryServer server = getArtifactoryServer();
+        return server.isArtifactoryUnify();
+    }
+
     public boolean isEnableIssueTrackerIntegration() {
         return enableIssueTrackerIntegration;
     }

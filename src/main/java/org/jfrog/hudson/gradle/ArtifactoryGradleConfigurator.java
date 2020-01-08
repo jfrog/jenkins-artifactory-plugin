@@ -29,7 +29,9 @@ import hudson.plugins.gradle.Gradle;
 import hudson.tasks.BuildWrapper;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;
@@ -269,6 +271,11 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     public String getArtifactoryUrl() {
         ArtifactoryServer server = getArtifactoryServer();
         return server != null ? server.getUrl() : null;
+    }
+
+    public Boolean isArtifactoryUnify() {
+        ArtifactoryServer server = getArtifactoryServer();
+        return server.isArtifactoryUnify();
     }
 
     public boolean isDeployArtifacts() {
@@ -522,7 +529,12 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 if (result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
                     if (isDeployBuildInfo()) {
                         String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGradleConfigurator.this, build);
-                        build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+                        ArtifactoryServer server = getArtifactoryServer();
+                        CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(ArtifactoryGradleConfigurator.this, server);
+                        try (ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideCredentials(build.getProject()),
+                                ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy))) {
+                            build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, isArtifactoryUnify()));
+                        }
                         ArtifactoryGradleConfigurator configurator =
                                 ActionableHelper.getBuildWrapper(build.getProject(),
                                         ArtifactoryGradleConfigurator.class);

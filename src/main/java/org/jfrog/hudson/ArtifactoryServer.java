@@ -55,6 +55,7 @@ public class ArtifactoryServer implements Serializable {
 
     private static final int DEFAULT_CONNECTION_TIMEOUT = 300;    // 5 Minutes
     private static final int DEFAULT_DEPLOYMENT_THREADS_NUMBER = 3;
+    private static final String ARTIFACTORY_UNIFY = "7.0.0";
     private final String url;
     private final String id;
     // Network timeout in seconds to use both for connection establishment and for unanswered requests
@@ -190,6 +191,16 @@ public class ArtifactoryServer implements Serializable {
             client.close();
         }
         return repositories;
+    }
+
+    public Boolean isArtifactoryUnify() {
+        try (ArtifactoryBuildInfoClient client = createArtifactoryClient(deployerCredentials, createProxyConfiguration(Jenkins.getInstance().proxy))) {
+            ArtifactoryVersion version = client.getArtifactoryVersion();
+            if (version.isAtLeast(new ArtifactoryVersion(ARTIFACTORY_UNIFY))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public List<String> getReleaseRepositoryKeysFirst(DeployerOverrider deployerOverrider, Item item) throws IOException {

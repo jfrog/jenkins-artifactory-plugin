@@ -219,6 +219,11 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         return server != null ? server.getUrl() : null;
     }
 
+    public boolean isArtifactoryUnify() {
+        ArtifactoryServer server = getArtifactoryServer();
+        return server.isArtifactoryUnify();
+    }
+
     /**
      * @return The release versions deployment repository.
      */
@@ -363,7 +368,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     private void addJobActions(AbstractBuild build, String buildName) {
-        build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+        build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, isArtifactoryUnify()));
         if (isAllowPromotionOfNonStagedBuilds()) {
             build.getActions().add(new UnifiedPromoteBuildAction(build, this));
         }

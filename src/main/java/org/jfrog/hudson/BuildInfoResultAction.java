@@ -22,11 +22,14 @@ import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Build;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+
+import java.text.ParseException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Result of the redeploy publisher. Currently only a link to Artifactory build info.
+ * Result of the redeploy publisher. Currently only a link to Artifactory build
+ * info.
  *
  * @author Yossi Shaul
  */
@@ -37,7 +40,8 @@ public class BuildInfoResultAction implements BuildBadgeAction {
     @Deprecated
     private String url;
     /**
-     * @deprecated Only here to keep compatibility with version 1.0.7 and below (part of the xstream de-serialization)
+     * @deprecated Only here to keep compatibility with version 1.0.7 and below
+     * (part of the xstream de-serialization)
      */
     @Deprecated
     private transient ArtifactoryRedeployPublisher artifactoryRedeployPublisher;
@@ -46,14 +50,15 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         this.build = build;
     }
 
-    public BuildInfoResultAction(String artifactoryUrl, Run build, String buildName) {
+    public BuildInfoResultAction(String artifactoryUrl, Run build, String buildName, boolean isArtifactoryUnify) {
         this(build);
         String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        publishedBuildsDetails.add(createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber));
+        publishedBuildsDetails.add(createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber,
+                build.getTimestampString(), isArtifactoryUnify));
     }
 
-    public void addBuildInfoResults(String artifactoryUrl, Build buildInfo) {
-        publishedBuildsDetails.add(createBuildInfoIdentifier(artifactoryUrl, build, buildInfo));
+    public void addBuildInfoResults(String artifactoryUrl, Build buildInfo, boolean isArtifactoryUnify) {
+        publishedBuildsDetails.add(createBuildInfoIdentifier(artifactoryUrl, build, buildInfo, isArtifactoryUnify));
     }
 
     public Run getBuild() {
@@ -74,9 +79,11 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         } else if (publishedBuildsDetails == null) {
             publishedBuildsDetails = new CopyOnWriteArrayList<>();
         }
-        // For backward compatibility if publishedBuildsDetails is empty calculate it from the old structs.
+        // For backward compatibility if publishedBuildsDetails is empty calculate it
+        // from the old structs.
         if (publishedBuildsDetails.size() == 0 && artifactoryRedeployPublisher != null && build != null) {
-            String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(artifactoryRedeployPublisher, build);
+            String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(artifactoryRedeployPublisher,
+                    build);
             return generateUrl(artifactoryRedeployPublisher.getArtifactoryName(), build, buildName);
         } else if (publishedBuildsDetails.size() == 1) {
             return publishedBuildsDetails.get(0).getBuildInfoUrl();
@@ -84,11 +91,11 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         return "published_builds";
     }
 
-    private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, String buildName, String buildNumber) {
-        return new PublishedBuildDetails(artifactoryUrl, Util.rawEncode(buildName), Util.rawEncode(buildNumber));
+    private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, String buildName, String buildNumber, String timestamp, boolean isArtifactoryUnify) {
+        return new PublishedBuildDetails(artifactoryUrl, Util.rawEncode(buildName), Util.rawEncode(buildNumber), timestamp, isArtifactoryUnify);
     }
 
-    private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, Run build, Build buildInfo) {
+    private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, Run build, Build buildInfo, boolean isArtifactoryUnify) {
         String buildName;
         String buildNumber;
         if (StringUtils.isNotEmpty(buildInfo.getName())) {
@@ -101,7 +108,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         } else {
             buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         }
-        return createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber);
+        return createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber, buildInfo.getStarted(), isArtifactoryUnify);
     }
 
     private String generateUrl(String artifactoryUrl, Run build, String buildName) {

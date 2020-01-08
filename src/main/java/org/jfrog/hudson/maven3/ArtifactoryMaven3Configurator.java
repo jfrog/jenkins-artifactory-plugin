@@ -23,7 +23,9 @@ import hudson.model.*;
 import hudson.tasks.BuildWrapper;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
@@ -260,6 +262,11 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         return server != null ? server.getUrl() : null;
     }
 
+    public boolean isArtifactoryUnify() {
+        ArtifactoryServer server = getArtifactoryServer();
+        return server.isArtifactoryUnify();
+    }
+
     public boolean isIncludeEnvVars() {
         return includeEnvVars;
     }
@@ -395,7 +402,12 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                 Result result = build.getResult();
                 if (deployBuildInfo && result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
                     String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryMaven3Configurator.this, build);
-                    build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+                    ArtifactoryServer server = getArtifactoryServer();
+                    CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(ArtifactoryMaven3Configurator.this, server);
+                    try (ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideCredentials(build.getProject()),
+                            ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy))) {
+                        build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, isArtifactoryUnify()));
+                    }
                     build.getActions().add(new UnifiedPromoteBuildAction(build, ArtifactoryMaven3Configurator.this));
                 }
                 return true;

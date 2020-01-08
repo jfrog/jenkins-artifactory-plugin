@@ -361,7 +361,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                                     listener, deployedArtifacts, buildDependencies, publishedDependencies).deploy();
                             String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGenericConfigurator.this, build);
                             // add the result action (prefer always the same index)
-                            build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+                            build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, client.isArtifactoryUnify()));
                             build.getActions().add(new UnifiedPromoteBuildAction(build, ArtifactoryGenericConfigurator.this));
                         }
                     }

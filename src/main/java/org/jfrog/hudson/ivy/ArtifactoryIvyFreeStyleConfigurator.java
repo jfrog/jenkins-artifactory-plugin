@@ -28,7 +28,9 @@ import hudson.tasks.Ant;
 import hudson.tasks.BuildWrapper;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.listener.ArtifactoryBuildListener;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;
@@ -220,6 +222,11 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
         return server != null ? server.getUrl() : null;
     }
 
+    public boolean isArtifactoryUnify() {
+        ArtifactoryServer server = getArtifactoryServer();
+        return server.isArtifactoryUnify();
+    }
+
     public boolean isDeployArtifacts() {
         return deployArtifacts;
     }
@@ -355,7 +362,12 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                 if (!finalPublisherContext.isSkipBuildInfoDeploy() && (result == null ||
                         result.isBetterOrEqualTo(Result.SUCCESS))) {
                     String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryIvyFreeStyleConfigurator.this, build);
-                    build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+                    ArtifactoryServer server = getArtifactoryServer();
+                    CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(ArtifactoryIvyFreeStyleConfigurator.this, server);
+                    try (ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideCredentials(build.getProject()),
+                            ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy))) {
+                        build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, isArtifactoryUnify()));
+                    }
                     build.getActions().add(new UnifiedPromoteBuildAction(build, ArtifactoryIvyFreeStyleConfigurator.this));
                 }
 
