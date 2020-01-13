@@ -10,7 +10,8 @@ enum TestRepository {
     NPM_LOCAL("jenkins-artifactory-tests-npm-local"),
     NPM_REMOTE("jenkins-artifactory-tests-npm-remote"),
     GO_LOCAL("jenkins-artifactory-tests-go-local"),
-    GO_REMOTE("jenkins-artifactory-tests-go-remote");
+    GO_REMOTE("jenkins-artifactory-tests-go-remote"),
+    GO_VIRTUAL("jenkins-artifactory-tests-go-virtual");
 
     private String repoName;
 

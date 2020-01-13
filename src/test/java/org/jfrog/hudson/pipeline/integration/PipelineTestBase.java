@@ -136,6 +136,7 @@ public class PipelineTestBase {
                 throw new IOException(repositorySettingsPath + " not found");
             }
             String repositorySettings = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            repositorySettings = pipelineSubstitution.replace(repositorySettings);
             artifactoryClient.restCall(new ArtifactoryRequestImpl()
                     .method(ArtifactoryRequest.Method.PUT)
                     .requestType(ArtifactoryRequest.ContentType.JSON)
@@ -180,6 +181,7 @@ public class PipelineTestBase {
             put("NPM_REMOTE", getRepoKey(TestRepository.NPM_REMOTE));
             put("GO_LOCAL", getRepoKey(TestRepository.GO_LOCAL));
             put("GO_REMOTE", getRepoKey(TestRepository.GO_REMOTE));
+            put("GO_VIRTUAL", getRepoKey(TestRepository.GO_VIRTUAL));
         }});
     }
 
