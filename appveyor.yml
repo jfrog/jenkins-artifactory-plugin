@@ -34,6 +34,8 @@ environment:
     ecosysjfrog-docker-jenkins-tests.jfrog.io
   JENKINS_ARTIFACTORY_DOCKER_REPO:
     docker-jenkins-tests
+  JENKINS_DOCKER_TEST_ENABLE:
+    false
 services:
   - docker
 before_test:
