@@ -17,8 +17,8 @@
 #   3. Override 'JENKINS_ARTIFACTORY_PASSWORD' with variable encryption.
 
 image:
-  - Visual Studio 2017
   - Ubuntu
+  - Visual Studio 2017
 stack: jdk 8, node 8
 skip_tags: true
 environment:
@@ -34,6 +34,8 @@ environment:
     ecosysjfrog-docker-jenkins-tests.jfrog.io
   JENKINS_ARTIFACTORY_DOCKER_REPO:
     docker-jenkins-tests
+  JENKINS_DOCKER_TEST_ENABLE:
+    false
 services:
   - docker
 before_test:

@@ -375,6 +375,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void dockerPushTest(String buildName) throws Exception {
         Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS);
+        Assume.assumeTrue("Skipping Xray tests", JENKINS_DOCKER_TEST_ENABLE == null || Boolean.parseBoolean(JENKINS_DOCKER_TEST_ENABLE));
         try {
             // Get image name
             String domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_DOMAIN");

@@ -1,0 +1,9 @@
+{
+  "packageType": "go",
+  "repoLayoutRef": "go-default",
+  "repositories": [
+    "${GO_REMOTE}",
+    "${GO_LOCAL}"
+  ],
+  "rclass": "virtual"
+}
