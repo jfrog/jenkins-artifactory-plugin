@@ -114,7 +114,7 @@ public class DockerUtils implements Serializable {
      * @return
      * @throws IOException
      */
-    public static String getConfigDigest(String manifest) throws IOException {
+    public static String getConfigDigest(String manifest) throws IOException{
         JsonNode manifestTree = Utils.mapper().readTree(manifest);
         JsonNode schemaVersion = manifestTree.get("schemaVersion");
         if (schemaVersion == null) {
