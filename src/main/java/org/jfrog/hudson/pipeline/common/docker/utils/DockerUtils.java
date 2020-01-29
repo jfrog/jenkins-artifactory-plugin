@@ -108,13 +108,13 @@ public class DockerUtils implements Serializable {
     }
 
     /**
-     * Get config digest from manifest (image id).
+     * Get config descriptions(digest & media type) from manifest (image id).
      *
      * @param manifest
      * @return
      * @throws IOException
      */
-    public static String getConfigDigest(String manifest) throws IOException {
+    public static DockerLayersDescriptions getConfigDescriptions(String manifest) throws IOException {
         JsonNode manifestTree = Utils.mapper().readTree(manifest);
         JsonNode schemaVersion = manifestTree.get("schemaVersion");
         if (schemaVersion == null) {
@@ -134,18 +134,23 @@ public class DockerUtils implements Serializable {
             throw new IllegalStateException("Could not find config digest in manifest");
         }
 
-        return StringUtils.remove(digest.toString(), "\"");
+        JsonNode mediaType = config.get("mediaType");
+        if (mediaType == null) {
+            throw new IllegalStateException("Could not find config media type in manifest");
+        }
+
+        return new DockerLayersDescriptions(StringUtils.remove(digest.toString(), "\""), mediaType.toString());
     }
 
     /**
-     * Get a list of layer digests from docker manifest.
+     * Get a list of layers descriptions(digest & media type) from docker manifest.
      *
      * @param manifestContent
      * @return
      * @throws IOException
      */
-    public static List<String> getLayersDigests(String manifestContent) throws IOException {
-        List<String> dockerLayersDependencies = new ArrayList<String>();
+    public static List<DockerLayersDescriptions> getLayersDescriptions(String manifestContent) throws IOException {
+        List<DockerLayersDescriptions> dockerLayersDependencies = new ArrayList<DockerLayersDescriptions>();
 
         JsonNode manifest = Utils.mapper().readTree(manifestContent);
         JsonNode schemaVersion = manifest.get("schemaVersion");
@@ -156,14 +161,13 @@ public class DockerUtils implements Serializable {
         boolean isSchemeVersion1 = schemaVersion.asInt() == 1;
         JsonNode fsLayers = getFsLayers(manifest, isSchemeVersion1);
         for (JsonNode fsLayer : fsLayers) {
-            JsonNode blobSum = getBlobSum(isSchemeVersion1, fsLayer);
-            dockerLayersDependencies.add(blobSum.asText());
+            dockerLayersDependencies.add(getBlobDescriptions(isSchemeVersion1, fsLayer));
         }
-        dockerLayersDependencies.add(getConfigDigest(manifestContent));
+        dockerLayersDependencies.add(getConfigDescriptions(manifestContent));
 
         //Add manifest sha1
         String manifestSha1 = Hashing.sha1().hashString(manifestContent, Charsets.UTF_8).toString();
-        dockerLayersDependencies.add("sha1:" + manifestSha1);
+        dockerLayersDependencies.add(new DockerLayersDescriptions("sha1:" + manifestSha1,""));
 
         return dockerLayersDependencies;
     }
@@ -190,25 +194,25 @@ public class DockerUtils implements Serializable {
     }
 
     /**
-     * Return blob sum depend on scheme version.
+     * Return blob sum and media type depend on scheme version.
      *
      * @param isSchemeVersion1
      * @param fsLayer
      * @return
      */
-    private static JsonNode getBlobSum(boolean isSchemeVersion1, JsonNode fsLayer) {
-        JsonNode blobSum;
+    private static DockerLayersDescriptions getBlobDescriptions(boolean isSchemeVersion1, JsonNode fsLayer) {
+        DockerLayersDescriptions blobDescriptions;
         if (isSchemeVersion1) {
-            blobSum = fsLayer.get("blobSum");
+            blobDescriptions = new DockerLayersDescriptions(fsLayer.get("blobSum").asText(),"");
         } else {
-            blobSum = fsLayer.get("digest");
+            blobDescriptions = new DockerLayersDescriptions(fsLayer.get("digest").asText(),fsLayer.get("mediaType").asText());
         }
 
-        if (blobSum == null) {
+        if (blobDescriptions == null) {
             throw new IllegalStateException("Could not find 'blobSub' or 'digest' in manifest");
         }
 
-        return blobSum;
+        return blobDescriptions;
     }
 
     /**

@@ -21,6 +21,7 @@ import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenc
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
+import org.jfrog.hudson.pipeline.common.docker.utils.DockerLayersDescriptions;
 import org.jfrog.hudson.pipeline.common.docker.utils.DockerUtils;
 import org.jfrog.hudson.util.CredentialManager;
 import org.jfrog.hudson.util.ExtractorUtils;
@@ -213,14 +214,14 @@ public class DockerImage implements Serializable {
             return false;
         }
 
-        String imageDigest = DockerUtils.getConfigDigest(candidateManifest);
-        if (imageDigest.equals(imageId)) {
+        DockerLayersDescriptions imageDescriptions = DockerUtils.getConfigDescriptions(candidateManifest);
+        if (imageDescriptions.getDigest().equals(imageId)) {
             manifest = candidateManifest;
             imagePath = candidateImagePath;
             return true;
         }
 
-        listener.getLogger().println(String.format("Found incorrect manifest.json file in Artifactory in the following path: %s\nExpecting: %s got: %s", manifestPath, imageId, imageDigest));
+        listener.getLogger().println(String.format("Found incorrect manifest.json file in Artifactory in the following path: %s\nExpecting: %s got: %s", manifestPath, imageId, imageDescriptions.getDigest()));
         return false;
     }
 
@@ -281,10 +282,13 @@ public class DockerImage implements Serializable {
 
         List<Dependency> dependencies = new ArrayList<Dependency>();
         List<Artifact> artifacts = new ArrayList<Artifact>();
-        Iterator<String> it = DockerUtils.getLayersDigests(manifest).iterator();
+        Iterator<DockerLayersDescriptions> it = DockerUtils.getLayersDescriptions(manifest).iterator();
         for (int i = 0; i < dependencyLayerNum; i++) {
-            String digest = it.next();
-            DockerLayer layer = layers.getByDigest(digest);
+            DockerLayersDescriptions dld = it.next();
+            DockerLayer layer = layers.getByDigest(dld.getDigest());
+            if(layer == null && dld.isForeignLayer()){
+                continue;
+            }
             HttpResponse httpResponse = propertyChangeClient.executeUpdateFileProperty(layer.getFullPath(), artifactsProps);
             validateResponse(httpResponse);
             Dependency dependency = new DependencyBuilder().id(layer.getFileName()).sha1(layer.getSha1()).properties(buildInfoItemsProps).build();
@@ -296,8 +300,8 @@ public class DockerImage implements Serializable {
         buildInfoModule.setDependencies(dependencies);
 
         while (it.hasNext()) {
-            String digest = it.next();
-            DockerLayer layer = layers.getByDigest(digest);
+            DockerLayersDescriptions digest = it.next();
+            DockerLayer layer = layers.getByDigest(digest.getDigest());
             if (layer == null) {
                 continue;
             }
@@ -317,16 +321,16 @@ public class DockerImage implements Serializable {
      * @throws IOException
      */
     private String getAqlQuery(boolean includeVirtualRepos) throws IOException {
-        List<String> layersDigest = DockerUtils.getLayersDigests(manifest);
+        List<DockerLayersDescriptions> layersDigest = DockerUtils.getLayersDescriptions(manifest);
         StringBuilder aqlRequestForDockerSha = new StringBuilder("items.find({")
             .append("\"path\":\"").append(imagePath).append("\",\"$or\":[");
 
         List<String> layersQuery = new ArrayList<String>();
-        for (String digest : layersDigest) {
-            String shaVersion = DockerUtils.getShaVersion(digest);
-            String shaValue = DockerUtils.getShaValue(digest);
+        for (DockerLayersDescriptions descriptions : layersDigest) {
+            String shaVersion = DockerUtils.getShaVersion(descriptions.getDigest());
+            String shaValue = DockerUtils.getShaValue(descriptions.getDigest());
 
-            String singleFileQuery = String.format("{\"name\": \"%s\"}", DockerUtils.digestToFileName(digest));
+            String singleFileQuery = String.format("{\"name\": \"%s\"}", DockerUtils.digestToFileName(descriptions.getDigest()));
 
             if (StringUtils.equalsIgnoreCase(shaVersion, "sha1")) {
                 singleFileQuery = String.format("{\"actual_sha1\": \"%s\"}", shaValue);
