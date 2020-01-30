@@ -156,6 +156,9 @@ public class DockerUtils implements Serializable {
         boolean isSchemeVersion1 = schemaVersion.asInt() == 1;
         JsonNode fsLayers = getFsLayers(manifest, isSchemeVersion1);
         for (JsonNode fsLayer : fsLayers) {
+            if(isForeignLayer(isSchemeVersion1, fsLayer)) {
+                continue;
+            }
             JsonNode blobSum = getBlobSum(isSchemeVersion1, fsLayer);
             dockerLayersDependencies.add(blobSum.asText());
         }
@@ -360,4 +363,8 @@ public class DockerUtils implements Serializable {
             }
         }
     }
+
+    private static boolean isForeignLayer(boolean isSchemeVersion1, JsonNode fsLayer){
+        return !isSchemeVersion1 && fsLayer.get("mediaType").asText().equals("application/vnd.docker.image.rootfs.foreign.diff.tar.gzip");
+       }
 }
