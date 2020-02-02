@@ -156,11 +156,10 @@ public class DockerUtils implements Serializable {
         boolean isSchemeVersion1 = schemaVersion.asInt() == 1;
         JsonNode fsLayers = getFsLayers(manifest, isSchemeVersion1);
         for (JsonNode fsLayer : fsLayers) {
-            if(isForeignLayer(isSchemeVersion1, fsLayer)) {
-                continue;
+            if (!isForeignLayer(isSchemeVersion1, fsLayer)) {
+                JsonNode blobSum = getBlobSum(isSchemeVersion1, fsLayer);
+                dockerLayersDependencies.add(blobSum.asText());
             }
-            JsonNode blobSum = getBlobSum(isSchemeVersion1, fsLayer);
-            dockerLayersDependencies.add(blobSum.asText());
         }
         dockerLayersDependencies.add(getConfigDigest(manifestContent));
 
@@ -328,30 +327,30 @@ public class DockerUtils implements Serializable {
 
 
     public static DockerClient getDockerClient(String host, EnvVars envVars) {
-      if (envVars == null) {
-          throw new IllegalStateException("envVars must not be null");
-      }
+        if (envVars == null) {
+            throw new IllegalStateException("envVars must not be null");
+        }
 
-      Builder configBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
+        Builder configBuilder = DefaultDockerClientConfig.createDefaultConfigBuilder();
 
-      if (envVars.containsKey(DefaultDockerClientConfig.DOCKER_HOST)) {
-          configBuilder.withDockerHost(envVars.get(DefaultDockerClientConfig.DOCKER_HOST));
-      } else {
-          // If open JDK is used and the host is null
-          // then instead of a null reference, the host is the string "null".
-          if (!StringUtils.isEmpty(host) && !host.equalsIgnoreCase("null")) {
-              configBuilder.withDockerHost(host);
-          }
-      }
-      if (envVars.containsKey(DefaultDockerClientConfig.DOCKER_TLS_VERIFY)) {
-          configBuilder.withDockerTlsVerify(envVars.get(DefaultDockerClientConfig.DOCKER_TLS_VERIFY));
-      }
-      if (envVars.containsKey(DefaultDockerClientConfig.DOCKER_CERT_PATH)) {
-          configBuilder.withDockerCertPath(envVars.get(DefaultDockerClientConfig.DOCKER_CERT_PATH));
-      }
+        if (envVars.containsKey(DefaultDockerClientConfig.DOCKER_HOST)) {
+            configBuilder.withDockerHost(envVars.get(DefaultDockerClientConfig.DOCKER_HOST));
+        } else {
+            // If open JDK is used and the host is null
+            // then instead of a null reference, the host is the string "null".
+            if (!StringUtils.isEmpty(host) && !host.equalsIgnoreCase("null")) {
+                configBuilder.withDockerHost(host);
+            }
+        }
+        if (envVars.containsKey(DefaultDockerClientConfig.DOCKER_TLS_VERIFY)) {
+            configBuilder.withDockerTlsVerify(envVars.get(DefaultDockerClientConfig.DOCKER_TLS_VERIFY));
+        }
+        if (envVars.containsKey(DefaultDockerClientConfig.DOCKER_CERT_PATH)) {
+            configBuilder.withDockerCertPath(envVars.get(DefaultDockerClientConfig.DOCKER_CERT_PATH));
+        }
 
-      DockerClientConfig config = configBuilder.build();
-      return DockerClientBuilder.getInstance(config).withDockerCmdExecFactory(new NettyDockerCmdExecFactory()).build();      
+        DockerClientConfig config = configBuilder.build();
+        return DockerClientBuilder.getInstance(config).withDockerCmdExecFactory(new NettyDockerCmdExecFactory()).build();
     }
 
     private static void closeQuietly(DockerClient dockerClient) {
@@ -364,7 +363,9 @@ public class DockerUtils implements Serializable {
         }
     }
 
-    private static boolean isForeignLayer(boolean isSchemeVersion1, JsonNode fsLayer){
-        return !isSchemeVersion1 && fsLayer.get("mediaType").asText().equals("application/vnd.docker.image.rootfs.foreign.diff.tar.gzip");
-       }
+    private static boolean isForeignLayer(boolean isSchemeVersion1, JsonNode fsLayer) {
+        return !isSchemeVersion1 &&
+                fsLayer.get("mediaType") != null &&
+                fsLayer.get("mediaType").asText().equals("application/vnd.docker.image.rootfs.foreign.diff.tar.gzip");
+    }
 }
