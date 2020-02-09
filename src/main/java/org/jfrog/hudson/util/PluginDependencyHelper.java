@@ -22,7 +22,7 @@ public class PluginDependencyHelper {
             throws IOException, InterruptedException {
 
         File localDependencyDir = localDependencyFile.getParentFile();
-        String pluginVersion = Hudson.getInstance().getPluginManager().getPlugin("artifactory").getVersion();
+        String pluginVersion = Hudson.get().getPluginManager().getPlugin("artifactory").getVersion();
         if (pluginVersion.contains(" ")) {
             //Trim the plugin version in case we're working on a snapshot version (contains illegal chars)
             pluginVersion = StringUtils.split(pluginVersion, " ")[0];
