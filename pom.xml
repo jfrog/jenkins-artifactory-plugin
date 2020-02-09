@@ -91,6 +91,11 @@
                     <artifactId>httpclient</artifactId>
                     <groupId>org.apache.httpcomponents</groupId>
                 </exclusion>
+                <!-- An updated version of commons-lang3 is received from the buildinfo dependency -->
+                <exclusion>
+                    <artifactId>commons-lang3</artifactId>
+                    <groupId>org.apache.commons</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -112,6 +117,17 @@
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>apache-httpcomponents-client-4-api</artifactId>
             <version>4.5.5-3.0</version>
+            <exclusions>
+                <!-- An updated version of httpcomponents is received from the buildinfo dependency -->
+                <exclusion>
+                    <artifactId>httpcore</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>httpclient</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -438,10 +454,6 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.bouncycastle</groupId>
-                    <artifactId>bcpkix-jdk15on</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

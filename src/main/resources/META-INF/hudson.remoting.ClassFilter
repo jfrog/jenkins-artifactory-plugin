@@ -47,3 +47,4 @@ org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails
 
 com.google.common.collect.ArrayListMultimap
 com.google.common.collect.AbstractListMultimap
+com.google.common.collect.AbstractMapBasedMultimap
