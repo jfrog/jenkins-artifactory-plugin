@@ -17,8 +17,8 @@
 #   3. Override 'JENKINS_ARTIFACTORY_PASSWORD' with variable encryption.
 
 image:
-#  - Ubuntu
   - Visual Studio 2017
+  - Ubuntu
 stack: jdk 8, node 8
 skip_tags: true
 environment:
