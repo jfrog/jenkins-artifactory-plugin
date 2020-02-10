@@ -24,7 +24,6 @@ skip_tags: true
 environment:
   APPVEYOR_SAVE_CACHE_ON_ERROR: true
   GRADLE_OPTS: -Dorg.gradle.daemon=false
-  MAVEN_OPTS: -Djna.nosys=true
   JENKINS_ARTIFACTORY_URL:
     secure: RIh0gGFDn2JAnLUEEqLsQnZ5H3XFWg1s+Qq8Z4i+Xu+FtQf6Tsu2AnfY4/6AaXJ8
   JENKINS_ARTIFACTORY_USERNAME:
@@ -51,7 +50,7 @@ before_test:
   - sh: tail -f tests.log &
 
 test_script:
-  - mvn -V -B -U clean verify -DskipITs=false
+  - mvn -V -B -U clean verify -DskipITs=false  -Djna.nosys=true
 
 cache:
   - C:\Users\appveyor\.m2\ -> pom.xml
