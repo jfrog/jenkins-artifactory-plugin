@@ -63,7 +63,7 @@ public class PipelineTestBase {
     static final String JENKINS_DOCKER_TEST_ENABLE = System.getenv("JENKINS_DOCKER_TEST_ENABLE");
     static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
 
-    private static long currentTime = System.currentTimeMillis();
+    private static long currentTime;
     private static StrSubstitutor pipelineSubstitution;
     static ArtifactoryBuildInfoClient buildInfoClient;
     static Artifactory artifactoryClient;
@@ -77,6 +77,7 @@ public class PipelineTestBase {
 
     @BeforeClass
     public static void setUp() {
+        currentTime = System.currentTimeMillis();
         verifyEnvironment();
         createSlave();
         setJarsLibEnv();
@@ -84,7 +85,7 @@ public class PipelineTestBase {
         cleanUpArtifactory(artifactoryClient);
         createPipelineSubstitution();
         // Create repositories
-        Arrays.stream(TestRepository.values()).forEach(repo -> createRepo(repo));
+        Arrays.stream(TestRepository.values()).forEach(PipelineTestBase::createRepo);
     }
 
     @Before
