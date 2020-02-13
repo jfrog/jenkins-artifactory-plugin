@@ -95,9 +95,9 @@ public class PipelineTestBase {
     }
 
     @After
-    public void CleanRepos() {
+    public void cleanRepos() {
         // Reemove the content of all local repositories
-        Arrays.stream(TestRepository.values()).filter(repoName -> repoName.getRepoName().contains("local"))
+        Arrays.stream(TestRepository.values()).filter(repoName -> repoName.getRepoType() == TestRepository.RepoType.LOCAL)
                 .forEach(repoName -> artifactoryClient.repository(getRepoKey(repoName)).delete(StringUtils.EMPTY));
     }
 
@@ -105,8 +105,8 @@ public class PipelineTestBase {
     public static void tearDown() {
         // Remove repositories - need to remove virtual repositories first
         Stream.concat(
-                Arrays.stream(TestRepository.values()).filter(repoName -> repoName.getRepoName().contains("virtual")),
-                Arrays.stream(TestRepository.values()).filter(repoName -> !repoName.getRepoName().contains("virtual")))
+                Arrays.stream(TestRepository.values()).filter(repoName -> repoName.getRepoType() == TestRepository.RepoType.VIRTUAL),
+                Arrays.stream(TestRepository.values()).filter(repoName -> repoName.getRepoType() != TestRepository.RepoType.VIRTUAL))
                 .forEach(repoName -> artifactoryClient.repository(getRepoKey(repoName)).delete());
         buildInfoClient.close();
         artifactoryClient.close();
