@@ -18,8 +18,8 @@ public class NpmInstallExecutor extends NpmExecutor {
 
     private String args;
 
-    public NpmInstallExecutor(BuildInfo buildInfo, Launcher launcher, NpmBuild npmBuild, String javaArgs, String npmExe, String args, FilePath ws, String path, EnvVars env, TaskListener listener, Run build) {
-        super(buildInfo, launcher, npmBuild, javaArgs, npmExe, ws, path, env, listener, build);
+    public NpmInstallExecutor(BuildInfo buildInfo, Launcher launcher, NpmBuild npmBuild, String javaArgs, String npmExe, String args, FilePath ws, String path, String module, EnvVars env, TaskListener listener, Run build) {
+        super(buildInfo, launcher, npmBuild, javaArgs, npmExe, ws, path, module, env, listener, build);
         this.args = StringUtils.defaultIfEmpty(args, "");
     }
 

@@ -17,14 +17,16 @@ public class NpmEnvExtractor extends EnvExtractor {
     private String npmExe;
     private String args;
     private String path;
+    private String module;
 
     public NpmEnvExtractor(Run build, BuildInfo buildInfo, Deployer deployer, Resolver resolver,
                            TaskListener buildListener, Launcher launcher, FilePath tempDir,
-                           EnvVars env, String args, String path, String npmExe) {
+                           EnvVars env, String args, String path, String npmExe, String module) {
         super(build, buildInfo, deployer, resolver, buildListener, launcher, tempDir, env);
         this.npmExe = npmExe;
         this.args = args;
         this.path = path;
+        this.module = module;
     }
 
     @Override
@@ -32,5 +34,6 @@ public class NpmEnvExtractor extends EnvExtractor {
         configuration.npmHandler.setNpmExecutablePath(npmExe);
         configuration.npmHandler.setNpmInstallArgs(args);
         configuration.npmHandler.setNpmPath(path);
+        configuration.npmHandler.setNpmModule(module);
     }
 }
