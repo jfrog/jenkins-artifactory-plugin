@@ -35,14 +35,14 @@ public class BuildInfoAccessor {
         this.buildInfo = buildInfo;
     }
 
-    public void appendDependencies(List<Dependency> dependencies) {
+    public void appendDependencies(List<Dependency> dependencies, String moduleId) {
         Module defaultModule = new ModuleBuilder()
-                .id(buildInfo.getName())
+                .id(moduleId)
                 .dependencies(dependencies)
                 .build();
         Module currentModule = buildInfo.getModules().stream()
                 // Check if the default module already exists.
-                .filter(module -> StringUtils.equals(module.getId(), getBuildName()))
+                .filter(module -> StringUtils.equals(module.getId(), moduleId))
                 .findAny()
                 .orElse(null);
         if (currentModule != null) {
@@ -87,14 +87,14 @@ public class BuildInfoAccessor {
         }
     }
 
-    public void appendArtifacts(List<Artifact> artifacts) {
+    public void appendArtifacts(List<Artifact> artifacts, String moduleId) {
         Module defaultModule = new ModuleBuilder()
-                .id(buildInfo.getName())
+                .id(moduleId)
                 .artifacts(artifacts)
                 .build();
         Module currentModule = buildInfo.getModules().stream()
                 // Check if the default module already exists.
-                .filter(module -> StringUtils.equals(module.getId(), getBuildName()))
+                .filter(module -> StringUtils.equals(module.getId(), moduleId))
                 .findAny()
                 .orElse(null);
         if (currentModule != null) {
