@@ -52,6 +52,11 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void uploadDownloadCustomModuleNameTest() throws Exception {
+        super.uploadDownloadCustomModuleNameTest("scripted:uploadDownloadCustomModuleName test");
+    }
+
+    @Test
     public void promotionTest() throws Exception {
         super.promotionTest("scripted:promotion test");
     }
@@ -73,12 +78,22 @@ public class ScriptedITest extends CommonITestsPipeline {
 
     @Test
     public void npmTest() throws Exception {
-        super.npmTest("scripted:npm test");
+        super.npmTest("npm", "scripted:npm test", "package-name1:0.0.1");
+    }
+
+    @Test
+    public void npmCustomModuleNameTest() throws Exception {
+        super.npmTest("npmCustomModuleName", "scripted:npmCustomModuleName test", "my-npm-module");
     }
 
     @Test
     public void goTest() throws Exception {
-        super.goTest("scripted:go test");
+        super.goTest("go", "scripted:go test", "github.com/you/hello");
+    }
+
+    @Test
+    public void goCustomModuleNameTest() throws Exception {
+        super.goTest("goCustomModuleName", "scripted:goCustomModuleName test", "my-Go-module");
     }
 
     @Test
