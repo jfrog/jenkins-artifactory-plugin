@@ -17,8 +17,8 @@ function repos(button, jsFunction, uniqueId, artifactoryUrl, credentialsInput, b
     let legacyInput = $('legacy' + credentialsInput);
     if (legacyInput) {
         overrideCredentials = legacyInput.down('input[type=checkbox]').checked;
-        username = legacyInput.down('input[type=text]').value;
-        password = legacyInput.down('input[type=password]').value;
+        username = legacyInput.down('input[name=_.username]').value;
+        password = legacyInput.down('input[name=_.password]').value;
     }
     let credentialsPluginInput = $(credentialsInput);
     if (credentialsPluginInput) {
