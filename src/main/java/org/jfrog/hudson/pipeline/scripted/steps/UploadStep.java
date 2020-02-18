@@ -23,15 +23,15 @@ public class UploadStep extends AbstractStepImpl {
     private BuildInfo buildInfo;
     private String spec;
     private ArtifactoryServer server;
-    private String moduleName;
+    private String module;
     private boolean failNoOp;
 
     @DataBoundConstructor
-    public UploadStep(String spec, BuildInfo buildInfo, boolean failNoOp, String moduleName, ArtifactoryServer server) {
+    public UploadStep(String spec, BuildInfo buildInfo, boolean failNoOp, String module, ArtifactoryServer server) {
         this.spec = spec;
         this.buildInfo = buildInfo;
         this.failNoOp = failNoOp;
-        this.moduleName = moduleName;
+        this.module = module;
         this.server = server;
     }
 
@@ -43,8 +43,8 @@ public class UploadStep extends AbstractStepImpl {
         return failNoOp;
     }
 
-    public String getModuleName() {
-        return moduleName;
+    public String getModule() {
+        return module;
     }
 
     public String getSpec() {
@@ -74,7 +74,7 @@ public class UploadStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), getContext(), Util.replaceMacro(step.getSpec(), env), step.getFailNoOp(), step.moduleName);
+            GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), getContext(), Util.replaceMacro(step.getSpec(), env), step.getFailNoOp(), step.module);
             genericUploadExecutor.execute();
             BuildInfo buildInfo = genericUploadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);

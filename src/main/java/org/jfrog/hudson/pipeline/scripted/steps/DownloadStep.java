@@ -23,15 +23,15 @@ public class DownloadStep extends AbstractStepImpl {
     private BuildInfo buildInfo;
     private boolean failNoOp;
     private String spec;
-    private String moduleName;
+    private String module;
     private ArtifactoryServer server;
 
     @DataBoundConstructor
-    public DownloadStep(String spec, BuildInfo buildInfo, boolean failNoOp, String moduleName, ArtifactoryServer server) {
+    public DownloadStep(String spec, BuildInfo buildInfo, boolean failNoOp, String module, ArtifactoryServer server) {
         this.spec = spec;
         this.buildInfo = buildInfo;
         this.failNoOp = failNoOp;
-        this.moduleName = moduleName;
+        this.module = module;
         this.server = server;
     }
 
@@ -43,8 +43,8 @@ public class DownloadStep extends AbstractStepImpl {
         return failNoOp;
     }
 
-    public String getModuleName() {
-        return moduleName;
+    public String getModule() {
+        return module;
     }
 
     public String getSpec() {
@@ -75,7 +75,7 @@ public class DownloadStep extends AbstractStepImpl {
         @Override
         protected BuildInfo run() throws Exception {
             GenericDownloadExecutor genericDownloadExecutor = new GenericDownloadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()),
-                    this.listener, this.build, this.ws, step.getBuildInfo(), Util.replaceMacro(step.getSpec(), env), step.getFailNoOp(), step.getModuleName());
+                    this.listener, this.build, this.ws, step.getBuildInfo(), Util.replaceMacro(step.getSpec(), env), step.getFailNoOp(), step.getModule());
             genericDownloadExecutor.execute();
             BuildInfo buildInfo = genericDownloadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
