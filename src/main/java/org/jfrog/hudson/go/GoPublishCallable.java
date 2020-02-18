@@ -21,6 +21,7 @@ public class GoPublishCallable extends MasterToSlaveFileCallable<Build> {
     private String deploymentRepository;
     private String path;
     private String version;
+    private String module;
     private Log logger;
 
     /**
@@ -30,12 +31,13 @@ public class GoPublishCallable extends MasterToSlaveFileCallable<Build> {
      * @param path                   - Path to directory that contains go.mod.
      * @param logger                 - The logger.
      */
-    public GoPublishCallable(ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder, ArrayListMultimap<String, String> properties, String deploymentRepository, String path, String version, Log logger) {
+    public GoPublishCallable(ArtifactoryBuildInfoClientBuilder buildInfoClientBuilder, ArrayListMultimap<String, String> properties, String deploymentRepository, String path, String version, String module, Log logger) {
         this.buildInfoClientBuilder = buildInfoClientBuilder;
         this.properties = properties;
         this.deploymentRepository = deploymentRepository;
         this.path = path;
         this.version = version;
+        this.module = module;
         this.logger = logger;
     }
 
@@ -43,6 +45,6 @@ public class GoPublishCallable extends MasterToSlaveFileCallable<Build> {
     public Build invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
         Path basePath = file.toPath();
         Path packagePath = StringUtils.isBlank(path) ? basePath : basePath.resolve(Utils.replaceTildeWithUserHome(path));
-        return new GoPublish(buildInfoClientBuilder, properties, deploymentRepository, packagePath, version, logger).execute();
+        return new GoPublish(buildInfoClientBuilder, properties, deploymentRepository, packagePath, version, module, logger).execute();
     }
 }

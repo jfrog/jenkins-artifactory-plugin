@@ -23,13 +23,15 @@ public class GoRunStep extends AbstractStepImpl {
     private GoBuild goBuild;
     private String path;
     private String goCmdArgs;
+    private String module;
 
     @DataBoundConstructor
-    public GoRunStep(BuildInfo buildInfo, GoBuild goBuild, String path, String goCmdArgs, String args) {
+    public GoRunStep(BuildInfo buildInfo, GoBuild goBuild, String path, String goCmdArgs, String args, String module) {
         this.buildInfo = buildInfo;
         this.goBuild = goBuild;
         this.path = path;
         this.goCmdArgs = goCmdArgs;
+        this.module = module;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
@@ -55,7 +57,7 @@ public class GoRunStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            GoRunExecutor goRunExecutor = new GoRunExecutor(getContext(), step.buildInfo, step.goBuild, step.path, step.goCmdArgs, ws, listener, env, build);
+            GoRunExecutor goRunExecutor = new GoRunExecutor(getContext(), step.buildInfo, step.goBuild, step.path, step.goCmdArgs, step.module, ws, listener, env, build);
             goRunExecutor.execute();
             return goRunExecutor.getBuildInfo();
         }

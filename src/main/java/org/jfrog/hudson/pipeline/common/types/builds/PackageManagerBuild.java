@@ -21,6 +21,14 @@ import java.util.Set;
 public class PackageManagerBuild implements Serializable {
     private static final long serialVersionUID = 1L;
 
+    public static final String SERVER = "server";
+    public static final String REPO = "repo";
+    public static final String PATH = "path";
+    public static final String INCLUDE_ENV_VARS = "includeEnvVars";
+    public static final String ARGS = "args";
+    public static final String BUILD_INFO = "buildInfo";
+    public static final String MODULE = "module";
+
     transient CpsScript cpsScript;
     Deployer deployer;
     Resolver resolver;

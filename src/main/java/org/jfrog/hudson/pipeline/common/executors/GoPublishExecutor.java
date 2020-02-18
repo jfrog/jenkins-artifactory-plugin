@@ -26,15 +26,17 @@ public class GoPublishExecutor implements Executor {
     private FilePath ws;
     private String path;
     private String version;
+    private String module;
     private Log logger;
     private Run build;
 
-    public GoPublishExecutor(StepContext context, BuildInfo buildInfo, GoBuild goBuild, String path, String version, FilePath ws, TaskListener listener, Run build) {
+    public GoPublishExecutor(StepContext context, BuildInfo buildInfo, GoBuild goBuild, String path, String version, String module, FilePath ws, TaskListener listener, Run build) {
         this.context = context;
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.goBuild = goBuild;
         this.path = path;
         this.version = version;
+        this.module = module;
         this.ws = ws;
         this.logger = new JenkinsBuildInfoLog(listener);
         this.build = build;
@@ -50,7 +52,7 @@ public class GoPublishExecutor implements Executor {
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }
-        Build build = ws.act(new GoPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), deployer.getRepo(), path, version, logger));
+        Build build = ws.act(new GoPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), deployer.getRepo(), path, version, module, logger));
         if (build == null) {
             throw new RuntimeException("go publish failed");
         }

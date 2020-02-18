@@ -41,6 +41,7 @@ public class GoRunStep extends AbstractStepImpl {
     private String resolverId;
     private String path;
     private String args;
+    private String module;
 
     @DataBoundConstructor
     public GoRunStep() {
@@ -72,6 +73,11 @@ public class GoRunStep extends AbstractStepImpl {
         this.args = args;
     }
 
+    @DataBoundSetter
+    public void setModule(String module) {
+        this.module = module;
+    }
+
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
         private static final long serialVersionUID = 1L;
 
@@ -97,7 +103,7 @@ public class GoRunStep extends AbstractStepImpl {
         protected Void run() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            GoRunExecutor goRunExecutor = new GoRunExecutor(getContext(), buildInfo, step.goBuild, step.path, step.args, ws, listener, env, build);
+            GoRunExecutor goRunExecutor = new GoRunExecutor(getContext(), buildInfo, step.goBuild, step.path, step.args, step.module, ws, listener, env, build);
             goRunExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(goRunExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
             return null;

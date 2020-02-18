@@ -40,6 +40,7 @@ public class GoPublishStep extends AbstractStepImpl {
     private String customBuildName;
     private String deployerId;
     private String path;
+    private String module;
     private String version;
 
     @DataBoundConstructor
@@ -65,6 +66,11 @@ public class GoPublishStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setPath(String path) {
         this.path = path;
+    }
+
+    @DataBoundSetter
+    public void setModule(String module) {
+        this.module = module;
     }
 
     @DataBoundSetter
@@ -97,7 +103,7 @@ public class GoPublishStep extends AbstractStepImpl {
         protected Void run() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            GoPublishExecutor goPublishExecutor = new GoPublishExecutor(getContext(), buildInfo, step.goBuild, step.path, step.version, ws, listener, build);
+            GoPublishExecutor goPublishExecutor = new GoPublishExecutor(getContext(), buildInfo, step.goBuild, step.path, step.version, step.module, ws, listener, build);
             goPublishExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(goPublishExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
             return null;
