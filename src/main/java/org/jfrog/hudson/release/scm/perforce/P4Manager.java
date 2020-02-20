@@ -13,6 +13,8 @@ import org.jenkinsci.plugins.p4.client.ConnectionFactory;
 import org.jenkinsci.plugins.p4.client.ConnectionHelper;
 import org.jfrog.build.vcs.perforce.PerforceClient;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Interacts with Perforce various release operations.
  * Using the updated perforce plugin - P4.
@@ -38,7 +40,7 @@ public class P4Manager extends AbstractPerforceManager<PerforceScm> {
         try {
             String clientString = getClientString();
             if (connection.isClient(clientString)) {
-                ClientHelper perforceClient = new ClientHelper(credentials, buildListener, clientString);
+                ClientHelper perforceClient = new ClientHelper(credentials, buildListener, clientString, StandardCharsets.UTF_8.toString());
                 IClient client = perforceClient.getClient();
                 try {
                     this.perforce = new PerforceClient(server, client);
