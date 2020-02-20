@@ -52,7 +52,7 @@ public class DockerExecutor implements Executor {
 
         // Remove trailing slash from target repo if needed.
         if (this.targetRepo != null && this.targetRepo.length() > 0 && this.targetRepo.endsWith("/")) {
-            this.targetRepo = this.targetRepo.substring(0, this.targetRepo.length()-1);
+            this.targetRepo = this.targetRepo.substring(0, this.targetRepo.length() - 1);
         }
     }
 
