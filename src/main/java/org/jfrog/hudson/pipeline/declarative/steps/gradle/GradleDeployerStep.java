@@ -87,6 +87,11 @@ public class GradleDeployerStep extends GradleDeployerResolver {
         gradleDeployer.setReleaseRepo(releaseRepo);
     }
 
+    @DataBoundSetter
+    public void setThreads(int threads) {
+        gradleDeployer.setThreads(threads);
+    }
+
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 

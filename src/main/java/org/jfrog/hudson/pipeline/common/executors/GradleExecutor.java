@@ -17,8 +17,8 @@ import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.gradle.GradleInitScriptWriter;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.builds.GradleBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.util.ExtractorUtils;
 
 import java.io.IOException;
@@ -69,8 +69,8 @@ public class GradleExecutor implements Executor {
         String generatedBuildPath = extendedEnv.get(BuildInfoFields.GENERATED_BUILD_INFO);
         buildInfo.append(Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath));
         ActionableHelper.deleteFilePath(tempDir, initScriptPath);
-        // Read the deployable artifacts list from the 'json' file in the agent and append them to the buildInfo object.
-        buildInfo.appendDeployableArtifacts(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), tempDir, listener);
+        // Read the deployable artifacts map from the 'json' file in the agent and append them to the buildInfo object.
+        buildInfo.appendDeployableArtifactsByModule(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), tempDir, listener);
         buildInfo.setAgentName(Utils.getAgentName(ws));
     }
 

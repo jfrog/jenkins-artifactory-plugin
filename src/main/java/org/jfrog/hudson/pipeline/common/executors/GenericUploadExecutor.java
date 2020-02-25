@@ -52,7 +52,7 @@ public class GenericUploadExecutor implements Executor {
         new BuildInfoAccessor(buildInfo).appendVcs(Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
 
         List<Artifact> deployedArtifacts = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
-                server, credentials, Utils.getPropertiesMap(buildInfo, build, context), proxyConfiguration));
+                server, credentials, Utils.getPropertiesMap(buildInfo, build, context), proxyConfiguration, server.getDeploymentThreads()));
         if (failNoOp && deployedArtifacts.isEmpty()) {
             throw new RuntimeException("Fail-no-op: No files were affected in the upload process.");
         }

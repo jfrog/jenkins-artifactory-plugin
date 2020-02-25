@@ -365,6 +365,7 @@ public class ExtractorUtils {
             configuration.info.setBuildNumbersNotToDelete(getBuildNumbersNotToBeDeletedAsString(build));
         }
         configuration.publisher.setPublishArtifacts(context.isDeployArtifacts());
+        configuration.publisher.setPublishForkCount(context.getThreads());
         configuration.publisher.setEvenUnstable(context.isEvenIfUnstable());
         if (context.isDeployIvy() != null) {
             configuration.publisher.setIvy(context.isDeployIvy());

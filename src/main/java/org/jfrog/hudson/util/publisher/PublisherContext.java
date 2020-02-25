@@ -36,6 +36,7 @@ public class PublisherContext {
     private boolean discardBuildArtifacts;
     private boolean asyncBuildRetention;
     private boolean deployArtifacts;
+    private int threads;
     private IncludesExcludes includesExcludes;
     private boolean skipBuildInfoDeploy;
     private boolean includeEnvVars;
@@ -128,6 +129,10 @@ public class PublisherContext {
         return deployArtifacts;
     }
 
+    public int getThreads() {
+        return threads;
+    }
+
     public final String getArtifactoryName() {
         return serverDetails != null ? serverDetails.artifactoryName : null;
     }
@@ -213,6 +218,11 @@ public class PublisherContext {
 
         public Builder deployArtifacts(boolean deployArtifacts) {
             publisher.deployArtifacts = deployArtifacts;
+            return this;
+        }
+
+        public Builder threads(int threads) {
+            publisher.threads = threads;
             return this;
         }
 
