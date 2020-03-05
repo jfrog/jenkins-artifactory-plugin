@@ -10,14 +10,15 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.PluginDependencyHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author yahavi
@@ -43,7 +44,7 @@ public abstract class NpmExecutor implements Executor {
         this.javaArgs = javaArgs;
         this.npmExe = npmExe;
         this.ws = ws;
-        this.path = path;
+        this.path = Objects.toString(path, ".");
         this.env = env;
         this.build = build;
     }
