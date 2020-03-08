@@ -50,7 +50,7 @@ before_test:
   - sh: tail -f tests.log &
 
 test_script:
-  - mvn -V -B -U clean verify -DskipITs=false
+  - mvn -V -B -U clean verify -DskipITs=false -Djna.nosys=true
 
 cache:
   - C:\Users\appveyor\.m2\ -> pom.xml

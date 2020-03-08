@@ -1,6 +1,7 @@
 package org.jfrog.hudson;
 
 import hudson.model.Item;
+import hudson.util.Secret;
 import hudson.util.XStream2;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
@@ -22,8 +23,8 @@ public class CredentialsConfig implements Serializable {
 
     public static final CredentialsConfig EMPTY_CREDENTIALS_CONFIG =
             new CredentialsConfig(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false);
-    private String username;
-    private String password;
+    private Secret username;
+    private Secret password;
     private String credentialsId;
     private Boolean overridingCredentials;
     private boolean ignoreCredentialPluginDisabled; //We need this for the pipeline flow we can set credentials although the credentials plugin is disabled
@@ -48,8 +49,8 @@ public class CredentialsConfig implements Serializable {
     public CredentialsConfig(String username, String password, String credentialsId, Boolean overridingCredentials) {
         this.overridingCredentials = overridingCredentials == null ? false : overridingCredentials;
         if (overridingCredentials == null || overridingCredentials.equals(Boolean.TRUE)) {
-            this.username = username;
-            this.password = password;
+            this.username = Secret.fromString(username);
+            this.password = Secret.fromString(password);
         }
         this.credentialsId = credentialsId;
     }
@@ -57,14 +58,14 @@ public class CredentialsConfig implements Serializable {
     public CredentialsConfig(String username, String password, String credentialsId) {
         this.overridingCredentials = false;
         this.ignoreCredentialPluginDisabled = StringUtils.isNotEmpty(credentialsId);
-        this.username = username;
-        this.password = password;
+        this.username = Secret.fromString(username);
+        this.password = Secret.fromString(password);
         this.credentialsId = credentialsId;
     }
 
     public void deleteCredentials() {
-        this.username = StringUtils.EMPTY;
-        this.password = StringUtils.EMPTY;
+        this.username = Secret.fromString(StringUtils.EMPTY);
+        this.password = Secret.fromString(StringUtils.EMPTY);
     }
 
     /**
@@ -87,7 +88,7 @@ public class CredentialsConfig implements Serializable {
      * @return the username that should be apply in this configuration
      */
     private String provideUsername(Item item) {
-        return isUsingCredentialsPlugin() ? PluginsUtils.usernamePasswordCredentialsLookup(credentialsId, item).getUsername() : username;
+        return isUsingCredentialsPlugin() ? PluginsUtils.usernamePasswordCredentialsLookup(credentialsId, item).getUsername() : Secret.toString(username);
     }
     /**
      * Not like getPassword this will return the password of the current Credentials mode of the system (legacy/credentials plugin)
@@ -95,7 +96,7 @@ public class CredentialsConfig implements Serializable {
      * @return the password that should be apply in this configuration
      */
     private String providePassword(Item item) {
-        return isUsingCredentialsPlugin() ? PluginsUtils.usernamePasswordCredentialsLookup(credentialsId, item).getPassword() : password;
+        return isUsingCredentialsPlugin() ? PluginsUtils.usernamePasswordCredentialsLookup(credentialsId, item).getPassword() : Secret.toString(password);
     }
 
     public String provideAccessToken(Item item) {
@@ -121,11 +122,11 @@ public class CredentialsConfig implements Serializable {
     // This should not be used in order to retrieve credentials in the configuration - Use provideUsername, providePassword instead
 
     public String getUsername() {
-        return username;
+        return Secret.toString(username);
     }
 
     public String getPassword() {
-        return password;
+        return Secret.toString(password);
     }
 
     public String getCredentialsId() {

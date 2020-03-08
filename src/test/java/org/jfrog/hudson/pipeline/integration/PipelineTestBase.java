@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.*;
 
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.junit.Assert.fail;
@@ -48,7 +49,7 @@ public class PipelineTestBase {
     @ClassRule // The Jenkins instance
     public static JenkinsRule jenkins = new JenkinsRule();
     static Slave slave;
-    private Logger log = LogManager.getRootLogger();
+    private static Logger log = LogManager.getRootLogger();
     @Rule
     public TestName testName = new TestName();
     @ClassRule
@@ -62,12 +63,12 @@ public class PipelineTestBase {
     static final String JENKINS_DOCKER_TEST_ENABLE = System.getenv("JENKINS_DOCKER_TEST_ENABLE");
     static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
 
-    private static long currentTime = System.currentTimeMillis();
+    private static long currentTime;
     private static StrSubstitutor pipelineSubstitution;
     static ArtifactoryBuildInfoClient buildInfoClient;
     static Artifactory artifactoryClient;
 
-    private ClassLoader classLoader = PipelineTestBase.class.getClassLoader();
+    private static ClassLoader classLoader = PipelineTestBase.class.getClassLoader();
     PipelineType pipelineType;
 
     PipelineTestBase(PipelineType pipelineType) {
@@ -76,29 +77,37 @@ public class PipelineTestBase {
 
     @BeforeClass
     public static void setUp() {
+        currentTime = System.currentTimeMillis();
         verifyEnvironment();
         createSlave();
         setJarsLibEnv();
         createClients();
         cleanUpArtifactory(artifactoryClient);
         createPipelineSubstitution();
+        // Create repositories
+        Arrays.stream(TestRepository.values()).forEach(PipelineTestBase::createRepo);
     }
 
     @Before
     public void beforeTest() throws IOException {
         log.info("Running test: " + pipelineType + " / " + testName.getMethodName());
-        // Create repositories
-        Arrays.stream(TestRepository.values()).forEach(this::createRepo);
         FileUtils.cleanDirectory(testTemporaryFolder.getRoot().getAbsoluteFile());
     }
 
     @After
-    public void deleteRepos() {
-        Arrays.stream(TestRepository.values()).forEach(repoName -> artifactoryClient.repository(getRepoKey(repoName)).delete());
+    public void cleanRepos() {
+        // Remove the content of all local repositories
+        Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.LOCAL)
+                .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete(StringUtils.EMPTY));
     }
 
     @AfterClass
     public static void tearDown() {
+        // Remove repositories - need to remove virtual repositories first
+        Stream.concat(
+                Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.VIRTUAL),
+                Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() != TestRepository.RepoType.VIRTUAL))
+                .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete());
         buildInfoClient.close();
         artifactoryClient.close();
     }
@@ -129,7 +138,7 @@ public class PipelineTestBase {
      *
      * @param repository - The repository base name
      */
-    private void createRepo(TestRepository repository) {
+    private static void createRepo(TestRepository repository) {
         try {
             String repositorySettingsPath = Paths.get("integration", "settings", repository.getRepoName() + ".json").toString();
             InputStream inputStream = classLoader.getResourceAsStream(repositorySettingsPath);

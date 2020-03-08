@@ -26,63 +26,6 @@ public class DockerAgentUtils implements Serializable {
     private static final List<DockerImage> images = new CopyOnWriteArrayList<>();
 
     /**
-     * Registers an image to be captured by the build-info proxy.
-     *
-     * @param launcher
-     * @param imageTag
-     * @param host
-     * @param targetRepo
-     * @param artifactsProps
-     * @param buildInfoId
-     * @param envVars
-     * @throws IOException
-     * @throws InterruptedException
-     */
-    public synchronized static void registerImagOnAgents(Launcher launcher, final String imageTag,
-            final String host, final String targetRepo, final ArrayListMultimap<String, String> artifactsProps,
-                final int buildInfoId, final EnvVars envVars) throws IOException, InterruptedException {
-        // Master
-        final String imageId = getImageIdFromAgent(launcher, imageTag, host, envVars);
-        registerImage(imageId, imageTag, targetRepo, artifactsProps, buildInfoId);
-
-        // Agents
-        List<Node> nodes = Jenkins.getInstance().getNodes();
-        for (Node node : nodes) {
-            if (node == null || node.getChannel() == null) {
-                continue;
-            }
-            try {
-                node.getChannel().call(new MasterToSlaveCallable<Boolean, IOException>() {
-                    public Boolean call() throws IOException {
-                        registerImage(imageId, imageTag, targetRepo, artifactsProps, buildInfoId);
-                        return true;
-                    }
-                });
-            } catch (Exception e) {
-                launcher.getListener().getLogger().println("Could not register docker image " + imageTag +
-                        " on Jenkins node '" + node.getDisplayName() + "' due to: " + e.getMessage() +
-                        " This could be because this node is now offline."
-                );
-            }
-        }
-    }
-
-    /**
-     * Registers an image to the images cache, so that it can be captured by the build-info proxy.
-     *
-     * @param imageId
-     * @param imageTag
-     * @param targetRepo
-     * @param buildInfoId
-     * @throws IOException
-     */
-    private static void registerImage(String imageId, String imageTag, String targetRepo,
-            ArrayListMultimap<String, String> artifactsProps, int buildInfoId) throws IOException {
-        DockerImage image = new DockerImage(imageId, imageTag, targetRepo, buildInfoId, artifactsProps);
-        images.add(image);
-    }
-
-    /**
      * Gets a list of registered docker images from the images cache, if it has been
      * registered to the cache for a specific build-info ID and if a docker manifest has been captured for it
      * by the build-info proxy.

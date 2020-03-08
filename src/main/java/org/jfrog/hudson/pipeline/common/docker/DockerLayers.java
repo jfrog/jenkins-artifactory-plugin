@@ -21,4 +21,8 @@ public class DockerLayers implements Serializable {
     public DockerLayer getByDigest(String digest) {
         return digestToLayer.get(digest);
     }
+
+    public List<DockerLayer> getLayers() {
+        return layers;
+    }
 }

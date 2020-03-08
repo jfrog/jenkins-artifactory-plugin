@@ -18,7 +18,7 @@ package org.jfrog.hudson.util;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hudson.util.Scrambler;
+import hudson.util.Secret;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -34,9 +34,9 @@ import java.util.Base64;
  */
 public class Credentials implements Serializable {
     public static final Credentials EMPTY_CREDENTIALS = new Credentials(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY);
-    private final String username;
-    private final String password;
-    private final String accessToken;
+    private final Secret username;
+    private final Secret password;
+    private final Secret accessToken;
 
     /**
      * Main constructor
@@ -45,10 +45,9 @@ public class Credentials implements Serializable {
      * @param password Clear-text password. Will be scrambled.
      */
     private Credentials(String username, String password, String accessToken) {
-        this.username = username;
-        this.password = Scrambler.scramble(password);
-        this.accessToken = Scrambler.scramble(accessToken);
-
+        this.username = Secret.fromString(username);
+        this.password = Secret.fromString(password);
+        this.accessToken = Secret.fromString(accessToken);
     }
 
     public Credentials(String accessToken) {
@@ -84,7 +83,7 @@ public class Credentials implements Serializable {
     }
 
     public Credentials convertAccessTokenToUsernamePassword() throws java.io.IOException {
-        String descrambledToken = Scrambler.descramble(accessToken);
+        String descrambledToken = Secret.toString(accessToken);
         return new Credentials(extractUsernameFromToken(descrambledToken), descrambledToken);
     }
 
@@ -99,9 +98,9 @@ public class Credentials implements Serializable {
             password = resolverPassword;
         }
 
-        this.username = username;
-        this.password = Scrambler.scramble(password);
-        this.accessToken = StringUtils.EMPTY;
+        this.username = Secret.fromString(username);
+        this.password = Secret.fromString(password);
+        this.accessToken = Secret.fromString(StringUtils.EMPTY);
     }
 
     /**
@@ -110,7 +109,7 @@ public class Credentials implements Serializable {
      * @return Username
      */
     public String getUsername() {
-        return username;
+        return Secret.toString(username);
     }
 
     /**
@@ -119,7 +118,7 @@ public class Credentials implements Serializable {
      * @return Password
      */
     public String getPassword() {
-        return Scrambler.descramble(password);
+        return Secret.toString(password);
     }
 
     /**
@@ -128,6 +127,6 @@ public class Credentials implements Serializable {
      * @return Access token
      */
     public String getAccessToken() {
-        return Scrambler.descramble(accessToken);
+        return Secret.toString(accessToken);
     }
 }
