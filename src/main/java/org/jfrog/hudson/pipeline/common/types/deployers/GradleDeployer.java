@@ -29,18 +29,20 @@ public class GradleDeployer extends Deployer {
     @Override
     @JsonIgnore
     public ServerDetails getDetails() throws IOException {
+        RepositoryConf releaseRepositoryConf = new RepositoryConf(repo, repo, false);
+        if (server == null) {
+            // No deployer
+            return new ServerDetails("", "", releaseRepositoryConf, null, releaseRepositoryConf, null, "", "");
+        }
         validateRepositories();
         RepositoryConf snapshotRepositoryConf = null;
-        RepositoryConf releaseRepositoryConf = null;
-        if (StringUtils.isNotEmpty(repo)) {
-            releaseRepositoryConf = new RepositoryConf(repo, repo, false);
-        } else {
+        if (StringUtils.isBlank(repo)) {
             releaseRepositoryConf = new RepositoryConf(releaseRepo, releaseRepo, false);
             snapshotRepositoryConf = new RepositoryConf(snapshotRepo, snapshotRepo, false);
         }
 
-        String serverName = server == null ? "" : server.getServerName();
-        String url = server == null ? "" : server.getUrl();
+        String serverName = server.getServerName();
+        String url = server.getUrl();
         return new ServerDetails(serverName, url, releaseRepositoryConf, snapshotRepositoryConf, releaseRepositoryConf, null, "", "");
     }
 
