@@ -19,7 +19,6 @@ public class GoBuild extends PackageManagerBuild {
     public static final String GO_CMD_ARGS = "goCmdArgs";
     public static final String VERSION = "version";
 
-
     public GoBuild() {
         deployer = new NpmGoDeployer();
         resolver = new NpmGoResolver();

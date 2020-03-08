@@ -51,8 +51,9 @@ public class NpmBuild extends PackageManagerBuild {
         deployer.setCpsScript(cpsScript);
         Map<String, Object> stepVariables = getRunArguments((String) args.get(PATH), (BuildInfo) args.get(BUILD_INFO));
         appendBuildInfo(cpsScript, stepVariables);
-        stepVariables.put(JAVA_ARGS, args.get(JAVA_ARGS)); // Added to allow java remote debugging
-        stepVariables.put(MODULE, args.get(MODULE)); // Added to allow java remote debugging
+        stepVariables.put(MODULE, args.get(MODULE));
+        // Added to allow java remote debugging
+        stepVariables.put(JAVA_ARGS, args.get(JAVA_ARGS));
         return stepVariables;
     }
 
