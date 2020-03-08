@@ -24,7 +24,7 @@ import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.util.PublishedItemsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.UploadSpecHelper;
-import org.jfrog.build.extractor.moduleParallelDeployer.ModuleParallelDeployHelper;
+import org.jfrog.build.extractor.ModuleParallelDeployHelper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.Utils;
@@ -117,7 +117,7 @@ public class GenericArtifactsDeployer {
         private PatternType patternType = PatternType.ANT;
         private String spec;
         private Map<String, Set<DeployDetails>> deployableArtifactsByModule;
-        private int deploymentThreads;
+        private int threads;
 
         // Generic deploy by pattern pairs
         public FilesDeployerCallable(TaskListener listener, Multimap<String, String> patternPairs,
@@ -135,25 +135,25 @@ public class GenericArtifactsDeployer {
         // Generic deploy by spec
         public FilesDeployerCallable(TaskListener listener, String spec,
                                      ArtifactoryServer server, Credentials credentials,
-                                     ArrayListMultimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration, int deploymentThreads) {
+                                     ArrayListMultimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration, int threads) {
             this.listener = listener;
             this.spec = spec;
             this.server = server;
             this.credentials = credentials;
             this.buildProperties = buildProperties;
             this.proxyConfiguration = proxyConfiguration;
-            this.deploymentThreads = deploymentThreads;
+            this.threads = threads;
         }
 
         // Late deploy for build tools' deployable artifacts
         public FilesDeployerCallable(TaskListener listener, Map<String, Set<DeployDetails>> deployableArtifactsByModule,
-                                     ArtifactoryServer server, Credentials credentials, ProxyConfiguration proxyConfiguration, int deploymentThreads) {
+                                     ArtifactoryServer server, Credentials credentials, ProxyConfiguration proxyConfiguration, int threads) {
             this.listener = listener;
             this.deployableArtifactsByModule = deployableArtifactsByModule;
             this.server = server;
             this.credentials = credentials;
             this.proxyConfiguration = proxyConfiguration;
-            this.deploymentThreads = deploymentThreads;
+            this.threads = threads;
         }
 
         public List<Artifact> invoke(File workspace, VirtualChannel channel) throws IOException, InterruptedException {
@@ -166,7 +166,7 @@ public class GenericArtifactsDeployer {
             if (StringUtils.isNotEmpty(spec)) {
                 SpecsHelper specsHelper = new SpecsHelper(log);
                 try {
-                    return specsHelper.uploadArtifactsBySpec(spec, deploymentThreads, workspace, buildProperties, clientBuilder);
+                    return specsHelper.uploadArtifactsBySpec(spec, threads, workspace, buildProperties, clientBuilder);
                 } catch (InterruptedException e) {
                     throw e;
                 } catch (Exception e) {
@@ -177,7 +177,7 @@ public class GenericArtifactsDeployer {
             // Option 2. Maven & Gradle Pipeline late deploy - Deployable Artifacts by Module are already set.
             if (deployableArtifactsByModule != null) {
                 try (ArtifactoryBuildInfoClient client = clientBuilder.build()) {
-                    new ModuleParallelDeployHelper().deployArtifacts(client, deployableArtifactsByModule, deploymentThreads);
+                    new ModuleParallelDeployHelper().deployArtifacts(client, deployableArtifactsByModule, threads);
                 }
                 return convertDeployDetailsByModuleToArtifacts(deployableArtifactsByModule);
             }

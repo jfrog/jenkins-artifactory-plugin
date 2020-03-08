@@ -40,7 +40,7 @@ public class BuildInfo implements Serializable {
     private String number; // Build number
     private Date startDate;
     private BuildRetention retention;
-    // The candidates artifacts to be deployed in the 'deployArtifacts' step.
+    // The candidates artifacts to be deployed in the 'deployArtifacts' step, sorted by module name.
     private Map<String, List<DeployDetails>> deployableArtifactsByModule = new ConcurrentHashMap<>();
     private List<Vcs> vcs = new ArrayList<>();
     private List<Module> modules = new CopyOnWriteArrayList<>();
@@ -127,10 +127,7 @@ public class BuildInfo implements Serializable {
 
     @Whitelisted
     public void append(BuildInfo other) {
-        // Preserve existing modules if there are duplicates
-        other.deployableArtifactsByModule.putAll(this.deployableArtifactsByModule);
-        this.deployableArtifactsByModule = other.deployableArtifactsByModule;
-
+        appendDeployableArtifactsByModule(other.deployableArtifactsByModule);
         this.append(other.convertToBuild());
     }
 
@@ -197,13 +194,24 @@ public class BuildInfo implements Serializable {
         return deployableArtifactsByModule;
     }
 
-    public void appendDeployableArtifactsByModule(String deployableArtifactsPath, FilePath ws, TaskListener listener) throws IOException, InterruptedException {
+    public void getAndAppendDeployableArtifactsByModule(String deployableArtifactsPath, FilePath ws, TaskListener listener) throws IOException, InterruptedException {
         Map<String, List<DeployDetails>> deployableArtifactsToAppend = ws.act(new DeployPathsAndPropsCallable(deployableArtifactsPath, listener, this));
         // Preserve existing modules if there are duplicates
-        if (deployableArtifactsToAppend != null) {
-            deployableArtifactsToAppend.putAll(this.deployableArtifactsByModule);
-            this.deployableArtifactsByModule = deployableArtifactsToAppend;
-        }
+        appendDeployableArtifactsByModule(deployableArtifactsToAppend);
+    }
+
+    public void appendDeployableArtifactsByModule(Map<String, List<DeployDetails>> deployableArtifactsToAppend) {
+        // Append new modules with deployable details. For equal module names, append new deployable artifacts to the list of the existing module.
+        this.deployableArtifactsByModule = Stream.of(this.deployableArtifactsByModule, deployableArtifactsToAppend)
+                .flatMap(map -> map.entrySet().stream())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> new ArrayList<>(e.getValue()),
+                        (current, other) -> {
+                            current.addAll(other);
+                            return current;
+                        }
+                ));
     }
 
     public String getAgentName() {
