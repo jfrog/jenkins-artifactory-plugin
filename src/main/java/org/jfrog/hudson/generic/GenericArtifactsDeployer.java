@@ -24,6 +24,7 @@ import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.util.PublishedItemsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.UploadSpecHelper;
+import org.jfrog.build.extractor.ModuleParallelDeployHelper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.Utils;
@@ -69,14 +70,14 @@ public class GenericArtifactsDeployer {
     public void deploy()
             throws IOException, InterruptedException {
         FilePath workingDir = build.getExecutor().getCurrentWorkspace();
-        ArrayListMultimap<String, String> propertiesToAdd = getbuildPropertiesMap();
+        ArrayListMultimap<String, String> propertiesToAdd = getBuildPropertiesMap();
         ArtifactoryServer artifactoryServer = configurator.getArtifactoryServer();
 
         if (configurator.isUseSpecs()) {
             String spec = SpecUtils.getSpecStringFromSpecConf(configurator.getUploadSpec(), env, workingDir, listener.getLogger());
             artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, spec, artifactoryServer,
                     credentialsConfig.provideCredentials(build.getParent()), propertiesToAdd,
-                    ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
+                    ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy), artifactoryServer.getDeploymentThreads()));
         } else {
             String deployPattern = Util.replaceMacro(configurator.getDeployPattern(), env);
             deployPattern = StringUtils.replace(deployPattern, "\r\n", "\n");
@@ -92,7 +93,7 @@ public class GenericArtifactsDeployer {
         }
     }
 
-    private ArrayListMultimap<String, String> getbuildPropertiesMap() {
+    private ArrayListMultimap<String, String> getBuildPropertiesMap() {
         ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
         String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build);
         properties.put(BuildInfoFields.BUILD_NAME, buildName);
@@ -115,8 +116,10 @@ public class GenericArtifactsDeployer {
         private ProxyConfiguration proxyConfiguration;
         private PatternType patternType = PatternType.ANT;
         private String spec;
-        private Set<DeployDetails> deployableArtifacts;
+        private Map<String, Set<DeployDetails>> deployableArtifactsByModule;
+        private int threads;
 
+        // Generic deploy by pattern pairs
         public FilesDeployerCallable(TaskListener listener, Multimap<String, String> patternPairs,
                                      ArtifactoryServer server, Credentials credentials, String repositoryKey,
                                      ArrayListMultimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration) {
@@ -129,59 +132,65 @@ public class GenericArtifactsDeployer {
             this.proxyConfiguration = proxyConfiguration;
         }
 
+        // Generic deploy by spec
         public FilesDeployerCallable(TaskListener listener, String spec,
                                      ArtifactoryServer server, Credentials credentials,
-                                     ArrayListMultimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration) {
+                                     ArrayListMultimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration, int threads) {
             this.listener = listener;
             this.spec = spec;
             this.server = server;
             this.credentials = credentials;
             this.buildProperties = buildProperties;
             this.proxyConfiguration = proxyConfiguration;
+            this.threads = threads;
         }
 
-        public FilesDeployerCallable(TaskListener listener, Set<DeployDetails> deployableArtifacts,
-                                     ArtifactoryServer server, Credentials credentials, ProxyConfiguration proxyConfiguration) {
+        // Late deploy for build tools' deployable artifacts
+        public FilesDeployerCallable(TaskListener listener, Map<String, Set<DeployDetails>> deployableArtifactsByModule,
+                                     ArtifactoryServer server, Credentials credentials, ProxyConfiguration proxyConfiguration, int threads) {
             this.listener = listener;
-            this.deployableArtifacts = deployableArtifacts;
+            this.deployableArtifactsByModule = deployableArtifactsByModule;
             this.server = server;
             this.credentials = credentials;
             this.proxyConfiguration = proxyConfiguration;
+            this.threads = threads;
         }
 
         public List<Artifact> invoke(File workspace, VirtualChannel channel) throws IOException, InterruptedException {
-            Set<DeployDetails> artifactsToDeploy;
             Log log = new JenkinsBuildInfoLog(listener);
 
             // Create ArtifactoryClientBuilder
             ArtifactoryBuildInfoClientBuilder clientBuilder = server.createBuildInfoClientBuilder(credentials, proxyConfiguration, log);
 
+            // Option 1. Upload - Use file specs.
             if (StringUtils.isNotEmpty(spec)) {
-                // Option 1. Upload - Use file specs.
                 SpecsHelper specsHelper = new SpecsHelper(log);
                 try {
-                    return specsHelper.uploadArtifactsBySpec(spec, server.getDeploymentThreads(), workspace, buildProperties, clientBuilder);
+                    return specsHelper.uploadArtifactsBySpec(spec, threads, workspace, buildProperties, clientBuilder);
                 } catch (InterruptedException e) {
                     throw e;
                 } catch (Exception e) {
                     throw new RuntimeException("Failed uploading artifacts by spec", e);
                 }
-            } else {
-                if (deployableArtifacts != null) {
-                    // Option 2. Pipeline deploy - There is already a deployable artifacts set.
-                    artifactsToDeploy = deployableArtifacts;
-                } else {
-                    // Option 3. Generic deploy - Fetch the artifacts details from workspace by using 'patternPairs'.
-                    artifactsToDeploy = Sets.newHashSet();
-                    Multimap<String, File> targetPathToFilesMap = buildTargetPathToFiles(workspace);
-                    for (Map.Entry<String, File> entry : targetPathToFilesMap.entries()) {
-                        artifactsToDeploy.addAll(buildDeployDetailsFromFileEntry(entry));
-                    }
-                }
+            }
+
+            // Option 2. Maven & Gradle Pipeline late deploy - Deployable Artifacts by Module are already set.
+            if (deployableArtifactsByModule != null) {
                 try (ArtifactoryBuildInfoClient client = clientBuilder.build()) {
-                    deploy(client, artifactsToDeploy);
-                    return convertDeployDetailsToArtifacts(artifactsToDeploy);
+                    new ModuleParallelDeployHelper().deployArtifacts(client, deployableArtifactsByModule, threads);
                 }
+                return convertDeployDetailsByModuleToArtifacts(deployableArtifactsByModule);
+            }
+
+            // Option 3. Generic deploy - Fetch the artifacts details from workspace by using 'patternPairs'.
+            Set<DeployDetails> artifactsToDeploy = Sets.newHashSet();
+            Multimap<String, File> targetPathToFilesMap = buildTargetPathToFiles(workspace);
+            for (Map.Entry<String, File> entry : targetPathToFilesMap.entries()) {
+                artifactsToDeploy.addAll(buildDeployDetailsFromFileEntry(entry));
+            }
+            try (ArtifactoryBuildInfoClient client = clientBuilder.build()) {
+                deploy(client, artifactsToDeploy);
+                return convertDeployDetailsToArtifacts(artifactsToDeploy);
             }
         }
 
@@ -196,15 +205,17 @@ public class GenericArtifactsDeployer {
             return result;
         }
 
+        private List<Artifact> convertDeployDetailsByModuleToArtifacts(Map<String, Set<DeployDetails>> detailsByModule) {
+            List<Artifact> result = Lists.newArrayList();
+            detailsByModule.forEach((module, details) -> {
+                result.addAll(convertDeployDetailsToArtifacts(details));
+            });
+            return result;
+        }
+
         public void deploy(ArtifactoryBuildInfoClient client, Set<DeployDetails> artifactsToDeploy)
                 throws IOException {
             for (DeployDetails deployDetail : artifactsToDeploy) {
-                StringBuilder deploymentPathBuilder = new StringBuilder(server.getUrl());
-                deploymentPathBuilder.append("/").append(deployDetail.getTargetRepository());
-                if (!deployDetail.getArtifactPath().startsWith("/")) {
-                    deploymentPathBuilder.append("/");
-                }
-                deploymentPathBuilder.append(deployDetail.getArtifactPath());
                 client.deployArtifact(deployDetail);
             }
         }

@@ -63,8 +63,8 @@ public class MavenDeployer extends Deployer {
     @JsonIgnore
     public ServerDetails getDetails() {
         RepositoryConf snapshotRepositoryConf = new RepositoryConf(snapshotRepo, snapshotRepo, false);
-        RepositoryConf releaesRepositoryConf = new RepositoryConf(releaseRepo, releaseRepo, false);
-        return new ServerDetails(this.server.getServerName(), this.server.getUrl(), releaesRepositoryConf, snapshotRepositoryConf, releaesRepositoryConf, snapshotRepositoryConf, "", "");
+        RepositoryConf releaseRepositoryConf = new RepositoryConf(releaseRepo, releaseRepo, false);
+        return new ServerDetails(this.server.getServerName(), this.server.getUrl(), releaseRepositoryConf, snapshotRepositoryConf, releaseRepositoryConf, snapshotRepositoryConf, "", "");
     }
 
     @Override
@@ -74,6 +74,7 @@ public class MavenDeployer extends Deployer {
                 .deployerOverrider(this)
                 .serverDetails(getDetails())
                 .deployArtifacts(isDeployArtifacts())
+                .threads(getThreads())
                 .evenIfUnstable(isDeployEvenIfUnstable())
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .includeEnvVars(isIncludeEnvVars())
@@ -98,6 +99,7 @@ public class MavenDeployer extends Deployer {
         dummy.setSnapshotRepo("empty_repo");
         dummy.setDeployArtifacts(false);
         dummy.setDeployEvenIfUnstable(false);
+        dummy.setThreads(1);
         return dummy;
     }
 }

@@ -57,6 +57,11 @@ public class MavenDeployerStep extends MavenDeployerResolver {
         mavenDeployer.setDeployEvenIfUnstable(deployEvenIfUnstable);
     }
 
+    @DataBoundSetter
+    public void setThreads(int threads) {
+        mavenDeployer.setThreads(threads);
+    }
+
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 

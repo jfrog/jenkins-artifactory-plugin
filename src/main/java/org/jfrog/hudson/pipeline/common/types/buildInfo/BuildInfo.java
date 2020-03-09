@@ -8,7 +8,6 @@ import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.*;
@@ -26,6 +25,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,8 +40,8 @@ public class BuildInfo implements Serializable {
     private String number; // Build number
     private Date startDate;
     private BuildRetention retention;
-    // The candidates artifacts to be deployed in the 'deployArtifacts' step.
-    private List<DeployDetails> deployableArtifacts = new CopyOnWriteArrayList<>();
+    // The candidates artifacts to be deployed in the 'deployArtifacts' step, sorted by module name.
+    private Map<String, List<DeployDetails>> deployableArtifactsByModule = new ConcurrentHashMap<>();
     private List<Vcs> vcs = new ArrayList<>();
     private List<Module> modules = new CopyOnWriteArrayList<>();
     private Env env = new Env();
@@ -127,7 +127,7 @@ public class BuildInfo implements Serializable {
 
     @Whitelisted
     public void append(BuildInfo other) {
-        this.deployableArtifacts.addAll(other.deployableArtifacts);
+        appendDeployableArtifactsByModule(other.deployableArtifactsByModule);
         this.append(other.convertToBuild());
     }
 
@@ -190,13 +190,28 @@ public class BuildInfo implements Serializable {
         this.retention = mapper.convertValue(retentionArguments, BuildRetention.class);
     }
 
-    public List<DeployDetails> getDeployableArtifacts() {
-        return deployableArtifacts;
+    public Map<String, List<DeployDetails>> getDeployableArtifactsByModule() {
+        return deployableArtifactsByModule;
     }
 
-    public void appendDeployableArtifacts(String deployableArtifactsPath, FilePath ws, TaskListener listener) throws IOException, InterruptedException {
-        List<DeployDetails> deployableArtifacts = ws.act(new DeployPathsAndPropsCallable(deployableArtifactsPath, listener, this));
-        this.deployableArtifacts.addAll(deployableArtifacts);
+    public void getAndAppendDeployableArtifactsByModule(String deployableArtifactsPath, FilePath ws, TaskListener listener) throws IOException, InterruptedException {
+        Map<String, List<DeployDetails>> deployableArtifactsToAppend = ws.act(new DeployPathsAndPropsCallable(deployableArtifactsPath, listener, this));
+        // Preserve existing modules if there are duplicates
+        appendDeployableArtifactsByModule(deployableArtifactsToAppend);
+    }
+
+    public void appendDeployableArtifactsByModule(Map<String, List<DeployDetails>> deployableArtifactsToAppend) {
+        // Append new modules with deployable details. For equal module names, append new deployable artifacts to the list of the existing module.
+        this.deployableArtifactsByModule = Stream.of(this.deployableArtifactsByModule, deployableArtifactsToAppend)
+                .flatMap(map -> map.entrySet().stream())
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        e -> new ArrayList<>(e.getValue()),
+                        (current, other) -> {
+                            current.addAll(other);
+                            return current;
+                        }
+                ));
     }
 
     public String getAgentName() {
@@ -239,8 +254,8 @@ public class BuildInfo implements Serializable {
     }
 
     @SuppressWarnings("unused") // For serialization/deserialization
-    public void setDeployableArtifacts(List<DeployDetails> deployableArtifacts) {
-        this.deployableArtifacts = deployableArtifacts;
+    public void setDeployableArtifactsByModule(Map<String, List<DeployDetails>> deployableArtifactsByModule) {
+        this.deployableArtifactsByModule = deployableArtifactsByModule;
     }
 
     @SuppressWarnings("unused") // For serialization/deserialization
@@ -274,7 +289,7 @@ public class BuildInfo implements Serializable {
         }
     }
 
-    public static class DeployPathsAndPropsCallable extends MasterToSlaveFileCallable<List<DeployDetails>> {
+    public static class DeployPathsAndPropsCallable extends MasterToSlaveFileCallable<Map<String, List<DeployDetails>>> {
         private String deployableArtifactsPath;
         private TaskListener listener;
         private ArrayListMultimap<String, String> propertiesMap;
@@ -282,15 +297,16 @@ public class BuildInfo implements Serializable {
         DeployPathsAndPropsCallable(String deployableArtifactsPath, TaskListener listener, BuildInfo buildInfo) {
             this.deployableArtifactsPath = deployableArtifactsPath;
             this.listener = listener;
-            this.propertiesMap = getbuildPropertiesMap(buildInfo);
+            this.propertiesMap = getBuildPropertiesMap(buildInfo);
         }
 
-        public List<DeployDetails> invoke(File file, VirtualChannel virtualChannel) throws IOException {
-            List<DeployDetails> results = new ArrayList<>();
-            try {
-                File deployableArtifactsFile = new File(deployableArtifactsPath);
-                List<DeployableArtifactDetail> deployableArtifacts = DeployableArtifactsUtils.loadDeployableArtifactsFromFile(deployableArtifactsFile);
-                deployableArtifactsFile.delete();
+        public Map<String, List<DeployDetails>> invoke(File file, VirtualChannel virtualChannel) throws IOException {
+            Map<String, List<DeployDetails>> results = new HashMap<>();
+            File deployableArtifactsFile = new File(deployableArtifactsPath);
+            Map<String, List<DeployableArtifactDetail>> deployableArtifactsByModule = DeployableArtifactsUtils.loadDeployableArtifactsByModuleFromFile(deployableArtifactsFile);
+            deployableArtifactsFile.delete();
+            deployableArtifactsByModule.forEach((module, deployableArtifacts) -> {
+                List<DeployDetails> moduleDeployDetails = new ArrayList<>();
                 for (DeployableArtifactDetail artifact : deployableArtifacts) {
                     DeployDetails.Builder builder = new DeployDetails.Builder()
                             .file(new File(artifact.getSourcePath()))
@@ -298,16 +314,14 @@ public class BuildInfo implements Serializable {
                             .addProperties(propertiesMap)
                             .targetRepository("empty_repo")
                             .sha1(artifact.getSha1());
-                    results.add(builder.build());
+                    moduleDeployDetails.add(builder.build());
                 }
-                return results;
-            } catch (ClassNotFoundException e) {
-                ExceptionUtils.printRootCauseStackTrace(e, listener.getLogger());
-            }
+                results.put(module, moduleDeployDetails);
+            });
             return results;
         }
 
-        private ArrayListMultimap<String, String> getbuildPropertiesMap(BuildInfo buildInfo) {
+        private ArrayListMultimap<String, String> getBuildPropertiesMap(BuildInfo buildInfo) {
             ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
             properties.put("build.name", buildInfo.getName());
             properties.put("build.number", buildInfo.getNumber());

@@ -421,23 +421,36 @@ public class Utils {
         return path.replaceFirst("^~", System.getProperty("user.home"));
     }
 
-    public static String getNpmExe(FilePath ws, TaskListener listener, EnvVars env, Launcher launcher, String nodeTool) throws IOException, InterruptedException {
-        Log logger = new JenkinsBuildInfoLog(listener);
-        String npmPath = "";
+    /**
+     * Add possible npm executable directories to PATH environment variable.
+     *
+     * @param ws       - Current workspace
+     * @param listener - The listener
+     * @param env      - Agent's environment variables
+     * @param launcher - The Launcher
+     * @param nodeTool - NodeJS tool, if requested
+     */
+    public static void addNpmToPath(FilePath ws, TaskListener listener, EnvVars env, Launcher launcher, String nodeTool) throws IOException, InterruptedException {
         String nodejsHome;
         // npm from tool
         if (StringUtils.isNotEmpty(nodeTool)) {
-            npmPath = getNpmFromTool(ws, logger, listener, env, launcher, nodeTool);
+            prependNpmToPathFromTool(ws, listener, env, launcher, nodeTool);
         } else if ((nodejsHome = env.get("NODEJS_HOME")) != null) {
-            // npm from environment
-            npmPath = ws.child(nodejsHome).child("bin").child("npm").getRemote();
+            prependNodeJSHomeToPath(env, ws.child(nodejsHome));
         }
-        logger.debug("Using npm executable from " + StringUtils.defaultIfEmpty(npmPath, "PATH"));
-        // If npmPath is empty, try to use npm from PATH
-        return npmPath;
     }
 
-    private static String getNpmFromTool(FilePath ws, Log logger, TaskListener listener, EnvVars env, Launcher launcher, String nodeTool) throws IOException, InterruptedException {
+    /**
+     * Prepend npm path from NodeJS tool, as used in the NodeJS plugin.
+     *
+     * @param ws       - Current workspace
+     * @param listener - The listener
+     * @param env      - Agent's environment variables
+     * @param launcher - The Launcher
+     * @param nodeTool - NodeJS tool, if requested
+     */
+    private static void prependNpmToPathFromTool(FilePath ws, TaskListener listener, EnvVars env, Launcher launcher, String nodeTool) throws IOException, InterruptedException {
+        Log logger = new JenkinsBuildInfoLog(listener);
         NodeJSInstallation nodeInstallation = getNpmInstallation(nodeTool);
         if (nodeInstallation == null) {
             logger.error("Couldn't find NodeJS tool '" + nodeTool + "'");
@@ -449,14 +462,20 @@ public class Utils {
             logger.error("Couldn't find NodeJS home");
             throw new Run.RunnerAbortedException();
         }
-        FilePath nodePath = ws.child(nodeJsHome).child("bin").child("node");
-        if (!nodePath.exists()) {
-            logger.error("Couldn't find node executable in path " + nodePath.getRemote());
-            throw new Run.RunnerAbortedException();
-        }
-        // Prepend NODEJS_HOME/bin to PATH
-        env.override(NodeJSConstants.ENVVAR_NODEJS_PATH, nodePath.getParent().getRemote());
-        return nodePath.sibling("npm").getRemote();
+        prependNodeJSHomeToPath(env, ws.child(nodeJsHome));
+    }
+
+    /**
+     * Prepend npm path from NODEJS_HOME environment variable.
+     *
+     * @param env        - Agent's environment variables
+     * @param nodeJsHome - Path to NodeJS home
+     */
+    private static void prependNodeJSHomeToPath(EnvVars env, FilePath nodeJsHome) {
+        // For Linux/Unix - Prepend NODEJS_HOME/bin to PATH
+        env.override(NodeJSConstants.ENVVAR_NODEJS_PATH, nodeJsHome.child("bin").getRemote());
+        // For Windows - Prepend NODEJS_HOME to PATH
+        env.override(NodeJSConstants.ENVVAR_NODEJS_PATH, nodeJsHome.getRemote());
     }
 
     private static NodeJSInstallation getNpmInstallation(String nodeTool) {

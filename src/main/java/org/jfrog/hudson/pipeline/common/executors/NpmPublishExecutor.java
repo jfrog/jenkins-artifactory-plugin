@@ -15,8 +15,8 @@ import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
  */
 public class NpmPublishExecutor extends NpmExecutor {
 
-    public NpmPublishExecutor(TaskListener listener, BuildInfo buildInfo, Launcher launcher, NpmBuild npmBuild, String javaArgs, String npmExe, String path, String module, FilePath ws, EnvVars env, Run build) {
-        super(buildInfo, launcher, npmBuild, javaArgs, npmExe, ws, path, module, env, listener, build);
+    public NpmPublishExecutor(TaskListener listener, BuildInfo buildInfo, Launcher launcher, NpmBuild npmBuild, String javaArgs, String path, String module, FilePath ws, EnvVars env, Run build) {
+        super(buildInfo, launcher, npmBuild, javaArgs, ws, path, module, env, listener, build);
     }
 
     @Override

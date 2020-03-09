@@ -30,20 +30,18 @@ public abstract class NpmExecutor implements Executor {
     Launcher launcher;
     NpmBuild npmBuild;
     String javaArgs;
-    String npmExe;
     FilePath ws;
     String path;
     String module;
     EnvVars env;
     Run build;
 
-    public NpmExecutor(BuildInfo buildInfo, Launcher launcher, NpmBuild npmBuild, String javaArgs, String npmExe, FilePath ws, String path, String module, EnvVars env, TaskListener listener, Run build) {
+    public NpmExecutor(BuildInfo buildInfo, Launcher launcher, NpmBuild npmBuild, String javaArgs, FilePath ws, String path, String module, EnvVars env, TaskListener listener, Run build) {
         this.listener = listener;
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.launcher = launcher;
         this.npmBuild = npmBuild;
         this.javaArgs = javaArgs;
-        this.npmExe = npmExe;
         this.ws = ws;
         this.path = Objects.toString(path, ".");
         this.module = module;
@@ -59,7 +57,7 @@ public abstract class NpmExecutor implements Executor {
         ExtractorUtils.addVcsDetailsToEnv(new FilePath(ws, path), env, listener);
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
         EnvExtractor envExtractor = new NpmEnvExtractor(build,
-                buildInfo, deployer, resolver, listener, launcher, tempDir, env, args, path, npmExe, module);
+                buildInfo, deployer, resolver, listener, launcher, tempDir, env, args, path, module);
         envExtractor.execute();
         String absoluteDependencyDirPath = copyExtractorJars(tempDir);
         Utils.launch("npm", launcher, getArgs(absoluteDependencyDirPath, classToExecute), env, listener, ws);
