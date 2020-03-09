@@ -17,7 +17,9 @@ public class NpmGoDeployer extends Deployer {
     @Override
     public ServerDetails getDetails() {
         RepositoryConf repositoryConf = new RepositoryConf(repo, repo, false);
-        return new ServerDetails(server.getServerName(), server.getUrl(), repositoryConf, null, repositoryConf, null, "", "");
+        String serverName = server == null ? "" : server.getServerName();
+        String url = server == null ? "" : server.getUrl();
+        return new ServerDetails(serverName, url, repositoryConf, null, repositoryConf, null, "", "");
     }
 
     @Whitelisted
