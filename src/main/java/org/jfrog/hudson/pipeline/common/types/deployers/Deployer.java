@@ -34,6 +34,8 @@ import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
+import static org.jfrog.build.extractor.ModuleParallelDeployHelper.DEFAULT_DEPLOYMENT_THREADS;
+
 /**
  * Created by Tamirh on 04/08/2016.
  */
@@ -43,7 +45,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
     private ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
     private Filter artifactDeploymentPatterns = new Filter();
     private String customBuildName = "";
-    private int threads = 8;
+    private int threads = DEFAULT_DEPLOYMENT_THREADS;
     private transient CpsScript cpsScript;
 
     protected transient ArtifactoryServer server;
