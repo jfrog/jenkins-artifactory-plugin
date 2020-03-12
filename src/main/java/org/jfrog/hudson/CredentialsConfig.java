@@ -125,8 +125,8 @@ public class CredentialsConfig implements Serializable {
         return Secret.toString(username);
     }
 
-    public String getPassword() {
-        return Secret.toString(password);
+    public Secret getPassword() {
+        return password;
     }
 
     public String getCredentialsId() {
