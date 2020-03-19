@@ -382,7 +382,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
-            <artifactId>commonsress</artifactId>
+            <artifactId>commons-compress</artifactId>
             <version>1.19</version>
         </dependency>
         <dependency>
