@@ -70,7 +70,7 @@ public class MavenExecutor implements Executor {
         String generatedBuildPath = extendedEnv.get(BuildInfoFields.GENERATED_BUILD_INFO);
         buildInfo.append(Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath));
         // Read the deployable artifacts map from the 'json' file in the agent and append them to the buildInfo object.
-        buildInfo.getAndAppendDeployableArtifactsByModule(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), tempDir, listener);
+        buildInfo.getAndAppendDeployableArtifactsByModule(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), "", tempDir, listener);
         buildInfo.setAgentName(Utils.getAgentName(ws));
     }
 

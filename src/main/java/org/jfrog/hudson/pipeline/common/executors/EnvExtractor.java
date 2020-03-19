@@ -96,9 +96,13 @@ public abstract class EnvExtractor implements Executor {
     private void addPipelineInfoToConfiguration(EnvVars env, ArtifactoryClientConfiguration configuration, FilePath tempDir) {
         String buildInfoTempFile;
         String deployableArtifactsFile;
+        // Backward compatibility for pipelines using Gradle Artifactory Plugin with version bellow 4.15.1, or Jenkins Artifactory Plugin bellow 3.6.1
+        @Deprecated
+        String backwardCompatibleDeployableArtifactsFile;
         try {
             buildInfoTempFile = Utils.createTempJsonFile(launcher, BuildInfoFields.GENERATED_BUILD_INFO, tempDir.getRemote());
             deployableArtifactsFile = Utils.createTempJsonFile(launcher, BuildInfoFields.DEPLOYABLE_ARTIFACTS, tempDir.getRemote());
+            backwardCompatibleDeployableArtifactsFile = Utils.createTempJsonFile(launcher, BuildInfoFields.BACKWARD_COMPATIBLE_DEPLOYABLE_ARTIFACTS, tempDir.getRemote());
         } catch (Exception e) {
             buildListener.error("Failed while generating temp file. " + e.getMessage());
             build.setResult(Result.FAILURE);
@@ -108,5 +112,7 @@ public abstract class EnvExtractor implements Executor {
         configuration.info.setGeneratedBuildInfoFilePath(buildInfoTempFile);
         env.put(BuildInfoFields.DEPLOYABLE_ARTIFACTS, deployableArtifactsFile);
         configuration.info.setDeployableArtifactsFilePath(deployableArtifactsFile);
+        env.put(BuildInfoFields.BACKWARD_COMPATIBLE_DEPLOYABLE_ARTIFACTS, backwardCompatibleDeployableArtifactsFile);
+        configuration.info.setBackwardCompatibleDeployableArtifactsFilePath(backwardCompatibleDeployableArtifactsFile);
     }
 }

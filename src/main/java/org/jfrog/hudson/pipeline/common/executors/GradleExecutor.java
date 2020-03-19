@@ -70,7 +70,8 @@ public class GradleExecutor implements Executor {
         buildInfo.append(Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath));
         ActionableHelper.deleteFilePath(tempDir, initScriptPath);
         // Read the deployable artifacts map from the 'json' file in the agent and append them to the buildInfo object.
-        buildInfo.getAndAppendDeployableArtifactsByModule(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), tempDir, listener);
+        buildInfo.getAndAppendDeployableArtifactsByModule(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS),
+                extendedEnv.get(BuildInfoFields.BACKWARD_COMPATIBLE_DEPLOYABLE_ARTIFACTS), tempDir, listener);
         buildInfo.setAgentName(Utils.getAgentName(ws));
     }
 

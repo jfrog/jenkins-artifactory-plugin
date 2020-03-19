@@ -194,8 +194,9 @@ public class BuildInfo implements Serializable {
         return deployableArtifactsByModule;
     }
 
-    public void getAndAppendDeployableArtifactsByModule(String deployableArtifactsPath, FilePath ws, TaskListener listener) throws IOException, InterruptedException {
-        Map<String, List<DeployDetails>> deployableArtifactsToAppend = ws.act(new DeployPathsAndPropsCallable(deployableArtifactsPath, listener, this));
+    public void getAndAppendDeployableArtifactsByModule(String deployableArtifactsPath, String backwardCompatibleDeployableArtifactsPath, FilePath ws, TaskListener listener) throws IOException, InterruptedException {
+        Map<String, List<DeployDetails>> deployableArtifactsToAppend = ws.act(new DeployPathsAndPropsCallable(deployableArtifactsPath,
+                backwardCompatibleDeployableArtifactsPath, listener, this));
         // Preserve existing modules if there are duplicates
         appendDeployableArtifactsByModule(deployableArtifactsToAppend);
     }
@@ -291,11 +292,15 @@ public class BuildInfo implements Serializable {
 
     public static class DeployPathsAndPropsCallable extends MasterToSlaveFileCallable<Map<String, List<DeployDetails>>> {
         private String deployableArtifactsPath;
+        // Backward compatibility for pipelines using Gradle Artifactory Plugin with version bellow 4.15.1, or Jenkins Artifactory Plugin bellow 3.6.1
+        @Deprecated
+        private String backwardCompatibleDeployableArtifactsPath;
         private TaskListener listener;
         private ArrayListMultimap<String, String> propertiesMap;
 
-        DeployPathsAndPropsCallable(String deployableArtifactsPath, TaskListener listener, BuildInfo buildInfo) {
+        DeployPathsAndPropsCallable(String deployableArtifactsPath, String backwardCompatibleDeployableArtifactsPath, TaskListener listener, BuildInfo buildInfo) {
             this.deployableArtifactsPath = deployableArtifactsPath;
+            this.backwardCompatibleDeployableArtifactsPath = backwardCompatibleDeployableArtifactsPath;
             this.listener = listener;
             this.propertiesMap = getBuildPropertiesMap(buildInfo);
         }
@@ -303,8 +308,10 @@ public class BuildInfo implements Serializable {
         public Map<String, List<DeployDetails>> invoke(File file, VirtualChannel virtualChannel) throws IOException {
             Map<String, List<DeployDetails>> results = new HashMap<>();
             File deployableArtifactsFile = new File(deployableArtifactsPath);
-            Map<String, List<DeployableArtifactDetail>> deployableArtifactsByModule = DeployableArtifactsUtils.loadDeployableArtifactsByModuleFromFile(deployableArtifactsFile);
+            File backwardCompatibleDeployableArtifactsFile = new File(backwardCompatibleDeployableArtifactsPath);
+            Map<String, List<DeployableArtifactDetail>> deployableArtifactsByModule = DeployableArtifactsUtils.loadDeployableArtifactsFromFile(deployableArtifactsFile, backwardCompatibleDeployableArtifactsFile);
             deployableArtifactsFile.delete();
+            backwardCompatibleDeployableArtifactsFile.delete();
             deployableArtifactsByModule.forEach((module, deployableArtifacts) -> {
                 List<DeployDetails> moduleDeployDetails = new ArrayList<>();
                 for (DeployableArtifactDetail artifact : deployableArtifacts) {
