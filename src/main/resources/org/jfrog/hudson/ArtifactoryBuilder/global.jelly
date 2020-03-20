@@ -2,7 +2,7 @@
          xmlns:f="/lib/form"
          xmlns:st="jelly:stapler"
          xmlns:r="/lib/jfrog"
-         xmlns:c="/lib/credentials" xmlns:l="/lib/layout">
+         xmlns:c="/lib/credentials">
     <st:adjunct includes="lib.jfrog.repos.credentials"/>
     <f:section title="Artifactory">
 
