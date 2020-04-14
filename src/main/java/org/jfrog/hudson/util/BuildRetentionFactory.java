@@ -1,5 +1,6 @@
 package org.jfrog.hudson.util;
 
+import hudson.matrix.MatrixRun;
 import hudson.model.Run;
 import hudson.tasks.LogRotator;
 import jenkins.model.BuildDiscarder;
@@ -24,7 +25,14 @@ public class BuildRetentionFactory {
     public static BuildRetention createBuildRetention(Run build, boolean discardOldArtifacts) {
         BuildRetention buildRetention = new BuildRetention(discardOldArtifacts);
         LogRotator rotator = null;
-        BuildDiscarder buildDiscarder = build.getParent().getBuildDiscarder();
+        BuildDiscarder buildDiscarder;
+        if (build instanceof MatrixRun) {
+            // Get the BuildDiscarder of the MatrixProject.
+            buildDiscarder = ((MatrixRun) build).getProject().getParent().getBuildDiscarder();
+        } else {
+            buildDiscarder = build.getParent().getBuildDiscarder();
+        }
+
         if (buildDiscarder != null && buildDiscarder instanceof LogRotator) {
             rotator = (LogRotator)  buildDiscarder;
         }
