@@ -95,11 +95,14 @@
                                 <input type="hidden" name="overridingCredentials" value="true"/>
                                 <input type="hidden" name="stapler-class"
                                        value="org.jfrog.hudson.CredentialsConfig"/>
+                                <div id="resolverCredentialsId${server.url}">
                                     <f:entry title="${%Credentials}" field="credentialsId">
                                         <c:select default="${server.resolverCredentialsConfig.credentialsId}"/>
                                     </f:entry>
+                                </div>
 
-                                    <f:entry title="Username"
+                                <div id="legacyResolverCredentials${server.url}">
+                                     <f:entry title="Username"
                                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-resolverUserName.html">
                                         <f:textbox field="username"
                                                    value="${server.resolverCredentialsConfig.username}"/>
@@ -109,6 +112,7 @@
                                         <f:password field="password"
                                                     value="${server.resolverCredentialsConfig.password}"/>
                                     </f:entry>
+                                </div>
                             </f:nested>
                         </f:block>
                     </f:optionalBlock>
