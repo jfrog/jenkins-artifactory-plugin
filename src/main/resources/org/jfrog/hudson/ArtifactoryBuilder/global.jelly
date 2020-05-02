@@ -65,10 +65,13 @@
                                name="deployerCredentialsConfig">
                         <f:block>
                             <input type="hidden" name="stapler-class" value="org.jfrog.hudson.CredentialsConfig"/>
+                            <div id="deployerCredentialsId${server.url}">
                                 <f:entry title="${%Credentials}" name="credentialsId" field="credentialsId">
                                     <c:select default="${server.deployerCredentialsConfig.credentialsId}"/>
                                 </f:entry>
+                            </div>
 
+                            <div id="legacyDeployerCredentials${server.url}">
                                 <f:entry title="Username"
                                          help="/plugin/artifactory/help/common/help-deployerUserName.html">
                                     <f:textbox name="username" field="username"
@@ -79,6 +82,7 @@
                                     <f:password name="password" field="password"
                                                 value="${server.deployerCredentialsConfig.password}"/>
                                 </f:entry>
+                            </div>
                         </f:block>
                     </f:section>
                     <f:validateButton
