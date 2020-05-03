@@ -10,7 +10,6 @@ import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.Vcs;
 import org.jfrog.build.api.builder.ModuleBuilder;
-import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
@@ -85,6 +84,10 @@ public class BuildInfoAccessor {
         if (env.isCapture()) {
             env.collectVariables(envVars, build, listener);
         }
+    }
+
+    public void filterVariables() {
+        this.buildInfo.getEnv().filter();
     }
 
     public void appendArtifacts(List<Artifact> artifacts, String moduleId) {
