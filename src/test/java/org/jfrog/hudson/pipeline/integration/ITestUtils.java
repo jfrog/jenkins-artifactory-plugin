@@ -174,7 +174,7 @@ class ITestUtils {
     }
 
     /**
-     * Assert that secret environment vatiables haven't been published.
+     * Assert that secret environment variables haven't been published.
      *
      * @param buildInfo - Build-info object
      */

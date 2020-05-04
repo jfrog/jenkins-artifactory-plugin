@@ -20,7 +20,6 @@ import java.util.Properties;
 /**
  * Created by romang on 6/22/16.
  */
-@SuppressWarnings("unused")
 public class Env implements Serializable {
     private Map<String, String> envVars = new HashMap<>();
     private Map<String, String> sysVars = new HashMap<>();
