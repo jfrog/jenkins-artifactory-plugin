@@ -24,10 +24,12 @@ public class EnvTest {
             putAll(System.getenv());
             put("password", "password");
             put("secret1", "secret");
-            put("1key", "key");
+            put("tOkEn", "token");
             put("psww", "psw");
-            put("wanda", "wanda");
+            put("1key", "key");
+
             put("vision", "vision");
+            put("wanda", "wanda");
         }};
     }
 
@@ -52,8 +54,9 @@ public class EnvTest {
         // These values should be excluded by default
         assertNotIncluded(env, "password");
         assertNotIncluded(env, "secret1");
-        assertNotIncluded(env, "1key");
+        assertNotIncluded(env, "tOkEn");
         assertNotIncluded(env, "psww");
+        assertNotIncluded(env, "1key");
     }
 
     @Test
@@ -75,6 +78,7 @@ public class EnvTest {
         // These values should be excluded by default
         assertNotIncluded(env, "password");
         assertNotIncluded(env, "secret1");
+        assertNotIncluded(env, "tOkEn");
         assertNotIncluded(env, "1key");
         assertNotIncluded(env, "psww");
 

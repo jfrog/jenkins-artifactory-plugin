@@ -184,7 +184,7 @@ class ITestUtils {
         String[] unfiltered = properties.keySet().stream()
                 .map(Object::toString)
                 .map(String::toLowerCase)
-                .filter(key -> StringUtils.containsAny(key, "password", "secret", "key", "psw", "DONT_COLLECT"))
+                .filter(key -> StringUtils.containsAny(key, "password", "psw", "secret", "key", "token", "DONT_COLLECT"))
                 .toArray(String[]::new);
         assertTrue("The following environment variables should have been filtered: " + Arrays.toString(unfiltered), ArrayUtils.isEmpty(unfiltered));
         assertTrue(properties.containsKey("buildInfo.env.COLLECT"));
