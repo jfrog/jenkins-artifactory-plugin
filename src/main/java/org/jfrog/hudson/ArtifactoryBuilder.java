@@ -32,6 +32,7 @@ import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.pipelines.PipelinesServer;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
@@ -65,6 +66,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         private boolean useCredentialsPlugin;
         private List<ArtifactoryServer> artifactoryServers;
+        private PipelinesServer pipelinesServer;
 
         public DescriptorImpl() {
             super(ArtifactoryBuilder.class);
@@ -275,6 +277,10 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return artifactoryServers;
         }
 
+        public PipelinesServer getPipelinesServer() {
+            return pipelinesServer;
+        }
+
         public boolean getUseCredentialsPlugin() {
             return useCredentialsPlugin;
         }
@@ -283,6 +289,11 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         @SuppressWarnings({"UnusedDeclaration"})
         public void setArtifactoryServers(List<ArtifactoryServer> artifactoryServers) {
             this.artifactoryServers = artifactoryServers;
+        }
+
+        @SuppressWarnings({"UnusedDeclaration"})
+        public void setPipelinesServer(PipelinesServer pipelinesServer) {
+            this.pipelinesServer = pipelinesServer;
         }
 
         @SuppressWarnings({"UnusedDeclaration"})
