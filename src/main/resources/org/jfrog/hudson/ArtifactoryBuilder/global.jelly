@@ -4,7 +4,7 @@
          xmlns:r="/lib/jfrog"
          xmlns:c="/lib/credentials">
     <st:adjunct includes="lib.jfrog.repos.credentials"/>
-    <f:section title="Artifactory">
+    <f:section title="JFrog">
 
         <f:entry
             help="/plugin/artifactory/help/ArtifactoryBuilder/help-useCredentialsPlugin.html">
