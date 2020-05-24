@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipelines;
+package org.jfrog.hudson;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;

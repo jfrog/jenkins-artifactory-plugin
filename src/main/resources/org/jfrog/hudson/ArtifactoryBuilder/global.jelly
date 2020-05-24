@@ -7,11 +7,11 @@
     <f:section title="JFrog">
 
         <f:entry
-            help="/plugin/artifactory/help/ArtifactoryBuilder/help-useCredentialsPlugin.html">
-                <input id="useCredentialsPlugin" type="checkbox" onclick="updateViewForCredentialsMethod(this.checked)"
+                help="/plugin/artifactory/help/ArtifactoryBuilder/help-useCredentialsPlugin.html">
+            <input id="useCredentialsPlugin" type="checkbox" onclick="updateViewForCredentialsMethod(this.checked)"
                    name="useCredentialsPlugin" value="${descriptor.useCredentialsPlugin}"
-                        field="useCredentialsPlugin">Use the Credentials Plugin
-                </input>
+                   field="useCredentialsPlugin">Use the Credentials Plugin
+            </input>
         </f:entry>
         <f:entry title="Artifactory servers"
                  description="List of Artifactory servers that projects will want to deploy artifacts and build info to">
@@ -57,125 +57,8 @@
                                         </j:forEach>
                                     </select>
                                 </f:entry>
-                                <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
-                                                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
-                                </f:optionalBlock>
-                            </table>
-                        </f:entry>
-                    </f:advanced>
-
-                    <f:section title="Default Deployer Credentials" field="deployerCredentialsConfig"
-                               name="deployerCredentialsConfig">
-                        <f:block>
-                            <input type="hidden" name="stapler-class" value="org.jfrog.hudson.CredentialsConfig"/>
-                            <table style="width: 100%" id="deployerCredentialsId${server.url}">
-                                <f:entry title="${%Credentials}" name="credentialsId" field="credentialsId">
-                                    <c:select default="${server.deployerCredentialsConfig.credentialsId}"/>
-                                </f:entry>
-                            </table>
-
-                            <table style="width: 100%" id="legacyDeployerCredentials${server.url}">
-                                <f:entry title="Username"
-                                         help="/plugin/artifactory/help/common/help-deployerUserName.html">
-                                    <f:textbox name="username" field="username"
-                                               value="${server.deployerCredentialsConfig.username}"/>
-                                </f:entry>
-                                <f:entry title="Password"
-                                         help="/plugin/artifactory/help/common/help-deployerPassword.html">
-                                    <f:password name="password" field="password"
-                                                value="${server.deployerCredentialsConfig.password}"/>
-                                </f:entry>
-                            </table>
-                        </f:block>
-                    </f:section>
-                    <f:validateButton
-                            title="${%Test Connection}" progress="${%Testing...}"
-                            method="testConnection"
-                            with="artifactoryUrl,artifactory.timeout,artifactory.bypassProxy,useCredentialsPlugin,credentialsId,username,password,connectionRetry"/>
-
-                    <f:optionalBlock title="Use Different Resolver Credentials"
-                                     name="resolverCredentialsConfig"
-                                     field="resolverCredentialsConfig"
-                                     checked="${server.resolverCredentialsConfig.overridingCredentials}">
-                        <f:block>
-                            <f:nested>
-                                <input type="hidden" name="overridingCredentials" value="true"/>
-                                <input type="hidden" name="stapler-class"
-                                       value="org.jfrog.hudson.CredentialsConfig"/>
-                                <table style="width: 100%" id="resolverCredentialsId${server.url}">
-                                    <f:entry title="${%Credentials}" field="credentialsId">
-                                        <c:select default="${server.resolverCredentialsConfig.credentialsId}"/>
-                                    </f:entry>
-                                </table>
-
-                                <table style="width: 100%" id="legacyResolverCredentials${server.url}">
-                                    <f:entry title="Username"
-                                             help="/plugin/artifactory/help/ArtifactoryBuilder/help-resolverUserName.html">
-                                        <f:textbox field="username"
-                                                   value="${server.resolverCredentialsConfig.username}"/>
-                                    </f:entry>
-                                    <f:entry title="Password"
-                                             help="/plugin/artifactory/help/ArtifactoryBuilder/help-resolverPassword.html">
-                                        <f:password field="password"
-                                                    value="${server.resolverCredentialsConfig.password}"/>
-                                    </f:entry>
-                                </table>
-                            </f:nested>
-                        </f:block>
-                    </f:optionalBlock>
-
-                     <f:entry title="">
-                        <div align="right">
-                            <f:repeatableDeleteButton/>
-                        </div>
-                    </f:entry>
-
-                </table>
-            </f:repeatable>
-
-
-
-            <f:repeatable name="pipelinesServer" var="server" items="${descriptor.artifactoryServers}"
-                          header="JFrog Pipelines" add="${%Add JFrog pipelines Server}">
-                <input type="hidden" name="stapler-class" value="org.jfrog.hudson.pipelines.PipelinesServer"/>
-
-                <table width="100%">
-                    <f:entry title="Server ID" help="/plugin/artifactory/help/ArtifactoryBuilder/help-serverId.html">
-                        <f:textbox field="serverId" value="${server.name}"/>
-                    </f:entry>
-
-                    <f:entry title="URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-url.html">
-                        <f:textbox field="artifactoryUrl" value="${server.url}" use="required"/>
-                    </f:entry>
-
-                    <f:advanced>
-                        <f:entry>
-                            <table style="width:100%">
-                                <f:entry title="Connection Timeout" field="artifactory.timeout"
-                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
-                                    <f:textbox clazz="number" value="${server.timeout}"/>
-                                </f:entry>
-                                <f:entry field="connectionRetry" title="Number of retries"
-                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
-                                    <select class="setting-input" name="connectionRetry">
-                                        <j:forEach var="r" items="${server.connectionRetries}">
-                                            <f:option selected="${r==server.connectionRetry}"
-                                                      value="${r}">${r}
-                                            </f:option>
-                                        </j:forEach>
-                                    </select>
-                                </f:entry>
-                                <f:entry field="deploymentThreads" title="Number of threads for Generic uploads"
-                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-deploymentThreads.html">
-                                    <select class="setting-input" name="deploymentThreads">
-                                        <j:forEach var="r" items="${server.deploymentsThreads}">
-                                            <f:option selected="${r==server.deploymentThreads}"
-                                                      value="${r}">${r}
-                                            </f:option>
-                                        </j:forEach>
-                                    </select>
-                                </f:entry>
-                                <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
+                                <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy"
+                                                 checked="${server.bypassProxy}" inline="true"
                                                  help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
                                 </f:optionalBlock>
                             </table>
@@ -251,15 +134,54 @@
                 </table>
             </f:repeatable>
 
+            <f:entry field="pipelinesServer" title="JFrog Pipelines server">
+                <table width="100%">
+                    <f:entry title="URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-url.html">
+                        <f:textbox field="pipelinesUrl" value="${descriptor.pipelinesServer.url}"/>
+                    </f:entry>
+
+                    <f:advanced>
+                        <f:entry>
+                            <f:entry title="Connection Timeout" field="pipelinesTimeout"
+                                     help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
+                                <f:textbox clazz="number" value="${descriptor.pipelinesServer.timeout}"/>
+                            </f:entry>
+                            <f:entry field="connectionRetry" title="Number of retries"
+                                     help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
+                                <select class="setting-input" name="pipelinesConnectionRetry">
+                                    <j:forEach var="r" items="${descriptor.pipelinesServer.connectionRetries}">
+                                        <f:option selected="${r==descriptor.pipelinesServer.connectionRetry}"
+                                                  value="${r}">${r}
+                                        </f:option>
+                                    </j:forEach>
+                                </select>
+                            </f:entry>
+                            <f:optionalBlock name="pipelinesBypassProxy" title="Bypass HTTP Proxy"
+                                             checked="${descriptor.pipelinesServer.bypassProxy}" inline="true"
+                                             help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
+                            </f:optionalBlock>
+                        </f:entry>
+                    </f:advanced>
 
 
+                    <f:section title="Credentials" name="credentialsConfig">
+                        <input type="hidden" name="stapler-class" value="org.jfrog.hudson.CredentialsConfig"/>
+                        <f:entry title="${%Credentials}" field="credentialsId">
+                            <c:select default="${descriptor.pipelinesServer.credentialsConfig.credentialsId}"/>
+                        </f:entry>
 
-
+                    </f:section>
+                    <!--                    <f:validateButton-->
+                    <!--                            title="${%Test Connection}" progress="${%Testing...}"-->
+                    <!--                            method="testConnection"-->
+                    <!--                            with="pipelinesUrl,pipelines.timeout,pipelines.bypassProxy,useCredentialsPlugin,credentialsId,accessToken,connectionRetry"/>-->
+                </table>
+            </f:entry>
 
         </f:entry>
     </f:section>
     <st:adjunct includes="lib.jfrog.global.global"/>
     <script>
-       populateDropDownList()
+        populateDropDownList()
     </script>
 </j:jelly>

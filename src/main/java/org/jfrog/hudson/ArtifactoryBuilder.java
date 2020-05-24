@@ -32,7 +32,6 @@ import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.pipelines.PipelinesServer;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
@@ -205,24 +204,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             Jenkins jenkins = Jenkins.getInstance();
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
                 boolean useCredentialsPlugin = (Boolean) o.get("useCredentialsPlugin");
-                Object servers = o.get("artifactoryServer");    // an array or single object
-                List<ArtifactoryServer> artifactoryServers;
-                if (!JSONNull.getInstance().equals(servers)) {
-                    artifactoryServers = req.bindJSONToList(ArtifactoryServer.class, servers);
-                } else {
-                    artifactoryServers = null;
-                }
-
-                if (!isServerIDConfigured(artifactoryServers)) {
-                    throw new FormException("Please set the Artifactory server ID.", "ServerID");
-                }
-
-                if (isServerDuplicated(artifactoryServers)) {
-                    throw new FormException("The Artifactory server ID you have entered is already configured", "Server ID");
-                }
-
-                setArtifactoryServers(artifactoryServers);
-
+                configureArtifactoryServers(req, o);
+                configurePipelinesServer(o);
                 if (useCredentialsPlugin && !this.useCredentialsPlugin) {
                     resetJobsCredentials();
                     resetServersCredentials();
@@ -234,6 +217,31 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             throw new FormException("User doesn't have permissions to save", "Server ID");
         }
 
+        private void configureArtifactoryServers(StaplerRequest req, JSONObject o) throws FormException {
+            List<ArtifactoryServer> artifactoryServers = null;
+            Object artifactoryServerObj = o.get("artifactoryServer"); // an array or single object
+            if (!JSONNull.getInstance().equals(artifactoryServerObj)) {
+                artifactoryServers = req.bindJSONToList(ArtifactoryServer.class, artifactoryServerObj);
+            }
+
+            if (!isServerIDConfigured(artifactoryServers)) {
+                throw new FormException("Please set the Artifactory server ID.", "ServerID");
+            }
+
+            if (isServerDuplicated(artifactoryServers)) {
+                throw new FormException("The Artifactory server ID you have entered is already configured", "Server ID");
+            }
+            setArtifactoryServers(artifactoryServers);
+        }
+
+        private void configurePipelinesServer(JSONObject o) {
+            String credentialsId = ((JSONObject) o.get("credentialsConfig")).optString("credentialsId");
+            CredentialsConfig credentialsConfig = new CredentialsConfig("", "", credentialsId);
+            credentialsConfig.setIgnoreCredentialPluginDisabled(true);
+            PipelinesServer pipelinesServer = new PipelinesServer(o.getString("pipelinesUrl"), credentialsConfig, o.optInt("pipelinesTimeout"), o.getBoolean("pipelinesBypassProxy"), o.optInt("pipelinesConnectionRetry"));
+            setPipelinesServer(pipelinesServer);
+        }
+
         private void resetServersCredentials() {
             for (ArtifactoryServer server : artifactoryServers) {
                 if (server.getResolverCredentialsConfig() != null) {
@@ -242,6 +250,9 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 if (server.getDeployerCredentialsConfig() != null) {
                     server.getDeployerCredentialsConfig().deleteCredentials();
                 }
+            }
+            if (pipelinesServer != null) {
+                pipelinesServer.getCredentialsConfig().deleteCredentials();
             }
         }
 
@@ -286,12 +297,10 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         // Required by external plugins.
-        @SuppressWarnings({"UnusedDeclaration"})
         public void setArtifactoryServers(List<ArtifactoryServer> artifactoryServers) {
             this.artifactoryServers = artifactoryServers;
         }
 
-        @SuppressWarnings({"UnusedDeclaration"})
         public void setPipelinesServer(PipelinesServer pipelinesServer) {
             this.pipelinesServer = pipelinesServer;
         }

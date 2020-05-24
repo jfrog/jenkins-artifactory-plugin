@@ -1,12 +1,13 @@
-package org.jfrog.hudson.pipelines;
+package org.jfrog.hudson;
 
+import hudson.util.ListBoxModel;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ProxyConfiguration;
-import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.util.Credentials;
 import org.kohsuke.stapler.DataBoundConstructor;
+import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.Serializable;
 import java.util.List;
@@ -17,11 +18,11 @@ public class PipelinesServer implements Serializable {
     private static final int DEFAULT_CONNECTION_TIMEOUT = 300; // 5 Minutes
     private static final int DEFAULT_CONNECTION_RETRIES = 3;
 
-    private final CredentialsConfig credentialsConfig;
-    private final boolean bypassProxy;
-    private final int connectionRetry;
-    private final int timeout;
-    private final String url;
+    private CredentialsConfig credentialsConfig;
+    private boolean bypassProxy;
+    private int connectionRetry;
+    private int timeout;
+    private String url;
 
     @DataBoundConstructor
     public PipelinesServer(String pipelinesUrl, CredentialsConfig credentialsConfig,
@@ -37,8 +38,19 @@ public class PipelinesServer implements Serializable {
         return url;
     }
 
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
     public CredentialsConfig getCredentialsConfig() {
+        if (credentialsConfig == null) {
+            return CredentialsConfig.EMPTY_CREDENTIALS_CONFIG;
+        }
         return credentialsConfig;
+    }
+
+    public void setCredentialsConfig(CredentialsConfig credentialsConfig) {
+        this.credentialsConfig = credentialsConfig;
     }
 
     public int getTimeout() {
@@ -56,6 +68,19 @@ public class PipelinesServer implements Serializable {
 
     public int getConnectionRetry() {
         return connectionRetry;
+    }
+
+    @DataBoundSetter
+    public void setConnectionRetry(int connectionRetry) {
+        this.connectionRetry = connectionRetry;
+    }
+
+    public ListBoxModel doFillConnectionRetry() {
+        ListBoxModel listBoxModel = new ListBoxModel();
+        for (int i = 0; i < 10; i++) {
+            listBoxModel.add(Integer.toString(i), Integer.toString(i));
+        }
+        return new ListBoxModel(listBoxModel);
     }
 
     /**
