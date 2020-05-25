@@ -1,13 +1,11 @@
 package org.jfrog.hudson;
 
-import hudson.util.ListBoxModel;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.hudson.util.Credentials;
 import org.kohsuke.stapler.DataBoundConstructor;
-import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.Serializable;
 import java.util.List;
@@ -38,19 +36,11 @@ public class PipelinesServer implements Serializable {
         return url;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
     public CredentialsConfig getCredentialsConfig() {
         if (credentialsConfig == null) {
             return CredentialsConfig.EMPTY_CREDENTIALS_CONFIG;
         }
         return credentialsConfig;
-    }
-
-    public void setCredentialsConfig(CredentialsConfig credentialsConfig) {
-        this.credentialsConfig = credentialsConfig;
     }
 
     public int getTimeout() {
@@ -70,19 +60,6 @@ public class PipelinesServer implements Serializable {
         return connectionRetry;
     }
 
-    @DataBoundSetter
-    public void setConnectionRetry(int connectionRetry) {
-        this.connectionRetry = connectionRetry;
-    }
-
-    public ListBoxModel doFillConnectionRetry() {
-        ListBoxModel listBoxModel = new ListBoxModel();
-        for (int i = 0; i < 10; i++) {
-            listBoxModel.add(Integer.toString(i), Integer.toString(i));
-        }
-        return new ListBoxModel(listBoxModel);
-    }
-
     /**
      * This method might run on slaves, this is why we provide it with a proxy from the master config
      */
@@ -94,7 +71,7 @@ public class PipelinesServer implements Serializable {
         PipelinesHttpClient pipelinesHttpClient = new PipelinesHttpClient(url, credentials.getAccessToken(), logger);
         pipelinesHttpClient.setConnectionRetries(getConnectionRetry());
         pipelinesHttpClient.setConnectionTimeout(getTimeout());
-        if (bypassProxy) {
+        if (!isBypassProxy()) {
             pipelinesHttpClient.setProxyConfiguration(proxyConfiguration.host, proxyConfiguration.port, proxyConfiguration.username, proxyConfiguration.password);
         }
         return pipelinesHttpClient;

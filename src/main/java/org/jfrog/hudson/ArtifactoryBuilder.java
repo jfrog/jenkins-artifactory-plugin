@@ -190,6 +190,51 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             }
         }
 
+        @RequirePOST
+        public FormValidation doTestPipelinesConnection(
+                @QueryParameter("pipelinesUrl") final String url,
+                @QueryParameter("pipelinesTimeout") final String timeout,
+                @QueryParameter("pipelinesBypassProxy") final boolean bypassProxy,
+                @QueryParameter("credentialsId") final String credentialsId,
+                @QueryParameter("pipelinesConnectionRetry") final int connectionRetry) {
+            if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                return FormValidation.error("Testing the connection requires 'Administer' permission");
+            }
+            if (StringUtils.isBlank(url)) {
+                return FormValidation.error("Please set a valid Pipelines URL");
+            }
+            if (connectionRetry < 0) {
+                return FormValidation.error("Connection Retries can not be less then 0");
+            }
+
+            StringCredentialsImpl accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(credentialsId, null);
+            if (accessTokenCredentials == null) {
+                return FormValidation.error("Please set credentials with access token as 'Secret text'");
+            }
+            String accessToken = accessTokenCredentials.getSecret().getPlainText();
+
+            try (PipelinesHttpClient client = new PipelinesHttpClient(url, accessToken, new NullLog())) {
+                if (!bypassProxy && Jenkins.get().proxy != null) {
+                    client.setProxyConfiguration(RepositoriesUtils.createProxyConfiguration(Jenkins.get().proxy));
+                }
+
+                if (StringUtils.isNotBlank(timeout)) {
+                    client.setConnectionTimeout(Integer.parseInt(timeout));
+                }
+                client.setConnectionRetries(connectionRetry);
+
+                ArtifactoryVersion version;
+                try {
+                    version = client.verifyCompatiblePipelinesVersion();
+                } catch (UnsupportedOperationException uoe) {
+                    return FormValidation.warning(uoe.getMessage());
+                } catch (Exception e) {
+                    return FormValidation.error(e.getMessage());
+                }
+                return FormValidation.ok("Found JFrog Pipelines " + version.toString());
+            }
+        }
+
         /**
          * This human readable name is used in the configuration screen.
          */

@@ -57,6 +57,10 @@ public class PipelinesHttpClient implements AutoCloseable {
         this.setProxyConfiguration(host, port, null, null);
     }
 
+    public void setProxyConfiguration(ProxyConfiguration proxy) {
+        this.setProxyConfiguration(proxy.host, proxy.port, proxy.username, proxy.password);
+    }
+
     public void setProxyConfiguration(String host, int port, String username, String password) {
         this.proxyConfiguration = new ProxyConfiguration();
         this.proxyConfiguration.host = host;
@@ -103,11 +107,11 @@ public class PipelinesHttpClient implements AutoCloseable {
         return httpClient;
     }
 
-    public ArtifactoryVersion getVersion() throws IOException {
+    public ArtifactoryVersion verifyCompatiblePipelinesVersion() throws IOException {
         String versionUrl = pipelinesUrl + VERSION_INFO_URL;
         HttpResponse response = executeGetRequest(versionUrl);
-        int statusCode = response.getStatusLine().getStatusCode();
         try {
+            int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_NOT_FOUND) {
                 return ArtifactoryVersion.NOT_FOUND;
             }

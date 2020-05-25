@@ -134,7 +134,7 @@
                 </table>
             </f:repeatable>
 
-            <f:entry field="pipelinesServer" title="JFrog Pipelines server">
+            <f:entry field="pipelinesServer" title="Pipelines server">
                 <table width="100%">
                     <f:entry title="URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-url.html">
                         <f:textbox field="pipelinesUrl" value="${descriptor.pipelinesServer.url}"/>
@@ -169,12 +169,11 @@
                         <f:entry title="${%Credentials}" field="credentialsId">
                             <c:select default="${descriptor.pipelinesServer.credentialsConfig.credentialsId}"/>
                         </f:entry>
-
                     </f:section>
-                    <!--                    <f:validateButton-->
-                    <!--                            title="${%Test Connection}" progress="${%Testing...}"-->
-                    <!--                            method="testConnection"-->
-                    <!--                            with="pipelinesUrl,pipelines.timeout,pipelines.bypassProxy,useCredentialsPlugin,credentialsId,accessToken,connectionRetry"/>-->
+                    <f:validateButton
+                            title="${%Test Connection}" progress="${%Testing...}"
+                            method="testPipelinesConnection"
+                            with="pipelinesUrl,pipelinesTimeout,pipelinesBypassProxy,credentialsId,pipelinesConnectionRetry"/>
                 </table>
             </f:entry>
 
