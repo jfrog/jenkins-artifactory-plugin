@@ -20,12 +20,15 @@ import org.jfrog.build.client.PreemptiveHttpClient;
 import org.jfrog.build.client.PreemptiveHttpClientBuilder;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.util.URI;
+import org.jfrog.build.util.VersionCompatibilityType;
+import org.jfrog.build.util.VersionException;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 public class PipelinesHttpClient implements AutoCloseable {
+    private static final ArtifactoryVersion MINIMAL_PIPELINES_VERSION = new ArtifactoryVersion("1.5.0");
     private static final String VERSION_INFO_URL = "/api/v1/system/info";
     private static final int DEFAULT_CONNECTION_TIMEOUT_SECS = 300;
     private static final int DEFAULT_CONNECTION_RETRY = 3;
@@ -107,7 +110,13 @@ public class PipelinesHttpClient implements AutoCloseable {
         return httpClient;
     }
 
-    public ArtifactoryVersion verifyCompatiblePipelinesVersion() throws IOException {
+    /**
+     * Get Pipelines version.
+     *
+     * @return Pipelines version
+     * @throws IOException if response status is not 200 or 404.
+     */
+    public ArtifactoryVersion getVersion() throws IOException {
         String versionUrl = pipelinesUrl + VERSION_INFO_URL;
         HttpResponse response = executeGetRequest(versionUrl);
         try {
@@ -131,6 +140,33 @@ public class PipelinesHttpClient implements AutoCloseable {
         } finally {
             consumeEntity(response);
         }
+    }
+
+    /**
+     * Get and verify Pipelines version.
+     *
+     * @return Pipelines version
+     * @throws VersionException if an error occurred or the Pipelines version is below minimum.
+     */
+    public ArtifactoryVersion verifyCompatiblePipelinesVersion() throws VersionException {
+        ArtifactoryVersion version;
+        try {
+            version = getVersion();
+        } catch (IOException e) {
+            throw new VersionException("Error occurred while requesting version information: " + e.getMessage(), e,
+                    VersionCompatibilityType.NOT_FOUND);
+        }
+        if (version.isNotFound()) {
+            throw new VersionException(
+                    "There is either an incompatible or no instance of Pipelines at the provided URL.",
+                    VersionCompatibilityType.NOT_FOUND);
+        }
+        if (!version.isAtLeast(MINIMAL_PIPELINES_VERSION)) {
+            throw new VersionException("This plugin is compatible with version " + MINIMAL_PIPELINES_VERSION +
+                    " of JFrog Pipelines and above. Please upgrade your JFrog Pipelines server!",
+                    VersionCompatibilityType.INCOMPATIBLE);
+        }
+        return version;
     }
 
     public JsonNode getJsonNode(InputStream content) throws IOException {
@@ -162,14 +198,13 @@ public class PipelinesHttpClient implements AutoCloseable {
     }
 
     public String getMessageFromEntity(HttpEntity entity) throws IOException {
-        String responseMessage = "";
-        if (entity != null) {
-            responseMessage = this.getResponseEntityContent(entity);
-            if (StringUtils.isNotBlank(responseMessage)) {
-                responseMessage = " Response message: " + responseMessage;
-            }
+        if (entity == null) {
+            return "";
         }
-
+        String responseMessage = getResponseEntityContent(entity);
+        if (StringUtils.isNotBlank(responseMessage)) {
+            responseMessage = " Response message: " + responseMessage;
+        }
         return responseMessage;
     }
 

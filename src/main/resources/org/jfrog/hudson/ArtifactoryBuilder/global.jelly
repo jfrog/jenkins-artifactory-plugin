@@ -15,8 +15,6 @@
         </f:entry>
         <f:entry title="Artifactory servers"
                  description="List of Artifactory servers that projects will want to deploy artifacts and build info to">
-
-
             <f:repeatable name="artifactoryServer" var="server" items="${descriptor.artifactoryServers}"
                           header="Artifactory" add="${%Add Artifactory Server}">
                 <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ArtifactoryServer"/>
@@ -133,51 +131,52 @@
 
                 </table>
             </f:repeatable>
-
-            <f:entry field="pipelinesServer" title="Pipelines server">
-                <table width="100%">
-                    <f:entry title="URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-url.html">
-                        <f:textbox field="pipelinesUrl" value="${descriptor.pipelinesServer.url}"/>
-                    </f:entry>
-
-                    <f:advanced>
-                        <f:entry>
-                            <f:entry title="Connection Timeout" field="pipelinesTimeout"
-                                     help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
-                                <f:textbox clazz="number" value="${descriptor.pipelinesServer.timeout}"/>
-                            </f:entry>
-                            <f:entry field="connectionRetry" title="Number of retries"
-                                     help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
-                                <select class="setting-input" name="pipelinesConnectionRetry">
-                                    <j:forEach var="r" items="${descriptor.pipelinesServer.connectionRetries}">
-                                        <f:option selected="${r==descriptor.pipelinesServer.connectionRetry}"
-                                                  value="${r}">${r}
-                                        </f:option>
-                                    </j:forEach>
-                                </select>
-                            </f:entry>
-                            <f:optionalBlock name="pipelinesBypassProxy" title="Bypass HTTP Proxy"
-                                             checked="${descriptor.pipelinesServer.bypassProxy}" inline="true"
-                                             help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
-                            </f:optionalBlock>
-                        </f:entry>
-                    </f:advanced>
-
-
-                    <f:section title="Credentials" name="credentialsConfig">
-                        <input type="hidden" name="stapler-class" value="org.jfrog.hudson.CredentialsConfig"/>
-                        <f:entry title="${%Credentials}" field="credentialsId">
-                            <c:select default="${descriptor.pipelinesServer.credentialsConfig.credentialsId}"/>
-                        </f:entry>
-                    </f:section>
-                    <f:validateButton
-                            title="${%Test Connection}" progress="${%Testing...}"
-                            method="testPipelinesConnection"
-                            with="pipelinesUrl,pipelinesTimeout,pipelinesBypassProxy,credentialsId,pipelinesConnectionRetry"/>
-                </table>
-            </f:entry>
-
         </f:entry>
+        <f:block>
+            <br/>
+        </f:block>
+        <f:entry title="Pipelines server" description="JFrog Pipelines server to mutually trigger jobs">
+            <table width="100%">
+                <f:entry title="URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-url.html">
+                    <f:textbox field="pipelinesUrl" value="${descriptor.pipelinesServer.url}"/>
+                </f:entry>
+
+                <f:advanced>
+                    <f:entry>
+                        <f:entry title="Connection Timeout" field="pipelinesTimeout"
+                                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
+                            <f:textbox clazz="number" value="${descriptor.pipelinesServer.timeout}"/>
+                        </f:entry>
+                        <f:entry field="connectionRetry" title="Number of retries"
+                                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
+                            <select class="setting-input" name="pipelinesConnectionRetry">
+                                <j:forEach var="r" items="${descriptor.pipelinesServer.connectionRetries}">
+                                    <f:option selected="${r==descriptor.pipelinesServer.connectionRetry}"
+                                              value="${r}">${r}
+                                    </f:option>
+                                </j:forEach>
+                            </select>
+                        </f:entry>
+                        <f:optionalBlock name="pipelinesBypassProxy" title="Bypass HTTP Proxy"
+                                         checked="${descriptor.pipelinesServer.bypassProxy}" inline="true"
+                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
+                        </f:optionalBlock>
+                    </f:entry>
+                </f:advanced>
+
+                <f:section title="Credentials" name="credentialsConfig">
+                    <input type="hidden" name="stapler-class" value="org.jfrog.hudson.CredentialsConfig"/>
+                    <f:entry title="${%Credentials}" field="credentialsId">
+                        <c:select default="${descriptor.pipelinesServer.credentialsConfig.credentialsId}"/>
+                    </f:entry>
+                </f:section>
+                <f:validateButton
+                        title="${%Test Connection}" progress="${%Testing...}"
+                        method="testPipelinesConnection"
+                        with="pipelinesUrl,pipelinesTimeout,pipelinesBypassProxy,credentialsId,pipelinesConnectionRetry"/>
+            </table>
+        </f:entry>
+
     </f:section>
     <st:adjunct includes="lib.jfrog.global.global"/>
     <script>

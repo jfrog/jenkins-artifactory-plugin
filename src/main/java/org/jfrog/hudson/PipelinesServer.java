@@ -16,11 +16,11 @@ public class PipelinesServer implements Serializable {
     private static final int DEFAULT_CONNECTION_TIMEOUT = 300; // 5 Minutes
     private static final int DEFAULT_CONNECTION_RETRIES = 3;
 
-    private CredentialsConfig credentialsConfig;
-    private boolean bypassProxy;
-    private int connectionRetry;
-    private int timeout;
-    private String url;
+    private final CredentialsConfig credentialsConfig;
+    private final boolean bypassProxy;
+    private final int connectionRetry;
+    private final int timeout;
+    private final String url;
 
     @DataBoundConstructor
     public PipelinesServer(String pipelinesUrl, CredentialsConfig credentialsConfig,
@@ -52,6 +52,7 @@ public class PipelinesServer implements Serializable {
     }
 
     // To populate the dropdown list from the jelly
+    @SuppressWarnings("unused")
     public List<Integer> getConnectionRetries() {
         return IntStream.range(0, 10).boxed().collect(Collectors.toList());
     }
