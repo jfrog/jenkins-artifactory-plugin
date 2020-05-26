@@ -18,7 +18,10 @@ package org.jfrog.hudson;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.BuildableItem;
+import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.Descriptor;
+import hudson.model.Item;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -41,7 +44,6 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -86,29 +88,13 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         /**
-         * Performs on-the-fly validation of the form field 'name'.
+         * Performs on-the-fly validation of the form field 'ServerId'.
          *
          * @param value This parameter receives the value that the user has typed.
          * @return Indicates the outcome of the validation. This is sent to the browser.
          */
-        public FormValidation doCheckName(@QueryParameter String value) throws IOException, ServletException {
-            if (value.length() == 0) {
-                return FormValidation.error("Please set a name");
-            }
-            if (value.length() < 4) {
-                return FormValidation.warning("Isn't the name too short?");
-            }
-            return FormValidation.ok();
-        }
-
-        /**
-         * Performs on-the-fly validation of the form field 'ServerId'.
-         *
-         * @param value          This parameter receives the value that the user has typed.
-         * @param artifactoryUrl This parameter receives the value that the user has typed as artifactory Url.
-         * @return Indicates the outcome of the validation. This is sent to the browser.
-         */
-        public FormValidation doCheckServerId(@QueryParameter String value, @QueryParameter String artifactoryUrl, @QueryParameter String username, @QueryParameter String password, @QueryParameter String credentialsId) throws IOException, ServletException {
+        @SuppressWarnings("unused")
+        public FormValidation doCheckServerId(@QueryParameter String value) {
             if (value.length() == 0) {
                 return FormValidation.error("Please set server ID");
             }
@@ -128,6 +114,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return FormValidation.ok();
         }
 
+        @SuppressWarnings("unused")
         @RequirePOST
         public FormValidation doTestConnection(
                 @QueryParameter("artifactoryUrl") final String url,
@@ -137,10 +124,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 @QueryParameter("credentialsId") final String deployerCredentialsId,
                 @QueryParameter("username") final String deployerCredentialsUsername,
                 @QueryParameter("password") final String deployerCredentialsPassword,
-                @QueryParameter("connectionRetry") final int connectionRetry
-
-        ) throws ServletException {
-            if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+                @QueryParameter("connectionRetry") final int connectionRetry) {
+            if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                 return FormValidation.error("Testing the connection requires 'Administer' permission");
             }
             if (StringUtils.isBlank(url)) {
@@ -193,6 +178,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             }
         }
 
+        @SuppressWarnings("unused")
         @RequirePOST
         public FormValidation doTestPipelinesConnection(
                 @QueryParameter("pipelinesCbkUrl") final String url,
@@ -251,7 +237,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         @Override
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
-            Jenkins jenkins = Jenkins.getInstance();
+            Jenkins jenkins = Jenkins.getInstanceOrNull();
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
                 boolean useCredentialsPlugin = (Boolean) o.get("useCredentialsPlugin");
                 configureArtifactoryServers(req, o);
@@ -301,17 +287,11 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                     server.getDeployerCredentialsConfig().deleteCredentials();
                 }
             }
-            if (pipelinesServer != null) {
-                pipelinesServer.getCredentialsConfig().deleteCredentials();
-            }
         }
 
         private void resetJobsCredentials() {
-            List<AbstractProject> jobs = Jenkins.getInstance().getAllItems(AbstractProject.class);
-            for (AbstractProject job : jobs) {
-                if (!(job instanceof BuildableItemWithBuildWrappers)) {
-                    continue;
-                }
+            List<BuildableItemWithBuildWrappers> jobs = Jenkins.get().getAllItems(BuildableItemWithBuildWrappers.class);
+            for (BuildableItem job : jobs) {
                 ResolverOverrider resolver = ActionableHelper.getResolverOverrider(job);
                 if (resolver != null) {
                     if (resolver.getResolverCredentialsConfig() != null) {
@@ -361,7 +341,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         private boolean isServerDuplicated(List<ArtifactoryServer> artifactoryServers) {
-            Set<String> serversNames = new HashSet<String>();
+            Set<String> serversNames = new HashSet<>();
             if (artifactoryServers == null) {
                 return false;
             }
