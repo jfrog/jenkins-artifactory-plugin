@@ -1,4 +1,4 @@
-package org.jfrog.hudson;
+package org.jfrog.hudson.jfpipelines;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonFactory;
@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import hudson.model.ResultTrend;
+import net.sf.json.JSONObject;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -25,6 +27,7 @@ import org.jfrog.build.util.URI;
 import org.jfrog.build.util.VersionCompatibilityType;
 import org.jfrog.build.util.VersionException;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -107,7 +110,7 @@ public class PipelinesHttpClient implements AutoCloseable {
      */
     public ArtifactoryVersion getVersion() throws IOException {
         HttpEntity requestEntity = new StringEntity("{action:\"test\"}");
-        HttpResponse response = executePostRequest(pipelinesCbkUrl, requestEntity);
+        HttpResponse response = executePostRequest(requestEntity);
         try {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_NOT_FOUND) {
@@ -158,19 +161,31 @@ public class PipelinesHttpClient implements AutoCloseable {
         return version;
     }
 
+    public void jobCompleted(ResultTrend status, String stepId, @Nullable OutputResource[] outputResources) throws IOException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.element("action", "status");
+        jsonObject.element("status", status.getID());
+        jsonObject.element("stepId", stepId);
+        if (outputResources != null) {
+            jsonObject.element("outputResources", outputResources);
+        }
+        HttpEntity body = new StringEntity(jsonObject.toString());
+        executePostRequest(body);
+    }
+
     public JsonNode getJsonNode(InputStream content) throws IOException {
         JsonFactory jsonFactory = this.createJsonFactory();
         JsonParser parser = jsonFactory.createParser(content);
         return (JsonNode) parser.readValueAsTree();
     }
 
-    private HttpResponse executeGetRequest(String url) throws IOException {
-        HttpGet httpGet = new HttpGet(url);
+    private HttpResponse executeGetRequest() throws IOException {
+        HttpGet httpGet = new HttpGet(pipelinesCbkUrl);
         return getHttpClient().execute(httpGet);
     }
 
-    private HttpResponse executePostRequest(String url, HttpEntity body) throws IOException {
-        HttpPost httpPost = new HttpPost(url);
+    private HttpResponse executePostRequest(HttpEntity body) throws IOException {
+        HttpPost httpPost = new HttpPost(pipelinesCbkUrl);
         httpPost.setEntity(body);
         return getHttpClient().execute(httpPost);
     }

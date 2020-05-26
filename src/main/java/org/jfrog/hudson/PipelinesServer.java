@@ -1,14 +1,19 @@
 package org.jfrog.hudson;
 
+import hudson.model.ResultTrend;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.hudson.jfpipelines.OutputResource;
+import org.jfrog.hudson.jfpipelines.PipelinesHttpClient;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.ProxyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -80,9 +85,9 @@ public class PipelinesServer implements Serializable {
         return pipelinesHttpClient;
     }
 
-    public void jobComplete() {
-        try(PipelinesHttpClient client = createPipelinesHttpClient(credentialsConfig.provideCredentials(null), ProxyUtils.createProxyConfiguration())) {
-
+    public void jobComplete(ResultTrend status, String stepId, @Nullable OutputResource[] outputResources) throws IOException {
+        try (PipelinesHttpClient client = createPipelinesHttpClient(credentialsConfig.provideCredentials(null), ProxyUtils.createProxyConfiguration())) {
+            client.jobCompleted(status, stepId, outputResources);
         }
     }
 
