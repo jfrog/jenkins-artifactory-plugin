@@ -30,6 +30,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
+import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.util.Credentials;
@@ -45,6 +46,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**
  * @author Yossi Shaul
@@ -167,8 +170,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             }
 
             try {
-                if (!bypassProxy && Jenkins.getInstance().proxy != null) {
-                    client.setProxyConfiguration(RepositoriesUtils.createProxyConfiguration(Jenkins.getInstance().proxy));
+                if (!bypassProxy && Jenkins.get().proxy != null) {
+                    client.setProxyConfiguration(createProxyConfiguration());
                 }
 
                 if (StringUtils.isNotBlank(timeout)) {
@@ -214,8 +217,11 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             String accessToken = accessTokenCredentials.getSecret().getPlainText();
 
             try (PipelinesHttpClient client = new PipelinesHttpClient(url, accessToken, new NullLog())) {
-                if (!bypassProxy && Jenkins.get().proxy != null) {
-                    client.setProxyConfiguration(RepositoriesUtils.createProxyConfiguration(Jenkins.get().proxy));
+                if (!bypassProxy) {
+                    ProxyConfiguration proxyConfiguration = createProxyConfiguration();
+                    if (proxyConfiguration != null) {
+                        client.setProxyConfiguration(proxyConfiguration);
+                    }
                 }
 
                 if (StringUtils.isNotBlank(timeout)) {

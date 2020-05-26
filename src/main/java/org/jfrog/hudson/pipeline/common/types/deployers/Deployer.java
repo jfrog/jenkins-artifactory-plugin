@@ -8,10 +8,10 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.util.FileChecksumCalculator;
+import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.CredentialsConfig;
@@ -25,7 +25,7 @@ import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.Env;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.IncludesExcludes;
-import org.jfrog.hudson.util.RepositoriesUtils;
+import org.jfrog.hudson.util.ProxyUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
 import java.io.File;
@@ -200,7 +200,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
                         "No matching credentials was found in Jenkins for the supplied credentialsId: '%s' ",
                         getDeployerCredentialsConfig().getCredentialsId()));
             }
-            org.jfrog.build.client.ProxyConfiguration proxy = RepositoriesUtils.createProxyConfiguration(Jenkins.getInstance().proxy);
+            ProxyConfiguration proxy = ProxyUtils.createProxyConfiguration();
             Map<String, Set<DeployDetails>> deployableArtifactsByModule = ws.act(new DeployDetailsCallable(buildInfo.getDeployableArtifactsByModule(), listener, this));
             if (deployableArtifactsByModule == null) {
                 throw new RuntimeException("Deployment failed");

@@ -3,18 +3,19 @@ package org.jfrog.hudson.trigger;
 import antlr.ANTLRException;
 import hudson.Extension;
 import hudson.maven.MavenModuleSet;
-import hudson.model.*;
+import hudson.model.AbstractProject;
+import hudson.model.Item;
+import hudson.model.Project;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
-import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ItemLastModified;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
+import org.jfrog.hudson.util.ProxyUtils;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -56,8 +57,7 @@ public class ArtifactoryTrigger extends Trigger {
         for (String path : paths) {
             try (ArtifactoryBuildInfoClient client = server.createArtifactoryClient(
                     server.getDeployerCredentialsConfig().provideCredentials(job),
-                    server.createProxyConfiguration(Jenkins.getInstance().proxy),
-                    new NullLog())) {
+                    ProxyUtils.createProxyConfiguration())) {
                 ItemLastModified itemLastModified = client.getItemLastModified(StringUtils.trimToEmpty(path));
                 long responseLastModified = itemLastModified.getLastModified();
                 if (responseLastModified > lastModified) {

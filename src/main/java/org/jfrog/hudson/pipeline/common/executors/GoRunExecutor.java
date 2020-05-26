@@ -4,7 +4,6 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.Build;
@@ -14,12 +13,12 @@ import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.go.GoRunCallable;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
-
+import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
+import org.jfrog.hudson.util.ProxyUtils;
 
 import java.io.IOException;
 
@@ -81,7 +80,7 @@ public class GoRunExecutor implements Executor {
                 .setArtifactoryUrl(server.getUrl())
                 .setUsername(username)
                 .setPassword(password)
-                .setProxyConfiguration(ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy))
+                .setProxyConfiguration(ProxyUtils.createProxyConfiguration())
                 .setLog(logger)
                 .setConnectionRetry(server.getConnectionRetry())
                 .setConnectionTimeout(server.getTimeout());

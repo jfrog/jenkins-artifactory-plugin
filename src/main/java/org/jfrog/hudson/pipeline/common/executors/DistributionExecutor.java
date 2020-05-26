@@ -2,7 +2,6 @@ package org.jfrog.hudson.pipeline.common.executors;
 
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 import net.sf.json.JSONArray;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -14,6 +13,7 @@ import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.types.DistributionConfig;
 import org.jfrog.hudson.release.DistributionUtils;
 import org.jfrog.hudson.util.CredentialManager;
+import org.jfrog.hudson.util.ProxyUtils;
 
 import java.io.IOException;
 
@@ -42,7 +42,7 @@ public class DistributionExecutor implements Executor {
         ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(server);
         CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, server);
         ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
-                ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy));
+                ProxyUtils.createProxyConfiguration());
 
         DistributionBuilder distributionBuilder = new DistributionBuilder()
                 .publish(distributionConfig.isPublish())

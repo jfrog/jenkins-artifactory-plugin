@@ -21,7 +21,6 @@ import com.google.common.collect.Maps;
 import hudson.model.*;
 import hudson.security.ACL;
 import hudson.security.Permission;
-import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -31,6 +30,7 @@ import org.jfrog.hudson.*;
 import org.jfrog.hudson.release.PromotionUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.CredentialManager;
+import org.jfrog.hudson.util.ProxyUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
@@ -387,7 +387,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                 listener.getLogger().println("Promoting build ....");
 
                 client = artifactoryServer.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
-                        artifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy));
+                        ProxyUtils.createProxyConfiguration());
 
                 if ((promotionPlugin != null) &&
                         !UserPluginInfo.NO_PLUGIN_KEY.equals(promotionPlugin.getPluginName())) {
