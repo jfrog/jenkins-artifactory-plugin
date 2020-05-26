@@ -22,20 +22,20 @@ public class PipelinesServer implements Serializable {
     private final boolean bypassProxy;
     private final int connectionRetry;
     private final int timeout;
-    private final String url;
+    private final String cbkUrl;
 
     @DataBoundConstructor
-    public PipelinesServer(String pipelinesCbkUrl, CredentialsConfig credentialsConfig,
+    public PipelinesServer(String cbkUrl, CredentialsConfig credentialsConfig,
                            int timeout, boolean bypassProxy, int connectionRetry) {
         this.connectionRetry = connectionRetry > 0 ? connectionRetry : DEFAULT_CONNECTION_RETRIES;
         this.timeout = timeout > 0 ? timeout : DEFAULT_CONNECTION_TIMEOUT;
-        this.url = StringUtils.removeEnd(pipelinesCbkUrl, "/");
+        this.cbkUrl = StringUtils.removeEnd(cbkUrl, "/");
         this.credentialsConfig = credentialsConfig;
         this.bypassProxy = bypassProxy;
     }
 
-    public String getUrl() {
-        return url;
+    public String getCbkUrl() {
+        return cbkUrl;
     }
 
     public CredentialsConfig getCredentialsConfig() {
@@ -71,7 +71,7 @@ public class PipelinesServer implements Serializable {
     }
 
     public PipelinesHttpClient createPipelinesHttpClient(Credentials credentials, ProxyConfiguration proxyConfiguration, Log logger) {
-        PipelinesHttpClient pipelinesHttpClient = new PipelinesHttpClient(url, credentials.getAccessToken(), logger);
+        PipelinesHttpClient pipelinesHttpClient = new PipelinesHttpClient(cbkUrl, credentials.getAccessToken(), logger);
         pipelinesHttpClient.setConnectionRetries(getConnectionRetry());
         pipelinesHttpClient.setConnectionTimeout(getTimeout());
         if (!isBypassProxy()) {

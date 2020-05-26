@@ -138,7 +138,7 @@
         <f:entry title="Pipelines server" description="JFrog Pipelines server to mutually trigger jobs">
             <table width="100%">
                 <f:entry title="Callback URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-pipelinesCbkUrl.html">
-                    <f:textbox field="pipelinesCbkUrl" value="${descriptor.pipelinesServer.url}"/>
+                    <f:textbox field="pipelinesCbkUrl" value="${descriptor.pipelinesServer.cbkUrl}"/>
                 </f:entry>
 
                 <f:advanced>

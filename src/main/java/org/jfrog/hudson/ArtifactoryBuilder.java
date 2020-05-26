@@ -78,7 +78,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         @SuppressWarnings("unused")
         @RequirePOST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
-            Jenkins jenkins = Jenkins.getInstance();
+            Jenkins jenkins = Jenkins.getInstanceOrNull();
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
                 return PluginsUtils.fillPluginCredentials(project, ACL.SYSTEM);
             }
@@ -249,7 +249,6 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return "Artifactory Plugin";
         }
 
-        @SuppressWarnings({"unchecked"})
         @Override
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
             Jenkins jenkins = Jenkins.getInstance();
