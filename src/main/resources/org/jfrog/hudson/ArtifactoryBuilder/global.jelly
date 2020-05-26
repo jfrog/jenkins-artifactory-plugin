@@ -137,8 +137,8 @@
         </f:block>
         <f:entry title="Pipelines server" description="JFrog Pipelines server to mutually trigger jobs">
             <table width="100%">
-                <f:entry title="URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-url.html">
-                    <f:textbox field="pipelinesUrl" value="${descriptor.pipelinesServer.url}"/>
+                <f:entry title="Callback URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-pipelinesCbkUrl.html">
+                    <f:textbox field="pipelinesCbkUrl" value="${descriptor.pipelinesServer.url}"/>
                 </f:entry>
 
                 <f:advanced>
@@ -173,7 +173,7 @@
                 <f:validateButton
                         title="${%Test Connection}" progress="${%Testing...}"
                         method="testPipelinesConnection"
-                        with="pipelinesUrl,pipelinesTimeout,pipelinesBypassProxy,credentialsId,pipelinesConnectionRetry"/>
+                        with="pipelinesCbkUrl,pipelinesTimeout,pipelinesBypassProxy,credentialsId,pipelinesConnectionRetry"/>
             </table>
         </f:entry>
 

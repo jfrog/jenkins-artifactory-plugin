@@ -195,7 +195,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         @RequirePOST
         public FormValidation doTestPipelinesConnection(
-                @QueryParameter("pipelinesUrl") final String url,
+                @QueryParameter("pipelinesCbkUrl") final String url,
                 @QueryParameter("pipelinesTimeout") final String timeout,
                 @QueryParameter("pipelinesBypassProxy") final boolean bypassProxy,
                 @QueryParameter("credentialsId") final String credentialsId,
@@ -289,7 +289,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             String credentialsId = ((JSONObject) o.get("credentialsConfig")).optString("credentialsId");
             CredentialsConfig credentialsConfig = new CredentialsConfig("", "", credentialsId);
             credentialsConfig.setIgnoreCredentialPluginDisabled(true);
-            PipelinesServer pipelinesServer = new PipelinesServer(o.getString("pipelinesUrl"), credentialsConfig, o.optInt("pipelinesTimeout"), o.getBoolean("pipelinesBypassProxy"), o.optInt("pipelinesConnectionRetry"));
+            PipelinesServer pipelinesServer = new PipelinesServer(o.getString("pipelinesCbkUrl"), credentialsConfig, o.optInt("pipelinesTimeout"), o.getBoolean("pipelinesBypassProxy"), o.optInt("pipelinesConnectionRetry"));
             setPipelinesServer(pipelinesServer);
         }
 

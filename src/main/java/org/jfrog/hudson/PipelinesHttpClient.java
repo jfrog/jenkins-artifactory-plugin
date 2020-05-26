@@ -13,6 +13,8 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ArtifactoryVersion;
@@ -28,25 +30,24 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 public class PipelinesHttpClient implements AutoCloseable {
-    private static final ArtifactoryVersion MINIMAL_PIPELINES_VERSION = new ArtifactoryVersion("1.5.0");
-    private static final String VERSION_INFO_URL = "/api/v1/system/info";
+    private static final ArtifactoryVersion MINIMAL_PIPELINES_VERSION = new ArtifactoryVersion("1.6.0");
     private static final int DEFAULT_CONNECTION_TIMEOUT_SECS = 300;
     private static final int DEFAULT_CONNECTION_RETRY = 3;
 
     private ProxyConfiguration proxyConfiguration;
     private PreemptiveHttpClient httpClient;
-    private final String pipelinesUrl;
+    private final String pipelinesCbkUrl;
     private final String accessToken;
     private int connectionTimeout;
     private int connectionRetries;
     private boolean insecureTls;
     private final Log log;
 
-    public PipelinesHttpClient(String pipelinesUrl, String accessToken, Log log) {
+    public PipelinesHttpClient(String pipelinesCbkUrl, String accessToken, Log log) {
         this.connectionTimeout = DEFAULT_CONNECTION_TIMEOUT_SECS;
         this.connectionRetries = DEFAULT_CONNECTION_RETRY;
         this.insecureTls = false;
-        this.pipelinesUrl = StringUtils.stripEnd(pipelinesUrl, "/");
+        this.pipelinesCbkUrl = StringUtils.stripEnd(pipelinesCbkUrl, "/");
         this.accessToken = accessToken;
         this.log = log;
     }
@@ -56,20 +57,8 @@ public class PipelinesHttpClient implements AutoCloseable {
         return org.apache.commons.codec.binary.StringUtils.newStringUsAscii(rawData);
     }
 
-    public void setProxyConfiguration(String host, int port) {
-        this.setProxyConfiguration(host, port, null, null);
-    }
-
-    public void setProxyConfiguration(ProxyConfiguration proxy) {
-        this.setProxyConfiguration(proxy.host, proxy.port, proxy.username, proxy.password);
-    }
-
-    public void setProxyConfiguration(String host, int port, String username, String password) {
-        this.proxyConfiguration = new ProxyConfiguration();
-        this.proxyConfiguration.host = host;
-        this.proxyConfiguration.port = port;
-        this.proxyConfiguration.username = username;
-        this.proxyConfiguration.password = password;
+    public void setProxyConfiguration(ProxyConfiguration proxyConfiguration) {
+        this.proxyConfiguration = proxyConfiguration;
     }
 
     public void setConnectionTimeout(int connectionTimeout) {
@@ -117,8 +106,8 @@ public class PipelinesHttpClient implements AutoCloseable {
      * @throws IOException if response status is not 200 or 404.
      */
     public ArtifactoryVersion getVersion() throws IOException {
-        String versionUrl = pipelinesUrl + VERSION_INFO_URL;
-        HttpResponse response = executeGetRequest(versionUrl);
+        HttpEntity requestEntity = new StringEntity("{action:\"test\"}");
+        HttpResponse response = executePostRequest(pipelinesCbkUrl, requestEntity);
         try {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_NOT_FOUND) {
@@ -175,10 +164,15 @@ public class PipelinesHttpClient implements AutoCloseable {
         return (JsonNode) parser.readValueAsTree();
     }
 
-    private HttpResponse executeGetRequest(String lastModifiedUrl) throws IOException {
-        PreemptiveHttpClient client = this.getHttpClient();
-        HttpGet httpGet = new HttpGet(lastModifiedUrl);
-        return client.execute(httpGet);
+    private HttpResponse executeGetRequest(String url) throws IOException {
+        HttpGet httpGet = new HttpGet(url);
+        return getHttpClient().execute(httpGet);
+    }
+
+    private HttpResponse executePostRequest(String url, HttpEntity body) throws IOException {
+        HttpPost httpPost = new HttpPost(url);
+        httpPost.setEntity(body);
+        return getHttpClient().execute(httpPost);
     }
 
     private void consumeEntity(HttpResponse response) throws IOException {

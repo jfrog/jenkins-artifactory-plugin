@@ -25,11 +25,11 @@ public class PipelinesServer implements Serializable {
     private final String url;
 
     @DataBoundConstructor
-    public PipelinesServer(String pipelinesUrl, CredentialsConfig credentialsConfig,
+    public PipelinesServer(String pipelinesCbkUrl, CredentialsConfig credentialsConfig,
                            int timeout, boolean bypassProxy, int connectionRetry) {
         this.connectionRetry = connectionRetry > 0 ? connectionRetry : DEFAULT_CONNECTION_RETRIES;
         this.timeout = timeout > 0 ? timeout : DEFAULT_CONNECTION_TIMEOUT;
-        this.url = StringUtils.removeEnd(pipelinesUrl, "/");
+        this.url = StringUtils.removeEnd(pipelinesCbkUrl, "/");
         this.credentialsConfig = credentialsConfig;
         this.bypassProxy = bypassProxy;
     }
@@ -75,7 +75,7 @@ public class PipelinesServer implements Serializable {
         pipelinesHttpClient.setConnectionRetries(getConnectionRetry());
         pipelinesHttpClient.setConnectionTimeout(getTimeout());
         if (!isBypassProxy()) {
-            pipelinesHttpClient.setProxyConfiguration(proxyConfiguration.host, proxyConfiguration.port, proxyConfiguration.username, proxyConfiguration.password);
+            pipelinesHttpClient.setProxyConfiguration(proxyConfiguration);
         }
         return pipelinesHttpClient;
     }
