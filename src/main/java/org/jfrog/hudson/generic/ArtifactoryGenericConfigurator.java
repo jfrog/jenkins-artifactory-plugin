@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 
+import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
+
 /**
  * Freestyle Generic configurator
  *
@@ -292,9 +294,8 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                 resolverServer);
         Credentials resolverCredentials = preferredResolver.provideCredentials(build.getProject());
         ProxyConfiguration proxyConfiguration = null;
-        hudson.ProxyConfiguration proxy = Jenkins.getInstance().proxy;
-        if (proxy != null && !resolverServer.isBypassProxy()) {
-            proxyConfiguration = ArtifactoryServer.createProxyConfiguration(proxy);
+        if (Jenkins.get().proxy != null && !resolverServer.isBypassProxy()) {
+            proxyConfiguration = createProxyConfiguration();
         }
 
         ArtifactoryDependenciesClient dependenciesClient = null;
@@ -336,7 +337,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                 ArtifactoryServer server = getArtifactoryServer();
                 CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(ArtifactoryGenericConfigurator.this, server);
                 ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideCredentials(build.getProject()),
-                        ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy));
+                        createProxyConfiguration());
                 server.setLog(listener, client);
                 try {
                     boolean isFiltered = false;

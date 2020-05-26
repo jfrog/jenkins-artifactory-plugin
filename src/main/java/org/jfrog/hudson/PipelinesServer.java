@@ -1,10 +1,12 @@
 package org.jfrog.hudson;
 
+import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.hudson.util.Credentials;
+import org.jfrog.hudson.util.ProxyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.Serializable;
@@ -76,5 +78,20 @@ public class PipelinesServer implements Serializable {
             pipelinesHttpClient.setProxyConfiguration(proxyConfiguration.host, proxyConfiguration.port, proxyConfiguration.username, proxyConfiguration.password);
         }
         return pipelinesHttpClient;
+    }
+
+    public void jobComplete() {
+        try(PipelinesHttpClient client = createPipelinesHttpClient(credentialsConfig.provideCredentials(null), ProxyUtils.createProxyConfiguration())) {
+
+        }
+    }
+
+    public static PipelinesServer getPipelinesServer() {
+        ArtifactoryBuilder.DescriptorImpl descriptor =
+                (ArtifactoryBuilder.DescriptorImpl) Jenkins.get().getDescriptor(ArtifactoryBuilder.class);
+        if (descriptor == null) {
+            return null;
+        }
+        return descriptor.getPipelinesServer();
     }
 }

@@ -375,7 +375,7 @@ public class Utils {
         if (server.isBypassProxy()) {
             return null;
         }
-        return org.jfrog.hudson.ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
+        return ProxyUtils.createProxyConfiguration();
     }
 
     public static ArrayListMultimap<String, String> getPropertiesMap(BuildInfo buildInfo, Run build, StepContext context) throws IOException, InterruptedException {
