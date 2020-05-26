@@ -3,7 +3,8 @@ package org.jfrog.hudson.pipeline.integration;
 import hudson.FilePath;
 import hudson.model.Slave;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.artifactory.client.Artifactory;
 import org.jfrog.artifactory.client.ArtifactoryRequest;
@@ -25,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -169,6 +171,23 @@ class ITestUtils {
      */
     static Build getBuildInfo(ArtifactoryBuildInfoClient buildInfoClient, String buildName, String buildNumber) throws IOException {
         return buildInfoClient.getBuildInfo(buildName, buildNumber);
+    }
+
+    /**
+     * Assert that secret environment variables haven't been published.
+     *
+     * @param buildInfo - Build-info object
+     */
+    static void assertFilteredProperties(Build buildInfo) {
+        Properties properties = buildInfo.getProperties();
+        assertNotNull(properties);
+        String[] unfiltered = properties.keySet().stream()
+                .map(Object::toString)
+                .map(String::toLowerCase)
+                .filter(key -> StringUtils.containsAny(key, "password", "psw", "secret", "key", "token", "DONT_COLLECT"))
+                .toArray(String[]::new);
+        assertTrue("The following environment variables should have been filtered: " + Arrays.toString(unfiltered), ArrayUtils.isEmpty(unfiltered));
+        assertTrue(properties.containsKey("buildInfo.env.COLLECT"));
     }
 
     /**

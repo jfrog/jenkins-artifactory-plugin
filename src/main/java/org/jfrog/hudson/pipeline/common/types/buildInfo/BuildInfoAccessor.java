@@ -86,6 +86,10 @@ public class BuildInfoAccessor {
         }
     }
 
+    public void filterVariables() {
+        this.buildInfo.getEnv().filter();
+    }
+
     public void appendArtifacts(List<Artifact> artifacts, String moduleId) {
         Module defaultModule = new ModuleBuilder()
                 .id(moduleId)

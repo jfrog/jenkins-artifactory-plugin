@@ -243,6 +243,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             runPipeline("maven");
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            assertFilteredProperties(buildInfo);
             assertEquals(4, buildInfo.getModules().size());
 
             Module module = getAndAssertModule(buildInfo, "org.jfrog.test:multi:3.7-SNAPSHOT");
@@ -261,6 +262,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             runPipeline("gradle");
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            assertFilteredProperties(buildInfo);
             assertEquals(4, buildInfo.getModules().size());
 
             assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:services:1.0-SNAPSHOT");
