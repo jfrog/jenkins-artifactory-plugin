@@ -19,6 +19,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.jfrog.build.api.util.Log;
+import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.client.PreemptiveHttpClient;
 import org.jfrog.build.client.PreemptiveHttpClientBuilder;
@@ -33,7 +34,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 public class PipelinesHttpClient implements AutoCloseable {
-    private static final ArtifactoryVersion MINIMAL_PIPELINES_VERSION = new ArtifactoryVersion("1.6.0");
+    static final ArtifactoryVersion MINIMAL_PIPELINES_VERSION = new ArtifactoryVersion("1.6.0");
     private static final int DEFAULT_CONNECTION_TIMEOUT_SECS = 300;
     private static final int DEFAULT_CONNECTION_RETRY = 3;
 
@@ -53,6 +54,10 @@ public class PipelinesHttpClient implements AutoCloseable {
         this.pipelinesCbkUrl = StringUtils.stripEnd(pipelinesCbkUrl, "/");
         this.accessToken = accessToken;
         this.log = log;
+    }
+
+    public PipelinesHttpClient(String pipelinesCbkUrl, String accessToken) {
+        this(pipelinesCbkUrl, accessToken, new NullLog());
     }
 
     public static String encodeUrl(String unescaped) {
@@ -161,7 +166,7 @@ public class PipelinesHttpClient implements AutoCloseable {
         return version;
     }
 
-    public void jobCompleted(ResultTrend status, String stepId, @Nullable OutputResource[] outputResources) throws IOException {
+    public HttpResponse jobCompleted(ResultTrend status, String stepId, @Nullable OutputResource[] outputResources) throws IOException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.element("action", "status");
         jsonObject.element("status", status.getID());
@@ -170,7 +175,7 @@ public class PipelinesHttpClient implements AutoCloseable {
             jsonObject.element("outputResources", outputResources);
         }
         HttpEntity body = new StringEntity(jsonObject.toString());
-        executePostRequest(body);
+        return executePostRequest(body);
     }
 
     public JsonNode getJsonNode(InputStream content) throws IOException {

@@ -7,13 +7,13 @@
     <f:section title="JFrog">
 
         <f:entry
-            help="/plugin/artifactory/help/ArtifactoryBuilder/help-useCredentialsPlugin.html">
-                <f:checkbox id="useCredentialsPlugin"
-                            onclick="updateViewForCredentialsMethod(this.checked)"
-                            name="useCredentialsPlugin"
-                            value="${descriptor.useCredentialsPlugin}"
-                            field="useCredentialsPlugin"
-                            title="${%Use the Credentials Plugin}"/>
+                help="/plugin/artifactory/help/ArtifactoryBuilder/help-useCredentialsPlugin.html">
+            <f:checkbox id="useCredentialsPlugin"
+                        onclick="updateViewForCredentialsMethod(this.checked)"
+                        name="useCredentialsPlugin"
+                        value="${descriptor.useCredentialsPlugin}"
+                        field="useCredentialsPlugin"
+                        title="${%Use the Credentials Plugin}"/>
         </f:entry>
         <f:entry title="Artifactory servers"
                  description="List of Artifactory servers that projects will want to deploy artifacts and build info to">
@@ -56,7 +56,8 @@
                                 </j:forEach>
                             </select>
                         </f:entry>
-                        <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
+                        <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy"
+                                         checked="${server.bypassProxy}" inline="true"
                                          help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
                         </f:optionalBlock>
                     </f:advanced>
@@ -106,7 +107,7 @@
                                 </r:blockWrapper>
 
                                 <r:blockWrapper id="legacyResolverCredentials${server.url}">
-                                     <f:entry title="Username"
+                                    <f:entry title="Username"
                                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-resolverUserName.html">
                                         <f:textbox field="username"
                                                    value="${server.resolverCredentialsConfig.username}"/>
@@ -123,7 +124,7 @@
 
                     <f:block>
                         <div align="right">
-                            <f:repeatableDeleteButton />
+                            <f:repeatableDeleteButton/>
                         </div>
                     </f:block>
 
@@ -135,7 +136,8 @@
         </f:block>
         <f:entry title="Pipelines server" description="JFrog Pipelines server to mutually trigger jobs">
             <table width="100%">
-                <f:entry title="Callback URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-pipelinesCbkUrl.html">
+                <f:entry title="Callback URL"
+                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-pipelinesCbkUrl.html">
                     <f:textbox field="pipelinesCbkUrl" value="${descriptor.pipelinesServer.cbkUrl}"/>
                 </f:entry>
 
