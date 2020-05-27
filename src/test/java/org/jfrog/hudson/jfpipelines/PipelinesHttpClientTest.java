@@ -2,7 +2,7 @@ package org.jfrog.hudson.jfpipelines;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.ImmutableMap;
-import hudson.model.ResultTrend;
+import hudson.model.Result;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -118,7 +118,7 @@ public class PipelinesHttpClientTest {
     @Test
     public void jobCompleteTest() {
         try (PipelinesHttpClient client = createClient("http://httpbin.org/post")) {
-            HttpResponse response = client.jobCompleted(ResultTrend.SUCCESS, "5", null);
+            HttpResponse response = client.jobCompleted(Result.SUCCESS, "5", null);
             Assert.assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             try (InputStream content = response.getEntity().getContent()) {
                 JsonNode jsonObject = client.getJsonNode(content);
@@ -129,7 +129,7 @@ public class PipelinesHttpClientTest {
                 getAndAssertChild(child, "action", "status");
 
                 // Check status == "SUCCESS"
-                getAndAssertChild(child, "status", ResultTrend.SUCCESS.getID());
+                getAndAssertChild(child, "status", Result.SUCCESS.toString());
 
                 // Check stepId == "5"
                 getAndAssertChild(child, "stepId", "5");
@@ -151,7 +151,7 @@ public class PipelinesHttpClientTest {
                 new OutputResource("resource2", ImmutableMap.of("c", "d"))
         };
         try (PipelinesHttpClient client = createClient("http://httpbin.org/post")) {
-            HttpResponse response = client.jobCompleted(ResultTrend.SUCCESS, "5", outputResources);
+            HttpResponse response = client.jobCompleted(Result.SUCCESS, "5", outputResources);
             Assert.assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             try (InputStream content = response.getEntity().getContent()) {
                 JsonNode jsonObject = client.getJsonNode(content);

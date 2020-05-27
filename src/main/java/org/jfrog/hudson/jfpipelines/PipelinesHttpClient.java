@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import hudson.model.ResultTrend;
+import hudson.model.Result;
 import net.sf.json.JSONObject;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.io.IOUtils;
@@ -166,10 +166,10 @@ public class PipelinesHttpClient implements AutoCloseable {
         return version;
     }
 
-    public HttpResponse jobCompleted(ResultTrend status, String stepId, @Nullable OutputResource[] outputResources) throws IOException {
+    public HttpResponse jobCompleted(Result status, String stepId, @Nullable OutputResource[] outputResources) throws IOException {
         JSONObject jsonObject = new JSONObject();
         jsonObject.element("action", "status");
-        jsonObject.element("status", status.getID());
+        jsonObject.element("status", status.toString());
         jsonObject.element("stepId", stepId);
         if (outputResources != null) {
             jsonObject.element("outputResources", outputResources);

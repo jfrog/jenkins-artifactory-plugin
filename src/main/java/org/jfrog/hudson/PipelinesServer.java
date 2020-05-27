@@ -1,6 +1,6 @@
 package org.jfrog.hudson;
 
-import hudson.model.ResultTrend;
+import hudson.model.Result;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.Log;
@@ -85,7 +85,7 @@ public class PipelinesServer implements Serializable {
         return pipelinesHttpClient;
     }
 
-    public void jobComplete(ResultTrend status, String stepId, @Nullable OutputResource[] outputResources) throws IOException {
+    public void jobComplete(Result status, String stepId, @Nullable OutputResource[] outputResources) throws IOException {
         try (PipelinesHttpClient client = createPipelinesHttpClient(credentialsConfig.provideCredentials(null), ProxyUtils.createProxyConfiguration())) {
             client.jobCompleted(status, stepId, outputResources);
         }
