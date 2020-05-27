@@ -134,6 +134,7 @@ public class PipelinesHttpClientTest {
                 // Check stepId == "5"
                 getAndAssertChild(child, "stepId", "5");
 
+                // Check that there are no output resources
                 Assert.assertFalse(child.has("outputResources"));
             }
         } catch (IOException e) {

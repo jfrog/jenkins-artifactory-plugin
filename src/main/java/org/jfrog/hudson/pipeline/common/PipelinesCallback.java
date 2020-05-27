@@ -26,6 +26,7 @@ import java.io.IOException;
  * stepId: <JFrog Pipelines step ID>
  * }
  */
+@SuppressWarnings("unused")
 @Extension
 public class PipelinesCallback extends FlowExecutionListener {
     private static final String JF_PIPELINES_ENV = "JFrogPipelines";

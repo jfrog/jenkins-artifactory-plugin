@@ -18,6 +18,11 @@ import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.hudson.ArtifactoryBuilder;
+import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.PipelinesServer;
+import org.junit.Assert;
+import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -286,6 +291,17 @@ class ITestUtils {
                 .apiUrl("api/build/" + encodeBuildName(buildName))
                 .addQueryParam("deleteAll", "1")
                 .addQueryParam("artifacts", "1"));
+    }
+
+    /**
+     * Create JFrog Pipelines server in the Global configuration.
+     * @param jenkins - Jenkins instance
+     */
+    static void createPipelinesServer(JenkinsRule jenkins) {
+        ArtifactoryBuilder.DescriptorImpl artifactoryBuilder = (ArtifactoryBuilder.DescriptorImpl) jenkins.getInstance().getDescriptor(ArtifactoryBuilder.class);
+        Assert.assertNotNull(artifactoryBuilder);
+        PipelinesServer pipelinesServer = new PipelinesServer("http://127.0.0.1:1080", CredentialsConfig.EMPTY_CREDENTIALS_CONFIG, 300, false, 3);
+        artifactoryBuilder.setPipelinesServer(pipelinesServer);
     }
 
     private static String encodeBuildName(String buildName) throws UnsupportedEncodingException {

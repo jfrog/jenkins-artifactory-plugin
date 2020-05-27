@@ -91,12 +91,20 @@ public class PipelinesServer implements Serializable {
         }
     }
 
+    /**
+     * Get JFrog Pipelines server from the global configuration or null if not configured.
+     * @return configured JFrog Pipelines server
+     */
     public static PipelinesServer getPipelinesServer() {
         ArtifactoryBuilder.DescriptorImpl descriptor =
                 (ArtifactoryBuilder.DescriptorImpl) Jenkins.get().getDescriptor(ArtifactoryBuilder.class);
         if (descriptor == null) {
             return null;
         }
-        return descriptor.getPipelinesServer();
+        PipelinesServer pipelinesServer = descriptor.getPipelinesServer();
+        if (StringUtils.isBlank(pipelinesServer.getCbkUrl())) {
+            return null;
+        }
+        return pipelinesServer;
     }
 }

@@ -488,6 +488,12 @@
             <version>2.6.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-netty</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
         <!--/Tests-->
     </dependencies>
 

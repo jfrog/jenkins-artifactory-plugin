@@ -1,0 +1,5 @@
+package integration.pipelines.scripted
+
+node("TestSlave") {
+    echo "Ribbit"
+}

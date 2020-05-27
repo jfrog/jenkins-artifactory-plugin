@@ -1,6 +1,13 @@
 package org.jfrog.hudson.pipeline.integration;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.StringBody;
+
+import static org.jfrog.hudson.pipeline.integration.ITestUtils.createPipelinesServer;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author yahavi
@@ -129,5 +136,17 @@ public class ScriptedITest extends CommonITestsPipeline {
     @Test
     public void appendBuildInfoTest() throws Exception {
         super.appendBuildInfoTest("scripted:appendBuildInfo test");
+    }
+
+    @Test
+    public void jfPipelinesCbkTest() throws Exception {
+        createPipelinesServer(jenkins);
+        try (ClientAndServer mockServer = ClientAndServer.startClientAndServer(1080)) {
+            runPipeline("empty");
+            HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
+            assertEquals(1, ArrayUtils.getLength(requests));
+            StringBody body = (StringBody) requests[0].getBody();
+            assertEquals("{\"action\":\"status\",\"status\":\"SUCCESS\",\"stepId\":\"5\"}", body.getValue());
+        }
     }
 }
