@@ -1,0 +1,12 @@
+package integration.pipelines.declarative
+
+node("TestSlave") {
+
+    stage "Set output resources"
+    jfPipelines(
+            outputResources: """[
+                {"name":"resource1", "content":{"a":"b"}},
+                {"name":"resource2", "content":{"c":"d"}}
+            ]"""
+    )
+}

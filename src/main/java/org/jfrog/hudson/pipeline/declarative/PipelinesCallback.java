@@ -1,15 +1,15 @@
-package org.jfrog.hudson.pipeline.common;
+package org.jfrog.hudson.pipeline.declarative;
 
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Result;
 import hudson.model.TaskListener;
-import net.sf.json.JSONObject;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jenkinsci.plugins.workflow.flow.FlowExecution;
 import org.jenkinsci.plugins.workflow.flow.FlowExecutionListener;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.hudson.PipelinesServer;
+import org.jfrog.hudson.jfpipelines.JfrogPipelinesParam;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import javax.annotation.Nonnull;
@@ -38,20 +38,20 @@ public class PipelinesCallback extends FlowExecutionListener {
         try {
             TaskListener listener = getTaskListener(execution);
             logger = new JenkinsBuildInfoLog(listener);
-            String data = getJFPipelinesEnv(execution, listener);
-            if (data == null) {
+            EnvVars envVars = getEnvVars(execution, listener);
+            JfrogPipelinesParam jfrogPipelinesParam = JfrogPipelinesParam.createFromEnv(envVars);
+            if (jfrogPipelinesParam == null) {
                 // JFrogPipelines parameter is not set
                 return;
             }
-            JSONObject jsonObject = JSONObject.fromObject(data);
-            String stepId = jsonObject.getString(STEP_ID_KEY);
-
+            String stepId = jfrogPipelinesParam.getStepId();
             PipelinesServer pipelinesServer = PipelinesServer.getPipelinesServer();
-            if (pipelinesServer == null) {
-                logger.error("Please set JFrog Pipelines server under 'Manage Jenkins' -> 'Configure System' -> 'Pipelines server'.");
+            if (pipelinesServer.isReported(stepId)) {
+                pipelinesServer.clearReported(stepId);
+                logger.info("Skipping reporting to JFrog Pipelines - status is already reported in jfPipelines step.");
                 return;
             }
-            pipelinesServer.jobComplete(getResult(execution), stepId, null);
+            pipelinesServer.jobCompleted(getResult(execution), jfrogPipelinesParam.getStepId());
         } catch (IOException | InterruptedException e) {
             if (logger != null) {
                 logger.error(ExceptionUtils.getRootCauseMessage(e), e);
@@ -65,10 +65,9 @@ public class PipelinesCallback extends FlowExecutionListener {
         return execution.getOwner().getListener();
     }
 
-    private String getJFPipelinesEnv(FlowExecution execution, TaskListener listener) throws IOException, InterruptedException {
+    private EnvVars getEnvVars(FlowExecution execution, TaskListener listener) throws IOException, InterruptedException {
         WorkflowRun run = (WorkflowRun) execution.getOwner().getExecutable();
-        EnvVars envVars = run.getEnvironment(listener);
-        return envVars.get(JF_PIPELINES_ENV);
+        return run.getEnvironment(listener);
     }
 
     private Result getResult(FlowExecution execution) throws IOException {

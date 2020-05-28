@@ -1,6 +1,17 @@
 package org.jfrog.hudson.pipeline.integration;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import hudson.model.Result;
+import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.StringBody;
+
+import static org.jfrog.hudson.TestUtils.getAndAssertChild;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author yahavi
@@ -125,5 +136,58 @@ public class DeclarativeITest extends CommonITestsPipeline {
     @Test
     public void collectIssuesTest() throws Exception {
         super.collectIssuesTest("declarative:collectIssues test");
+    }
+
+    @Test
+    public void jfPipelinesOutputResourcesTest() throws Exception {
+        try (ClientAndServer mockServer = ClientAndServer.startClientAndServer(1080)) {
+            // Run pipeline
+            runPipeline("jfPipelinesResources");
+
+            // Get sent request from the mock server
+            HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
+            assertEquals(1, ArrayUtils.getLength(requests));
+            StringBody body = (StringBody) requests[0].getBody();
+            JsonNode requestTree = new ObjectMapper().readTree(body.getValue());
+
+            // Check request content
+            getAndAssertChild(requestTree, "action", "status");
+            getAndAssertChild(requestTree, "status", Result.SUCCESS.toString());
+            getAndAssertChild(requestTree, "stepId", "5");
+            JsonNode outputResources = getAndAssertChild(requestTree, "outputResources", null);
+            assertEquals(2, outputResources.size());
+
+            // Check output resource 1
+            JsonNode resource = getAndAssertChild(outputResources, 0);
+            getAndAssertChild(resource, "name", "resource1");
+            JsonNode content = getAndAssertChild(resource, "content", null);
+            getAndAssertChild(content, "a", "b");
+
+            // Test output resource 2
+            resource = getAndAssertChild(outputResources, 1);
+            getAndAssertChild(resource, "name", "resource2");
+            content = getAndAssertChild(resource, "content", null);
+            getAndAssertChild(content, "c", "d");
+        }
+    }
+
+    @Test
+    public void jfPipelinesReportNowTest() throws Exception {
+        try (ClientAndServer mockServer = ClientAndServer.startClientAndServer(1080)) {
+            // Run pipeline
+            runPipeline("jfPipelinesReport");
+
+            // Get sent request from the mock server
+            HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
+            assertEquals(1, ArrayUtils.getLength(requests));
+            StringBody body = (StringBody) requests[0].getBody();
+            JsonNode responseTree = new ObjectMapper().readTree(body.getValue());
+
+            // Check request content
+            getAndAssertChild(responseTree, "action", "status");
+            getAndAssertChild(responseTree, "status", Result.UNSTABLE.toString());
+            getAndAssertChild(responseTree, "stepId", "5");
+            assertFalse(responseTree.has("outputResources"));
+        }
     }
 }

@@ -6,15 +6,11 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-import hudson.model.Result;
-import net.sf.json.JSONObject;
-import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
@@ -24,11 +20,9 @@ import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.client.PreemptiveHttpClient;
 import org.jfrog.build.client.PreemptiveHttpClientBuilder;
 import org.jfrog.build.client.ProxyConfiguration;
-import org.jfrog.build.util.URI;
 import org.jfrog.build.util.VersionCompatibilityType;
 import org.jfrog.build.util.VersionException;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -58,11 +52,6 @@ public class PipelinesHttpClient implements AutoCloseable {
 
     public PipelinesHttpClient(String pipelinesCbkUrl, String accessToken) {
         this(pipelinesCbkUrl, accessToken, new NullLog());
-    }
-
-    public static String encodeUrl(String unescaped) {
-        byte[] rawData = URLCodec.encodeUrl(URI.allowed_query, org.apache.commons.codec.binary.StringUtils.getBytesUtf8(unescaped));
-        return org.apache.commons.codec.binary.StringUtils.newStringUsAscii(rawData);
     }
 
     public void setProxyConfiguration(ProxyConfiguration proxyConfiguration) {
@@ -166,15 +155,10 @@ public class PipelinesHttpClient implements AutoCloseable {
         return version;
     }
 
-    public HttpResponse jobCompleted(Result status, String stepId, @Nullable OutputResource[] outputResources) throws IOException {
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.element("action", "status");
-        jsonObject.element("status", status.toString());
-        jsonObject.element("stepId", stepId);
-        if (outputResources != null) {
-            jsonObject.element("outputResources", outputResources);
-        }
-        HttpEntity body = new StringEntity(jsonObject.toString());
+    public HttpResponse jobCompleted(JobCompletedPayload payload) throws IOException {
+        ObjectMapper mapper = new ObjectMapper(new JsonFactory());
+        String text = mapper.writeValueAsString(payload);
+        HttpEntity body = new StringEntity(text);
         return executePostRequest(body);
     }
 
@@ -182,11 +166,6 @@ public class PipelinesHttpClient implements AutoCloseable {
         JsonFactory jsonFactory = this.createJsonFactory();
         JsonParser parser = jsonFactory.createParser(content);
         return (JsonNode) parser.readValueAsTree();
-    }
-
-    private HttpResponse executeGetRequest() throws IOException {
-        HttpGet httpGet = new HttpGet(pipelinesCbkUrl);
-        return getHttpClient().execute(httpGet);
     }
 
     private HttpResponse executePostRequest(HttpEntity body) throws IOException {

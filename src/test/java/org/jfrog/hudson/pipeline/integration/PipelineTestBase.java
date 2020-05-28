@@ -20,6 +20,9 @@ import org.jfrog.artifactory.client.ArtifactoryRequest;
 import org.jfrog.artifactory.client.impl.ArtifactoryRequestImpl;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.hudson.ArtifactoryBuilder;
+import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.PipelinesServer;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
@@ -81,6 +84,7 @@ public class PipelineTestBase {
         createSlave();
         setEnvVars();
         createClients();
+        createPipelinesServer();
         cleanUpArtifactory(artifactoryClient);
         createPipelineSubstitution();
         // Create repositories
@@ -166,6 +170,16 @@ public class PipelineTestBase {
                 .setUsername(ARTIFACTORY_USERNAME)
                 .setPassword(ARTIFACTORY_PASSWORD)
                 .build();
+    }
+
+    /**
+     * Create JFrog Pipelines server in the Global configuration.
+     */
+    private static void createPipelinesServer() {
+        ArtifactoryBuilder.DescriptorImpl artifactoryBuilder = (ArtifactoryBuilder.DescriptorImpl) jenkins.getInstance().getDescriptor(ArtifactoryBuilder.class);
+        Assert.assertNotNull(artifactoryBuilder);
+        PipelinesServer pipelinesServer = new PipelinesServer("http://127.0.0.1:1080", CredentialsConfig.EMPTY_CREDENTIALS_CONFIG, 300, false, 3);
+        artifactoryBuilder.setPipelinesServer(pipelinesServer);
     }
 
     /**

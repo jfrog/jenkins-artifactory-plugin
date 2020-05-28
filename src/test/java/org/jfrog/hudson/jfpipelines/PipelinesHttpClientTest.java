@@ -1,7 +1,6 @@
 package org.jfrog.hudson.jfpipelines;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.ImmutableMap;
 import hudson.model.Result;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpResponse;
@@ -15,6 +14,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.jfpipelines.PipelinesHttpClient.MINIMAL_PIPELINES_VERSION;
 
 public class PipelinesHttpClientTest {
@@ -118,7 +118,7 @@ public class PipelinesHttpClientTest {
     @Test
     public void jobCompleteTest() {
         try (PipelinesHttpClient client = createClient("http://httpbin.org/post")) {
-            HttpResponse response = client.jobCompleted(Result.SUCCESS, "5", null);
+            HttpResponse response = client.jobCompleted(new JobCompletedPayload(Result.SUCCESS, "5", null));
             Assert.assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             try (InputStream content = response.getEntity().getContent()) {
                 JsonNode jsonObject = client.getJsonNode(content);
@@ -147,12 +147,9 @@ public class PipelinesHttpClientTest {
      */
     @Test
     public void jobCompleteOutputResourcesTest() {
-        OutputResource[] outputResources = {
-                new OutputResource("resource1", ImmutableMap.of("a", "b")),
-                new OutputResource("resource2", ImmutableMap.of("c", "d"))
-        };
+        String outputResources = "[{\"content\":{\"a\":\"b\"},\"name\":\"resource1\"},{\"content\":{\"c\":\"d\"},\"name\":\"resource2\"}]";
         try (PipelinesHttpClient client = createClient("http://httpbin.org/post")) {
-            HttpResponse response = client.jobCompleted(Result.SUCCESS, "5", outputResources);
+            HttpResponse response = client.jobCompleted(new JobCompletedPayload(Result.SUCCESS, "5", outputResources));
             Assert.assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             try (InputStream content = response.getEntity().getContent()) {
                 JsonNode jsonObject = client.getJsonNode(content);
@@ -176,36 +173,6 @@ public class PipelinesHttpClientTest {
         } catch (IOException e) {
             Assert.fail(ExceptionUtils.getRootCauseMessage(e));
         }
-    }
-
-    /**
-     * Get JsonNode, assert and return its child.
-     *
-     * @param jsonNode - The node
-     * @param name     - The name of the child
-     * @param value    - The value to assert. Can be null if no value.
-     * @return the child
-     */
-    private JsonNode getAndAssertChild(JsonNode jsonNode, String name, String value) {
-        JsonNode child = jsonNode.get(name);
-        Assert.assertNotNull(child);
-        if (value != null) {
-            Assert.assertEquals(value, child.textValue());
-        }
-        return child;
-    }
-
-    /**
-     * Get JsonNode, assert and return its child.
-     *
-     * @param jsonNode - The node
-     * @param index    - The index of the child
-     * @return the child
-     */
-    private JsonNode getAndAssertChild(JsonNode jsonNode, int index) {
-        JsonNode child = jsonNode.get(index);
-        Assert.assertNotNull(child);
-        return child;
     }
 
     private PipelinesHttpClient createClient(String pipelinesCbk) {
