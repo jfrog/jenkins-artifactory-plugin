@@ -75,13 +75,13 @@ public class JfPipelinesStep extends AbstractStepImpl {
             }
             if (StringUtils.isNotBlank(step.reportNow)) {
                 if (!ACCEPTABLE_RESULTS.contains(StringUtils.upperCase(step.reportNow))) {
-                    throw new IllegalArgumentException("Illegal build results '" + step.reportNow + "'. Acceptable values: " + String.join(", " + ACCEPTABLE_RESULTS));
+                    throw new IllegalArgumentException("Illegal build results '" + step.reportNow + "'. Acceptable values: " + ACCEPTABLE_RESULTS);
                 }
                 if (pipelinesServer.isReported(jfrogPipelinesParam.getStepId())) {
-                    throw new IllegalStateException("StepId: " + stepId + " is already reported to JFrog Pipelines. You can run jfPipelines with 'reportNow' parameter only once.");
+                    throw new IllegalStateException("Step ID " + stepId + " is already reported to JFrog Pipelines. You can run jfPipelines with 'reportNow' parameter only once.");
                 }
                 pipelinesServer.setReported(stepId);
-                pipelinesServer.jobCompleted(Result.fromString(step.reportNow), jfrogPipelinesParam.getStepId());
+                pipelinesServer.jobCompleted(Result.fromString(step.reportNow), jfrogPipelinesParam.getStepId(), logger);
             }
             return null;
         }

@@ -29,6 +29,7 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 @Extension
 public class PipelinesCallback extends FlowExecutionListener {
+    private static final String FAILURE_PREFIX = "Failed to report status to JFrog Pipelines: ";
     private static final String JF_PIPELINES_ENV = "JFrogPipelines";
     private static final String STEP_ID_KEY = "stepId";
 
@@ -48,14 +49,15 @@ public class PipelinesCallback extends FlowExecutionListener {
             PipelinesServer pipelinesServer = PipelinesServer.getPipelinesServer();
             if (pipelinesServer.isReported(stepId)) {
                 pipelinesServer.clearReported(stepId);
-                logger.info("Skipping reporting to JFrog Pipelines - status is already reported in jfPipelines step.");
+                logger.debug("Skipping reporting to JFrog Pipelines - status is already reported in jfPipelines step.");
                 return;
             }
-            pipelinesServer.jobCompleted(getResult(execution), jfrogPipelinesParam.getStepId());
-        } catch (IOException | InterruptedException e) {
+            pipelinesServer.jobCompleted(getResult(execution), jfrogPipelinesParam.getStepId(), logger);
+        } catch (IOException | InterruptedException | IllegalArgumentException | IllegalStateException e) {
             if (logger != null) {
-                logger.error(ExceptionUtils.getRootCauseMessage(e), e);
+                logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
             } else {
+                System.err.println(FAILURE_PREFIX);
                 ExceptionUtils.printRootCauseStackTrace(e);
             }
         }

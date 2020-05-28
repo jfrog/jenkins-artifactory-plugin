@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.EnvVars;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 
@@ -28,16 +29,20 @@ public class JfrogPipelinesParam implements Serializable {
      *
      * @param envVars - The step's environment variables
      * @return JfrogPipelinesParam or null if JFrogPipelines environment variable is not set
-     * @throws JsonProcessingException if JFrogPipelines environment variable is incorrect
+     * @throws IllegalArgumentException if JFrogPipelines environment variable couldn't be parsed.
      */
     @JsonIgnore
-    public static JfrogPipelinesParam createFromEnv(EnvVars envVars) throws JsonProcessingException {
+    public static JfrogPipelinesParam createFromEnv(EnvVars envVars) throws IllegalArgumentException {
         String jfPipelinesParam = envVars.get(JF_PIPELINES_ENV);
-        if (jfPipelinesParam == null) {
+        if (StringUtils.isBlank(jfPipelinesParam)) {
             // JFrogPipelines parameter is not set
             return null;
         }
         ObjectMapper objectMapper = new ObjectMapper();
-        return objectMapper.readValue(jfPipelinesParam, JfrogPipelinesParam.class);
+        try {
+            return objectMapper.readValue(jfPipelinesParam, JfrogPipelinesParam.class);
+        } catch (JsonProcessingException exception) {
+            throw new IllegalArgumentException("Couldn't parse 'JFrogPipelines' parameter.", exception);
+        }
     }
 }

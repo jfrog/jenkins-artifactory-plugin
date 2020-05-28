@@ -9,6 +9,7 @@ import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.hudson.jfpipelines.JobCompletedPayload;
 import org.jfrog.hudson.jfpipelines.PipelinesHttpClient;
 import org.jfrog.hudson.util.Credentials;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.ProxyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -109,10 +110,11 @@ public class PipelinesServer implements Serializable {
         return pipelinesHttpClient;
     }
 
-    public void jobCompleted(Result result, String stepId) throws IOException {
+    public void jobCompleted(Result result, String stepId, JenkinsBuildInfoLog logger) throws IOException {
         try (PipelinesHttpClient client = createPipelinesHttpClient(credentialsConfig.provideCredentials(null), ProxyUtils.createProxyConfiguration())) {
             client.jobCompleted(new JobCompletedPayload(result, stepId, getOutputResource(stepId)));
         }
+        logger.info("Successfully reported status '" + result + "' to JFrog pipelines.");
     }
 
     /**
