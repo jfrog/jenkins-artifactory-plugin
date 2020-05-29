@@ -1,11 +1,16 @@
 package org.jfrog.hudson;
 
+import hudson.EnvVars;
 import hudson.model.Result;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.hudson.jfpipelines.JfrogPipelinesParam;
 import org.jfrog.hudson.jfpipelines.JobCompletedPayload;
 import org.jfrog.hudson.jfpipelines.PipelinesHttpClient;
 import org.jfrog.hudson.util.Credentials;
@@ -22,6 +27,7 @@ import java.util.stream.IntStream;
 
 public class PipelinesServer implements Serializable {
     private static final String SERVER_NOT_FOUND_EXCEPTION = "Please set JFrog Pipelines server under 'Manage Jenkins' -> 'Configure System' -> 'Pipelines server'.";
+    public static final String FAILURE_PREFIX = "Failed to report status to JFrog Pipelines: ";
     private static final int DEFAULT_CONNECTION_TIMEOUT = 300; // 5 Minutes
     private static final int DEFAULT_CONNECTION_RETRIES = 3;
 
@@ -110,7 +116,51 @@ public class PipelinesServer implements Serializable {
         return pipelinesHttpClient;
     }
 
-    public void jobCompleted(Result result, String stepId, JenkinsBuildInfoLog logger) throws IOException {
+    /**
+     * Send information to JFrog Pipelines after a pipeline job finished.
+     *
+     * @param build    - The build
+     * @param listener - The task listener
+     */
+    @SuppressWarnings("rawtypes")
+    public static void reportJob(Run build, TaskListener listener) {
+        JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
+        try {
+            EnvVars envVars = build.getEnvironment(listener);
+            JfrogPipelinesParam jfrogPipelinesParam = JfrogPipelinesParam.createFromEnv(envVars);
+            if (jfrogPipelinesParam == null) {
+                // JFrogPipelines parameter is not set
+                return;
+            }
+            String stepId = jfrogPipelinesParam.getStepId();
+            PipelinesServer pipelinesServer = getPipelinesServer();
+            if (pipelinesServer.isReported(stepId)) {
+                pipelinesServer.clearReported(stepId);
+                logger.debug("Skipping reporting to JFrog Pipelines - status is already reported in jfPipelines step.");
+                return;
+            }
+            pipelinesServer.reportNow(build.getResult(), jfrogPipelinesParam.getStepId(), logger);
+        } catch (InterruptedException | IOException | IllegalArgumentException | IllegalStateException e) {
+            logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
+        }
+    }
+
+    /**
+     * Send information to JFrog Pipelines after a pipeline job finished or when a reportNow step invoked.
+     * Input parameter:
+     * { stepId: <JFrog Pipelines step ID> }
+     * Output:
+     * {
+     * action: "status",
+     * status: <jenkins status>,
+     * stepId: <JFrog Pipelines step ID>
+     * }
+     *
+     * @param result - The build results
+     * @param stepId - JFrog Pipelines step ID
+     * @param logger - The build logger
+     */
+    public void reportNow(Result result, String stepId, JenkinsBuildInfoLog logger) throws IOException {
         try (PipelinesHttpClient client = createPipelinesHttpClient(credentialsConfig.provideCredentials(null), ProxyUtils.createProxyConfiguration())) {
             client.jobCompleted(new JobCompletedPayload(result, stepId, getOutputResource(stepId)));
         }
@@ -121,8 +171,9 @@ public class PipelinesServer implements Serializable {
      * Get JFrog Pipelines server from the global configuration.
      *
      * @return configured JFrog Pipelines server
+     * @throws IllegalStateException if Pipelines server is not defined
      */
-    public static PipelinesServer getPipelinesServer() {
+    public static PipelinesServer getPipelinesServer() throws IllegalStateException {
         ArtifactoryBuilder.DescriptorImpl descriptor =
                 (ArtifactoryBuilder.DescriptorImpl) Jenkins.get().getDescriptor(ArtifactoryBuilder.class);
         if (descriptor == null) {

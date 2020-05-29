@@ -81,7 +81,7 @@ public class JfPipelinesStep extends AbstractStepImpl {
                     throw new IllegalStateException("Step ID " + stepId + " is already reported to JFrog Pipelines. You can run jfPipelines with 'reportNow' parameter only once.");
                 }
                 pipelinesServer.setReported(stepId);
-                pipelinesServer.jobCompleted(Result.fromString(step.reportNow), jfrogPipelinesParam.getStepId(), logger);
+                pipelinesServer.reportNow(Result.fromString(step.reportNow), jfrogPipelinesParam.getStepId(), logger);
             }
             return null;
         }
