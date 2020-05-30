@@ -70,6 +70,9 @@ public class JfPipelinesStep extends AbstractStepImpl {
             }
             String stepId = jfrogPipelinesParam.getStepId();
             PipelinesServer pipelinesServer = PipelinesServer.getPipelinesServer();
+            if (!PipelinesServer.isConfigured(pipelinesServer)) {
+                throw new IllegalStateException(PipelinesServer.SERVER_NOT_FOUND_EXCEPTION);
+            }
             if (StringUtils.isNotBlank(step.outputResources)) {
                 pipelinesServer.setOutputResources(jfrogPipelinesParam.getStepId(), step.outputResources);
             }

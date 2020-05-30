@@ -1,6 +1,5 @@
 package org.jfrog.hudson;
 
-import hudson.EnvVars;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -25,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class PipelinesServer implements Serializable {
-    private static final String SERVER_NOT_FOUND_EXCEPTION = "Please set JFrog Pipelines server under 'Manage Jenkins' -> 'Configure System' -> 'Pipelines server'.";
+    public static final String SERVER_NOT_FOUND_EXCEPTION = "Please set JFrog Pipelines server under 'Manage Jenkins' -> 'Configure System' -> 'Pipelines server'.";
     public static final String FAILURE_PREFIX = "Failed to report status to JFrog Pipelines: ";
     private static final int DEFAULT_CONNECTION_TIMEOUT = 300; // 5 Minutes
     private static final int DEFAULT_CONNECTION_RETRIES = 3;
@@ -133,31 +132,41 @@ public class PipelinesServer implements Serializable {
     }
 
     /**
-     * Send information to JFrog Pipelines after a pipeline job finished.
+     * Send information to JFrog Pipelines after a Jenkins pipeline job finished.
      *
      * @param build    - The build
      * @param listener - The task listener
      */
     @SuppressWarnings("rawtypes")
     public static void reportJob(Run build, TaskListener listener) {
+        PipelinesServer pipelinesServer = null;
         JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
         try {
-            EnvVars envVars = build.getEnvironment(listener);
-            JfrogPipelinesParam jfrogPipelinesParam = JfrogPipelinesParam.createFromEnv(envVars);
+            pipelinesServer = getPipelinesServer();
+            JfrogPipelinesParam jfrogPipelinesParam = JfrogPipelinesParam.createFromBuild(build, listener);
             if (jfrogPipelinesParam == null) {
-                // JFrogPipelines parameter is not set
+                // 'JFrogPipelines' parameter is not set.
+                return;
+            }
+            if (!(isConfigured(pipelinesServer))) {
+                // JFrog Pipelines server is not configured, but 'JFrogPipelines' parameter is set.
+                logger.error(SERVER_NOT_FOUND_EXCEPTION);
                 return;
             }
             String stepId = jfrogPipelinesParam.getStepId();
-            PipelinesServer pipelinesServer = getPipelinesServer();
             if (pipelinesServer.isReported(stepId)) {
+                // Step status is already reported to JFrog Pipelines.
                 pipelinesServer.clearReported(stepId);
                 logger.debug("Skipping reporting to JFrog Pipelines - status is already reported in jfPipelines step.");
                 return;
             }
             pipelinesServer.reportNow(build.getResult(), jfrogPipelinesParam.getStepId(), logger);
-        } catch (InterruptedException | IOException | IllegalArgumentException | IllegalStateException e) {
-            logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
+        } catch (IOException | IllegalArgumentException | IllegalStateException e) {
+            if (isConfigured(pipelinesServer)) {
+                // If JFrog Pipelines server is not configured don't log errors.
+                // This case is feasible when build.getEnvironment throws an exception.
+                logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
+            }
         }
     }
 
@@ -189,16 +198,20 @@ public class PipelinesServer implements Serializable {
      * @return configured JFrog Pipelines server
      * @throws IllegalStateException if Pipelines server is not defined
      */
-    public static PipelinesServer getPipelinesServer() throws IllegalStateException {
+    public static PipelinesServer getPipelinesServer() {
         ArtifactoryBuilder.DescriptorImpl descriptor =
                 (ArtifactoryBuilder.DescriptorImpl) Jenkins.get().getDescriptor(ArtifactoryBuilder.class);
         if (descriptor == null) {
-            throw new IllegalStateException(SERVER_NOT_FOUND_EXCEPTION);
+            return null;
         }
         PipelinesServer pipelinesServer = descriptor.getPipelinesServer();
         if (StringUtils.isBlank(pipelinesServer.getCbkUrl())) {
-            throw new IllegalStateException(SERVER_NOT_FOUND_EXCEPTION);
+            return null;
         }
         return pipelinesServer;
+    }
+
+    public static boolean isConfigured(PipelinesServer pipelinesServer) {
+        return pipelinesServer != null && StringUtils.isNotBlank(pipelinesServer.getCbkUrl());
     }
 }
