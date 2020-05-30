@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class PipelinesServer implements Serializable {
-    public static final String SERVER_NOT_FOUND_EXCEPTION = "Please set JFrog Pipelines server under 'Manage Jenkins' -> 'Configure System' -> 'Pipelines server'.";
+    public static final String SERVER_NOT_FOUND_EXCEPTION = "Please configure JFrog Pipelines server under 'Manage Jenkins' -> 'Configure System' -> 'Pipelines server'.";
     public static final String FAILURE_PREFIX = "Failed to report status to JFrog Pipelines: ";
     private static final int DEFAULT_CONNECTION_TIMEOUT = 300; // 5 Minutes
     private static final int DEFAULT_CONNECTION_RETRIES = 3;
