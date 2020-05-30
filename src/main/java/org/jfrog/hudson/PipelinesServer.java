@@ -164,7 +164,7 @@ public class PipelinesServer implements Serializable {
         try (PipelinesHttpClient client = createPipelinesHttpClient(credentialsConfig.provideCredentials(null), ProxyUtils.createProxyConfiguration())) {
             client.jobCompleted(new JobCompletedPayload(result, stepId, getOutputResource(stepId)));
         }
-        logger.info("Successfully reported status '" + result + "' to JFrog pipelines.");
+        logger.info("Successfully reported status '" + result + "' to JFrog Pipelines.");
     }
 
     /**
