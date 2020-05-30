@@ -191,7 +191,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 return FormValidation.error("Testing the connection requires 'Administer' permission");
             }
             if (StringUtils.isBlank(url)) {
-                return FormValidation.error("Please set a valid Pipelines URL");
+                return FormValidation.error("Please set a valid JFrog Pipelines callback URL");
             }
             if (connectionRetry < 0) {
                 return FormValidation.error("Connection Retries can not be less then 0");

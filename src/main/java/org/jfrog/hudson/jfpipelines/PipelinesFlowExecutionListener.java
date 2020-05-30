@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline;
+package org.jfrog.hudson.jfpipelines;
 
 import hudson.Extension;
 import hudson.model.TaskListener;
@@ -14,10 +14,18 @@ import java.io.IOException;
 
 import static org.jfrog.hudson.PipelinesServer.FAILURE_PREFIX;
 
+/**
+ * This class implements a Jenkins pipelines jobs listener to integrate with JFrog Pipelines.
+ */
 @SuppressWarnings("unused")
 @Extension
-public class PipelinesCallback extends FlowExecutionListener {
+public class PipelinesFlowExecutionListener extends FlowExecutionListener {
 
+    /**
+     * When a Jenkins pipeline completes, report back status to JFrog pipeines.
+     *
+     * @param execution - The Jenkins pipeline execution
+     */
     @Override
     public void onCompleted(@Nonnull FlowExecution execution) {
         TaskListener listener = null;

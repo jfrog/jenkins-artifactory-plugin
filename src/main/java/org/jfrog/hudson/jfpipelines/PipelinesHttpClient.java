@@ -38,13 +38,18 @@ public class PipelinesHttpClient implements AutoCloseable {
     private final String accessToken;
     private int connectionTimeout;
     private int connectionRetries;
-    private boolean insecureTls;
     private final Log log;
 
+    /**
+     * JFrog pipelines integration HTTP client.
+     *
+     * @param pipelinesCbkUrl - The JFrog Pipelines callback URL
+     * @param accessToken     - The access toKen
+     * @param log             - The build log
+     */
     public PipelinesHttpClient(String pipelinesCbkUrl, String accessToken, Log log) {
         this.connectionTimeout = DEFAULT_CONNECTION_TIMEOUT_SECS;
         this.connectionRetries = DEFAULT_CONNECTION_RETRY;
-        this.insecureTls = false;
         this.pipelinesCbkUrl = StringUtils.stripEnd(pipelinesCbkUrl, "/");
         this.accessToken = accessToken;
         this.log = log;
@@ -66,27 +71,25 @@ public class PipelinesHttpClient implements AutoCloseable {
         this.connectionRetries = connectionRetries;
     }
 
-    public void setInsecureTls(boolean insecureTls) {
-        this.insecureTls = insecureTls;
-    }
-
+    @SuppressWarnings("unused")
     public int getConnectionRetries() {
         return this.connectionRetries;
     }
 
+    @SuppressWarnings("unused")
     public ProxyConfiguration getProxyConfiguration() {
         return this.proxyConfiguration;
     }
 
     public PreemptiveHttpClient getHttpClient() {
-        return this.getHttpClient(this.connectionTimeout);
+        return getHttpClient(this.connectionTimeout);
     }
 
     public PreemptiveHttpClient getHttpClient(int connectionTimeout) {
         if (httpClient != null) {
             return httpClient;
         }
-        PreemptiveHttpClientBuilder clientBuilder = (new PreemptiveHttpClientBuilder()).setConnectionRetries(this.connectionRetries).setInsecureTls(this.insecureTls).setTimeout(connectionTimeout).setLog(this.log);
+        PreemptiveHttpClientBuilder clientBuilder = (new PreemptiveHttpClientBuilder()).setConnectionRetries(this.connectionRetries).setTimeout(connectionTimeout).setLog(this.log);
         if (this.proxyConfiguration != null) {
             clientBuilder.setProxyConfiguration(this.proxyConfiguration);
         }

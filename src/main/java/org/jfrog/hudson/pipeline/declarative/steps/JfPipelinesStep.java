@@ -71,7 +71,7 @@ public class JfPipelinesStep extends AbstractStepImpl {
             String stepId = jfrogPipelinesParam.getStepId();
             PipelinesServer pipelinesServer = PipelinesServer.getPipelinesServer();
             if (StringUtils.isNotBlank(step.outputResources)) {
-                pipelinesServer.addOutputResources(jfrogPipelinesParam.getStepId(), step.outputResources);
+                pipelinesServer.setOutputResources(jfrogPipelinesParam.getStepId(), step.outputResources);
             }
             if (StringUtils.isNotBlank(step.reportNow)) {
                 if (!ACCEPTABLE_RESULTS.contains(StringUtils.upperCase(step.reportNow))) {

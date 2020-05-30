@@ -8,7 +8,6 @@ import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.hudson.jfpipelines.JfrogPipelinesParam;
 import org.jfrog.hudson.jfpipelines.JobCompletedPayload;
@@ -31,7 +30,9 @@ public class PipelinesServer implements Serializable {
     private static final int DEFAULT_CONNECTION_TIMEOUT = 300; // 5 Minutes
     private static final int DEFAULT_CONNECTION_RETRIES = 3;
 
+    // Map between step ID and output resources.
     private final Map<String, String> outputResourcesMap = new HashMap<>();
+    // Set of reported step IDs. This is important to avoid reporting status to JFrog pipelines more than once.
     private final Set<String> reportedStepIds = new HashSet<>();
     private final CredentialsConfig credentialsConfig;
     private final boolean bypassProxy;
@@ -68,7 +69,7 @@ public class PipelinesServer implements Serializable {
         return bypassProxy;
     }
 
-    // To populate the dropdown list from the jelly
+    // Populate connection retries list from the Jelly
     @SuppressWarnings("unused")
     public List<Integer> getConnectionRetries() {
         return IntStream.range(0, 10).boxed().collect(Collectors.toList());
@@ -78,18 +79,40 @@ public class PipelinesServer implements Serializable {
         return connectionRetry;
     }
 
-    public void addOutputResources(String stepId, String outputResources) {
+    /**
+     * Set the output resources of the step ID.
+     *
+     * @param stepId          - Step ID from JFrog Pipelines
+     * @param outputResources - Output resources map to report to JFrog Pipelines
+     */
+    public void setOutputResources(String stepId, String outputResources) {
         outputResourcesMap.put(stepId, outputResources);
     }
 
+    /**
+     * Run after executing the pipeline step 'jfPipelines'.
+     *
+     * @param stepId - Step ID from JFrog Pipelines
+     */
     public void setReported(String stepId) {
         reportedStepIds.add(stepId);
     }
 
+    /**
+     * Return true if the build is already reported to JFrog Pipelines.
+     *
+     * @param stepId - Step ID from JFrog Pipelines
+     * @return true if the build is already reported to JFrog Pipelines
+     */
     public boolean isReported(String stepId) {
         return reportedStepIds.contains(stepId);
     }
 
+    /**
+     * Clean up the step ID report status after build finished.
+     *
+     * @param stepId - Step ID from JFrog Pipelines
+     */
     public void clearReported(String stepId) {
         reportedStepIds.remove(stepId);
     }
@@ -97,13 +120,6 @@ public class PipelinesServer implements Serializable {
     @Nullable
     public String getOutputResource(String stepId) {
         return outputResourcesMap.get(stepId);
-    }
-
-    /**
-     * This method might run on slaves, this is why we provide it with a proxy from the master config
-     */
-    public PipelinesHttpClient createPipelinesHttpClient(Credentials credentials, ProxyConfiguration proxyConfiguration) {
-        return createPipelinesHttpClient(credentials, proxyConfiguration, new NullLog());
     }
 
     public PipelinesHttpClient createPipelinesHttpClient(Credentials credentials, ProxyConfiguration proxyConfiguration, Log logger) {
@@ -152,7 +168,7 @@ public class PipelinesServer implements Serializable {
      * Output:
      * {
      * action: "status",
-     * status: <jenkins status>,
+     * status: <Jenkins build status>,
      * stepId: <JFrog Pipelines step ID>
      * }
      *
@@ -161,7 +177,7 @@ public class PipelinesServer implements Serializable {
      * @param logger - The build logger
      */
     public void reportNow(Result result, String stepId, JenkinsBuildInfoLog logger) throws IOException {
-        try (PipelinesHttpClient client = createPipelinesHttpClient(credentialsConfig.provideCredentials(null), ProxyUtils.createProxyConfiguration())) {
+        try (PipelinesHttpClient client = createPipelinesHttpClient(credentialsConfig.provideCredentials(null), ProxyUtils.createProxyConfiguration(), logger)) {
             client.jobCompleted(new JobCompletedPayload(result, stepId, getOutputResource(stepId)));
         }
         logger.info("Successfully reported status '" + result + "' to JFrog Pipelines.");

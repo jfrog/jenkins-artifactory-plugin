@@ -134,7 +134,7 @@
         <f:block>
             <br/>
         </f:block>
-        <f:entry title="Pipelines server" description="JFrog Pipelines server to mutually trigger jobs">
+        <f:entry title="Pipelines server" description="Send job results to JFrog Pipelines.">
             <table width="100%">
                 <f:entry title="Callback URL"
                          help="/plugin/artifactory/help/ArtifactoryBuilder/help-pipelinesCbkUrl.html">
