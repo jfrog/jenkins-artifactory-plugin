@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.integration;
 
 import hudson.FilePath;
+import hudson.model.JobProperty;
 import hudson.model.Label;
 import hudson.model.Slave;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
@@ -22,7 +23,7 @@ import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.PipelinesServer;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
@@ -84,7 +85,7 @@ public class PipelineTestBase {
         createSlave();
         setEnvVars();
         createClients();
-        createPipelinesServer();
+        createJFrogPipelinesServer();
         cleanUpArtifactory(artifactoryClient);
         createPipelineSubstitution();
         // Create repositories
@@ -175,11 +176,11 @@ public class PipelineTestBase {
     /**
      * Create JFrog Pipelines server in the Global configuration.
      */
-    private static void createPipelinesServer() {
+    private static void createJFrogPipelinesServer() {
         ArtifactoryBuilder.DescriptorImpl artifactoryBuilder = (ArtifactoryBuilder.DescriptorImpl) jenkins.getInstance().getDescriptor(ArtifactoryBuilder.class);
         Assert.assertNotNull(artifactoryBuilder);
-        PipelinesServer pipelinesServer = new PipelinesServer("http://127.0.0.1:1080", CredentialsConfig.EMPTY_CREDENTIALS_CONFIG, 300, false, 3);
-        artifactoryBuilder.setPipelinesServer(pipelinesServer);
+        JFrogPipelinesServer server = new JFrogPipelinesServer("http://127.0.0.1:1080", CredentialsConfig.EMPTY_CREDENTIALS_CONFIG, 300, false, 3);
+        artifactoryBuilder.setJfrogPipelinesServer(server);
     }
 
     /**
@@ -222,11 +223,15 @@ public class PipelineTestBase {
     /**
      * Run pipeline script.
      *
-     * @param name - Pipeline name from 'jenkins-artifactory-plugin/src/test/resources/integration/pipelines'.
+     * @param name          - Pipeline name from 'jenkins-artifactory-plugin/src/test/resources/integration/pipelines'.
+     * @param jobProperties - Job properties to set.
      * @return the Jenkins job
      */
-    WorkflowRun runPipeline(String name) throws Exception {
+    WorkflowRun runPipeline(String name, JobProperty<?>... jobProperties) throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
+        for (JobProperty<?> jobProperty : jobProperties) {
+            project.addProperty(jobProperty);
+        }
         FilePath slaveWs = slave.getWorkspaceFor(project);
         if (slaveWs == null) {
             throw new Exception("Slave workspace not found");
@@ -275,9 +280,7 @@ public class PipelineTestBase {
                 // Set ARTIFACTORY_JARS_LIB env to be used in Maven and Gradle tests.
                 // The Maven and Gradle steps will copy the jars from this directory to the local test cache.
                 new EnvironmentVariablesNodeProperty.Entry("ARTIFACTORY_JARS_LIB",
-                        Paths.get("target", "artifactory", "WEB-INF", "lib").toAbsolutePath().toString()),
-                // Set JFrogPipelines env to be used in JFrog Pipelines callback tests.
-                new EnvironmentVariablesNodeProperty.Entry("JFrogPipelines", "{\"stepId\": \"5\"}")
+                        Paths.get("target", "artifactory", "WEB-INF", "lib").toAbsolutePath().toString())
         );
         jenkins.jenkins.getGlobalNodeProperties().add(prop);
     }

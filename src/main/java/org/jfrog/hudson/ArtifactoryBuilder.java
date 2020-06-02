@@ -34,9 +34,11 @@ import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.client.Version;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.jfpipelines.PipelinesHttpClient;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesHttpClient;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
@@ -71,7 +73,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         private boolean useCredentialsPlugin;
         private List<ArtifactoryServer> artifactoryServers;
-        private PipelinesServer pipelinesServer;
+        private JFrogPipelinesServer jfrogPipelinesServer = new JFrogPipelinesServer();
 
         public DescriptorImpl() {
             super(ArtifactoryBuilder.class);
@@ -181,17 +183,17 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         @SuppressWarnings("unused")
         @RequirePOST
-        public FormValidation doTestPipelinesConnection(
-                @QueryParameter("pipelinesCbkUrl") final String url,
+        public FormValidation doTestJFrogPipelinesConnection(
+                @QueryParameter("pipelinesIntegrationUrl") final String url,
                 @QueryParameter("pipelinesTimeout") final String timeout,
                 @QueryParameter("pipelinesBypassProxy") final boolean bypassProxy,
                 @QueryParameter("credentialsId") final String credentialsId,
-                @QueryParameter("pipelinesConnectionRetry") final int connectionRetry) {
+                @QueryParameter("pipelinesConnectionRetries") final int connectionRetry) {
             if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                 return FormValidation.error("Testing the connection requires 'Administer' permission");
             }
             if (StringUtils.isBlank(url)) {
-                return FormValidation.error("Please set a valid JFrog Pipelines callback URL");
+                return FormValidation.error("Please set a valid JFrog Pipelines integration URL");
             }
             if (connectionRetry < 0) {
                 return FormValidation.error("Connection Retries can not be less then 0");
@@ -203,7 +205,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             }
             String accessToken = accessTokenCredentials.getSecret().getPlainText();
 
-            try (PipelinesHttpClient client = new PipelinesHttpClient(url, accessToken, new NullLog())) {
+            try (JFrogPipelinesHttpClient client = new JFrogPipelinesHttpClient(url, accessToken, new NullLog())) {
                 if (!bypassProxy) {
                     ProxyConfiguration proxyConfiguration = createProxyConfiguration();
                     if (proxyConfiguration != null) {
@@ -216,9 +218,9 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 }
                 client.setConnectionRetries(connectionRetry);
 
-                ArtifactoryVersion version;
+                Version version;
                 try {
-                    version = client.verifyCompatiblePipelinesVersion();
+                    version = client.verifyCompatibleVersion();
                 } catch (UnsupportedOperationException uoe) {
                     return FormValidation.warning(uoe.getMessage());
                 } catch (Exception e) {
@@ -242,7 +244,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
                 boolean useCredentialsPlugin = (Boolean) o.get("useCredentialsPlugin");
                 configureArtifactoryServers(req, o);
-                configurePipelinesServer(o);
+                configureJFrogPipelinesServer(o);
                 if (useCredentialsPlugin && !this.useCredentialsPlugin) {
                     resetJobsCredentials();
                     resetServersCredentials();
@@ -271,12 +273,14 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             setArtifactoryServers(artifactoryServers);
         }
 
-        private void configurePipelinesServer(JSONObject o) {
+        private void configureJFrogPipelinesServer(JSONObject o) {
             String credentialsId = ((JSONObject) o.get("credentialsConfig")).optString("credentialsId");
             CredentialsConfig credentialsConfig = new CredentialsConfig("", "", credentialsId);
             credentialsConfig.setIgnoreCredentialPluginDisabled(true);
-            PipelinesServer pipelinesServer = new PipelinesServer(o.getString("pipelinesCbkUrl"), credentialsConfig, o.optInt("pipelinesTimeout"), o.getBoolean("pipelinesBypassProxy"), o.optInt("pipelinesConnectionRetry"));
-            setPipelinesServer(pipelinesServer);
+            JFrogPipelinesServer jfrogPipelinesServer = new JFrogPipelinesServer(o.getString("pipelinesIntegrationUrl"),
+                    credentialsConfig, o.optInt("pipelinesTimeout"), o.getBoolean("pipelinesBypassProxy"),
+                    o.optInt("pipelinesConnectionRetries"));
+            setJfrogPipelinesServer(jfrogPipelinesServer);
         }
 
         private void resetServersCredentials() {
@@ -319,8 +323,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return artifactoryServers;
         }
 
-        public PipelinesServer getPipelinesServer() {
-            return pipelinesServer;
+        public JFrogPipelinesServer getJfrogPipelinesServer() {
+            return jfrogPipelinesServer;
         }
 
         public boolean getUseCredentialsPlugin() {
@@ -332,8 +336,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             this.artifactoryServers = artifactoryServers;
         }
 
-        public void setPipelinesServer(PipelinesServer pipelinesServer) {
-            this.pipelinesServer = pipelinesServer;
+        public void setJfrogPipelinesServer(JFrogPipelinesServer jfrogPipelinesServer) {
+            this.jfrogPipelinesServer = jfrogPipelinesServer;
         }
 
         @SuppressWarnings({"UnusedDeclaration"})

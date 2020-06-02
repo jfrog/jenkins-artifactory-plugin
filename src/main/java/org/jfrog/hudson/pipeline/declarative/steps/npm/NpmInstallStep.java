@@ -23,6 +23,7 @@ import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
+import org.jfrog.hudson.util.SerializationUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -130,7 +131,7 @@ public class NpmInstallStep extends AbstractStepImpl {
             if (buildDataFile == null) {
                 throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
             }
-            NpmGoResolver resolver = Utils.mapper().treeToValue(buildDataFile.get(NpmResolverStep.STEP_NAME), NpmGoResolver.class);
+            NpmGoResolver resolver = SerializationUtils.createMapper().treeToValue(buildDataFile.get(NpmResolverStep.STEP_NAME), NpmGoResolver.class);
             resolver.setServer(getArtifactoryServer(buildNumber, buildDataFile));
             step.npmBuild.setResolver(resolver);
         }

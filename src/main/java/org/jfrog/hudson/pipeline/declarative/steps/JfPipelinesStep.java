@@ -1,17 +1,18 @@
 package org.jfrog.hudson.pipeline.declarative.steps;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
 import hudson.Extension;
 import hudson.model.Result;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.PipelinesServer;
-import org.jfrog.hudson.jfpipelines.JfrogPipelinesParam;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobProperty;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
+import org.jfrog.hudson.jfpipelines.OutputResource;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -26,7 +27,7 @@ public class JfPipelinesStep extends AbstractStepImpl {
     public static final String STEP_NAME = "jfPipelines";
     public static final List<String> ACCEPTABLE_RESULTS;
     private String outputResources;
-    private String reportNow;
+    private String reportStatus;
 
     static {
         ACCEPTABLE_RESULTS = Stream.of(Result.FAILURE, Result.SUCCESS, Result.ABORTED, Result.NOT_BUILT, Result.UNSTABLE)
@@ -44,8 +45,8 @@ public class JfPipelinesStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setReportNow(String reportNow) {
-        this.reportNow = reportNow;
+    public void setReportStatus(String reportStatus) {
+        this.reportStatus = reportStatus;
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<Void> {
@@ -55,7 +56,7 @@ public class JfPipelinesStep extends AbstractStepImpl {
         private transient TaskListener listener;
 
         @StepContextParameter
-        private transient EnvVars env;
+        private transient Run<?, ?> build;
 
         @Inject(optional = true)
         private transient JfPipelinesStep step;
@@ -63,28 +64,28 @@ public class JfPipelinesStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
-            JfrogPipelinesParam jfrogPipelinesParam = JfrogPipelinesParam.createFromEnv(env);
-            if (jfrogPipelinesParam == null) {
-                logger.info("'JFrogPipelines' parameter is not set. Skipping jfPipelines step.");
+            JFrogPipelinesJobProperty property = build.getParent().getProperty(JFrogPipelinesJobProperty.class);
+            if (property == null) {
+                logger.info("Skipping jfPipelines step.");
                 return null;
             }
-            String stepId = jfrogPipelinesParam.getStepId();
-            PipelinesServer pipelinesServer = PipelinesServer.getPipelinesServer();
-            if (!PipelinesServer.isConfigured(pipelinesServer)) {
-                throw new IllegalStateException(PipelinesServer.SERVER_NOT_FOUND_EXCEPTION);
+            String stepId = property.getPayload().getStepId();
+            JFrogPipelinesServer pipelinesServer = JFrogPipelinesServer.getPipelinesServer();
+            if (!JFrogPipelinesServer.isConfigured(pipelinesServer)) {
+                throw new IllegalStateException(JFrogPipelinesServer.SERVER_NOT_FOUND_EXCEPTION);
             }
             if (StringUtils.isNotBlank(step.outputResources)) {
-                pipelinesServer.setOutputResources(jfrogPipelinesParam.getStepId(), step.outputResources);
+                pipelinesServer.setOutputResources(stepId, OutputResource.fromString(step.outputResources));
             }
-            if (StringUtils.isNotBlank(step.reportNow)) {
-                if (!ACCEPTABLE_RESULTS.contains(StringUtils.upperCase(step.reportNow))) {
-                    throw new IllegalArgumentException("Illegal build results '" + step.reportNow + "'. Acceptable values: " + ACCEPTABLE_RESULTS);
+            if (StringUtils.isNotBlank(step.reportStatus)) {
+                if (!ACCEPTABLE_RESULTS.contains(StringUtils.upperCase(step.reportStatus))) {
+                    throw new IllegalArgumentException("Illegal build results '" + step.reportStatus + "'. Acceptable values: " + ACCEPTABLE_RESULTS);
                 }
-                if (pipelinesServer.isReported(jfrogPipelinesParam.getStepId())) {
-                    throw new IllegalStateException("Step ID " + stepId + " is already reported to JFrog Pipelines. You can run jfPipelines with 'reportNow' parameter only once.");
+                if (pipelinesServer.isReported(stepId)) {
+                    throw new IllegalStateException("This job already reported the status to JFrog Pipelines Step ID " + stepId + ". You can run jfPipelines with the 'reportStatus' parameter only once.");
                 }
                 pipelinesServer.setReported(stepId);
-                pipelinesServer.reportNow(Result.fromString(step.reportNow), jfrogPipelinesParam.getStepId(), logger);
+                pipelinesServer.report(build, step.reportStatus, stepId, logger);
             }
             return null;
         }

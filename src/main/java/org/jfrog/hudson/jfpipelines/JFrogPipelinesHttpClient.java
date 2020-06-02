@@ -1,11 +1,6 @@
 package org.jfrog.hudson.jfpipelines;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -16,47 +11,50 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.api.util.NullLog;
-import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.client.PreemptiveHttpClient;
 import org.jfrog.build.client.PreemptiveHttpClientBuilder;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.client.Version;
 import org.jfrog.build.util.VersionCompatibilityType;
 import org.jfrog.build.util.VersionException;
+import org.jfrog.hudson.jfpipelines.payloads.JobStatusPayload;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-public class PipelinesHttpClient implements AutoCloseable {
-    static final ArtifactoryVersion MINIMAL_PIPELINES_VERSION = new ArtifactoryVersion("1.6.0");
+import static org.jfrog.hudson.util.SerializationUtils.createMapper;
+
+public class JFrogPipelinesHttpClient implements AutoCloseable {
+    static final Version MINIMAL_PIPELINES_VERSION = new Version("1.6.0");
     private static final int DEFAULT_CONNECTION_TIMEOUT_SECS = 300;
-    private static final int DEFAULT_CONNECTION_RETRY = 3;
+    private static final int DEFAULT_CONNECTION_RETRIES = 3;
 
     private ProxyConfiguration proxyConfiguration;
+    private final String pipelinesIntegrationUrl;
     private PreemptiveHttpClient httpClient;
-    private final String pipelinesCbkUrl;
     private final String accessToken;
     private int connectionTimeout;
     private int connectionRetries;
     private final Log log;
 
     /**
-     * JFrog pipelines integration HTTP client.
+     * JFrog Pipelines integration HTTP client.
      *
-     * @param pipelinesCbkUrl - The JFrog Pipelines callback URL
-     * @param accessToken     - The access toKen
-     * @param log             - The build log
+     * @param pipelinesIntegrationUrl - The JFrog Pipelines integration URL
+     * @param accessToken             - The access toKen
+     * @param log                     - The build log
      */
-    public PipelinesHttpClient(String pipelinesCbkUrl, String accessToken, Log log) {
+    public JFrogPipelinesHttpClient(String pipelinesIntegrationUrl, String accessToken, Log log) {
         this.connectionTimeout = DEFAULT_CONNECTION_TIMEOUT_SECS;
-        this.connectionRetries = DEFAULT_CONNECTION_RETRY;
-        this.pipelinesCbkUrl = StringUtils.stripEnd(pipelinesCbkUrl, "/");
+        this.connectionRetries = DEFAULT_CONNECTION_RETRIES;
+        this.pipelinesIntegrationUrl = StringUtils.stripEnd(pipelinesIntegrationUrl, "/");
         this.accessToken = accessToken;
         this.log = log;
     }
 
-    public PipelinesHttpClient(String pipelinesCbkUrl, String accessToken) {
-        this(pipelinesCbkUrl, accessToken, new NullLog());
+    public JFrogPipelinesHttpClient(String pipelinesIntegrationUrl, String accessToken) {
+        this(pipelinesIntegrationUrl, accessToken, new NullLog());
     }
 
     public void setProxyConfiguration(ProxyConfiguration proxyConfiguration) {
@@ -100,45 +98,45 @@ public class PipelinesHttpClient implements AutoCloseable {
     }
 
     /**
-     * Get Pipelines version.
+     * Get JFrog Pipelines version.
      *
      * @return Pipelines version
      * @throws IOException if response status is not 200 or 404.
      */
-    public ArtifactoryVersion getVersion() throws IOException {
+    public Version getVersion() throws IOException {
         HttpEntity requestEntity = new StringEntity("{action:\"test\"}");
         HttpResponse response = executePostRequest(requestEntity);
         try {
             int statusCode = response.getStatusLine().getStatusCode();
             if (statusCode == HttpStatus.SC_NOT_FOUND) {
-                return ArtifactoryVersion.NOT_FOUND;
+                return Version.NOT_FOUND;
             }
             if (statusCode != HttpStatus.SC_OK) {
                 throw new IOException(getMessageFromEntity(response.getEntity()));
             }
             HttpEntity httpEntity = response.getEntity();
             if (httpEntity == null) {
-                return ArtifactoryVersion.NOT_FOUND;
+                return Version.NOT_FOUND;
             }
             try (InputStream content = httpEntity.getContent()) {
-                JsonNode result = getJsonNode(content);
+                JsonNode result = createMapper().readTree(content);
                 log.debug("Version result: " + result);
                 String version = result.get("version").asText();
-                return new ArtifactoryVersion(version);
+                return new Version(version);
             }
         } finally {
-            consumeEntity(response);
+            EntityUtils.consume(response.getEntity());
         }
     }
 
     /**
-     * Get and verify Pipelines version.
+     * Get and verify JFrog Pipelines version.
      *
      * @return Pipelines version
      * @throws VersionException if an error occurred or the Pipelines version is below minimum.
      */
-    public ArtifactoryVersion verifyCompatiblePipelinesVersion() throws VersionException {
-        ArtifactoryVersion version;
+    public Version verifyCompatibleVersion() throws VersionException {
+        Version version;
         try {
             version = getVersion();
         } catch (IOException e) {
@@ -147,50 +145,27 @@ public class PipelinesHttpClient implements AutoCloseable {
         }
         if (version.isNotFound()) {
             throw new VersionException(
-                    "There is either an incompatible or no instance of Pipelines at the provided URL.",
+                    "There is either an incompatible version or no instance of JFrog Pipelines accessible at the provided URL.",
                     VersionCompatibilityType.NOT_FOUND);
         }
         if (!version.isAtLeast(MINIMAL_PIPELINES_VERSION)) {
             throw new VersionException("This plugin is compatible with version " + MINIMAL_PIPELINES_VERSION +
-                    " of JFrog Pipelines and above. Please upgrade your JFrog Pipelines server!",
+                    " or above of JFrog Pipelines. Please upgrade your JFrog Pipelines server!",
                     VersionCompatibilityType.INCOMPATIBLE);
         }
         return version;
     }
 
-    public HttpResponse jobCompleted(JobCompletedPayload payload) throws IOException {
-        ObjectMapper mapper = new ObjectMapper(new JsonFactory());
-        String text = mapper.writeValueAsString(payload);
+    public HttpResponse sendStatus(JobStatusPayload payload) throws IOException {
+        String text = createMapper().writeValueAsString(payload);
         HttpEntity body = new StringEntity(text);
         return executePostRequest(body);
     }
 
-    public JsonNode getJsonNode(InputStream content) throws IOException {
-        JsonFactory jsonFactory = this.createJsonFactory();
-        JsonParser parser = jsonFactory.createParser(content);
-        return (JsonNode) parser.readValueAsTree();
-    }
-
     private HttpResponse executePostRequest(HttpEntity body) throws IOException {
-        HttpPost httpPost = new HttpPost(pipelinesCbkUrl);
+        HttpPost httpPost = new HttpPost(pipelinesIntegrationUrl);
         httpPost.setEntity(body);
         return getHttpClient().execute(httpPost);
-    }
-
-    private void consumeEntity(HttpResponse response) throws IOException {
-        HttpEntity httpEntity = response.getEntity();
-        if (httpEntity != null) {
-            EntityUtils.consume(httpEntity);
-        }
-    }
-
-    public JsonFactory createJsonFactory() {
-        JsonFactory jsonFactory = new JsonFactory();
-        ObjectMapper mapper = new ObjectMapper(jsonFactory);
-        mapper.setAnnotationIntrospector(new JacksonAnnotationIntrospector());
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        jsonFactory.setCodec(mapper);
-        return jsonFactory;
     }
 
     public String getMessageFromEntity(HttpEntity entity) throws IOException {

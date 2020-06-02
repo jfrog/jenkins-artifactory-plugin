@@ -13,12 +13,11 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.MavenExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer;
 import org.jfrog.hudson.pipeline.common.types.builds.MavenBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.MavenResolver;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -30,6 +29,8 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 import java.util.Objects;
+
+import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
 /**
  * Run Maven-Artifactory task.
@@ -128,7 +129,7 @@ public class MavenStep extends AbstractStepImpl {
             if (buildDataFile == null) {
                 throw new IOException("Deployer " + step.deployerId + " doesn't exist!");
             }
-            MavenDeployer deployer = Utils.mapper().treeToValue(buildDataFile.get(MavenDeployerStep.STEP_NAME), MavenDeployer.class);
+            MavenDeployer deployer = createMapper().treeToValue(buildDataFile.get(MavenDeployerStep.STEP_NAME), MavenDeployer.class);
             deployer.setServer(getArtifactoryServer(buildNumber, buildDataFile));
             step.mavenBuild.setDeployer(deployer);
             addProperties(buildDataFile);
@@ -149,7 +150,7 @@ public class MavenStep extends AbstractStepImpl {
             if (buildDataFile == null) {
                 throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
             }
-            MavenResolver resolver = Utils.mapper().treeToValue(buildDataFile.get(MavenResolverStep.STEP_NAME), MavenResolver.class);
+            MavenResolver resolver = createMapper().treeToValue(buildDataFile.get(MavenResolverStep.STEP_NAME), MavenResolver.class);
             resolver.setServer(getArtifactoryServer(buildNumber, buildDataFile));
             step.mavenBuild.setResolver(resolver);
         }

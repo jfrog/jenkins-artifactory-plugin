@@ -14,12 +14,13 @@ import com.google.common.base.Charsets;
 import com.google.common.hash.Hashing;
 import hudson.EnvVars;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.hudson.pipeline.common.Utils;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
 /**
  * Created by romang on 7/28/16.
@@ -115,7 +116,7 @@ public class DockerUtils implements Serializable {
      * @throws IOException
      */
     public static String getConfigDigest(String manifest) throws IOException{
-        JsonNode manifestTree = Utils.mapper().readTree(manifest);
+        JsonNode manifestTree = createMapper().readTree(manifest);
         JsonNode schemaVersion = manifestTree.get("schemaVersion");
         if (schemaVersion == null) {
             throw new IllegalStateException("Could not find 'schemaVersion' in manifest");
@@ -147,7 +148,7 @@ public class DockerUtils implements Serializable {
     public static List<String> getLayersDigests(String manifestContent) throws IOException {
         List<String> dockerLayersDependencies = new ArrayList<String>();
 
-        JsonNode manifest = Utils.mapper().readTree(manifestContent);
+        JsonNode manifest = createMapper().readTree(manifestContent);
         JsonNode schemaVersion = manifest.get("schemaVersion");
         if (schemaVersion == null) {
             throw new IllegalStateException("Could not find 'schemaVersion' in manifest");
@@ -295,7 +296,7 @@ public class DockerUtils implements Serializable {
      * @throws IOException
      */
     public static int getNumberOfDependentLayers(String imageContent) throws IOException {
-        JsonNode history = Utils.mapper().readTree(imageContent).get("history");
+        JsonNode history = createMapper().readTree(imageContent).get("history");
         if (history == null) {
             throw new IllegalStateException("Could not find 'history' tag");
         }

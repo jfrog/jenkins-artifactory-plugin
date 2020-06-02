@@ -1,21 +1,31 @@
 package org.jfrog.hudson.pipeline.integration;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.BuildImageCmd;
 import com.github.dockerjava.core.command.BuildImageResultCallback;
 import com.google.common.collect.Sets;
 import hudson.EnvVars;
+import hudson.model.Result;
 import org.apache.commons.cli.MissingArgumentException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Module;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobProperty;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
+import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
 import org.jfrog.hudson.pipeline.common.docker.utils.DockerUtils;
+import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
+import org.mockserver.integration.ClientAndServer;
+import org.mockserver.model.HttpRequest;
+import org.mockserver.model.StringBody;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -25,12 +35,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
+import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 import static org.junit.Assert.*;
 
 /**
  * @author yahavi
  */
+@SuppressWarnings("UnconstructableJUnitTestCase")
 public class CommonITestsPipeline extends PipelineTestBase {
 
     CommonITestsPipeline(PipelineType pipelineType) {
@@ -510,6 +523,88 @@ public class CommonITestsPipeline extends PipelineTestBase {
         } finally {
             deleteBuild(artifactoryClient, buildName);
             FileUtils.deleteDirectory(dotGitPath);
+        }
+    }
+
+    void jfPipelinesOutputResourcesTest() throws Exception {
+        try (ClientAndServer mockServer = ClientAndServer.startClientAndServer(1080)) {
+            // Set JFrog Pipelines input payload
+            JobStartedPayload payload = new JobStartedPayload();
+            payload.setStepId("5");
+            // Run pipeline
+            runPipeline("jfPipelinesResources", new JFrogPipelinesJobProperty(payload));
+            HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
+            assertEquals(2, ArrayUtils.getLength(requests));
+
+            // Check job started
+            StringBody body = (StringBody) requests[0].getBody();
+            JsonNode requestTree = createMapper().readTree(body.getValue());
+            getAndAssertChild(requestTree, "action", "status");
+            getAndAssertChild(requestTree, "status", JFrogPipelinesServer.BUILD_STARTED);
+            getAndAssertChild(requestTree, "stepId", "5");
+            JsonNode outputResources = getAndAssertChild(requestTree, "outputResources", null);
+            assertEquals(1, outputResources.size());
+            checkJenkinsJobInfo(outputResources.get(0), false);
+
+            // Check job completed
+            body = (StringBody) requests[1].getBody();
+            requestTree = createMapper().readTree(body.getValue());
+            getAndAssertChild(requestTree, "action", "status");
+            getAndAssertChild(requestTree, "status", Result.SUCCESS.toString());
+            getAndAssertChild(requestTree, "stepId", "5");
+            outputResources = getAndAssertChild(requestTree, "outputResources", null);
+            assertEquals(3, outputResources.size());
+            for (JsonNode resource : outputResources) {
+                JsonNode name = getAndAssertChild(resource, "name", null);
+                switch (name.asText()) {
+                    case "jenkins-job-info":
+                        checkJenkinsJobInfo(resource, true);
+                        break;
+                    case "resource1":
+                        JsonNode content = getAndAssertChild(resource, "content", null);
+                        getAndAssertChild(content, "a", "b");
+                        break;
+                    case "resource2":
+                        content = getAndAssertChild(resource, "content", null);
+                        getAndAssertChild(content, "c", "d");
+                        break;
+                    default:
+                        Assert.fail("Unexpected output resource name " + name.asText());
+                }
+            }
+        }
+    }
+
+    public void jfPipelinesReportStatusTest() throws Exception {
+        try (ClientAndServer mockServer = ClientAndServer.startClientAndServer(1080)) {
+            // Set JFrog Pipelines input payload
+            JobStartedPayload payload = new JobStartedPayload();
+            payload.setStepId("5");
+            // Run pipeline
+            runPipeline("jfPipelinesReport", new JFrogPipelinesJobProperty(payload));
+            // Get sent request from the mock server
+            HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
+            assertEquals(2, ArrayUtils.getLength(requests));
+
+            // Check job started
+            StringBody body = (StringBody) requests[0].getBody();
+            JsonNode responseTree = createMapper().readTree(body.getValue());
+            getAndAssertChild(responseTree, "action", "status");
+            getAndAssertChild(responseTree, "status", JFrogPipelinesServer.BUILD_STARTED);
+            getAndAssertChild(responseTree, "stepId", "5");
+            JsonNode outputResources = getAndAssertChild(responseTree, "outputResources", null);
+            assertEquals(1, outputResources.size());
+            checkJenkinsJobInfo(outputResources.get(0), false);
+
+            // Check status reported on jfPipelines step
+            body = (StringBody) requests[1].getBody();
+            responseTree = createMapper().readTree(body.getValue());
+            getAndAssertChild(responseTree, "action", "status");
+            getAndAssertChild(responseTree, "status", Result.UNSTABLE.toString());
+            getAndAssertChild(responseTree, "stepId", "5");
+            outputResources = getAndAssertChild(responseTree, "outputResources", null);
+            assertEquals(1, outputResources.size());
+            checkJenkinsJobInfo(outputResources.get(0), false);
         }
     }
 }

@@ -32,7 +32,7 @@
                     </f:entry>
 
                     <f:advanced>
-                        <f:entry title="Connection Timeout" field="artifactory.timeout"
+                        <f:entry title="Connection timeout" field="artifactory.timeout"
                                  help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
                             <f:textbox clazz="number" value="${server.timeout}"/>
                         </f:entry>
@@ -56,7 +56,7 @@
                                 </j:forEach>
                             </select>
                         </f:entry>
-                        <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy"
+                        <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP proxy"
                                          checked="${server.bypassProxy}" inline="true"
                                          help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
                         </f:optionalBlock>
@@ -134,31 +134,31 @@
         <f:block>
             <br/>
         </f:block>
-        <f:entry title="Pipelines server" description="Send job results to JFrog Pipelines.">
+        <f:entry title="JFrog Pipelines server" description="Report job results to JFrog Pipelines">
             <table width="100%">
-                <f:entry title="Callback URL"
-                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-pipelinesCbkUrl.html">
-                    <f:textbox field="pipelinesCbkUrl" value="${descriptor.pipelinesServer.cbkUrl}"/>
+                <f:entry title="Integration URL"
+                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-pipelinesIntegrationUrl.html">
+                    <f:textbox field="pipelinesIntegrationUrl" value="${descriptor.jfrogPipelinesServer.integrationUrl}"/>
                 </f:entry>
 
                 <f:advanced>
                     <f:entry>
-                        <f:entry title="Connection Timeout" field="pipelinesTimeout"
+                        <f:entry title="Connection timeout" field="pipelinesTimeout"
                                  help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
-                            <f:textbox clazz="number" value="${descriptor.pipelinesServer.timeout}"/>
+                            <f:textbox clazz="number" value="${descriptor.jfrogPipelinesServer.timeout}"/>
                         </f:entry>
-                        <f:entry field="connectionRetry" title="Number of retries"
+                        <f:entry field="connectionRetries" title="Number of retries"
                                  help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
-                            <select class="setting-input" name="pipelinesConnectionRetry">
-                                <j:forEach var="r" items="${descriptor.pipelinesServer.connectionRetries}">
-                                    <f:option selected="${r==descriptor.pipelinesServer.connectionRetry}"
+                            <select class="setting-input" name="pipelinesConnectionRetries">
+                                <j:forEach var="r" items="${descriptor.jfrogPipelinesServer.connectionRetriesOptions}">
+                                    <f:option selected="${r==descriptor.jfrogPipelinesServer.connectionRetries}"
                                               value="${r}">${r}
                                     </f:option>
                                 </j:forEach>
                             </select>
                         </f:entry>
-                        <f:optionalBlock name="pipelinesBypassProxy" title="Bypass HTTP Proxy"
-                                         checked="${descriptor.pipelinesServer.bypassProxy}" inline="true"
+                        <f:optionalBlock name="pipelinesBypassProxy" title="Bypass HTTP proxy"
+                                         checked="${descriptor.jfrogPipelinesServer.bypassProxy}" inline="true"
                                          help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
                         </f:optionalBlock>
                     </f:entry>
@@ -167,13 +167,13 @@
                 <f:section title="Credentials" name="credentialsConfig">
                     <input type="hidden" name="stapler-class" value="org.jfrog.hudson.CredentialsConfig"/>
                     <f:entry title="${%Credentials}" field="credentialsId">
-                        <c:select default="${descriptor.pipelinesServer.credentialsConfig.credentialsId}"/>
+                        <c:select default="${descriptor.jfrogPipelinesServer.credentialsConfig.credentialsId}"/>
                     </f:entry>
                 </f:section>
                 <f:validateButton
                         title="${%Test Connection}" progress="${%Testing...}"
-                        method="testPipelinesConnection"
-                        with="pipelinesCbkUrl,pipelinesTimeout,pipelinesBypassProxy,credentialsId,pipelinesConnectionRetry"/>
+                        method="testJFrogPipelinesConnection"
+                        with="pipelinesIntegrationUrl,pipelinesTimeout,pipelinesBypassProxy,credentialsId,pipelinesConnectionRetries"/>
             </table>
         </f:entry>
 

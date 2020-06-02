@@ -4,6 +4,6 @@ node("TestSlave") {
 
     stage "Set output resources"
     jfPipelines(
-            reportNow: "UNSTABLE"
+            reportStatus: "UNSTABLE"
     )
 }

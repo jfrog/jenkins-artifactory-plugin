@@ -2,9 +2,10 @@ package org.jfrog.hudson.pipeline.declarative;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.jfrog.hudson.pipeline.common.Utils;
 
 import java.io.*;
+
+import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
 /**
  * Data to transfer between different declarative pipeline steps.
@@ -22,7 +23,7 @@ public class BuildDataFile implements Serializable {
      * @param stepId   - Unique value from the user to distinguish between steps. We may have, for example, 2 build infos.
      */
     public BuildDataFile(String stepName, String stepId) {
-        jsonObject = Utils.mapper().createObjectNode();
+        jsonObject = createMapper().createObjectNode();
         jsonObject.put("stepName", stepName).put("stepId", stepId);
     }
 
@@ -58,7 +59,7 @@ public class BuildDataFile implements Serializable {
      * @param stream - The input stream to read the object from.
      */
     private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        jsonObject = Utils.mapper().readValue((DataInput) stream, ObjectNode.class);
+        jsonObject = createMapper().readValue((DataInput) stream, ObjectNode.class);
     }
 
     /**
@@ -67,6 +68,6 @@ public class BuildDataFile implements Serializable {
      * @param stream - The output stream to write the object to.
      */
     private void writeObject(ObjectOutputStream stream) throws IOException {
-        Utils.mapper().writeValue((DataOutput) stream, jsonObject);
+        createMapper().writeValue((DataOutput) stream, jsonObject);
     }
 }
