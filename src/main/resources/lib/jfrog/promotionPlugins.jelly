@@ -9,7 +9,7 @@
     <tr>
         <td colspan="2"/>
         <td colspan="2">
-            <r:blockWrapper width="100%" name="promotionPlugin" id="pluginList-container"> <!-- TODO look at the attributes here -->
+            <r:blockWrapper id="pluginList-container">
                 <tbody id="None">
                     <f:entry title="${%Target status}" field="targetStatus"
                              help="/plugin/artifactory/help/release/PromoteBuildAction/help-targetStatus.html">

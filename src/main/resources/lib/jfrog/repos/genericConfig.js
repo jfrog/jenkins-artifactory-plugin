@@ -22,7 +22,7 @@ function updateViewBySpecsParam(isUsesSpec, uniqueId) {
     let deployerSpec = getElementByUniqueId("artifactory-deployer-spec-dd", uniqueId);
     let deployerLegacy = getElementByUniqueId("artifactory-deployer-generic-dd", uniqueId);
     
-    // Jenkins 2.236 and later use div for layout rather than tables
+    // Jenkins after https://github.com/jenkinsci/jenkins/pull/3895 uses div for layout rather than tables
     const tagName = resolverSpec.tagName.toLowerCase() === 'div' ? 'div' : 'table'
 
     let specView = "none", legacyView = "none";
@@ -41,13 +41,13 @@ function updateViewBySpecsParam(isUsesSpec, uniqueId) {
     } else {
         // Resolution section
         // By changing the name the configuration will decide which server to use
-        resolverSpec.getElementsByTagName("table")[0].setAttribute("name", "artifactory-resolver-spec-dd");
-        resolverLegacy.getElementsByTagName("table")[0].setAttribute("name", "resolverDetails");
+        resolverSpec.getElementsByTagName(tagName)[0].setAttribute("name", "artifactory-resolver-spec-dd");
+        resolverLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "resolverDetails");
 
         // Deployment section
         // By changing the name the configuration will decide which server to use
-        deployerSpec.getElementsByTagName("table")[0].setAttribute("name", "artifactory-deployer-spec-dd");
-        deployerLegacy.getElementsByTagName("table")[0].setAttribute("name", "deployerDetails");
+        deployerSpec.getElementsByTagName(tagName)[0].setAttribute("name", "artifactory-deployer-spec-dd");
+        deployerLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "deployerDetails");
 
         legacyView = "";
     }
