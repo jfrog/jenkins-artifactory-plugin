@@ -296,24 +296,23 @@ class ITestUtils {
     /**
      * Check Jenkins job info node for JFrog Pipelines tests.
      *
-     * @param jenkinsJobInfo - The Jenkins job info node.
+     * @param node - The node that container the Jenkins job info node.
      */
-    static void checkJenkinsJobInfo(JsonNode jenkinsJobInfo, boolean completed) {
-        getAndAssertChild(jenkinsJobInfo, "name", null);
-        JsonNode content = getAndAssertChild(jenkinsJobInfo, "content", null);
-        JsonNode jobName = getAndAssertChild(content, "job-name", null);
-        getAndAssertChild(content, "job-number", "1");
+    static void checkJenkinsJobInfo(JsonNode node, boolean completed) {
+        JsonNode jobInfo = getAndAssertChild(node, "jobInfo", null);
+        JsonNode jobName = getAndAssertChild(jobInfo, "job-name", null);
+        getAndAssertChild(jobInfo, "job-number", "1");
         if (completed) {
-            JsonNode duration = getAndAssertChild(content, "duration", null);
+            JsonNode duration = getAndAssertChild(jobInfo, "duration", null);
             assertTrue(NumberUtils.isDigits(duration.asText()));
         }
-        JsonNode startTime = getAndAssertChild(content, "start-time", null);
+        JsonNode startTime = getAndAssertChild(jobInfo, "start-time", null);
         assertTrue(NumberUtils.isDigits(startTime.asText()));
-        JsonNode buildUrl = getAndAssertChild(content, "build-url", null);
+        JsonNode buildUrl = getAndAssertChild(jobInfo, "build-url", null);
         WorkflowJob job = (WorkflowJob) Jenkins.get().getItem(jobName.textValue());
         assertNotNull(job);
-        //noinspection deprecation
-        assertEquals(job.getLastBuild().getAbsoluteUrl(), buildUrl.asText());
+        WorkflowRun lastBuild = job.getLastBuild();
+        assertEquals(lastBuild.getParent().getAbsoluteUrl() + lastBuild.getNumber(), buildUrl.asText());
     }
 
     private static String encodeBuildName(String buildName) throws UnsupportedEncodingException {

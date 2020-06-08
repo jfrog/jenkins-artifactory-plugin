@@ -14,6 +14,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.jfpipelines.JFrogPipelinesHttpClient.MINIMAL_PIPELINES_VERSION;
@@ -120,8 +122,11 @@ public class JFrogPipelinesHttpClientTest {
      */
     @Test
     public void sendStatusTest() {
+        Map<String, String> jobInfo = new HashMap<String, String>() {{
+            put("a", "b");
+        }};
         try (JFrogPipelinesHttpClient client = createClient("http://httpbin.org/post")) {
-            HttpResponse response = client.sendStatus(new JobStatusPayload(Result.SUCCESS.toExportedObject(), "5", null));
+            HttpResponse response = client.sendStatus(new JobStatusPayload(Result.SUCCESS.toExportedObject(), "5", jobInfo, null));
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             try (InputStream content = response.getEntity().getContent()) {
                 JsonNode jsonObject = createMapper().readTree(content);
@@ -136,6 +141,10 @@ public class JFrogPipelinesHttpClientTest {
 
                 // Check stepId == "5"
                 getAndAssertChild(child, "stepId", "5");
+
+                // Check jobInfo
+                JsonNode jobInfoNode = getAndAssertChild(child, "jobInfo", null);
+                getAndAssertChild(jobInfoNode, "a", "b");
 
                 // Check that there are no output resources
                 Assert.assertFalse(child.has("outputResources"));
@@ -152,7 +161,7 @@ public class JFrogPipelinesHttpClientTest {
     public void sendStatusOutputResourcesTest() {
         String outputResources = "[{\"content\":{\"a\":\"b\"},\"name\":\"resource1\"},{\"content\":{\"c\":\"d\"},\"name\":\"resource2\"}]";
         try (JFrogPipelinesHttpClient client = createClient("http://httpbin.org/post")) {
-            HttpResponse response = client.sendStatus(new JobStatusPayload(Result.SUCCESS.toExportedObject(), "5", OutputResource.fromString(outputResources)));
+            HttpResponse response = client.sendStatus(new JobStatusPayload(Result.SUCCESS.toExportedObject(), "5", new HashMap<>(), OutputResource.fromString(outputResources)));
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             try (InputStream content = response.getEntity().getContent()) {
                 JsonNode jsonObject = createMapper().readTree(content);

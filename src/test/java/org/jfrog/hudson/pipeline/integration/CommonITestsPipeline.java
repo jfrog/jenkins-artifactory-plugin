@@ -542,9 +542,10 @@ public class CommonITestsPipeline extends PipelineTestBase {
             getAndAssertChild(requestTree, "action", "status");
             getAndAssertChild(requestTree, "status", JFrogPipelinesServer.BUILD_STARTED);
             getAndAssertChild(requestTree, "stepId", "5");
+            checkJenkinsJobInfo(requestTree, false);
+
             JsonNode outputResources = getAndAssertChild(requestTree, "outputResources", null);
-            assertEquals(1, outputResources.size());
-            checkJenkinsJobInfo(outputResources.get(0), false);
+            assertTrue(outputResources.isEmpty());
 
             // Check job completed
             body = (StringBody) requests[1].getBody();
@@ -552,14 +553,12 @@ public class CommonITestsPipeline extends PipelineTestBase {
             getAndAssertChild(requestTree, "action", "status");
             getAndAssertChild(requestTree, "status", Result.SUCCESS.toString());
             getAndAssertChild(requestTree, "stepId", "5");
+            checkJenkinsJobInfo(requestTree, true);
             outputResources = getAndAssertChild(requestTree, "outputResources", null);
-            assertEquals(3, outputResources.size());
+            assertEquals(2, outputResources.size());
             for (JsonNode resource : outputResources) {
                 JsonNode name = getAndAssertChild(resource, "name", null);
                 switch (name.asText()) {
-                    case "jenkins-job-info":
-                        checkJenkinsJobInfo(resource, true);
-                        break;
                     case "resource1":
                         JsonNode content = getAndAssertChild(resource, "content", null);
                         getAndAssertChild(content, "a", "b");
@@ -592,9 +591,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
             getAndAssertChild(responseTree, "action", "status");
             getAndAssertChild(responseTree, "status", JFrogPipelinesServer.BUILD_STARTED);
             getAndAssertChild(responseTree, "stepId", "5");
+            checkJenkinsJobInfo(responseTree, false);
             JsonNode outputResources = getAndAssertChild(responseTree, "outputResources", null);
-            assertEquals(1, outputResources.size());
-            checkJenkinsJobInfo(outputResources.get(0), false);
+            assertTrue(outputResources.isEmpty());
 
             // Check status reported on jfPipelines step
             body = (StringBody) requests[1].getBody();
@@ -602,9 +601,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
             getAndAssertChild(responseTree, "action", "status");
             getAndAssertChild(responseTree, "status", Result.UNSTABLE.toString());
             getAndAssertChild(responseTree, "stepId", "5");
+            checkJenkinsJobInfo(responseTree, false);
             outputResources = getAndAssertChild(responseTree, "outputResources", null);
-            assertEquals(1, outputResources.size());
-            checkJenkinsJobInfo(outputResources.get(0), false);
+            assertTrue(outputResources.isEmpty());
         }
     }
 }

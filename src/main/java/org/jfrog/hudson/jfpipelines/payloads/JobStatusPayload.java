@@ -1,11 +1,11 @@
 package org.jfrog.hudson.jfpipelines.payloads;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import org.jfrog.hudson.jfpipelines.OutputResource;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * This class represents the payload to send to JFrog Pipelines after a job completed.
@@ -15,13 +15,14 @@ public class JobStatusPayload implements Serializable {
 
     private static final String ACTION = "status";
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final Collection<OutputResource> outputResources;
+    private final Map<String, String> jobInfo;
     private final String status;
     private final String stepId;
 
-    public JobStatusPayload(String status, String stepId, @Nullable Collection<OutputResource> outputResources) {
+    public JobStatusPayload(String status, String stepId, Map<String, String> jobInfo, @Nullable Collection<OutputResource> outputResources) {
         this.outputResources = outputResources;
+        this.jobInfo = jobInfo;
         this.status = status;
         this.stepId = stepId;
     }
@@ -36,6 +37,10 @@ public class JobStatusPayload implements Serializable {
 
     public String getStepId() {
         return stepId;
+    }
+
+    public Map<String, String> getJobInfo() {
+        return jobInfo;
     }
 
     @SuppressWarnings("unused")

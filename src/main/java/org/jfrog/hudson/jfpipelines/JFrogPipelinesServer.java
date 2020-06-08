@@ -213,9 +213,9 @@ public class JFrogPipelinesServer implements Serializable {
         }
     }
 
-    private static OutputResource createJenkinsJobInfo(Run<?, ?> build) {
+    private static Map<String, String> createJenkinsJobInfo(Run<?, ?> build) {
         Cause.UserIdCause cause = build.getCause(Cause.UserIdCause.class);
-        Map<String, String> content = new HashMap<String, String>() {{
+        return new HashMap<String, String>() {{
             put("job-name", build.getParent().getName());
             put("job-number", String.valueOf(build.getNumber()));
             put("start-time", String.valueOf(build.getStartTimeInMillis()));
@@ -227,8 +227,6 @@ public class JFrogPipelinesServer implements Serializable {
                 put("user", cause.getUserId());
             }
         }};
-
-        return new OutputResource("jenkins-job-info", content);
     }
 
     /**
@@ -253,12 +251,11 @@ public class JFrogPipelinesServer implements Serializable {
             if (currentResources != null) {
                 addAll(currentResources);
             }
-            add(createJenkinsJobInfo(build));
         }};
 
         // Report job completed to JFrog Pipelines
         try (JFrogPipelinesHttpClient client = createHttpClient(logger)) {
-            client.sendStatus(new JobStatusPayload(result, stepId, outputResource));
+            client.sendStatus(new JobStatusPayload(result, stepId, createJenkinsJobInfo(build), outputResource));
         }
         logger.info("Successfully reported status '" + result + "' to JFrog Pipelines.");
     }
