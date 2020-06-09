@@ -25,7 +25,7 @@ import org.junit.Assume;
 import org.junit.Test;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.HttpRequest;
-import org.mockserver.model.StringBody;
+import org.mockserver.model.JsonBody;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -536,39 +536,38 @@ public class CommonITestsPipeline extends PipelineTestBase {
             HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
             assertEquals(2, ArrayUtils.getLength(requests));
 
-            // Check job started
-            StringBody body = (StringBody) requests[0].getBody();
-            JsonNode requestTree = createMapper().readTree(body.getValue());
-            getAndAssertChild(requestTree, "action", "status");
-            getAndAssertChild(requestTree, "status", JFrogPipelinesServer.BUILD_STARTED);
-            getAndAssertChild(requestTree, "stepId", "5");
-            checkJenkinsJobInfo(requestTree, false);
-
-            JsonNode outputResources = getAndAssertChild(requestTree, "outputResources", null);
-            assertTrue(outputResources.isEmpty());
-
-            // Check job completed
-            body = (StringBody) requests[1].getBody();
-            requestTree = createMapper().readTree(body.getValue());
-            getAndAssertChild(requestTree, "action", "status");
-            getAndAssertChild(requestTree, "status", Result.SUCCESS.toString());
-            getAndAssertChild(requestTree, "stepId", "5");
-            checkJenkinsJobInfo(requestTree, true);
-            outputResources = getAndAssertChild(requestTree, "outputResources", null);
-            assertEquals(2, outputResources.size());
-            for (JsonNode resource : outputResources) {
-                JsonNode name = getAndAssertChild(resource, "name", null);
-                switch (name.asText()) {
-                    case "resource1":
-                        JsonNode content = getAndAssertChild(resource, "content", null);
-                        getAndAssertChild(content, "a", "b");
-                        break;
-                    case "resource2":
-                        content = getAndAssertChild(resource, "content", null);
-                        getAndAssertChild(content, "c", "d");
-                        break;
-                    default:
-                        Assert.fail("Unexpected output resource name " + name.asText());
+            for (HttpRequest request : requests) {
+                JsonBody body = (JsonBody) request.getBody();
+                JsonNode requestTree = createMapper().readTree(body.getValue());
+                getAndAssertChild(requestTree, "action", "status");
+                getAndAssertChild(requestTree, "stepId", "5");
+                String status = getAndAssertChild(requestTree, "status", null).asText();
+                if (JFrogPipelinesServer.BUILD_STARTED.equals(status)) {
+                    // Check job started
+                    checkJenkinsJobInfo(requestTree, false);
+                    assertFalse(requestTree.has("outputResources"));
+                } else if (Result.SUCCESS.toString().equals(status)) {
+                    // Check job completed
+                    checkJenkinsJobInfo(requestTree, true);
+                    JsonNode outputResources = getAndAssertChild(requestTree, "outputResources", null);
+                    assertEquals(2, outputResources.size());
+                    for (JsonNode resource : outputResources) {
+                        JsonNode name = getAndAssertChild(resource, "name", null);
+                        switch (name.asText()) {
+                            case "resource1":
+                                JsonNode content = getAndAssertChild(resource, "content", null);
+                                getAndAssertChild(content, "a", "b");
+                                break;
+                            case "resource2":
+                                content = getAndAssertChild(resource, "content", null);
+                                getAndAssertChild(content, "c", "d");
+                                break;
+                            default:
+                                Assert.fail("Unexpected output resource name " + name.asText());
+                        }
+                    }
+                } else {
+                    Assert.fail("Unexpected build status " + status);
                 }
             }
         }
@@ -585,25 +584,17 @@ public class CommonITestsPipeline extends PipelineTestBase {
             HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
             assertEquals(2, ArrayUtils.getLength(requests));
 
-            // Check job started
-            StringBody body = (StringBody) requests[0].getBody();
-            JsonNode responseTree = createMapper().readTree(body.getValue());
-            getAndAssertChild(responseTree, "action", "status");
-            getAndAssertChild(responseTree, "status", JFrogPipelinesServer.BUILD_STARTED);
-            getAndAssertChild(responseTree, "stepId", "5");
-            checkJenkinsJobInfo(responseTree, false);
-            JsonNode outputResources = getAndAssertChild(responseTree, "outputResources", null);
-            assertTrue(outputResources.isEmpty());
-
-            // Check status reported on jfPipelines step
-            body = (StringBody) requests[1].getBody();
-            responseTree = createMapper().readTree(body.getValue());
-            getAndAssertChild(responseTree, "action", "status");
-            getAndAssertChild(responseTree, "status", Result.UNSTABLE.toString());
-            getAndAssertChild(responseTree, "stepId", "5");
-            checkJenkinsJobInfo(responseTree, false);
-            outputResources = getAndAssertChild(responseTree, "outputResources", null);
-            assertTrue(outputResources.isEmpty());
+            // Check requests
+            for (HttpRequest request : requests) {
+                JsonBody body = (JsonBody) request.getBody();
+                JsonNode requestTree = createMapper().readTree(body.getValue());
+                String status = getAndAssertChild(requestTree, "status", null).asText();
+                assertTrue(Result.UNSTABLE.toString().equals(status) || "STARTED".equals(status));
+                getAndAssertChild(requestTree, "action", "status");
+                getAndAssertChild(requestTree, "stepId", "5");
+                checkJenkinsJobInfo(requestTree, false);
+                assertFalse(requestTree.has("outputResources"));
+            }
         }
     }
 }

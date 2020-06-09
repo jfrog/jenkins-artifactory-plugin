@@ -2,6 +2,7 @@ package org.jfrog.hudson.jfpipelines;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Result;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -21,6 +22,7 @@ import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.jfpipelines.JFrogPipelinesHttpClient.MINIMAL_PIPELINES_VERSION;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class JFrogPipelinesHttpClientTest {
 
@@ -129,20 +131,19 @@ public class JFrogPipelinesHttpClientTest {
             HttpResponse response = client.sendStatus(new JobStatusPayload(Result.SUCCESS.toExportedObject(), "5", jobInfo, null));
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             try (InputStream content = response.getEntity().getContent()) {
-                JsonNode jsonObject = createMapper().readTree(content);
-                Assert.assertNotNull(jsonObject);
-                JsonNode child = getAndAssertChild(jsonObject, "json", null);
+                JsonNode requestTree = createMapper().readTree(content);
+                Assert.assertNotNull(requestTree);
 
-                // Check action == "status"
+                // Check content type
+                JsonNode headers = getAndAssertChild(requestTree, "headers", null);
+                JsonNode contentType = getAndAssertChild(headers, "Content-Type", null);
+                assertTrue(StringUtils.startsWith(contentType.asText(), "application/json"));
+
+                // Check response body
+                JsonNode child = getAndAssertChild(requestTree, "json", null);
                 getAndAssertChild(child, "action", "status");
-
-                // Check status == "SUCCESS"
                 getAndAssertChild(child, "status", Result.SUCCESS.toString());
-
-                // Check stepId == "5"
                 getAndAssertChild(child, "stepId", "5");
-
-                // Check jobInfo
                 JsonNode jobInfoNode = getAndAssertChild(child, "jobInfo", null);
                 getAndAssertChild(jobInfoNode, "a", "b");
 
@@ -164,10 +165,10 @@ public class JFrogPipelinesHttpClientTest {
             HttpResponse response = client.sendStatus(new JobStatusPayload(Result.SUCCESS.toExportedObject(), "5", new HashMap<>(), OutputResource.fromString(outputResources)));
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             try (InputStream content = response.getEntity().getContent()) {
-                JsonNode jsonObject = createMapper().readTree(content);
-                Assert.assertNotNull(jsonObject);
+                JsonNode requestTree = createMapper().readTree(content);
+                Assert.assertNotNull(requestTree);
 
-                JsonNode child = getAndAssertChild(jsonObject, "json", null);
+                JsonNode child = getAndAssertChild(requestTree, "json", null);
                 JsonNode outputResourcesNode = getAndAssertChild(child, "outputResources", null);
 
                 // Check resource1

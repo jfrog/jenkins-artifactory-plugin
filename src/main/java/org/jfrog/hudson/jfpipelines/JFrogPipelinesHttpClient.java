@@ -7,6 +7,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 import org.jfrog.build.api.util.Log;
@@ -104,7 +105,7 @@ public class JFrogPipelinesHttpClient implements AutoCloseable {
      * @throws IOException if response status is not 200 or 404.
      */
     public Version getVersion() throws IOException {
-        HttpEntity requestEntity = new StringEntity("{action:\"test\"}");
+        HttpEntity requestEntity = new StringEntity("{action:\"test\"}", ContentType.APPLICATION_JSON);
         HttpResponse response = executePostRequest(requestEntity);
         try {
             int statusCode = response.getStatusLine().getStatusCode();
@@ -158,7 +159,7 @@ public class JFrogPipelinesHttpClient implements AutoCloseable {
 
     public HttpResponse sendStatus(JobStatusPayload payload) throws IOException {
         String text = createMapper().writeValueAsString(payload);
-        HttpEntity body = new StringEntity(text);
+        StringEntity body = new StringEntity(text, ContentType.APPLICATION_JSON);
         return executePostRequest(body);
     }
 

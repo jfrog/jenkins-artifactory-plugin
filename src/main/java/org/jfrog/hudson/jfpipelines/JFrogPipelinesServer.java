@@ -245,17 +245,9 @@ public class JFrogPipelinesServer implements Serializable {
      * @param logger - The build logger
      */
     public void report(Run<?, ?> build, String result, String stepId, JenkinsBuildInfoLog logger) throws IOException {
-        // Create output resources to add to payload
-        List<OutputResource> outputResource = new ArrayList<OutputResource>() {{
-            Collection<OutputResource> currentResources = getOutputResource(stepId);
-            if (currentResources != null) {
-                addAll(currentResources);
-            }
-        }};
-
         // Report job completed to JFrog Pipelines
         try (JFrogPipelinesHttpClient client = createHttpClient(logger)) {
-            client.sendStatus(new JobStatusPayload(result, stepId, createJenkinsJobInfo(build), outputResource));
+            client.sendStatus(new JobStatusPayload(result, stepId, createJenkinsJobInfo(build), getOutputResource(stepId)));
         }
         logger.info("Successfully reported status '" + result + "' to JFrog Pipelines.");
     }
