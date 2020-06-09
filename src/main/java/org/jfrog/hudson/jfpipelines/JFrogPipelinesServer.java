@@ -38,9 +38,9 @@ public class JFrogPipelinesServer implements Serializable {
     private static final int DEFAULT_CONNECTION_RETRIES = 3;
 
     // Map between step ID and output resources.
-    private final transient Multimap<String, OutputResource> outputResourcesMap = Multimaps.synchronizedMultimap(HashMultimap.create());
+    private transient Multimap<String, OutputResource> outputResourcesMap;
     // Set of reported step IDs. This is important to avoid reporting status to JFrog pipelines more than once.
-    private final transient Set<String> reportedStepIds = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private transient Set<String> reportedStepIds;
 
     private CredentialsConfig credentialsConfig;
     private final int connectionRetries;
@@ -102,13 +102,20 @@ public class JFrogPipelinesServer implements Serializable {
         outputResourcesMap.putAll(stepId, outputResources);
     }
 
+    public synchronized Set<String> getReportedStepIds() {
+        if (this.reportedStepIds == null) {
+            this.reportedStepIds = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        }
+        return this.reportedStepIds;
+    }
+
     /**
      * Run after executing the pipeline step 'jfPipelines'.
      *
      * @param stepId - Step ID from JFrog Pipelines
      */
     public void setReported(String stepId) {
-        reportedStepIds.add(stepId);
+        getReportedStepIds().add(stepId);
     }
 
     /**
@@ -118,7 +125,7 @@ public class JFrogPipelinesServer implements Serializable {
      * @return true if the build is already reported to JFrog Pipelines
      */
     public boolean isReported(String stepId) {
-        return reportedStepIds.contains(stepId);
+        return getReportedStepIds().contains(stepId);
     }
 
     /**
@@ -127,12 +134,19 @@ public class JFrogPipelinesServer implements Serializable {
      * @param stepId - Step ID from JFrog Pipelines
      */
     public void clearReported(String stepId) {
-        reportedStepIds.remove(stepId);
+        getReportedStepIds().remove(stepId);
+    }
+
+    public synchronized Multimap<String, OutputResource> getOutputResourcesMap() {
+        if (this.outputResourcesMap == null) {
+            this.outputResourcesMap = Multimaps.synchronizedMultimap(HashMultimap.create());
+        }
+        return this.outputResourcesMap;
     }
 
     @Nullable
     public Collection<OutputResource> getOutputResource(String stepId) {
-        return outputResourcesMap.get(stepId);
+        return getOutputResourcesMap().get(stepId);
     }
 
     private JFrogPipelinesHttpClient createHttpClient(Log logger) {
