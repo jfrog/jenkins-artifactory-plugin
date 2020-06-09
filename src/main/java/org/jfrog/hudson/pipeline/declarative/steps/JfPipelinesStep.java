@@ -12,7 +12,6 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobProperty;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
-import org.jfrog.hudson.jfpipelines.OutputResource;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -75,17 +74,17 @@ public class JfPipelinesStep extends AbstractStepImpl {
                 throw new IllegalStateException(JFrogPipelinesServer.SERVER_NOT_FOUND_EXCEPTION);
             }
             if (StringUtils.isNotBlank(step.outputResources)) {
-                pipelinesServer.setOutputResources(stepId, OutputResource.fromString(step.outputResources));
+                property.setOutputResources(step.outputResources);
             }
             if (StringUtils.isNotBlank(step.reportStatus)) {
                 if (!ACCEPTABLE_RESULTS.contains(StringUtils.upperCase(step.reportStatus))) {
                     throw new IllegalArgumentException("Illegal build results '" + step.reportStatus + "'. Acceptable values: " + ACCEPTABLE_RESULTS);
                 }
-                if (pipelinesServer.isReported(stepId)) {
+                if (property.isReported()) {
                     throw new IllegalStateException("This job already reported the status to JFrog Pipelines Step ID " + stepId + ". You can run jfPipelines with the 'reportStatus' parameter only once.");
                 }
-                pipelinesServer.setReported(stepId);
-                pipelinesServer.report(build, step.reportStatus, stepId, logger);
+                pipelinesServer.report(build, step.reportStatus, property, logger);
+                property.setReported();
             }
             return null;
         }

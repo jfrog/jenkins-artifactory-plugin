@@ -12,6 +12,8 @@ import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
 public class JFrogPipelinesJobProperty extends JobProperty<Job<?, ?>> {
 
     private final JobStartedPayload payload;
+    private String outputResources;
+    private boolean reported;
 
     public JFrogPipelinesJobProperty(JobStartedPayload payload) {
         this.payload = payload;
@@ -19,6 +21,22 @@ public class JFrogPipelinesJobProperty extends JobProperty<Job<?, ?>> {
 
     public JobStartedPayload getPayload() {
         return payload;
+    }
+
+    public void setOutputResources(String outputResources) {
+        this.outputResources = outputResources;
+    }
+
+    public String getOutputResources() {
+        return outputResources;
+    }
+
+    public void setReported() {
+        this.reported = true;
+    }
+
+    public boolean isReported() {
+        return reported;
     }
 
     /**

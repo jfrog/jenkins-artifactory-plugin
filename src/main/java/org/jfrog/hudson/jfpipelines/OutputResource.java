@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.util.SerializationUtils;
 
 import javax.annotation.Nullable;
@@ -40,6 +41,9 @@ public class OutputResource implements Serializable {
 
     @JsonIgnore
     public static List<OutputResource> fromString(@Nullable String str) throws JsonProcessingException {
+        if (StringUtils.isBlank(str)) {
+            return null;
+        }
         ObjectMapper mapper = SerializationUtils.createMapper();
         CollectionType javaType = mapper.getTypeFactory().constructCollectionType(List.class, OutputResource.class);
         return SerializationUtils.createMapper().readValue(str, javaType);

@@ -1,8 +1,5 @@
 package org.jfrog.hudson.jfpipelines;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import hudson.model.Cause;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -19,11 +16,11 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.ProxyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -36,11 +33,6 @@ public class JFrogPipelinesServer implements Serializable {
 
     private static final int DEFAULT_CONNECTION_TIMEOUT = 300; // 5 Minutes
     private static final int DEFAULT_CONNECTION_RETRIES = 3;
-
-    // Map between step ID and output resources.
-    private transient Multimap<String, OutputResource> outputResourcesMap;
-    // Set of reported step IDs. This is important to avoid reporting status to JFrog pipelines more than once.
-    private transient Set<String> reportedStepIds;
 
     private CredentialsConfig credentialsConfig;
     private final int connectionRetries;
@@ -92,63 +84,6 @@ public class JFrogPipelinesServer implements Serializable {
         return connectionRetries;
     }
 
-    /**
-     * Set the output resources of the step ID.
-     *
-     * @param stepId          - Step ID from JFrog Pipelines
-     * @param outputResources - Output resources map to report to JFrog Pipelines
-     */
-    public void setOutputResources(String stepId, Collection<OutputResource> outputResources) {
-        outputResourcesMap.putAll(stepId, outputResources);
-    }
-
-    public synchronized Set<String> getReportedStepIds() {
-        if (this.reportedStepIds == null) {
-            this.reportedStepIds = Collections.newSetFromMap(new ConcurrentHashMap<>());
-        }
-        return this.reportedStepIds;
-    }
-
-    /**
-     * Run after executing the pipeline step 'jfPipelines'.
-     *
-     * @param stepId - Step ID from JFrog Pipelines
-     */
-    public void setReported(String stepId) {
-        getReportedStepIds().add(stepId);
-    }
-
-    /**
-     * Return true if the build is already reported to JFrog Pipelines.
-     *
-     * @param stepId - Step ID from JFrog Pipelines
-     * @return true if the build is already reported to JFrog Pipelines
-     */
-    public boolean isReported(String stepId) {
-        return getReportedStepIds().contains(stepId);
-    }
-
-    /**
-     * Clean up the step ID report status after build finished.
-     *
-     * @param stepId - Step ID from JFrog Pipelines
-     */
-    public void clearReported(String stepId) {
-        getReportedStepIds().remove(stepId);
-    }
-
-    public synchronized Multimap<String, OutputResource> getOutputResourcesMap() {
-        if (this.outputResourcesMap == null) {
-            this.outputResourcesMap = Multimaps.synchronizedMultimap(HashMultimap.create());
-        }
-        return this.outputResourcesMap;
-    }
-
-    @Nullable
-    public Collection<OutputResource> getOutputResource(String stepId) {
-        return getOutputResourcesMap().get(stepId);
-    }
-
     private JFrogPipelinesHttpClient createHttpClient(Log logger) {
         JFrogPipelinesHttpClient client = new JFrogPipelinesHttpClient(integrationUrl, credentialsConfig.provideCredentials(null).getAccessToken(), logger);
         client.setConnectionRetries(getConnectionRetries());
@@ -179,7 +114,7 @@ public class JFrogPipelinesServer implements Serializable {
                 logger.error(SERVER_NOT_FOUND_EXCEPTION);
                 return;
             }
-            pipelinesServer.report(build, BUILD_STARTED, property.getPayload().getStepId(), logger);
+            pipelinesServer.report(build, BUILD_STARTED, property, logger);
         } catch (IOException e) {
             if (isConfigured(pipelinesServer)) {
                 // If JFrog Pipelines server is not configured - don't log errors.
@@ -209,15 +144,13 @@ public class JFrogPipelinesServer implements Serializable {
                 logger.error(SERVER_NOT_FOUND_EXCEPTION);
                 return;
             }
-            String stepId = property.getPayload().getStepId();
-            if (pipelinesServer.isReported(stepId)) {
+            if (property.isReported()) {
                 // Step status is already reported to JFrog Pipelines.
-                pipelinesServer.clearReported(stepId);
                 logger.debug("Skipping reporting to JFrog Pipelines - status is already reported in jfPipelines step.");
                 return;
             }
             Result result = ObjectUtils.defaultIfNull(build.getResult(), Result.NOT_BUILT);
-            pipelinesServer.report(build, result.toExportedObject(), property.getPayload().getStepId(), logger);
+            pipelinesServer.report(build, result.toExportedObject(), property, logger);
         } catch (IOException e) {
             if (isConfigured(pipelinesServer)) {
                 // If JFrog Pipelines server is not configured - don't log errors.
@@ -255,13 +188,12 @@ public class JFrogPipelinesServer implements Serializable {
      * }
      *
      * @param build  - The build
-     * @param stepId - JFrog Pipelines step ID
      * @param logger - The build logger
      */
-    public void report(Run<?, ?> build, String result, String stepId, JenkinsBuildInfoLog logger) throws IOException {
+    public void report(Run<?, ?> build, String result, JFrogPipelinesJobProperty property, JenkinsBuildInfoLog logger) throws IOException {
         // Report job completed to JFrog Pipelines
         try (JFrogPipelinesHttpClient client = createHttpClient(logger)) {
-            client.sendStatus(new JobStatusPayload(result, stepId, createJenkinsJobInfo(build), getOutputResource(stepId)));
+            client.sendStatus(new JobStatusPayload(result, property.getPayload().getStepId(), createJenkinsJobInfo(build), OutputResource.fromString(property.getOutputResources())));
         }
         logger.info("Successfully reported status '" + result + "' to JFrog Pipelines.");
     }
