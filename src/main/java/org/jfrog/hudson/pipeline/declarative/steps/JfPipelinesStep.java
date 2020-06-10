@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.jfrog.hudson.jfpipelines.Utils.*;
+
 @SuppressWarnings("unused")
 public class JfPipelinesStep extends AbstractStepImpl {
 
@@ -69,8 +71,8 @@ public class JfPipelinesStep extends AbstractStepImpl {
                 return null;
             }
             String stepId = property.getPayload().getStepId();
-            JFrogPipelinesServer pipelinesServer = JFrogPipelinesServer.getPipelinesServer();
-            if (!JFrogPipelinesServer.isConfigured(pipelinesServer)) {
+            JFrogPipelinesServer pipelinesServer = getPipelinesServer();
+            if (!isConfigured(pipelinesServer)) {
                 throw new IllegalStateException(JFrogPipelinesServer.SERVER_NOT_FOUND_EXCEPTION);
             }
             if (StringUtils.isNotBlank(step.outputResources)) {
@@ -83,7 +85,7 @@ public class JfPipelinesStep extends AbstractStepImpl {
                 if (property.isReported()) {
                     throw new IllegalStateException("This job already reported the status to JFrog Pipelines Step ID " + stepId + ". You can run jfPipelines with the 'reportStatus' parameter only once.");
                 }
-                pipelinesServer.report(build, step.reportStatus, property, logger);
+                pipelinesServer.report(step.reportStatus, property, createJobInfo(build), logger);
                 property.setReported();
             }
             return null;

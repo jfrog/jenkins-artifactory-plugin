@@ -11,6 +11,7 @@ import java.util.Map;
 /**
  * This class represents the payload to send to JFrog Pipelines after a job completed.
  */
+@SuppressWarnings("unused")
 public class JobStatusPayload implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -29,7 +30,6 @@ public class JobStatusPayload implements Serializable {
         this.stepId = stepId;
     }
 
-    @SuppressWarnings("unused")
     public Collection<OutputResource> getOutputResources() {
         return outputResources;
     }

@@ -1,10 +1,7 @@
 package org.jfrog.hudson.action;
 
 import hudson.Extension;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.Job;
-import hudson.model.TransientProjectActionFactory;
+import hudson.model.*;
 import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.model.TransientActionFactory;
@@ -12,6 +9,7 @@ import jenkins.util.TimeDuration;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobProperty;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
 import org.jfrog.hudson.util.SerializationUtils;
 import org.kohsuke.stapler.StaplerRequest;
@@ -63,6 +61,8 @@ public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn
 
     /**
      * Implements the "/pipelines" endpoint.
+     * 1. Queue job with JFrogPipelinesJobProperty that contains the JFrog Pipelines step id.
+     * 2. Report the queued status if exist. Typically UI based jobs have queue id.
      *
      * @param req  - The REST API request
      * @param resp - The response
@@ -72,8 +72,12 @@ public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn
     public void doPipelines(StaplerRequest req, StaplerResponse resp) {
         try {
             JobStartedPayload payload = SerializationUtils.createMapper().readValue(req.getInputStream(), JobStartedPayload.class);
-            project.addProperty(new JFrogPipelinesJobProperty(payload));
-            runBuild(project, req, resp);
+            JFrogPipelinesJobProperty property = new JFrogPipelinesJobProperty(payload);
+            project.addProperty(property);
+            Queue.Item queueItem = runBuild(project, req, resp);
+            if (queueItem != null) {
+                JFrogPipelinesServer.reportQueueId(queueItem, property);
+            }
         } catch (IOException | ServletException e) {
             ExceptionUtils.printRootCauseStackTrace(e);
         }
@@ -85,16 +89,18 @@ public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn
      * @param job  - AbstractProject for UI jobs or WorkflowJob for Jenkins pipelines
      * @param req  - The REST API request
      * @param resp - The response
+     * @return the queue item if the job entered the Jenkins queue or null if job started running.
      * @throws IOException      in case of errors during starting the build
      * @throws ServletException in case of errors during starting the build
      */
-    private void runBuild(JobT job, StaplerRequest req, StaplerResponse resp) throws IOException, ServletException {
+    private Queue.Item runBuild(JobT job, StaplerRequest req, StaplerResponse resp) throws IOException, ServletException {
         TimeDuration quietPeriod = new TimeDuration(Jenkins.get().getQuietPeriod());
         if (job.isParameterized()) {
             job.doBuildWithParameters(req, resp, quietPeriod);
         } else {
             job.doBuild(req, resp, quietPeriod);
         }
+        return job.getQueueItem();
     }
 
     /**

@@ -1,15 +1,14 @@
 package org.jfrog.hudson.jfpipelines;
 
-import hudson.model.Cause;
+import hudson.model.Queue;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.hudson.ArtifactoryBuilder;
+import org.jfrog.build.api.util.NullLog;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.jfpipelines.payloads.JobStatusPayload;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -18,11 +17,12 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static org.jfrog.hudson.jfpipelines.Utils.*;
 
 public class JFrogPipelinesServer implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -30,6 +30,7 @@ public class JFrogPipelinesServer implements Serializable {
     public static final String SERVER_NOT_FOUND_EXCEPTION = "Please configure JFrog Pipelines server under 'Manage Jenkins' -> 'Configure System' -> 'JFrog Pipelines server'.";
     public static final String FAILURE_PREFIX = "Failed to report status to JFrog Pipelines: ";
     public static final String BUILD_STARTED = "STARTED";
+    public static final String BUILD_QUEUED = "QUEUED";
 
     private static final int DEFAULT_CONNECTION_TIMEOUT = 300; // 5 Minutes
     private static final int DEFAULT_CONNECTION_RETRIES = 3;
@@ -95,7 +96,27 @@ public class JFrogPipelinesServer implements Serializable {
     }
 
     /**
-     * Send information to JFrog Pipelines what a Jenkins pipeline job started.
+     * Report queue if when the Jon enters the Jenkins queue.
+     *
+     * @param queueItem - The queue item to report
+     * @param property  - The JFrogPipelinesJobProperty contains the JFrog Pipelines step ID.
+     */
+    public static void reportQueueId(Queue.Item queueItem, JFrogPipelinesJobProperty property) {
+        try {
+            JFrogPipelinesServer pipelinesServer = getPipelinesServer();
+            if (!isConfigured(pipelinesServer)) {
+                // JFrog Pipelines server is not configured, but 'JFrogPipelines' parameter is set.
+                throw new IOException(SERVER_NOT_FOUND_EXCEPTION);
+            }
+            pipelinesServer.report(BUILD_QUEUED, property, createJobInfo(queueItem), new NullLog());
+        } catch (IOException e) {
+            System.err.println(FAILURE_PREFIX);
+            ExceptionUtils.printRootCauseStackTrace(e);
+        }
+    }
+
+    /**
+     * Reported 'STARTED' status to JFrog Pipelines when a Jenkins job starts running.
      *
      * @param build    - The build
      * @param listener - The task listener
@@ -114,7 +135,7 @@ public class JFrogPipelinesServer implements Serializable {
                 logger.error(SERVER_NOT_FOUND_EXCEPTION);
                 return;
             }
-            pipelinesServer.report(build, BUILD_STARTED, property, logger);
+            pipelinesServer.report(BUILD_STARTED, property, createJobInfo(build), logger);
         } catch (IOException e) {
             if (isConfigured(pipelinesServer)) {
                 // If JFrog Pipelines server is not configured - don't log errors.
@@ -125,7 +146,7 @@ public class JFrogPipelinesServer implements Serializable {
     }
 
     /**
-     * Send information to JFrog Pipelines after a Jenkins pipeline job finished.
+     * Report status to JFrog Pipelines when a Jenkins job completes running.
      *
      * @param build    - The build
      * @param listener - The task listener
@@ -150,7 +171,7 @@ public class JFrogPipelinesServer implements Serializable {
                 return;
             }
             Result result = ObjectUtils.defaultIfNull(build.getResult(), Result.NOT_BUILT);
-            pipelinesServer.report(build, result.toExportedObject(), property, logger);
+            pipelinesServer.report(result.toExportedObject(), property, createJobInfo(build), logger);
         } catch (IOException e) {
             if (isConfigured(pipelinesServer)) {
                 // If JFrog Pipelines server is not configured - don't log errors.
@@ -160,24 +181,8 @@ public class JFrogPipelinesServer implements Serializable {
         }
     }
 
-    private static Map<String, String> createJenkinsJobInfo(Run<?, ?> build) {
-        Cause.UserIdCause cause = build.getCause(Cause.UserIdCause.class);
-        return new HashMap<String, String>() {{
-            put("job-name", build.getParent().getName());
-            put("job-number", String.valueOf(build.getNumber()));
-            put("start-time", String.valueOf(build.getStartTimeInMillis()));
-            if (build.getDuration() > 0) {
-                put("duration", String.valueOf(build.getDuration()));
-            }
-            put("build-url", build.getParent().getAbsoluteUrl() + build.getNumber());
-            if (cause != null) {
-                put("user", cause.getUserId());
-            }
-        }};
-    }
-
     /**
-     * Send information to JFrog Pipelines after a pipeline job finished or when a reportStatus step invoked.
+     * Report status to JFrog Pipelines after a pipeline job finished or when a reportStatus step invoked.
      * Input parameter:
      * { stepId: <JFrog Pipelines step ID> }
      * Output:
@@ -185,38 +190,20 @@ public class JFrogPipelinesServer implements Serializable {
      * action: "status",
      * status: <Jenkins build status>,
      * stepId: <JFrog Pipelines step ID>
+     * jobiInfo: <Jenkins job info>
+     * outputResources: <Key-Value map of properties>
      * }
      *
-     * @param build  - The build
-     * @param logger - The build logger
+     * @param result   - The build results - on of {QUEUED, STARTED, SUCCESS, UNSTABLE, FAILURE, NOT_BUILT, ABORTED}
+     * @param property - The build
+     * @param jobInfo  - The job info payload
+     * @param logger   - The build logger
      */
-    public void report(Run<?, ?> build, String result, JFrogPipelinesJobProperty property, JenkinsBuildInfoLog logger) throws IOException {
+    public void report(String result, JFrogPipelinesJobProperty property, Map<String, String> jobInfo, Log logger) throws IOException {
         // Report job completed to JFrog Pipelines
         try (JFrogPipelinesHttpClient client = createHttpClient(logger)) {
-            client.sendStatus(new JobStatusPayload(result, property.getPayload().getStepId(), createJenkinsJobInfo(build), OutputResource.fromString(property.getOutputResources())));
+            client.sendStatus(new JobStatusPayload(result, property.getPayload().getStepId(), jobInfo, OutputResource.fromString(property.getOutputResources())));
         }
         logger.info("Successfully reported status '" + result + "' to JFrog Pipelines.");
-    }
-
-    /**
-     * Get JFrog Pipelines server from the global configuration or null if not defined.
-     *
-     * @return configured JFrog Pipelines server
-     */
-    public static JFrogPipelinesServer getPipelinesServer() {
-        ArtifactoryBuilder.DescriptorImpl descriptor =
-                (ArtifactoryBuilder.DescriptorImpl) Jenkins.get().getDescriptor(ArtifactoryBuilder.class);
-        if (descriptor == null) {
-            return null;
-        }
-        JFrogPipelinesServer pipelinesServer = descriptor.getJfrogPipelinesServer();
-        if (StringUtils.isBlank(pipelinesServer.getIntegrationUrl())) {
-            return null;
-        }
-        return pipelinesServer;
-    }
-
-    public static boolean isConfigured(JFrogPipelinesServer pipelinesServer) {
-        return pipelinesServer != null && StringUtils.isNotBlank(pipelinesServer.getIntegrationUrl());
     }
 }
