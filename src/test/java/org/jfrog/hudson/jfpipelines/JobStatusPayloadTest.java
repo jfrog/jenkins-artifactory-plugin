@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import hudson.model.Result;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.hudson.jfpipelines.payloads.JobStatusPayload;
+import org.jfrog.hudson.jfpipelines.payloads.VersionPayload;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -97,6 +98,20 @@ public class JobStatusPayloadTest {
             assertTrue(text.contains("\"status\":\"SUCCESS\""));
             assertTrue(text.contains("\"stepId\":\"5\""));
             assertTrue(text.contains("\"action\":\"status\""));
+        } catch (JsonProcessingException e) {
+            Assert.fail(ExceptionUtils.getRootCauseMessage(e));
+        }
+    }
+
+    /**
+     * Check that the payload is stringified without escaping.
+     */
+    @Test
+    public void stringifyVersionPayloadTest() {
+        try {
+            VersionPayload payload = new VersionPayload();
+            String text = createMapper().writeValueAsString(payload);
+            assertTrue(text.contains("\"action\":\"test\""));
         } catch (JsonProcessingException e) {
             Assert.fail(ExceptionUtils.getRootCauseMessage(e));
         }

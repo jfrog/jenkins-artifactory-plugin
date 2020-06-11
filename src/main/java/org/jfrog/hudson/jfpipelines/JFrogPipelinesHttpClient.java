@@ -19,6 +19,7 @@ import org.jfrog.build.client.Version;
 import org.jfrog.build.util.VersionCompatibilityType;
 import org.jfrog.build.util.VersionException;
 import org.jfrog.hudson.jfpipelines.payloads.JobStatusPayload;
+import org.jfrog.hudson.jfpipelines.payloads.VersionPayload;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,7 +106,9 @@ public class JFrogPipelinesHttpClient implements AutoCloseable {
      * @throws IOException if response status is not 200 or 404.
      */
     public Version getVersion() throws IOException {
-        HttpEntity requestEntity = new StringEntity("{action:\"test\"}", ContentType.APPLICATION_JSON);
+        String text = createMapper().writeValueAsString(new VersionPayload());
+        log.debug("Sending version request to JFrog Pipelines with payload: " + text);
+        HttpEntity requestEntity = new StringEntity(text, ContentType.APPLICATION_JSON);
         HttpResponse response = executePostRequest(requestEntity);
         try {
             int statusCode = response.getStatusLine().getStatusCode();
@@ -159,6 +162,7 @@ public class JFrogPipelinesHttpClient implements AutoCloseable {
 
     public HttpResponse sendStatus(JobStatusPayload payload) throws IOException {
         String text = createMapper().writeValueAsString(payload);
+        log.debug("Sending status to JFrog Pipelines with payload: " + text);
         StringEntity body = new StringEntity(text, ContentType.APPLICATION_JSON);
         return executePostRequest(body);
     }
