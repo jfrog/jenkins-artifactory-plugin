@@ -8,9 +8,14 @@ import jenkins.model.TransientActionFactory;
 import jenkins.util.TimeDuration;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobProperty;
+import org.jfrog.build.api.util.Log;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobInfo;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
+import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
+import org.jfrog.hudson.pipeline.declarative.steps.JfPipelinesStep;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.SerializationUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
@@ -38,6 +43,7 @@ import static org.jfrog.hudson.jfpipelines.Utils.getWorkspace;
 @SuppressWarnings({"unused"})
 public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn.ParameterizedJob<?, ?>> implements Action {
 
+    private final JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(TaskListener.NULL);
     private final JobT project;
 
     public JfrogPipelinesAction(JobT job) {
@@ -72,16 +78,20 @@ public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn
     @SuppressWarnings({"UnusedDeclaration"})
     @RequirePOST
     public void doPipelines(StaplerRequest req, StaplerResponse resp) {
-        try {
-            JobStartedPayload payload = SerializationUtils.createMapper().readValue(req.getInputStream(), JobStartedPayload.class);
-            JFrogPipelinesJobProperty property = new JFrogPipelinesJobProperty(payload);
-            project.addProperty(property);
-            Queue.Item queueItem = runBuild(project, req, resp);
-            if (queueItem != null) {
-                JFrogPipelinesServer.reportQueueId(queueItem, property);
+        // Synchronize on project to avoid concurrent invocations of 'getNextBuildNumber' before runBuild
+        synchronized (project) {
+            try {
+                JobStartedPayload payload = SerializationUtils.createMapper().readValue(req.getInputStream(), JobStartedPayload.class);
+                JFrogPipelinesJobInfo jobInfo = new JFrogPipelinesJobInfo(payload);
+                saveJobInfo(project, jobInfo, logger);
+                Queue.Item queueItem = runBuild(project, req, resp);
+                if (queueItem != null) {
+                    JFrogPipelinesServer.reportQueueId(queueItem, jobInfo);
+                }
+                logger.debug(String.format("Queued job '%s/%s', stepId: '%s', queueId: '%s'", project.getName(), project.getNextBuildNumber(), payload.getStepId(), queueItem));
+            } catch (Exception e) {
+                logger.error(ExceptionUtils.getRootCauseMessage(e), e);
             }
-        } catch (IOException | ServletException e) {
-            ExceptionUtils.printRootCauseStackTrace(e);
         }
     }
 

@@ -10,7 +10,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobProperty;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobInfo;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -67,8 +67,8 @@ public class JfPipelinesStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
-            JFrogPipelinesJobProperty property = build.getParent().getProperty(JFrogPipelinesJobProperty.class);
-            if (property == null) {
+            JFrogPipelinesJobInfo jobInfo = getPipelinesJobInfo(build);
+            if (jobInfo == null) {
                 logger.info("Skipping jfPipelines step.");
                 return null;
             }

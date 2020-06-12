@@ -227,15 +227,12 @@ public class PipelineTestBase {
     /**
      * Run pipeline script.
      *
-     * @param name          - Pipeline name from 'jenkins-artifactory-plugin/src/test/resources/integration/pipelines'.
-     * @param jobProperties - Job properties to set.
+     * @param name - Pipeline name from 'jenkins-artifactory-plugin/src/test/resources/integration/pipelines'.
      * @return the Jenkins job
      */
-    WorkflowRun runPipeline(String name, JobProperty<?>... jobProperties) throws Exception {
+    WorkflowRun runPipeline(String name) throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
-        for (JobProperty<?> jobProperty : jobProperties) {
-            project.addProperty(jobProperty);
-        }
+        createDummyJobInfo(project);
         FilePath slaveWs = slave.getWorkspaceFor(project);
         if (slaveWs == null) {
             throw new Exception("Slave workspace not found");

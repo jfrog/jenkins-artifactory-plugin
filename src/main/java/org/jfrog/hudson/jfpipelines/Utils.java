@@ -47,6 +47,20 @@ public class Utils {
     }
 
     /**
+     * Extract JFrog Pipelines job info from build.
+     *
+     * @param build - the build
+     * @return JFrog Pipelines job info
+     */
+    public static JFrogPipelinesJobInfo getPipelinesJobInfo(Run<?, ?> build) throws IOException, InterruptedException {
+        BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(getWorkspace(build.getParent()), String.valueOf(build.getNumber()), JfPipelinesStep.STEP_NAME, "0");
+        if (buildDataFile == null) {
+            return null;
+        }
+        return SerializationUtils.createMapper().treeToValue(buildDataFile.get(JfPipelinesStep.STEP_NAME), JFrogPipelinesJobInfo.class);
+    }
+
+    /**
      * Return true if the JFrog Pipelines server is well configured.
      *
      * @param pipelinesServer - The server to check

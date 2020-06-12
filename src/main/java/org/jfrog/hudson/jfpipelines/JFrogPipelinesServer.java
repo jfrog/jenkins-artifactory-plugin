@@ -102,7 +102,7 @@ public class JFrogPipelinesServer implements Serializable {
      * @param queueItem - The queue item to report
      * @param jobInfo   - Contains the JFrog Pipelines step ID.
      */
-    public static void reportQueueId(Queue.Item queueItem, JFrogPipelinesJobProperty property) {
+    public static void reportQueueId(Queue.Item queueItem, JFrogPipelinesJobInfo jobInfo) {
         try {
             JFrogPipelinesServer pipelinesServer = getPipelinesServer();
             if (!isConfigured(pipelinesServer)) {
@@ -126,8 +126,8 @@ public class JFrogPipelinesServer implements Serializable {
         JFrogPipelinesServer pipelinesServer = null;
         JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
         try {
-            JFrogPipelinesJobProperty property = build.getParent().getProperty(JFrogPipelinesJobProperty.class);
-            if (property == null) {
+            JFrogPipelinesJobInfo jobInfo = getPipelinesJobInfo(build);
+            if (jobInfo == null) {
                 return;
             }
             pipelinesServer = getPipelinesServer();
@@ -156,8 +156,8 @@ public class JFrogPipelinesServer implements Serializable {
         JFrogPipelinesServer pipelinesServer = null;
         JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
         try {
-            JFrogPipelinesJobProperty property = build.getParent().removeProperty(JFrogPipelinesJobProperty.class);
-            if (property == null) {
+            JFrogPipelinesJobInfo jobInfo = getPipelinesJobInfo(build);
+            if (jobInfo == null) {
                 return;
             }
             DeclarativePipelineUtils.deleteBuildDataDir(getWorkspace(build.getParent()), String.valueOf(build.getNumber()), logger);
@@ -167,14 +167,14 @@ public class JFrogPipelinesServer implements Serializable {
                 logger.error(SERVER_NOT_FOUND_EXCEPTION);
                 return;
             }
-            if (property.isReported()) {
+            if (jobInfo.isReported()) {
                 // Step status is already reported to JFrog Pipelines.
                 logger.debug("Skipping reporting to JFrog Pipelines - status is already reported in jfPipelines step.");
                 return;
             }
             Result result = ObjectUtils.defaultIfNull(build.getResult(), Result.NOT_BUILT);
-            pipelinesServer.report(result.toExportedObject(), property, createJobInfo(build), logger);
-        } catch (IOException e) {
+            pipelinesServer.report(result.toExportedObject(), jobInfo, createJobInfo(build), logger);
+        } catch (IOException | InterruptedException e) {
             if (isConfigured(pipelinesServer)) {
                 // If JFrog Pipelines server is not configured - don't log errors.
                 // This case is feasible when getPipelinesJobInfo throws an exception.
@@ -201,7 +201,7 @@ public class JFrogPipelinesServer implements Serializable {
      * @param jobInfo               - The job info payload
      * @param logger                - The build logger
      */
-    public void report(String result, JFrogPipelinesJobProperty property, Map<String, String> jobInfo, Log logger) throws IOException {
+    public void report(String result, JFrogPipelinesJobInfo jfrogPipelinesJobInfo, Map<String, String> jobInfo, Log logger) throws IOException {
         // Report job completed to JFrog Pipelines
         try (JFrogPipelinesHttpClient client = createHttpClient(logger)) {
             client.sendStatus(new JobStatusPayload(result, jfrogPipelinesJobInfo.getPayload().getStepId(), jobInfo, OutputResource.fromString(jfrogPipelinesJobInfo.getOutputResources())));
