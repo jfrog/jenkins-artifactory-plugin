@@ -18,6 +18,7 @@ import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -170,13 +171,37 @@ public class DeclarativePipelineUtils {
             return;
         }
 
-        for (File buildDataDir : buildDataDirs) {
-            try {
-                FileUtils.deleteDirectory(buildDataDir);
-                logger.debug(buildDataDir.getAbsolutePath() + " deleted");
-            } catch (IOException e) {
-                logger.error("Failed while attempting to delete old build data dir: " + buildDataDir.toString(), e);
-            }
+        Arrays.stream(buildDataDirs).forEach(buildDataDir -> deleteBuildDataDir(buildDataDir, logger));
+    }
+
+    /**
+     * Delete build data dir from input.
+     *
+     * @param buildDataDir - The directory to delete
+     * @param logger       - The logger
+     */
+    public static void deleteBuildDataDir(File buildDataDir, Log logger) {
+        try {
+            FileUtils.deleteDirectory(buildDataDir);
+            logger.debug(buildDataDir.getAbsolutePath() + " deleted");
+        } catch (IOException e) {
+            logger.error("Failed while attempting to delete old build data dir: " + buildDataDir.toString(), e);
+        }
+    }
+
+    /**
+     * Delete build data dir associated with the build number.
+     *
+     * @param ws     - The workspace
+     * @param logger - The logger
+     */
+    public static void deleteBuildDataDir(FilePath ws, String buildNumber, Log logger) {
+        try {
+            FilePath buildDataDir = createAndGetTempDir(ws).child(PIPELINE_CACHE_DIR_NAME).child(buildNumber);
+            buildDataDir.deleteRecursive();
+            logger.debug(buildDataDir.getRemote() + " deleted");
+        } catch (IOException | InterruptedException e) {
+            logger.error("Failed while attempting to delete build data dir for build number " + buildNumber, e);
         }
     }
 }

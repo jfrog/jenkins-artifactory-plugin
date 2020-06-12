@@ -1,16 +1,33 @@
 package org.jfrog.hudson.jfpipelines;
 
+import hudson.FilePath;
 import hudson.model.Cause;
+import hudson.model.Job;
 import hudson.model.Queue;
 import hudson.model.Run;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.ArtifactoryBuilder;
+import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
+import org.jfrog.hudson.pipeline.declarative.steps.JfPipelinesStep;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
+import org.jfrog.hudson.util.SerializationUtils;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Utils {
+    /**
+     * Get 'workspace' dir for the input project.
+     *
+     * @param project - The project
+     * @return the 'workspace' dir.
+     */
+    public static FilePath getWorkspace(Job<?, ?> project) {
+        FilePath projectJob = new FilePath(project.getRootDir());
+        return projectJob.getParent().sibling("workspace").child(project.getName());
+    }
 
     /**
      * Get JFrog Pipelines server from the global configuration or null if not defined.

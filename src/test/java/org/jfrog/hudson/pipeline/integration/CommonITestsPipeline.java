@@ -528,11 +528,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void jfPipelinesOutputResourcesTest() throws Exception {
         try (ClientAndServer mockServer = ClientAndServer.startClientAndServer(1080)) {
-            // Set JFrog Pipelines input payload
-            JobStartedPayload payload = new JobStartedPayload();
-            payload.setStepId("5");
-            // Run pipeline
-            runPipeline("jfPipelinesResources", new JFrogPipelinesJobProperty(payload));
+            runPipeline("jfPipelinesResources");
             HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
             assertEquals(2, ArrayUtils.getLength(requests));
 
@@ -575,11 +571,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     public void jfPipelinesReportStatusTest() throws Exception {
         try (ClientAndServer mockServer = ClientAndServer.startClientAndServer(1080)) {
-            // Set JFrog Pipelines input payload
-            JobStartedPayload payload = new JobStartedPayload();
-            payload.setStepId("5");
-            // Run pipeline
-            runPipeline("jfPipelinesReport", new JFrogPipelinesJobProperty(payload));
+            runPipeline("jfPipelinesReport");
             // Get sent request from the mock server
             HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
             assertEquals(2, ArrayUtils.getLength(requests));

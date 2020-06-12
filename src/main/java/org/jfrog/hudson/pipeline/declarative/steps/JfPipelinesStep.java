@@ -12,6 +12,8 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobProperty;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
+import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -54,10 +56,10 @@ public class JfPipelinesStep extends AbstractStepImpl {
         private static final long serialVersionUID = 1L;
 
         @StepContextParameter
-        private transient TaskListener listener;
+        private transient Run<?, ?> build;
 
         @StepContextParameter
-        private transient Run<?, ?> build;
+        private transient TaskListener listener;
 
         @Inject(optional = true)
         private transient JfPipelinesStep step;
@@ -70,25 +72,45 @@ public class JfPipelinesStep extends AbstractStepImpl {
                 logger.info("Skipping jfPipelines step.");
                 return null;
             }
-            String stepId = property.getPayload().getStepId();
+            String stepId = jobInfo.getPayload().getStepId();
             JFrogPipelinesServer pipelinesServer = getPipelinesServer();
             if (!isConfigured(pipelinesServer)) {
                 throw new IllegalStateException(JFrogPipelinesServer.SERVER_NOT_FOUND_EXCEPTION);
             }
+            boolean saveJobInfo = false;
             if (StringUtils.isNotBlank(step.outputResources)) {
-                property.setOutputResources(step.outputResources);
+                jobInfo.setOutputResources(step.outputResources);
+                saveJobInfo = true;
             }
             if (StringUtils.isNotBlank(step.reportStatus)) {
                 if (!ACCEPTABLE_RESULTS.contains(StringUtils.upperCase(step.reportStatus))) {
                     throw new IllegalArgumentException("Illegal build results '" + step.reportStatus + "'. Acceptable values: " + ACCEPTABLE_RESULTS);
                 }
-                if (property.isReported()) {
+                if (jobInfo.isReported()) {
                     throw new IllegalStateException("This job already reported the status to JFrog Pipelines Step ID " + stepId + ". You can run jfPipelines with the 'reportStatus' parameter only once.");
                 }
-                pipelinesServer.report(step.reportStatus, property, createJobInfo(build), logger);
-                property.setReported();
+                pipelinesServer.report(step.reportStatus, jobInfo, createJobInfo(build), logger);
+
+                jobInfo.setReported();
+                saveJobInfo = true;
+            }
+            if (saveJobInfo) {
+                saveJobInfo(jobInfo, logger);
             }
             return null;
+        }
+
+        /**
+         * Save job info to file system.
+         *
+         * @param jobInfo - The job info to save
+         * @param logger  - The build logger
+         * @throws Exception In case of no write permissions.
+         */
+        private void saveJobInfo(JFrogPipelinesJobInfo jobInfo, JenkinsBuildInfoLog logger) throws Exception {
+            BuildDataFile buildDataFile = new BuildDataFile(JfPipelinesStep.STEP_NAME, "0");
+            buildDataFile.putPOJO(jobInfo);
+            DeclarativePipelineUtils.writeBuildDataFile(getWorkspace(build.getParent()), String.valueOf(build.getNumber()), buildDataFile, logger);
         }
     }
 

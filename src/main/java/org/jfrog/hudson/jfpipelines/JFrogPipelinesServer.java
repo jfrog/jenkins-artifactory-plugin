@@ -11,6 +11,7 @@ import org.jfrog.build.api.util.Log;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.jfpipelines.payloads.JobStatusPayload;
+import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.ProxyUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -99,7 +100,7 @@ public class JFrogPipelinesServer implements Serializable {
      * Report queue if when the Jon enters the Jenkins queue.
      *
      * @param queueItem - The queue item to report
-     * @param property  - The JFrogPipelinesJobProperty contains the JFrog Pipelines step ID.
+     * @param jobInfo   - Contains the JFrog Pipelines step ID.
      */
     public static void reportQueueId(Queue.Item queueItem, JFrogPipelinesJobProperty property) {
         try {
@@ -108,7 +109,7 @@ public class JFrogPipelinesServer implements Serializable {
                 // JFrog Pipelines server is not configured, but 'JFrogPipelines' parameter is set.
                 throw new IOException(SERVER_NOT_FOUND_EXCEPTION);
             }
-            pipelinesServer.report(BUILD_QUEUED, property, createJobInfo(queueItem), new NullLog());
+            pipelinesServer.report(BUILD_QUEUED, jobInfo, createJobInfo(queueItem), new NullLog());
         } catch (IOException e) {
             System.err.println(FAILURE_PREFIX);
             ExceptionUtils.printRootCauseStackTrace(e);
@@ -135,11 +136,11 @@ public class JFrogPipelinesServer implements Serializable {
                 logger.error(SERVER_NOT_FOUND_EXCEPTION);
                 return;
             }
-            pipelinesServer.report(BUILD_STARTED, property, createJobInfo(build), logger);
-        } catch (IOException e) {
+            pipelinesServer.report(BUILD_STARTED, jobInfo, createJobInfo(build), logger);
+        } catch (IOException | InterruptedException e) {
             if (isConfigured(pipelinesServer)) {
                 // If JFrog Pipelines server is not configured - don't log errors.
-                // This case is feasible when removeProperty throws an exception.
+                // This case is feasible when getPipelinesJobInfo throws an exception.
                 logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
             }
         }
@@ -159,6 +160,7 @@ public class JFrogPipelinesServer implements Serializable {
             if (property == null) {
                 return;
             }
+            DeclarativePipelineUtils.deleteBuildDataDir(getWorkspace(build.getParent()), String.valueOf(build.getNumber()), logger);
             pipelinesServer = getPipelinesServer();
             if (!isConfigured(pipelinesServer)) {
                 // JFrog Pipelines server is not configured, but 'JFrogPipelines' parameter is set.
@@ -175,7 +177,7 @@ public class JFrogPipelinesServer implements Serializable {
         } catch (IOException e) {
             if (isConfigured(pipelinesServer)) {
                 // If JFrog Pipelines server is not configured - don't log errors.
-                // This case is feasible when removeProperty throws an exception.
+                // This case is feasible when getPipelinesJobInfo throws an exception.
                 logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
             }
         }
@@ -194,15 +196,15 @@ public class JFrogPipelinesServer implements Serializable {
      * outputResources: <Key-Value map of properties>
      * }
      *
-     * @param result   - The build results - on of {QUEUED, STARTED, SUCCESS, UNSTABLE, FAILURE, NOT_BUILT, ABORTED}
-     * @param property - The build
-     * @param jobInfo  - The job info payload
-     * @param logger   - The build logger
+     * @param result                - The build results - on of {QUEUED, STARTED, SUCCESS, UNSTABLE, FAILURE, NOT_BUILT, ABORTED}
+     * @param jfrogPipelinesJobInfo - The build
+     * @param jobInfo               - The job info payload
+     * @param logger                - The build logger
      */
     public void report(String result, JFrogPipelinesJobProperty property, Map<String, String> jobInfo, Log logger) throws IOException {
         // Report job completed to JFrog Pipelines
         try (JFrogPipelinesHttpClient client = createHttpClient(logger)) {
-            client.sendStatus(new JobStatusPayload(result, property.getPayload().getStepId(), jobInfo, OutputResource.fromString(property.getOutputResources())));
+            client.sendStatus(new JobStatusPayload(result, jfrogPipelinesJobInfo.getPayload().getStepId(), jobInfo, OutputResource.fromString(jfrogPipelinesJobInfo.getOutputResources())));
         }
         logger.info("Successfully reported status '" + result + "' to JFrog Pipelines.");
     }

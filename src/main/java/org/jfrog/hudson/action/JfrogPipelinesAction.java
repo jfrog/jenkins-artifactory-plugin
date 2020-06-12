@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
+import static org.jfrog.hudson.jfpipelines.Utils.getWorkspace;
+
 /**
  * This class is used for managing the JFrog Pipelines Job triggering functionality.
  * The API is invoked using a URL with the following pattern:
@@ -81,6 +83,21 @@ public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn
         } catch (IOException | ServletException e) {
             ExceptionUtils.printRootCauseStackTrace(e);
         }
+    }
+
+    /**
+     * Save job info to fs.
+     *
+     * @param project - The Jenkins project
+     * @param jobInfo - The job info to save
+     * @param logger  - The logger
+     * @throws Exception In case of no write permissions.
+     */
+    public static void saveJobInfo(Job<?, ?> project, JFrogPipelinesJobInfo jobInfo, Log logger) throws Exception {
+        String buildNumber = String.valueOf(project.getNextBuildNumber());
+        BuildDataFile buildDataFile = new BuildDataFile(JfPipelinesStep.STEP_NAME, "0");
+        buildDataFile.putPOJO(jobInfo);
+        DeclarativePipelineUtils.writeBuildDataFile(getWorkspace(project), buildNumber, buildDataFile, logger);
     }
 
     /**

@@ -1,9 +1,9 @@
 package org.jfrog.hudson.pipeline.integration;
 
 import hudson.FilePath;
-import hudson.model.JobProperty;
 import hudson.model.Label;
 import hudson.model.Slave;
+import hudson.model.TaskListener;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -23,7 +23,11 @@ import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.action.JfrogPipelinesAction;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobInfo;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
+import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
@@ -239,6 +243,18 @@ public class PipelineTestBase {
         slaveWs.mkdirs();
         project.setDefinition(new CpsFlowDefinition(readPipeline(name)));
         return jenkins.buildAndAssertSuccess(project);
+    }
+
+    /**
+     * Create and save job info for JFrog Pipelines.
+     *
+     * @param project - The project
+     * @throws Exception In case of no write permissions.
+     */
+    private void createDummyJobInfo(WorkflowJob project) throws Exception {
+        JobStartedPayload payload = new JobStartedPayload();
+        payload.setStepId("5");
+        JfrogPipelinesAction.saveJobInfo(project, new JFrogPipelinesJobInfo(payload), new JenkinsBuildInfoLog(TaskListener.NULL));
     }
 
     /**
