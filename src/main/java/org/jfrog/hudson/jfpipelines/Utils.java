@@ -1,10 +1,7 @@
 package org.jfrog.hudson.jfpipelines;
 
 import hudson.FilePath;
-import hudson.model.Cause;
-import hudson.model.Job;
-import hudson.model.Queue;
-import hudson.model.Run;
+import hudson.model.*;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.ArtifactoryBuilder;
@@ -14,7 +11,9 @@ import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.SerializationUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class Utils {
@@ -47,6 +46,35 @@ public class Utils {
     }
 
     /**
+     * Inject the step id parameter to the project's parameters list.
+     *
+     * @param project      - The project
+     * @param defaultValue - The default value - for tests
+     * @throws IOException in case of any error.
+     */
+    public static void injectStepIdParameter(Job<?, ?> project, String defaultValue) throws IOException {
+        ParametersDefinitionProperty parametersProperty = project.getProperty(ParametersDefinitionProperty.class);
+        ParameterDefinition parameterDefinition = new JFrogPipelinesParameter(defaultValue);
+        if (parametersProperty == null) {
+            project.addProperty(new ParametersDefinitionProperty(parameterDefinition));
+        } else if (parametersProperty.getParameterDefinition(JFrogPipelinesParameter.PARAM_NAME) == null) {
+            List<ParameterDefinition> parameterDefinitions = new ArrayList<>(parametersProperty.getParameterDefinitions());
+            parameterDefinitions.add(parameterDefinition);
+            project.removeProperty(parametersProperty);
+            project.addProperty(new ParametersDefinitionProperty(parameterDefinitions));
+        }
+    }
+
+    public static String getStepId(Run<?, ?> build) {
+        ParametersAction parametersAction = build.getAction(ParametersAction.class);
+        if (parametersAction != null) {
+            ParameterValue value = parametersAction.getParameter(JFrogPipelinesParameter.PARAM_NAME);
+            return (String) value.getValue();
+        }
+        return null;
+    }
+
+    /**
      * Extract JFrog Pipelines job info from build.
      *
      * @param build - the build
@@ -61,13 +89,13 @@ public class Utils {
     }
 
     /**
-     * Return true if the JFrog Pipelines server is well configured.
+     * Return true if the JFrog Pipelines server is not configured.
      *
      * @param pipelinesServer - The server to check
-     * @return true if the JFrog Pipelines server is well configured.
+     * @return true if the JFrog Pipelines server is not configured.
      */
-    public static boolean isConfigured(JFrogPipelinesServer pipelinesServer) {
-        return pipelinesServer != null && StringUtils.isNotBlank(pipelinesServer.getIntegrationUrl());
+    public static boolean isNotConfigured(JFrogPipelinesServer pipelinesServer) {
+        return pipelinesServer == null || !StringUtils.isNotBlank(pipelinesServer.getIntegrationUrl());
     }
 
     /**

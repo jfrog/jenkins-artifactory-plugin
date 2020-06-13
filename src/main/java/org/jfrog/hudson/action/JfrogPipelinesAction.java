@@ -6,15 +6,12 @@ import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.model.TransientActionFactory;
 import jenkins.util.TimeDuration;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
-import org.jfrog.build.api.util.Log;
-import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobInfo;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesParameter;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
-import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
-import org.jfrog.hudson.pipeline.declarative.steps.JfPipelinesStep;
-import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.SerializationUtils;
 import org.kohsuke.stapler.StaplerRequest;
@@ -28,19 +25,15 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
-import static org.jfrog.hudson.jfpipelines.Utils.getWorkspace;
+import static org.jfrog.hudson.jfpipelines.Utils.injectStepIdParameter;
 
 /**
  * This class is used for managing the JFrog Pipelines Job triggering functionality.
  * The API is invoked using a URL with the following pattern:
- * POST <Jenkins server>/Jenkins>/job/<Project>/jfrog/pipelines?<job-parameters>
- * {
- * "stepId": "<step-id>"
- * }
+ * POST <Jenkins server>/Jenkins>/job/<Project>/jfrog/pipelines?JFROG_PIPELINES_INFO={"stepId":"<STEP_ID>"};<job-parameters>
  *
  * @param <JobT> - AbstractProject or WorkflowJob
  */
-@SuppressWarnings({"unused"})
 public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn.ParameterizedJob<?, ?>> implements Action {
 
     private final JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(TaskListener.NULL);
@@ -77,37 +70,39 @@ public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn
      */
     @SuppressWarnings({"UnusedDeclaration"})
     @RequirePOST
-    public void doPipelines(StaplerRequest req, StaplerResponse resp) {
-        // Synchronize on project to avoid concurrent invocations of 'getNextBuildNumber' before runBuild
-        synchronized (project) {
-            try {
-                JobStartedPayload payload = SerializationUtils.createMapper().readValue(req.getInputStream(), JobStartedPayload.class);
-                JFrogPipelinesJobInfo jobInfo = new JFrogPipelinesJobInfo(payload);
-                saveJobInfo(project, jobInfo, logger);
-                Queue.Item queueItem = runBuild(project, req, resp);
-                if (queueItem != null) {
-                    JFrogPipelinesServer.reportQueueId(queueItem, jobInfo);
-                }
-                logger.debug(String.format("Queued job '%s/%s', stepId: '%s', queueId: '%s'", project.getName(), project.getNextBuildNumber(), payload.getStepId(), queueItem));
-            } catch (Exception e) {
-                logger.error(ExceptionUtils.getRootCauseMessage(e), e);
+    public void doPipelines(StaplerRequest req, StaplerResponse resp) throws IOException {
+        try {
+            JobStartedPayload payload = getJobStartedPayload(req);
+            injectStepIdParameter(project, "");
+            Queue.Item queueItem = runBuild(project, req, resp);
+            if (queueItem != null) {
+                // The queue item is null in Jenkins Pipelines jobs
+                JFrogPipelinesServer.reportQueueId(queueItem, payload.getStepId());
             }
+            logger.debug(String.format("Queued job '%s', stepId: '%s', queueId: '%s'", project.getName(), payload.getStepId(), queueItem));
+        } catch (Exception e) {
+            logger.error(ExceptionUtils.getRootCauseMessage(e), e);
+            resp.sendError(400, ExceptionUtils.getRootCauseMessage(e));
         }
     }
 
     /**
-     * Save job info to fs.
+     * Extract 'JFROG_PIPELINES_INFO' parameter.
      *
-     * @param project - The Jenkins project
-     * @param jobInfo - The job info to save
-     * @param logger  - The logger
-     * @throws Exception In case of no write permissions.
+     * @param req - The HTTP request
+     * @return JobStartedPayload.
+     * @throws IOException if the parameter is missing or incorrect.
      */
-    public static void saveJobInfo(Job<?, ?> project, JFrogPipelinesJobInfo jobInfo, Log logger) throws Exception {
-        String buildNumber = String.valueOf(project.getNextBuildNumber());
-        BuildDataFile buildDataFile = new BuildDataFile(JfPipelinesStep.STEP_NAME, "0");
-        buildDataFile.putPOJO(jobInfo);
-        DeclarativePipelineUtils.writeBuildDataFile(getWorkspace(project), buildNumber, buildDataFile, logger);
+    private JobStartedPayload getJobStartedPayload(StaplerRequest req) throws IOException {
+        String jfPipelinesInfo = req.getParameter(JFrogPipelinesParameter.PARAM_NAME);
+        if (StringUtils.isBlank(jfPipelinesInfo)) {
+            throw new IOException(JFrogPipelinesParameter.PARAM_NAME + " parameter is missing");
+        }
+        JobStartedPayload payload = SerializationUtils.createMapper().readValue(jfPipelinesInfo, JobStartedPayload.class);
+        if (StringUtils.isBlank(payload.getStepId())) {
+            throw new IOException("'stepId' is missing in " + JFrogPipelinesParameter.PARAM_NAME + " parameter");
+        }
+        return payload;
     }
 
     /**
@@ -122,11 +117,7 @@ public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn
      */
     private Queue.Item runBuild(JobT job, StaplerRequest req, StaplerResponse resp) throws IOException, ServletException {
         TimeDuration quietPeriod = new TimeDuration(Jenkins.get().getQuietPeriod());
-        if (job.isParameterized()) {
-            job.doBuildWithParameters(req, resp, quietPeriod);
-        } else {
-            job.doBuild(req, resp, quietPeriod);
-        }
+        job.doBuildWithParameters(req, resp, quietPeriod);
         return job.getQueueItem();
     }
 

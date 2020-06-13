@@ -5,6 +5,7 @@ import hudson.Extension;
 import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
@@ -12,12 +13,15 @@ import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobInfo;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
+import org.jfrog.hudson.jfpipelines.OutputResource;
+import org.jfrog.hudson.jfpipelines.payloads.JobStatusPayload;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -67,14 +71,14 @@ public class JfPipelinesStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
-            JFrogPipelinesJobInfo jobInfo = getPipelinesJobInfo(build);
-            if (jobInfo == null) {
+            String stepId = getStepId(build);
+            if (StringUtils.isBlank(stepId)) {
                 logger.info("Skipping jfPipelines step.");
                 return null;
             }
-            String stepId = jobInfo.getPayload().getStepId();
+            JFrogPipelinesJobInfo jobInfo = (JFrogPipelinesJobInfo) ObjectUtils.defaultIfNull(getPipelinesJobInfo(build), new JFrogPipelinesJobInfo());
             JFrogPipelinesServer pipelinesServer = getPipelinesServer();
-            if (!isConfigured(pipelinesServer)) {
+            if (isNotConfigured(pipelinesServer)) {
                 throw new IllegalStateException(JFrogPipelinesServer.SERVER_NOT_FOUND_EXCEPTION);
             }
             boolean saveJobInfo = false;
@@ -89,7 +93,8 @@ public class JfPipelinesStep extends AbstractStepImpl {
                 if (jobInfo.isReported()) {
                     throw new IllegalStateException("This job already reported the status to JFrog Pipelines Step ID " + stepId + ". You can run jfPipelines with the 'reportStatus' parameter only once.");
                 }
-                pipelinesServer.report(step.reportStatus, jobInfo, createJobInfo(build), logger);
+                Collection<OutputResource> outputResources = OutputResource.fromString(jobInfo.getOutputResources());
+                pipelinesServer.report(new JobStatusPayload(step.reportStatus, stepId, createJobInfo(build), outputResources), logger);
 
                 jobInfo.setReported();
                 saveJobInfo = true;

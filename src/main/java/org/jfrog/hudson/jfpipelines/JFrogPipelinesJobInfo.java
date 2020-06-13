@@ -1,16 +1,13 @@
 package org.jfrog.hudson.jfpipelines;
 
-import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
-
 import java.io.Serializable;
 
 /**
- * This Job action is added to the build project when running from "/jfrog/pipelines" REST API, before triggering the job.
+ * Use to serialize information from 'jfPipelines' step
  */
 public class JFrogPipelinesJobInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private JobStartedPayload payload;
     private String outputResources;
     private boolean reported;
 
@@ -19,14 +16,6 @@ public class JFrogPipelinesJobInfo implements Serializable {
      */
     @SuppressWarnings("unused")
     public JFrogPipelinesJobInfo() {
-    }
-
-    public JFrogPipelinesJobInfo(JobStartedPayload payload) {
-        this.payload = payload;
-    }
-
-    public JobStartedPayload getPayload() {
-        return payload;
     }
 
     public void setOutputResources(String outputResources) {

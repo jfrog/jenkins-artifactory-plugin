@@ -26,6 +26,7 @@ import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.JfrogPipelinesAction;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobInfo;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
+import org.jfrog.hudson.jfpipelines.Utils;
 import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.junit.*;
@@ -90,10 +91,10 @@ public class PipelineTestBase {
         setEnvVars();
         createClients();
         createJFrogPipelinesServer();
-        cleanUpArtifactory(artifactoryClient);
+//        cleanUpArtifactory(artifactoryClient);
         createPipelineSubstitution();
         // Create repositories
-        Arrays.stream(TestRepository.values()).forEach(PipelineTestBase::createRepo);
+//        Arrays.stream(TestRepository.values()).forEach(PipelineTestBase::createRepo);
     }
 
     @Before
@@ -102,23 +103,23 @@ public class PipelineTestBase {
         FileUtils.cleanDirectory(testTemporaryFolder.getRoot().getAbsoluteFile());
     }
 
-    @After
-    public void cleanRepos() {
-        // Remove the content of all local repositories
-        Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.LOCAL)
-                .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete(StringUtils.EMPTY));
-    }
+//    @After
+//    public void cleanRepos() {
+//        // Remove the content of all local repositories
+//        Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.LOCAL)
+//                .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete(StringUtils.EMPTY));
+//    }
 
-    @AfterClass
-    public static void tearDown() {
-        // Remove repositories - need to remove virtual repositories first
-        Stream.concat(
-                Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.VIRTUAL),
-                Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() != TestRepository.RepoType.VIRTUAL))
-                .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete());
-        buildInfoClient.close();
-        artifactoryClient.close();
-    }
+//    @AfterClass
+//    public static void tearDown() {
+//        // Remove repositories - need to remove virtual repositories first
+//        Stream.concat(
+//                Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.VIRTUAL),
+//                Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() != TestRepository.RepoType.VIRTUAL))
+//                .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete());
+//        buildInfoClient.close();
+//        artifactoryClient.close();
+//    }
 
     /**
      * Create jenkins slave. All tests should run on it.
@@ -232,7 +233,7 @@ public class PipelineTestBase {
      */
     WorkflowRun runPipeline(String name) throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
-        createDummyJobInfo(project);
+        Utils.injectStepIdParameter(project, "5");
         FilePath slaveWs = slave.getWorkspaceFor(project);
         if (slaveWs == null) {
             throw new Exception("Slave workspace not found");
@@ -240,18 +241,6 @@ public class PipelineTestBase {
         slaveWs.mkdirs();
         project.setDefinition(new CpsFlowDefinition(readPipeline(name)));
         return jenkins.buildAndAssertSuccess(project);
-    }
-
-    /**
-     * Create and save job info for JFrog Pipelines.
-     *
-     * @param project - The project
-     * @throws Exception In case of no write permissions.
-     */
-    private void createDummyJobInfo(WorkflowJob project) throws Exception {
-        JobStartedPayload payload = new JobStartedPayload();
-        payload.setStepId("5");
-        JfrogPipelinesAction.saveJobInfo(project, new JFrogPipelinesJobInfo(payload), new JenkinsBuildInfoLog(TaskListener.NULL));
     }
 
     /**

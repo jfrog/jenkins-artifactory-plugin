@@ -18,8 +18,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -100,20 +100,11 @@ public class JFrogPipelinesServer implements Serializable {
      * Report queue if when the Jon enters the Jenkins queue.
      *
      * @param queueItem - The queue item to report
-     * @param jobInfo   - Contains the JFrog Pipelines step ID.
+     * @param stepId    - JFrog Pipelines step ID.
+     * @throws IOException if the JFrog Pipelines server is not configured.
      */
-    public static void reportQueueId(Queue.Item queueItem, JFrogPipelinesJobInfo jobInfo) {
-        try {
-            JFrogPipelinesServer pipelinesServer = getPipelinesServer();
-            if (!isConfigured(pipelinesServer)) {
-                // JFrog Pipelines server is not configured, but 'JFrogPipelines' parameter is set.
-                throw new IOException(SERVER_NOT_FOUND_EXCEPTION);
-            }
-            pipelinesServer.report(BUILD_QUEUED, jobInfo, createJobInfo(queueItem), new NullLog());
-        } catch (IOException e) {
-            System.err.println(FAILURE_PREFIX);
-            ExceptionUtils.printRootCauseStackTrace(e);
-        }
+    public static void reportQueueId(Queue.Item queueItem, String stepId) throws IOException {
+        getAndVerifyServer().report(new JobStatusPayload(BUILD_QUEUED, stepId, createJobInfo(queueItem), null), new NullLog());
     }
 
     /**
@@ -123,26 +114,16 @@ public class JFrogPipelinesServer implements Serializable {
      * @param listener - The task listener
      */
     public static void reportStarted(Run<?, ?> build, TaskListener listener) {
-        JFrogPipelinesServer pipelinesServer = null;
+        String stepId = getStepId(build);
+        if (StringUtils.isBlank(stepId)) {
+            // Job is not triggered by JFrog Pipelines
+            return;
+        }
         JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
         try {
-            JFrogPipelinesJobInfo jobInfo = getPipelinesJobInfo(build);
-            if (jobInfo == null) {
-                return;
-            }
-            pipelinesServer = getPipelinesServer();
-            if (!isConfigured(pipelinesServer)) {
-                // JFrog Pipelines server is not configured, but 'JFrogPipelines' parameter is set.
-                logger.error(SERVER_NOT_FOUND_EXCEPTION);
-                return;
-            }
-            pipelinesServer.report(BUILD_STARTED, jobInfo, createJobInfo(build), logger);
-        } catch (IOException | InterruptedException e) {
-            if (isConfigured(pipelinesServer)) {
-                // If JFrog Pipelines server is not configured - don't log errors.
-                // This case is feasible when getPipelinesJobInfo throws an exception.
-                logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
-            }
+            getAndVerifyServer().report(new JobStatusPayload(BUILD_STARTED, stepId, createJobInfo(build), null), logger);
+        } catch (IOException e) {
+            logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
         }
     }
 
@@ -153,33 +134,32 @@ public class JFrogPipelinesServer implements Serializable {
      * @param listener - The task listener
      */
     public static void reportCompleted(Run<?, ?> build, TaskListener listener) {
-        JFrogPipelinesServer pipelinesServer = null;
+        String stepId = getStepId(build);
+        if (StringUtils.isBlank(stepId)) {
+            // Job is not triggered by JFrog Pipelines
+            return;
+        }
         JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
         try {
+            JFrogPipelinesServer pipelinesServer = getAndVerifyServer();
             JFrogPipelinesJobInfo jobInfo = getPipelinesJobInfo(build);
-            if (jobInfo == null) {
-                return;
+            Collection<OutputResource> outputResources = null;
+            if (jobInfo != null) {
+                // 'jfPipelines' step is invoked in this job.
+                if (jobInfo.isReported()) {
+                    // Step status is already reported to JFrog Pipelines.
+                    logger.debug("Skipping reporting to JFrog Pipelines - status is already reported in jfPipelines step.");
+                    return;
+                }
+                outputResources = OutputResource.fromString(jobInfo.getOutputResources());
             }
-            DeclarativePipelineUtils.deleteBuildDataDir(getWorkspace(build.getParent()), String.valueOf(build.getNumber()), logger);
-            pipelinesServer = getPipelinesServer();
-            if (!isConfigured(pipelinesServer)) {
-                // JFrog Pipelines server is not configured, but 'JFrogPipelines' parameter is set.
-                logger.error(SERVER_NOT_FOUND_EXCEPTION);
-                return;
-            }
-            if (jobInfo.isReported()) {
-                // Step status is already reported to JFrog Pipelines.
-                logger.debug("Skipping reporting to JFrog Pipelines - status is already reported in jfPipelines step.");
-                return;
-            }
+
             Result result = ObjectUtils.defaultIfNull(build.getResult(), Result.NOT_BUILT);
-            pipelinesServer.report(result.toExportedObject(), jobInfo, createJobInfo(build), logger);
+            pipelinesServer.report(new JobStatusPayload(result.toExportedObject(), stepId, createJobInfo(build), outputResources), logger);
         } catch (IOException | InterruptedException e) {
-            if (isConfigured(pipelinesServer)) {
-                // If JFrog Pipelines server is not configured - don't log errors.
-                // This case is feasible when getPipelinesJobInfo throws an exception.
-                logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
-            }
+            logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
+        } finally {
+            DeclarativePipelineUtils.deleteBuildDataDir(getWorkspace(build.getParent()), String.valueOf(build.getNumber()), logger);
         }
     }
 
@@ -196,16 +176,28 @@ public class JFrogPipelinesServer implements Serializable {
      * outputResources: <Key-Value map of properties>
      * }
      *
-     * @param result                - The build results - on of {QUEUED, STARTED, SUCCESS, UNSTABLE, FAILURE, NOT_BUILT, ABORTED}
-     * @param jfrogPipelinesJobInfo - The build
-     * @param jobInfo               - The job info payload
-     * @param logger                - The build logger
+     * @param payload - The status payload
+     * @param logger  - The build logger
      */
-    public void report(String result, JFrogPipelinesJobInfo jfrogPipelinesJobInfo, Map<String, String> jobInfo, Log logger) throws IOException {
-        // Report job completed to JFrog Pipelines
+    public void report(JobStatusPayload payload, Log logger) throws IOException {
         try (JFrogPipelinesHttpClient client = createHttpClient(logger)) {
-            client.sendStatus(new JobStatusPayload(result, jfrogPipelinesJobInfo.getPayload().getStepId(), jobInfo, OutputResource.fromString(jfrogPipelinesJobInfo.getOutputResources())));
+            client.sendStatus(payload);
         }
-        logger.info("Successfully reported status '" + result + "' to JFrog Pipelines.");
+        logger.info("Successfully reported status '" + payload.getStatus() + "' to JFrog Pipelines.");
+    }
+
+    /**
+     * Get JFrog Pipelines server or throw exception if not configured.
+     *
+     * @return JFrog Pipelines server
+     * @throws IOException if JFrog Pipelines server is not configured.
+     */
+    private static JFrogPipelinesServer getAndVerifyServer() throws IOException {
+        JFrogPipelinesServer pipelinesServer = getPipelinesServer();
+        if (isNotConfigured(pipelinesServer)) {
+            // JFrog Pipelines server is not configured, but 'JF_PIPELINES_STEP_ID' parameter is set.
+            throw new IOException(SERVER_NOT_FOUND_EXCEPTION);
+        }
+        return pipelinesServer;
     }
 }
