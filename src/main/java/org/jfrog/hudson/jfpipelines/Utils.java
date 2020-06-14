@@ -1,10 +1,12 @@
 package org.jfrog.hudson.jfpipelines;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import hudson.FilePath;
 import hudson.model.*;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.ArtifactoryBuilder;
+import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.steps.JfPipelinesStep;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -65,11 +67,22 @@ public class Utils {
         }
     }
 
-    public static String getStepId(Run<?, ?> build) {
+    /**
+     * Extract 'JFROG_PIPELINES_INFO' parameter from build.
+     *
+     * @param build    - The build
+     * @param listener - The task listener
+     * @return JobStartedPayload or null.
+     */
+    public static JobStartedPayload getJobStartedPayload(Run<?, ?> build, TaskListener listener) {
         ParametersAction parametersAction = build.getAction(ParametersAction.class);
         if (parametersAction != null) {
             ParameterValue value = parametersAction.getParameter(JFrogPipelinesParameter.PARAM_NAME);
-            return (String) value.getValue();
+            try {
+                return SerializationUtils.createMapper().readValue((String) value.getValue(), JobStartedPayload.class);
+            } catch (JsonProcessingException exception) {
+                listener.error("Couldn't deserialize 'JFROG_PIPELINES_INFO' parameter", exception);
+            }
         }
         return null;
     }

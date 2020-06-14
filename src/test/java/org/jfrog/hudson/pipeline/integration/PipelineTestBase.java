@@ -3,7 +3,6 @@ package org.jfrog.hudson.pipeline.integration;
 import hudson.FilePath;
 import hudson.model.Label;
 import hudson.model.Slave;
-import hudson.model.TaskListener;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -23,12 +22,8 @@ import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.action.JfrogPipelinesAction;
-import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobInfo;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.jfpipelines.Utils;
-import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
-import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
@@ -91,10 +86,10 @@ public class PipelineTestBase {
         setEnvVars();
         createClients();
         createJFrogPipelinesServer();
-//        cleanUpArtifactory(artifactoryClient);
+        cleanUpArtifactory(artifactoryClient);
         createPipelineSubstitution();
         // Create repositories
-//        Arrays.stream(TestRepository.values()).forEach(PipelineTestBase::createRepo);
+        Arrays.stream(TestRepository.values()).forEach(PipelineTestBase::createRepo);
     }
 
     @Before
@@ -103,23 +98,23 @@ public class PipelineTestBase {
         FileUtils.cleanDirectory(testTemporaryFolder.getRoot().getAbsoluteFile());
     }
 
-//    @After
-//    public void cleanRepos() {
-//        // Remove the content of all local repositories
-//        Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.LOCAL)
-//                .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete(StringUtils.EMPTY));
-//    }
+    @After
+    public void cleanRepos() {
+        // Remove the content of all local repositories
+        Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.LOCAL)
+                .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete(StringUtils.EMPTY));
+    }
 
-//    @AfterClass
-//    public static void tearDown() {
-//        // Remove repositories - need to remove virtual repositories first
-//        Stream.concat(
-//                Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.VIRTUAL),
-//                Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() != TestRepository.RepoType.VIRTUAL))
-//                .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete());
-//        buildInfoClient.close();
-//        artifactoryClient.close();
-//    }
+    @AfterClass
+    public static void tearDown() {
+        // Remove repositories - need to remove virtual repositories first
+        Stream.concat(
+                Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.VIRTUAL),
+                Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() != TestRepository.RepoType.VIRTUAL))
+                .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete());
+        buildInfoClient.close();
+        artifactoryClient.close();
+    }
 
     /**
      * Create jenkins slave. All tests should run on it.
@@ -233,7 +228,7 @@ public class PipelineTestBase {
      */
     WorkflowRun runPipeline(String name) throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
-        Utils.injectStepIdParameter(project, "5");
+        Utils.injectStepIdParameter(project, "{\"stepId\":\"5\"}");
         FilePath slaveWs = slave.getWorkspaceFor(project);
         if (slaveWs == null) {
             throw new Exception("Slave workspace not found");

@@ -79,7 +79,8 @@ public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn
                 // The queue item is null in Jenkins Pipelines jobs
                 JFrogPipelinesServer.reportQueueId(queueItem, payload.getStepId());
             }
-            logger.debug(String.format("Queued job '%s', stepId: '%s', queueId: '%s'", project.getName(), payload.getStepId(), queueItem));
+            logger.debug(String.format("Queued job '%s', stepId: '%s', queueId: '%s'",
+                    project.getName(), payload.getStepId(), queueItem != null ? queueItem.getId() : "N/A"));
         } catch (Exception e) {
             logger.error(ExceptionUtils.getRootCauseMessage(e), e);
             resp.sendError(400, ExceptionUtils.getRootCauseMessage(e));
@@ -87,7 +88,7 @@ public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn
     }
 
     /**
-     * Extract 'JFROG_PIPELINES_INFO' parameter.
+     * Extract 'JFROG_PIPELINES_INFO' parameter from HTTP request.
      *
      * @param req - The HTTP request
      * @return JobStartedPayload.

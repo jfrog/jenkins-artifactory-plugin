@@ -10,6 +10,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
 import org.jfrog.hudson.jfpipelines.payloads.JobStatusPayload;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -114,14 +115,14 @@ public class JFrogPipelinesServer implements Serializable {
      * @param listener - The task listener
      */
     public static void reportStarted(Run<?, ?> build, TaskListener listener) {
-        String stepId = getStepId(build);
-        if (StringUtils.isBlank(stepId)) {
+        JobStartedPayload payload = getJobStartedPayload(build, listener);
+        if (payload == null || StringUtils.isBlank(payload.getStepId())) {
             // Job is not triggered by JFrog Pipelines
             return;
         }
         JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
         try {
-            getAndVerifyServer().report(new JobStatusPayload(BUILD_STARTED, stepId, createJobInfo(build), null), logger);
+            getAndVerifyServer().report(new JobStatusPayload(BUILD_STARTED, payload.getStepId(), createJobInfo(build), null), logger);
         } catch (IOException e) {
             logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
         }
@@ -134,8 +135,8 @@ public class JFrogPipelinesServer implements Serializable {
      * @param listener - The task listener
      */
     public static void reportCompleted(Run<?, ?> build, TaskListener listener) {
-        String stepId = getStepId(build);
-        if (StringUtils.isBlank(stepId)) {
+        JobStartedPayload payload = getJobStartedPayload(build, listener);
+        if (payload == null || StringUtils.isBlank(payload.getStepId())) {
             // Job is not triggered by JFrog Pipelines
             return;
         }
@@ -155,7 +156,7 @@ public class JFrogPipelinesServer implements Serializable {
             }
 
             Result result = ObjectUtils.defaultIfNull(build.getResult(), Result.NOT_BUILT);
-            pipelinesServer.report(new JobStatusPayload(result.toExportedObject(), stepId, createJobInfo(build), outputResources), logger);
+            pipelinesServer.report(new JobStatusPayload(result.toExportedObject(), payload.getStepId(), createJobInfo(build), outputResources), logger);
         } catch (IOException | InterruptedException e) {
             logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
         } finally {

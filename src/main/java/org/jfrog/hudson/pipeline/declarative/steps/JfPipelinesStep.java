@@ -14,6 +14,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobInfo;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.jfpipelines.OutputResource;
+import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
 import org.jfrog.hudson.jfpipelines.payloads.JobStatusPayload;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -71,8 +72,8 @@ public class JfPipelinesStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
-            String stepId = getStepId(build);
-            if (StringUtils.isBlank(stepId)) {
+            JobStartedPayload payload = getJobStartedPayload(build, listener);
+            if (payload == null || StringUtils.isBlank(payload.getStepId())) {
                 logger.info("Skipping jfPipelines step.");
                 return null;
             }
@@ -91,10 +92,10 @@ public class JfPipelinesStep extends AbstractStepImpl {
                     throw new IllegalArgumentException("Illegal build results '" + step.reportStatus + "'. Acceptable values: " + ACCEPTABLE_RESULTS);
                 }
                 if (jobInfo.isReported()) {
-                    throw new IllegalStateException("This job already reported the status to JFrog Pipelines Step ID " + stepId + ". You can run jfPipelines with the 'reportStatus' parameter only once.");
+                    throw new IllegalStateException("This job already reported the status to JFrog Pipelines Step ID " + payload.getStepId() + ". You can run jfPipelines with the 'reportStatus' parameter only once.");
                 }
                 Collection<OutputResource> outputResources = OutputResource.fromString(jobInfo.getOutputResources());
-                pipelinesServer.report(new JobStatusPayload(step.reportStatus, stepId, createJobInfo(build), outputResources), logger);
+                pipelinesServer.report(new JobStatusPayload(step.reportStatus, payload.getStepId(), createJobInfo(build), outputResources), logger);
 
                 jobInfo.setReported();
                 saveJobInfo = true;
