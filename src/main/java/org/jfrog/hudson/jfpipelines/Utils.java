@@ -76,13 +76,17 @@ public class Utils {
      */
     public static JobStartedPayload getJobStartedPayload(Run<?, ?> build, TaskListener listener) {
         ParametersAction parametersAction = build.getAction(ParametersAction.class);
-        if (parametersAction != null) {
-            ParameterValue value = parametersAction.getParameter(JFrogPipelinesParameter.PARAM_NAME);
-            try {
-                return SerializationUtils.createMapper().readValue((String) value.getValue(), JobStartedPayload.class);
-            } catch (JsonProcessingException exception) {
-                listener.error("Couldn't deserialize 'JFROG_PIPELINES_INFO' parameter", exception);
-            }
+        if (parametersAction == null) {
+            return null;
+        }
+        ParameterValue value = parametersAction.getParameter(JFrogPipelinesParameter.PARAM_NAME);
+        if (value == null) {
+            return null;
+        }
+        try {
+            return SerializationUtils.createMapper().readValue((String) value.getValue(), JobStartedPayload.class);
+        } catch (JsonProcessingException exception) {
+            listener.error("Couldn't deserialize 'JFROG_PIPELINES_INFO' parameter", exception);
         }
         return null;
     }
