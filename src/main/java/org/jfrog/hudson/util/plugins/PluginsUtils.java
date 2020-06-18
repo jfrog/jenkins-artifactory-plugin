@@ -13,6 +13,7 @@ import hudson.model.Queue;
 import hudson.model.queue.Tasks;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 import org.acegisecurity.Authentication;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -138,6 +139,14 @@ public class PluginsUtils {
             return ((String) responseMap.get("version"));
         } catch (Exception e) {
             throw new RuntimeException("Error while trying to get Jira Issue Tracker version: " + e.getMessage());
+        }
+    }
+
+    public static boolean isJiraPluginEnabled() {
+        try {
+            return (Jenkins.getInstance().getPlugin("jira") != null);
+        } catch (NullPointerException npe) {
+            return false;
         }
     }
 
