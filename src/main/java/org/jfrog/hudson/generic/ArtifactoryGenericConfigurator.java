@@ -233,20 +233,17 @@ BuildInfoAwareConfigurator, MultiConfigurationAware {
 
 	@Override
 	public boolean isEnableIssueTrackerIntegration() {
-		//        return false;
 		return enableIssueTrackerIntegration;
 	}
 
 	@Override
 	public boolean isAggregateBuildIssues() {
-		//        return false; #(6 years ago since 2019) Shay Yaakov: HAP-320 - Issue tracking doesn't work in Maven2
-		return aggregateBuildIssues;    //We don't care about Maven2 anymore in 2019, do we?
+		return aggregateBuildIssues;
 	}
 
 	@Override
 	public String getAggregationBuildStatus() {
-		//       return null; #(6 years ago since 2019) Shay Yaakov: HAP-320 - Issue tracking doesn't work in Maven2
-		return aggregationBuildStatus;  //We don't care about Maven2 anymore in 2019, do we?
+		return aggregationBuildStatus;
 	}
 
 	@Override
