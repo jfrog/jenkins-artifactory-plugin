@@ -17,8 +17,8 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.NpmPublishExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -43,6 +43,7 @@ public class NpmPublishStep extends AbstractStepImpl {
     private String deployerId;
     private String javaArgs; // Added to allow java remote debugging
     private String path;
+    private String module;
 
     @DataBoundConstructor
     public NpmPublishStep() {
@@ -75,6 +76,11 @@ public class NpmPublishStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
+    public void setModule(String module) {
+        this.module = module;
+    }
+
+    @DataBoundSetter
     public void setTool(String tool) {
         npmBuild.setTool(tool);
     }
@@ -104,8 +110,8 @@ public class NpmPublishStep extends AbstractStepImpl {
         protected Void run() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            String npmExe = Utils.getNpmExe(ws, listener, env, launcher, step.npmBuild.getTool());
-            NpmPublishExecutor npmPublishExecutor = new NpmPublishExecutor(listener, buildInfo, launcher, step.npmBuild, step.javaArgs, npmExe, step.path, ws, env, build);
+            Utils.addNpmToPath(ws, listener, env, launcher, step.npmBuild.getTool());
+            NpmPublishExecutor npmPublishExecutor = new NpmPublishExecutor(listener, buildInfo, launcher, step.npmBuild, step.javaArgs, step.path, step.module, ws, env, build);
             npmPublishExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(npmPublishExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
             return null;

@@ -23,13 +23,15 @@ public class GoPublishStep extends AbstractStepImpl {
     private GoBuild goBuild;
     private String path;
     private String version;
+    private String module;
 
     @DataBoundConstructor
-    public GoPublishStep(BuildInfo buildInfo, GoBuild goBuild, String path, String version, String args) {
+    public GoPublishStep(BuildInfo buildInfo, GoBuild goBuild, String path, String version, String args, String module) {
         this.buildInfo = buildInfo;
         this.goBuild = goBuild;
         this.path = path;
         this.version = version;
+        this.module = module;
     }
 
     public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
@@ -55,7 +57,7 @@ public class GoPublishStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            GoPublishExecutor goPublishExecutor = new GoPublishExecutor(getContext(), step.buildInfo, step.goBuild, step.path, step.version, ws, listener, build);
+            GoPublishExecutor goPublishExecutor = new GoPublishExecutor(getContext(), step.buildInfo, step.goBuild, step.path, step.version, step.module, ws, listener, build);
             goPublishExecutor.execute();
             return goPublishExecutor.getBuildInfo();
         }

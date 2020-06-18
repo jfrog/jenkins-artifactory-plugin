@@ -29,6 +29,7 @@ public class PublishBuildInfoExecutor implements Executor {
     @Override
     public void execute() throws Exception {
         BuildInfoAccessor buildInfoAccessor = new BuildInfoAccessor(buildInfo);
+        buildInfoAccessor.filterVariables();
         buildInfoAccessor.appendVcs(Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
         try (ArtifactoryBuildInfoClient client = buildInfoAccessor.createArtifactoryClient(server, build, listener)) {

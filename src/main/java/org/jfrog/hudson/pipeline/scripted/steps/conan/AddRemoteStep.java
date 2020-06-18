@@ -20,13 +20,15 @@ public class AddRemoteStep extends AbstractStepImpl {
     private String serverName;
     private String conanHome;
     private boolean force;
+    private boolean verifySSL;
 
     @DataBoundConstructor
-    public AddRemoteStep(String serverUrl, String serverName, String conanHome, boolean force) {
+    public AddRemoteStep(String serverUrl, String serverName, String conanHome, boolean force, boolean verifySSL) {
         this.serverUrl = serverUrl;
         this.serverName = serverName;
         this.conanHome = conanHome;
         this.force = force;
+        this.verifySSL = verifySSL;
     }
 
     public String getServerUrl() {
@@ -43,6 +45,10 @@ public class AddRemoteStep extends AbstractStepImpl {
 
     public boolean getForce() {
         return this.force;
+    }
+
+    public boolean getVerifySSL() {
+    	return this.verifySSL;
     }
 
     public static class Execution extends AbstractSynchronousStepExecution<Boolean> {
@@ -75,6 +81,7 @@ public class AddRemoteStep extends AbstractStepImpl {
             }
             args.add(step.getServerName());
             args.add(step.getServerUrl());
+            args.add(step.getVerifySSL() ? "True" : "False");
             EnvVars extendedEnv = new EnvVars(env);
             extendedEnv.put(Utils.CONAN_USER_HOME, step.getConanHome());
             Utils.exeConan(args, ws, launcher, listener, extendedEnv);

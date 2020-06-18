@@ -14,7 +14,7 @@ node("TestSlave") {
     stage "Configure Go build"
     def rtGo = Artifactory.newGoBuild()
     rtGo.deployer repo: "${GO_LOCAL}", server: rtServer
-    rtGo.resolver repo: "${GO_REMOTE}", server: rtServer
+    rtGo.resolver repo: "${GO_VIRTUAL}", server: rtServer
 
 
     stage "Copy project example"

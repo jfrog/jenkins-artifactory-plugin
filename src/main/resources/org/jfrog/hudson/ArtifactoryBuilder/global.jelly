@@ -8,14 +8,15 @@
 
         <f:entry
             help="/plugin/artifactory/help/ArtifactoryBuilder/help-useCredentialsPlugin.html">
-                <input id="useCredentialsPlugin" type="checkbox" onclick="updateViewForCredentialsMethod(this.checked)"
-                   name="useCredentialsPlugin" value="${descriptor.useCredentialsPlugin}"
-                        field="useCredentialsPlugin">Use the Credentials Plugin
-                </input>
+                <f:checkbox id="useCredentialsPlugin"
+                            onclick="updateViewForCredentialsMethod(this.checked)"
+                            name="useCredentialsPlugin"
+                            value="${descriptor.useCredentialsPlugin}"
+                            field="useCredentialsPlugin"
+                            title="${%Use the Credentials Plugin}"/>
         </f:entry>
         <f:entry title="Artifactory servers"
                  description="List of Artifactory servers that projects will want to deploy artifacts and build info to">
-
 
             <f:repeatable name="artifactoryServer" var="server" items="${descriptor.artifactoryServers}"
                           header="Artifactory" add="${%Add Artifactory Server}">
@@ -31,50 +32,46 @@
                     </f:entry>
 
                     <f:advanced>
-                        <f:entry>
-                            <table style="width:100%">
-                                <f:entry title="Connection Timeout" field="artifactory.timeout"
-                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
-                                    <f:textbox clazz="number" value="${server.timeout}"/>
-                                </f:entry>
-                                <f:entry field="connectionRetry" title="Number of retries"
-                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
-                                    <select class="setting-input" name="connectionRetry">
-                                        <j:forEach var="r" items="${server.connectionRetries}">
-                                            <f:option selected="${r==server.connectionRetry}"
-                                                      value="${r}">${r}
-                                            </f:option>
-                                        </j:forEach>
-                                    </select>
-                                </f:entry>
-                                <f:entry field="deploymentThreads" title="Number of threads for Generic uploads"
-                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-deploymentThreads.html">
-                                    <select class="setting-input" name="deploymentThreads">
-                                        <j:forEach var="r" items="${server.deploymentsThreads}">
-                                            <f:option selected="${r==server.deploymentThreads}"
-                                                      value="${r}">${r}
-                                            </f:option>
-                                        </j:forEach>
-                                    </select>
-                                </f:entry>
-                                <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
-                                                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
-                                </f:optionalBlock>
-                            </table>
+                        <f:entry title="Connection Timeout" field="artifactory.timeout"
+                                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
+                            <f:textbox clazz="number" value="${server.timeout}"/>
                         </f:entry>
+                        <f:entry field="connectionRetry" title="Number of retries"
+                                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-connectionRetry.html">
+                            <select class="setting-input" name="connectionRetry">
+                                <j:forEach var="r" items="${server.connectionRetries}">
+                                    <f:option selected="${r==server.connectionRetry}"
+                                              value="${r}">${r}
+                                    </f:option>
+                                </j:forEach>
+                            </select>
+                        </f:entry>
+                        <f:entry field="deploymentThreads" title="Number of threads for Generic uploads"
+                                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-deploymentThreads.html">
+                            <select class="setting-input" name="deploymentThreads">
+                                <j:forEach var="r" items="${server.deploymentsThreads}">
+                                    <f:option selected="${r==server.deploymentThreads}"
+                                              value="${r}">${r}
+                                    </f:option>
+                                </j:forEach>
+                            </select>
+                        </f:entry>
+                        <f:optionalBlock name="artifactory.bypassProxy" title="Bypass HTTP Proxy" checked="${server.bypassProxy}" inline="true"
+                                         help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
+                        </f:optionalBlock>
                     </f:advanced>
 
                     <f:section title="Default Deployer Credentials" field="deployerCredentialsConfig"
                                name="deployerCredentialsConfig">
                         <f:block>
                             <input type="hidden" name="stapler-class" value="org.jfrog.hudson.CredentialsConfig"/>
-                            <table style="width: 100%" id="deployerCredentialsId${server.url}">
+                            <r:blockWrapper id="deployerCredentialsId${server.url}">
                                 <f:entry title="${%Credentials}" name="credentialsId" field="credentialsId">
                                     <c:select default="${server.deployerCredentialsConfig.credentialsId}"/>
                                 </f:entry>
-                            </table>
+                            </r:blockWrapper>
 
-                            <table style="width: 100%" id="legacyDeployerCredentials${server.url}">
+                            <r:blockWrapper id="legacyDeployerCredentials${server.url}">
                                 <f:entry title="Username"
                                          help="/plugin/artifactory/help/common/help-deployerUserName.html">
                                     <f:textbox name="username" field="username"
@@ -85,7 +82,7 @@
                                     <f:password name="password" field="password"
                                                 value="${server.deployerCredentialsConfig.password}"/>
                                 </f:entry>
-                            </table>
+                            </r:blockWrapper>
                         </f:block>
                     </f:section>
                     <f:validateButton
@@ -102,14 +99,14 @@
                                 <input type="hidden" name="overridingCredentials" value="true"/>
                                 <input type="hidden" name="stapler-class"
                                        value="org.jfrog.hudson.CredentialsConfig"/>
-                                <table style="width: 100%" id="resolverCredentialsId${server.url}">
+                                <r:blockWrapper id="resolverCredentialsId${server.url}">
                                     <f:entry title="${%Credentials}" field="credentialsId">
                                         <c:select default="${server.resolverCredentialsConfig.credentialsId}"/>
                                     </f:entry>
-                                </table>
+                                </r:blockWrapper>
 
-                                <table style="width: 100%" id="legacyResolverCredentials${server.url}">
-                                    <f:entry title="Username"
+                                <r:blockWrapper id="legacyResolverCredentials${server.url}">
+                                     <f:entry title="Username"
                                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-resolverUserName.html">
                                         <f:textbox field="username"
                                                    value="${server.resolverCredentialsConfig.username}"/>
@@ -119,16 +116,16 @@
                                         <f:password field="password"
                                                     value="${server.resolverCredentialsConfig.password}"/>
                                     </f:entry>
-                                </table>
+                                </r:blockWrapper>
                             </f:nested>
                         </f:block>
                     </f:optionalBlock>
 
-                     <f:entry title="">
+                    <f:block>
                         <div align="right">
-                            <f:repeatableDeleteButton/>
+                            <f:repeatableDeleteButton />
                         </div>
-                    </f:entry>
+                    </f:block>
 
                 </table>
             </f:repeatable>

@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.common.executors;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
@@ -27,8 +28,9 @@ public class GenericDownloadExecutor implements Executor {
     private ArtifactoryServer server;
     private TaskListener listener;
     private String spec;
+    private String moduleName;
 
-    public GenericDownloadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, String spec, boolean failNoOp) {
+    public GenericDownloadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, String spec, boolean failNoOp, String moduleName) {
         this.build = build;
         this.server = server;
         this.listener = listener;
@@ -36,6 +38,7 @@ public class GenericDownloadExecutor implements Executor {
         this.failNoOp = failNoOp;
         this.ws = ws;
         this.spec = spec;
+        this.moduleName = moduleName;
     }
 
     public BuildInfo getBuildInfo() {
@@ -51,6 +54,7 @@ public class GenericDownloadExecutor implements Executor {
         if (failNoOp && resolvedDependencies.isEmpty()) {
             throw new RuntimeException("Fail-no-op: No files were affected in the download process.");
         }
-        new BuildInfoAccessor(this.buildInfo).appendDependencies(resolvedDependencies);
+        String moduleId = StringUtils.isNotBlank(moduleName) ? moduleName : buildInfo.getName();
+        new BuildInfoAccessor(this.buildInfo).appendDependencies(resolvedDependencies, moduleId);
     }
 }

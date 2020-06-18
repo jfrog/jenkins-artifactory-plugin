@@ -28,6 +28,7 @@ public class ArtifactoryServer implements Serializable {
     public static final String BUILD_NAME = "buildName";
     public static final String BUILD_NUMBER = "buildNumber";
     public static final String FAIL_NO_OP = "failNoOp";
+    public static final String MODULE = "module";
     public static final String PROPERTIES = "props";
     public static final String EDIT_PROPERTIES_TYPE = "editType";
 
@@ -79,7 +80,7 @@ public class ArtifactoryServer implements Serializable {
             throw new IllegalArgumentException(SPEC + " is a mandatory argument");
         }
 
-        List<String> keysAsList = Arrays.asList(SPEC, BUILD_INFO, FAIL_NO_OP);
+        List<String> keysAsList = Arrays.asList(SPEC, BUILD_INFO, FAIL_NO_OP, MODULE);
         if (!keysAsList.containsAll(arguments.keySet())) {
             throw new IllegalArgumentException("Only the following arguments are allowed, " + keysAsList.toString());
         }

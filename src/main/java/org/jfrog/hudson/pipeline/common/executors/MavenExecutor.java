@@ -11,9 +11,9 @@ import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.hudson.maven3.Maven3Builder;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.types.builds.MavenBuild;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer;
-import org.jfrog.hudson.pipeline.common.types.builds.MavenBuild;
 import org.jfrog.hudson.util.ExtractorUtils;
 
 public class MavenExecutor implements Executor {
@@ -69,7 +69,8 @@ public class MavenExecutor implements Executor {
         maven3Builder.perform(build, launcher, listener, extendedEnv, ws, tempDir);
         String generatedBuildPath = extendedEnv.get(BuildInfoFields.GENERATED_BUILD_INFO);
         buildInfo.append(Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath));
-        buildInfo.appendDeployableArtifacts(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), tempDir, listener);
+        // Read the deployable artifacts map from the 'json' file in the agent and append them to the buildInfo object.
+        buildInfo.getAndAppendDeployableArtifactsByModule(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), "", tempDir, listener);
         buildInfo.setAgentName(Utils.getAgentName(ws));
     }
 

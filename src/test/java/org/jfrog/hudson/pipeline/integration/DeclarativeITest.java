@@ -52,6 +52,11 @@ public class DeclarativeITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void uploadDownloadCustomModuleNameTest() throws Exception {
+        super.uploadDownloadCustomModuleNameTest("declarative:uploadDownloadCustomModuleName test");
+    }
+
+    @Test
     public void promotionTest() throws Exception {
         super.promotionTest("declarative:promotion test");
     }
@@ -73,13 +78,24 @@ public class DeclarativeITest extends CommonITestsPipeline {
 
     @Test
     public void npmTest() throws Exception {
-        super.npmTest("declarative:npm test");
+        super.npmTest("npm", "declarative:npm test", "package-name1:0.0.1");
+    }
+
+    @Test
+    public void npmCustomModuleNameTest() throws Exception {
+        super.npmTest("npmCustomModuleName", "declarative:npmCustomModuleName test", "my-npm-module");
     }
 
     @Test
     public void goTest() throws Exception {
-        super.goTest("declarative:go test");
+        super.goTest("go", "declarative:go test", "github.com/you/hello");
     }
+
+    @Test
+    public void goCustomModuleNameTest() throws Exception {
+        super.goTest("goCustomModuleName", "declarative:goCustomModuleName test", "my-Go-module");
+    }
+
 
     @Test
     public void setPropsTest() throws Exception {

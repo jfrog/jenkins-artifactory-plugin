@@ -4,10 +4,14 @@ import org.apache.commons.io.FileUtils
 
 import java.nio.file.Paths
 
+env.DONT_COLLECT='FOO'
+env.COLLECT='BAR'
 node("TestSlave")  {
     stage "Configure Artifactory"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.env.capture = true
+    buildInfo.env.filter.addExclude("DONT_COLLECT")
     buildInfo.name = "scripted:maven test"
     buildInfo.number = "3"
 

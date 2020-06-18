@@ -10,14 +10,15 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.PluginDependencyHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
 /**
  * @author yahavi
@@ -29,21 +30,21 @@ public abstract class NpmExecutor implements Executor {
     Launcher launcher;
     NpmBuild npmBuild;
     String javaArgs;
-    String npmExe;
     FilePath ws;
     String path;
+    String module;
     EnvVars env;
     Run build;
 
-    public NpmExecutor(BuildInfo buildInfo, Launcher launcher, NpmBuild npmBuild, String javaArgs, String npmExe, FilePath ws, String path, EnvVars env, TaskListener listener, Run build) {
+    public NpmExecutor(BuildInfo buildInfo, Launcher launcher, NpmBuild npmBuild, String javaArgs, FilePath ws, String path, String module, EnvVars env, TaskListener listener, Run build) {
         this.listener = listener;
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.launcher = launcher;
         this.npmBuild = npmBuild;
         this.javaArgs = javaArgs;
-        this.npmExe = npmExe;
         this.ws = ws;
-        this.path = path;
+        this.path = Objects.toString(path, ".");
+        this.module = module;
         this.env = env;
         this.build = build;
     }
@@ -56,7 +57,7 @@ public abstract class NpmExecutor implements Executor {
         ExtractorUtils.addVcsDetailsToEnv(new FilePath(ws, path), env, listener);
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
         EnvExtractor envExtractor = new NpmEnvExtractor(build,
-                buildInfo, deployer, resolver, listener, launcher, tempDir, env, args, path, npmExe);
+                buildInfo, deployer, resolver, listener, launcher, tempDir, env, args, path, module);
         envExtractor.execute();
         String absoluteDependencyDirPath = copyExtractorJars(tempDir);
         Utils.launch("npm", launcher, getArgs(absoluteDependencyDirPath, classToExecute), env, listener, ws);

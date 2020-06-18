@@ -2,8 +2,8 @@ package org.jfrog.hudson.util;
 
 import hudson.EnvVars;
 import hudson.FilePath;
-import hudson.model.Hudson;
 import hudson.remoting.Which;
+import jenkins.model.Jenkins;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -22,7 +22,7 @@ public class PluginDependencyHelper {
             throws IOException, InterruptedException {
 
         File localDependencyDir = localDependencyFile.getParentFile();
-        String pluginVersion = Hudson.getInstance().getPluginManager().getPlugin("artifactory").getVersion();
+        String pluginVersion = Jenkins.get().getPluginManager().getPlugin("artifactory").getVersion();
         if (pluginVersion.contains(" ")) {
             //Trim the plugin version in case we're working on a snapshot version (contains illegal chars)
             pluginVersion = StringUtils.split(pluginVersion, " ")[0];

@@ -31,11 +31,12 @@ public class GoRunExecutor implements Executor {
     private FilePath ws;
     private String path;
     private String goCmdArgs;
+    private String module;
     private Log logger;
     private EnvVars env;
     private Run build;
 
-    public GoRunExecutor(StepContext context, BuildInfo buildInfo, GoBuild goBuild, String path, String goCmdArgs, FilePath ws, TaskListener listener, EnvVars env, Run build) {
+    public GoRunExecutor(StepContext context, BuildInfo buildInfo, GoBuild goBuild, String path, String goCmdArgs, String module, FilePath ws, TaskListener listener, EnvVars env, Run build) {
         this.context = context;
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.goBuild = goBuild;
@@ -45,6 +46,7 @@ public class GoRunExecutor implements Executor {
         this.logger = new JenkinsBuildInfoLog(listener);
         this.env = env;
         this.build = build;
+        this.module = module;
     }
 
     public BuildInfo getBuildInfo() {
@@ -53,7 +55,7 @@ public class GoRunExecutor implements Executor {
 
     @Override
     public void execute() throws Exception {
-        GoRunCallable runCallable = new GoRunCallable(path, goCmdArgs, logger, env);
+        GoRunCallable runCallable = new GoRunCallable(path, goCmdArgs, module, logger, env);
         addResolverDetailsToCallable((NpmGoResolver) goBuild.getResolver(), runCallable);
         Build build = ws.act(runCallable);
         if (build == null) {

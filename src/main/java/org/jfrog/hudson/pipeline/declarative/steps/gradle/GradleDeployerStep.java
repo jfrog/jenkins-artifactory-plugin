@@ -15,10 +15,9 @@ public class GradleDeployerStep extends GradleDeployerResolver {
     private GradleDeployer gradleDeployer;
 
     @DataBoundConstructor
-    public GradleDeployerStep(String id, String serverId, String repo) {
+    public GradleDeployerStep(String id, String serverId) {
         super(STEP_NAME, id, serverId);
         gradleDeployer = new GradleDeployer();
-        gradleDeployer.setRepo(repo);
         buildDataFile.putPOJO(gradleDeployer);
     }
 
@@ -85,6 +84,11 @@ public class GradleDeployerStep extends GradleDeployerResolver {
     @DataBoundSetter
     public void setReleaseRepo(String releaseRepo) {
         gradleDeployer.setReleaseRepo(releaseRepo);
+    }
+
+    @DataBoundSetter
+    public void setThreads(int threads) {
+        gradleDeployer.setThreads(threads);
     }
 
     @Extension

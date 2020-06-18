@@ -10,7 +10,6 @@ import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.Vcs;
 import org.jfrog.build.api.builder.ModuleBuilder;
-import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
@@ -35,14 +34,14 @@ public class BuildInfoAccessor {
         this.buildInfo = buildInfo;
     }
 
-    public void appendDependencies(List<Dependency> dependencies) {
+    public void appendDependencies(List<Dependency> dependencies, String moduleId) {
         Module defaultModule = new ModuleBuilder()
-                .id(buildInfo.getName())
+                .id(moduleId)
                 .dependencies(dependencies)
                 .build();
         Module currentModule = buildInfo.getModules().stream()
                 // Check if the default module already exists.
-                .filter(module -> StringUtils.equals(module.getId(), getBuildName()))
+                .filter(module -> StringUtils.equals(module.getId(), moduleId))
                 .findAny()
                 .orElse(null);
         if (currentModule != null) {
@@ -87,14 +86,18 @@ public class BuildInfoAccessor {
         }
     }
 
-    public void appendArtifacts(List<Artifact> artifacts) {
+    public void filterVariables() {
+        this.buildInfo.getEnv().filter();
+    }
+
+    public void appendArtifacts(List<Artifact> artifacts, String moduleId) {
         Module defaultModule = new ModuleBuilder()
-                .id(buildInfo.getName())
+                .id(moduleId)
                 .artifacts(artifacts)
                 .build();
         Module currentModule = buildInfo.getModules().stream()
                 // Check if the default module already exists.
-                .filter(module -> StringUtils.equals(module.getId(), getBuildName()))
+                .filter(module -> StringUtils.equals(module.getId(), moduleId))
                 .findAny()
                 .orElse(null);
         if (currentModule != null) {

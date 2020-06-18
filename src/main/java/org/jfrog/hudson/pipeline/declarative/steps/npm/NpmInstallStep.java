@@ -43,6 +43,7 @@ public class NpmInstallStep extends AbstractStepImpl {
     private String javaArgs; // Added to allow java remote debugging
     private String path;
     private String args;
+    private String module;
 
     @DataBoundConstructor
     public NpmInstallStep() {
@@ -72,6 +73,11 @@ public class NpmInstallStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setPath(String path) {
         this.path = path;
+    }
+
+    @DataBoundSetter
+    public void setModule(String module) {
+        this.module = module;
     }
 
     @DataBoundSetter
@@ -109,8 +115,8 @@ public class NpmInstallStep extends AbstractStepImpl {
         protected Void run() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            String npmExe = Utils.getNpmExe(ws, listener, env, launcher, step.npmBuild.getTool());
-            NpmInstallExecutor npmInstallExecutor = new NpmInstallExecutor(buildInfo, launcher, step.npmBuild, step.javaArgs, npmExe, step.args, ws, step.path, env, listener, build);
+            Utils.addNpmToPath(ws, listener, env, launcher, step.npmBuild.getTool());
+            NpmInstallExecutor npmInstallExecutor = new NpmInstallExecutor(buildInfo, launcher, step.npmBuild, step.javaArgs, step.args, ws, step.path, step.module, env, listener, build);
             npmInstallExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(npmInstallExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
             return null;

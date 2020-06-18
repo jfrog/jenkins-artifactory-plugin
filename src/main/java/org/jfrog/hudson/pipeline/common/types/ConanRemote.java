@@ -37,18 +37,20 @@ public class ConanRemote implements Serializable {
         String serverName = args.containsKey("remoteName") ? args.get("remoteName").toString() : UUID.randomUUID().toString();
         String repo = (String) args.get("repo");
         boolean force = args.containsKey("force") && (boolean) args.get("force");
-        cpsScript.invokeMethod("conanAddRemote", getAddRemoteExecutionArguments(server, serverName, repo, force));
+        boolean verifySSL = args.containsKey("verifySSL") ? (boolean) args.get("verifySSL") : true;
+        cpsScript.invokeMethod("conanAddRemote", getAddRemoteExecutionArguments(server, serverName, repo, force, verifySSL));
         cpsScript.invokeMethod("conanAddUser", getAddUserExecutionArguments(server, serverName));
         return serverName;
     }
 
-    private Map<String, Object> getAddRemoteExecutionArguments(ArtifactoryServer server, String serverName, String repo, boolean force) {
+    private Map<String, Object> getAddRemoteExecutionArguments(ArtifactoryServer server, String serverName, String repo, boolean force, boolean verifySSL) {
         String serverUrl = buildConanRemoteUrl(server, repo);
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("serverUrl", serverUrl);
         stepVariables.put("serverName", serverName);
         stepVariables.put("conanHome", conanHome);
         stepVariables.put("force", force);
+        stepVariables.put("verifySSL", verifySSL);
         return stepVariables;
     }
 

@@ -31,7 +31,7 @@ public class GradleDeployer extends Deployer {
     public ServerDetails getDetails() throws IOException {
         validateRepositories();
         RepositoryConf snapshotRepositoryConf = null;
-        RepositoryConf releaseRepositoryConf = null;
+        RepositoryConf releaseRepositoryConf;
         if (StringUtils.isNotEmpty(repo)) {
             releaseRepositoryConf = new RepositoryConf(repo, repo, false);
         } else {
@@ -39,9 +39,7 @@ public class GradleDeployer extends Deployer {
             snapshotRepositoryConf = new RepositoryConf(snapshotRepo, snapshotRepo, false);
         }
 
-        String serverName = server == null ? "" : server.getServerName();
-        String url = server == null ? "" : server.getUrl();
-        return new ServerDetails(serverName, url, releaseRepositoryConf, snapshotRepositoryConf, releaseRepositoryConf, null, "", "");
+        return new ServerDetails(server.getServerName(), server.getUrl(), releaseRepositoryConf, snapshotRepositoryConf, releaseRepositoryConf, null, "", "");
     }
 
     @JsonIgnore
@@ -161,6 +159,7 @@ public class GradleDeployer extends Deployer {
                 .artifactoryServer(getArtifactoryServer())
                 .serverDetails(getDetails())
                 .deployArtifacts(isDeployArtifacts()).includesExcludes(Utils.getArtifactsIncludeExcludeForDeyployment(getArtifactDeploymentPatterns().getPatternFilter()))
+                .threads(getThreads())
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
                 .artifactsPattern(getArtifactPattern())
                 .ivyPattern(getIvyPattern())

@@ -20,6 +20,7 @@ public class GoRunCallable extends MasterToSlaveFileCallable<Build> {
     private String resolutionRepository;
     private String path;
     private String goCmdArgs;
+    private String module;
     private String resolverUsername;
     private String resolverPassword;
     private Log logger;
@@ -30,9 +31,10 @@ public class GoRunCallable extends MasterToSlaveFileCallable<Build> {
      * @param path      - Path to directory that contains go.mod.
      * @param logger    - The logger.
      */
-    public GoRunCallable(String path, String goCmdArgs, Log logger, EnvVars env) {
+    public GoRunCallable(String path, String goCmdArgs, String module, Log logger, EnvVars env) {
         this.path = path;
         this.goCmdArgs = goCmdArgs;
+        this.module = module;
         this.logger = logger;
         this.env = env;
         this.buildInfoClientBuilder = null;
@@ -49,6 +51,6 @@ public class GoRunCallable extends MasterToSlaveFileCallable<Build> {
     public Build invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
         Path basePath = file.toPath();
         Path packagePath = StringUtils.isBlank(path) ? basePath : basePath.resolve(Utils.replaceTildeWithUserHome(path));
-        return new GoRun(goCmdArgs, packagePath, buildInfoClientBuilder, resolutionRepository, resolverUsername, resolverPassword, logger, env).execute();
+        return new GoRun(goCmdArgs, packagePath, module, buildInfoClientBuilder, resolutionRepository, resolverUsername, resolverPassword, logger, env).execute();
     }
 }

@@ -194,6 +194,26 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void uploadDownloadCustomModuleNameTest(String buildName) throws Exception {
+        Set<String> expectedArtifactsAndDependencies = getTestFilesNamesByLayer(0);
+        String buildNumber = "3";
+
+        WorkflowRun build = runPipeline("uploadDownloadCustomModuleName");
+        try {
+            expectedArtifactsAndDependencies.forEach(artifactName ->
+                    assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
+            for (String fileName : expectedArtifactsAndDependencies) {
+                assertTrue(isExistInWorkspace(slave, build, "downloadByPattern-test", fileName));
+            }
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, "my-generic-module");
+            assertModuleDependencies(module, expectedArtifactsAndDependencies);
+            assertModuleArtifacts(module, expectedArtifactsAndDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
     void promotionTest(String buildName) throws Exception {
         Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
         String buildNumber = "4";
@@ -223,6 +243,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             runPipeline("maven");
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            assertFilteredProperties(buildInfo);
             assertEquals(4, buildInfo.getModules().size());
 
             Module module = getAndAssertModule(buildInfo, "org.jfrog.test:multi:3.7-SNAPSHOT");
@@ -241,6 +262,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             runPipeline("gradle");
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            assertFilteredProperties(buildInfo);
             assertEquals(4, buildInfo.getModules().size());
 
             assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:services:1.0-SNAPSHOT");
@@ -273,14 +295,14 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
-    void npmTest(String buildName) throws Exception {
+    void npmTest(String pipelineName, String buildName, String moduleName) throws Exception {
         Set<String> expectedArtifact = Sets.newHashSet("package-name1:0.0.1");
         Set<String> expectedDependencies = Sets.newHashSet("big-integer-1.6.40.tgz", "is-number-7.0.0.tgz");
         String buildNumber = "3";
         try {
-            runPipeline("npm");
+            runPipeline(pipelineName);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
-            Module module = getAndAssertModule(buildInfo, "package-name1:0.0.1");
+            Module module = getAndAssertModule(buildInfo, moduleName);
             assertModuleDependencies(module, expectedDependencies);
             assertModuleArtifacts(module, expectedArtifact);
         } finally {
@@ -288,14 +310,14 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
-    void goTest(String buildName) throws Exception {
+    void goTest(String pipelineName, String buildName, String moduleName) throws Exception {
         Set<String> expectedArtifact = Sets.newHashSet("github.com/you/hello:v1.0.0.zip", "github.com/you/hello:v1.0.0.mod", "github.com/you/hello:v1.0.0.info");
         Set<String> expectedDependencies = Sets.newHashSet("rsc.io/sampler:v1.3.0", "golang.org/x/text:v0.0.0-20170915032832-14c0d48ead0c", "rsc.io/quote:v1.5.2");
         String buildNumber = "7";
         try {
-            runPipeline("go");
+            runPipeline(pipelineName);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
-            Module module = getAndAssertModule(buildInfo, "github.com/you/hello");
+            Module module = getAndAssertModule(buildInfo, moduleName);
             assertModuleDependencies(module, expectedDependencies);
             assertModuleArtifacts(module, expectedArtifact);
         } finally {
@@ -375,6 +397,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void dockerPushTest(String buildName) throws Exception {
         Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS);
+        Assume.assumeTrue("Skipping Xray tests", JENKINS_DOCKER_TEST_ENABLE == null || Boolean.parseBoolean(JENKINS_DOCKER_TEST_ENABLE));
         try {
             // Get image name
             String domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_DOMAIN");

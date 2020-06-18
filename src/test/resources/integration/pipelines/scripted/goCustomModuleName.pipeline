@@ -1,0 +1,34 @@
+package integration.pipelines.scripted
+
+import org.apache.commons.io.FileUtils
+
+import java.nio.file.Paths
+
+node("TestSlave") {
+    stage "Configure Artifactory"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:goCustomModuleName test"
+    buildInfo.number = "7"
+
+    stage "Configure Go build"
+    def rtGo = Artifactory.newGoBuild()
+    rtGo.deployer repo: "${GO_LOCAL}", server: rtServer
+    rtGo.resolver repo: "${GO_VIRTUAL}", server: rtServer
+
+
+    stage "Copy project example"
+    FileUtils.copyDirectory(Paths.get("${GO_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-go-example").toFile())
+
+    stage "Go build"
+    rtGo.run args: "build", buildInfo: buildInfo, path: "scripted-go-example", module: "my-Go-module"
+
+
+    stage "Go publish"
+    rtGo.publish version:"1.0.0", buildInfo: buildInfo, path: "scripted-go-example", module: "my-Go-module"
+
+
+    stage "Publish build info"
+    rtServer.publishBuildInfo buildInfo
+
+}

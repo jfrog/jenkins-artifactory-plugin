@@ -17,7 +17,7 @@ node("TestSlave") {
             password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     )
 
-    stage "Configure npm build"
+    stage "Configure Go build"
     rtGoDeployer(
             id: "GO_DEPLOYER",
             serverId: serverId,
@@ -27,7 +27,7 @@ node("TestSlave") {
     rtGoResolver(
             id: "GO_RESOLVER",
             serverId: serverId,
-            repo: "${GO_REMOTE}",
+            repo: "${GO_VIRTUAL}",
     )
 
     stage "Copy project example"

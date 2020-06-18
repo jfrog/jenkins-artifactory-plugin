@@ -33,6 +33,7 @@ public class GenericStep extends AbstractStepImpl {
     private String customBuildName;
     private String specPath;
     boolean failNoOp;
+    protected String module;
 
     GenericStep(String serverId) {
         this.serverId = serverId;
@@ -61,6 +62,11 @@ public class GenericStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setFailNoOp(boolean failNoOp) {
         this.failNoOp = failNoOp;
+    }
+
+    @DataBoundSetter
+    public void setModule(String module) {
+        this.module = module;
     }
 
     public static abstract class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
