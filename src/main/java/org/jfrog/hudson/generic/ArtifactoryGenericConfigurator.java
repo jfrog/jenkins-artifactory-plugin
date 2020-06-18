@@ -452,10 +452,6 @@ BuildInfoAwareConfigurator, MultiConfigurationAware {
 			return PluginsUtils.fillPluginCredentials(project);
 		}
 
-		@Override
-		public boolean isJiraPluginEnabled() {
-			return (Jenkins.getInstance().getPlugin("jira") != null);
-		}
 	}
 
 	/**
