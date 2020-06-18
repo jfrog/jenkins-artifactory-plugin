@@ -142,14 +142,6 @@ public class PluginsUtils {
         }
     }
 
-    public static boolean isJiraPluginEnabled() {
-        try {
-            return (Jenkins.getInstance().getPlugin("jira") != null);
-        } catch (NullPointerException npe) {
-            return false;
-        }
-    }
-
     private static ObjectMapper lazyInitMapper() {
         if (mapper == null) {
             mapper = new ObjectMapper();
