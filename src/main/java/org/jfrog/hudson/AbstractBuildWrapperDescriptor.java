@@ -76,7 +76,7 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
 
     @SuppressWarnings("unused")
     public boolean isJiraPluginEnabled() {
-        return (Jenkins.getInstance().getPlugin("jira") != null);
+        return (Jenkins.getInstanceOrNull().getPlugin("jira") != null);
 
     }
 

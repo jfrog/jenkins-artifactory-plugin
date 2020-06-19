@@ -289,6 +289,30 @@
                         </f:optionalBlock>
 
                     </f:optionalBlock>
+                 </table>   
+            </f:block>
+
+            <f:block>
+                <table style="width:100%">
+                    <j:if test="${descriptor.jiraPluginEnabled}">
+                        <f:optionalBlock name="enableIssueTrackerIntegration"
+                                         checked="${instance.enableIssueTrackerIntegration}"
+                                         title="Enable JIRA Integration"
+                                         help="/plugin/artifactory/help/common/help-enableIssueTrackerIntegration.html"
+                                         inline="true">
+
+                            <f:optionalBlock name="aggregateBuildIssues"
+                                             checked="${instance.aggregateBuildIssues}"
+                                             title="Aggregate issues from previous builds"
+                                             inline="true"
+                                             help="/plugin/artifactory/help/common/help-aggregateBuildIssues.html">
+                                <f:entry field="aggregationBuildStatus" title="${%Aggregate from status}"
+                                         description="Define the latest build status to stop the aggregation at">
+                                    <f:textbox value="${instance.aggregationBuildStatus}" default="Released"/>
+                                </f:entry>
+                            </f:optionalBlock>
+                        </f:optionalBlock>
+                    </j:if>
                 </table>
             </f:block>
 
