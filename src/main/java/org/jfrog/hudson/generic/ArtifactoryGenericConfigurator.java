@@ -454,7 +454,7 @@ BuildInfoAwareConfigurator, MultiConfigurationAware {
 
 		@Override
 		public boolean isJiraPluginEnabled() {
-			return (Jenkins.getInstance().getPlugin("jira") != null);
+			return (Jenkins.getInstanceOrNull().getPlugin("jira") != null);
 		}
 	}
 
