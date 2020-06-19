@@ -451,11 +451,6 @@ BuildInfoAwareConfigurator, MultiConfigurationAware {
 		public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
 			return PluginsUtils.fillPluginCredentials(project);
 		}
-
-		@Override
-		public boolean isJiraPluginEnabled() {
-			return (Jenkins.getInstanceOrNull().getPlugin("jira") != null);
-		}
 	}
 
 	/**
