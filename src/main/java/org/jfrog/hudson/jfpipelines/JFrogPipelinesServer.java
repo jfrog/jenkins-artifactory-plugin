@@ -46,7 +46,7 @@ public class JFrogPipelinesServer implements Serializable {
     @DataBoundConstructor
     public JFrogPipelinesServer(String integrationUrl, CredentialsConfig credentialsConfig,
                                 int timeout, boolean bypassProxy, int connectionRetries) {
-        this.connectionRetries = connectionRetries > 0 ? connectionRetries : DEFAULT_CONNECTION_RETRIES;
+        this.connectionRetries = connectionRetries >= 0 ? connectionRetries : DEFAULT_CONNECTION_RETRIES;
         this.integrationUrl = StringUtils.removeEnd(integrationUrl, "/");
         this.timeout = timeout > 0 ? timeout : DEFAULT_CONNECTION_TIMEOUT;
         this.credentialsConfig = credentialsConfig;
@@ -98,7 +98,7 @@ public class JFrogPipelinesServer implements Serializable {
     }
 
     /**
-     * Report queue if when the Jon enters the Jenkins queue.
+     * Report queue ID to JFrog Pipelines when the Job enters the Jenkins queue.
      *
      * @param queueItem - The queue item to report
      * @param stepId    - JFrog Pipelines step ID.

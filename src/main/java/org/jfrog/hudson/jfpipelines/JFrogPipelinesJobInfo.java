@@ -3,7 +3,7 @@ package org.jfrog.hudson.jfpipelines;
 import java.io.Serializable;
 
 /**
- * Use to serialize information from 'jfPipelines' step
+ * Used for serializing information from 'jfPipelines' step
  */
 public class JFrogPipelinesJobInfo implements Serializable {
     private static final long serialVersionUID = 1L;

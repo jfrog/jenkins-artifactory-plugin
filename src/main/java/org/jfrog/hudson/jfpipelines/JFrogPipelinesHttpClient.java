@@ -89,7 +89,7 @@ public class JFrogPipelinesHttpClient implements AutoCloseable {
         if (httpClient != null) {
             return httpClient;
         }
-        PreemptiveHttpClientBuilder clientBuilder = (new PreemptiveHttpClientBuilder()).setConnectionRetries(this.connectionRetries).setTimeout(connectionTimeout).setLog(this.log);
+        PreemptiveHttpClientBuilder clientBuilder = new PreemptiveHttpClientBuilder().setConnectionRetries(this.connectionRetries).setTimeout(connectionTimeout).setLog(this.log);
         if (this.proxyConfiguration != null) {
             clientBuilder.setProxyConfiguration(this.proxyConfiguration);
         }
