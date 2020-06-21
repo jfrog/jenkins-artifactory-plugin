@@ -338,7 +338,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         if (artifactoryServer == null) {
             listener.getLogger().format("No Artifactory server configured for %s. " +
                     "Please check your configuration.", artifactoryServerName).println();
-            build.setResult(Result.FAILURE);
             throw new IllegalArgumentException("No Artifactory server configured for " + artifactoryServerName);
         }
 
@@ -360,7 +359,6 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
             if (StringUtils.isBlank(getArtifactoryCombinationFilter())) {
                 String error = "The field \"Combination Matches\" is empty, but is defined as mandatory!";
                 listener.getLogger().println(error);
-                build.setResult(Result.FAILURE);
                 throw new IllegalArgumentException(error);
             }
             boolean isFiltered = MultiConfigurationUtils.isfiltrated(build, getArtifactoryCombinationFilter());

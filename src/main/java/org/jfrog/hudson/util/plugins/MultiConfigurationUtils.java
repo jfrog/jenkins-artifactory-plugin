@@ -19,7 +19,6 @@ public class MultiConfigurationUtils {
         if (StringUtils.isBlank(combFilter)) {
             String error = "The \"Combination Matches\" field is mandatory. It cannot be empty.";
             listener.getLogger().println(error);
-            build.setResult(Result.FAILURE);
             throw new IllegalArgumentException(error);
         }
     }

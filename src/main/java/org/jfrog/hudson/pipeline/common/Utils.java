@@ -193,7 +193,6 @@ public class Utils {
             return mapper.readValue(buildInfoFileContent, org.jfrog.build.api.Build.class);
         } catch (Exception e) {
             listener.error("Couldn't read generated build info at : " + jsonBuildPath);
-            build.setResult(Result.FAILURE);
             throw new Run.RunnerAbortedException();
         } finally {
             if (inputStream != null) {

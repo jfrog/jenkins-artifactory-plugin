@@ -243,13 +243,11 @@ public class ExtractorUtils {
                                                         Run build, String resolverReleaseInput,
                                                         String resolverSnapshotInput, Map<String, String> env) {
         if (StringUtils.isBlank(resolverReleaseInput) || StringUtils.isBlank(resolverSnapshotInput)) {
-            build.setResult(Result.FAILURE);
             throw new IllegalStateException("Input for resolve repositories cannot be empty.");
         }
         String resolveReleaseRepo = Util.replaceMacro(resolverReleaseInput, env);
         String resolveSnapshotRepo = Util.replaceMacro(resolverSnapshotInput, env);
         if (StringUtils.isBlank(resolveReleaseRepo) || StringUtils.isBlank(resolveSnapshotRepo)) {
-            build.setResult(Result.FAILURE);
             throw new IllegalStateException("Resolver repository variable cannot be replaces with empty value.");
         }
         configuration.resolver.setDownloadSnapshotRepoKey(resolveSnapshotRepo);

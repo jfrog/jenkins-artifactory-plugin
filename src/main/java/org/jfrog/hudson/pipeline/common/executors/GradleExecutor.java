@@ -90,7 +90,6 @@ public class GradleExecutor implements Executor {
                 args.add(getGradleExe());
             } catch (Exception e) {
                 listener.error("Couldn't find Gradle executable.");
-                build.setResult(Result.FAILURE);
                 throw new Run.RunnerAbortedException();
             }
         }
@@ -124,7 +123,7 @@ public class GradleExecutor implements Executor {
                 switches += " --init-script " + initScriptPath;
             } catch (Exception e) {
                 listener.getLogger().println("Error occurred while writing Gradle Init Script: " + e.getMessage());
-                build.setResult(Result.FAILURE);
+                throw new Run.RunnerAbortedException();
             }
         }
         return switches;

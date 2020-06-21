@@ -315,7 +315,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
             return createEnvironmentOnSuccessfulSetup();
         } catch (Exception e) {
             e.printStackTrace(listener.error(e.getMessage()));
-            build.setResult(Result.FAILURE);
         } finally {
             if (dependenciesClient != null) {
                 dependenciesClient.close();
@@ -344,7 +343,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                         if (multiConfProject && StringUtils.isBlank(getArtifactoryCombinationFilter())) {
                             String error = "The field \"Combination Matches\" is empty, but is defined as mandatory!";
                             listener.getLogger().println(error);
-                            build.setResult(Result.FAILURE);
                             throw new IllegalArgumentException(error);
                         }
                         isFiltered = MultiConfigurationUtils.isfiltrated(build, getArtifactoryCombinationFilter());

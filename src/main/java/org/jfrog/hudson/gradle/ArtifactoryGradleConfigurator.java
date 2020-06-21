@@ -374,7 +374,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 if (StringUtils.isBlank(getArtifactoryCombinationFilter())) {
                     String error = "The field \"Combination Matches\" is empty, but is defined as mandatory!";
                     log.println(error);
-                    build.setResult(Result.FAILURE);
                     throw new IllegalArgumentException(error);
                 }
                 boolean isFiltered = MultiConfigurationUtils.isfiltrated(build, getArtifactoryCombinationFilter());

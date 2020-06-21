@@ -105,7 +105,6 @@ public abstract class EnvExtractor implements Executor {
             backwardCompatibleDeployableArtifactsFile = Utils.createTempJsonFile(launcher, BuildInfoFields.BACKWARD_COMPATIBLE_DEPLOYABLE_ARTIFACTS, tempDir.getRemote());
         } catch (Exception e) {
             buildListener.error("Failed while generating temp file. " + e.getMessage());
-            build.setResult(Result.FAILURE);
             throw new Run.RunnerAbortedException();
         }
         env.put(BuildInfoFields.GENERATED_BUILD_INFO, buildInfoTempFile);

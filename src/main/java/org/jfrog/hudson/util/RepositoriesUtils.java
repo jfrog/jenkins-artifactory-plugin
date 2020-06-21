@@ -189,7 +189,6 @@ public abstract class RepositoriesUtils {
             String error = "No Artifactory server configured for " + artifactoryUrl +
                     ". Please check your configuration.";
             listener.getLogger().println(error);
-            build.setResult(Result.FAILURE);
             throw new IOException(error);
         }
     }
