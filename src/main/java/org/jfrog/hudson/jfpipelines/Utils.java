@@ -48,13 +48,13 @@ public class Utils {
     }
 
     /**
-     * Inject the step id parameter to the project's parameters list.
+     * Inject the 'JFROG_PIPELINES_INFO' parameter to the project's parameters list.
      *
      * @param project      - The project
      * @param defaultValue - The default value - for tests
      * @throws IOException in case of any error.
      */
-    public static void injectStepIdParameter(Job<?, ?> project, String defaultValue) throws IOException {
+    public static void injectJfPipelinesInfoParameter(Job<?, ?> project, String defaultValue) throws IOException {
         ParametersDefinitionProperty parametersProperty = project.getProperty(ParametersDefinitionProperty.class);
         ParameterDefinition parameterDefinition = new JFrogPipelinesParameter(defaultValue);
         if (parametersProperty == null) {

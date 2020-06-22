@@ -24,6 +24,10 @@ import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * In this class we send HTTP requests to 'http://httpbin.org' in order to examine the requests.
+ * For example - 'GET' request to 'http://httpbin.org/status/401' will return response code 401.
+ */
 public class JFrogPipelinesHttpClientTest {
 
     /**

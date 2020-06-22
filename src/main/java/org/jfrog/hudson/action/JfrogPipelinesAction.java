@@ -25,7 +25,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 
-import static org.jfrog.hudson.jfpipelines.Utils.injectStepIdParameter;
+import static org.jfrog.hudson.jfpipelines.Utils.injectJfPipelinesInfoParameter;
 
 /**
  * This class is used for managing the JFrog Pipelines Job triggering functionality.
@@ -73,7 +73,7 @@ public class JfrogPipelinesAction<JobT extends Job<?, ?> & ParameterizedJobMixIn
     public void doPipelines(StaplerRequest req, StaplerResponse resp) throws IOException {
         try {
             JobStartedPayload payload = getJobStartedPayload(req);
-            injectStepIdParameter(project, "");
+            injectJfPipelinesInfoParameter(project, "");
             Queue.Item queueItem = runBuild(project, req, resp);
             if (queueItem != null) {
                 // The queue item is null in Jenkins Pipelines jobs
