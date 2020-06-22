@@ -1,9 +1,9 @@
 package org.jfrog.hudson.pipeline.common.types;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
+import org.jfrog.hudson.pipeline.common.Utils;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class ConanRemote implements Serializable {
     }
 
     private Map<String, Object> getAddRemoteExecutionArguments(ArtifactoryServer server, String serverName, String repo, boolean force, boolean verifySSL) {
-        String serverUrl = buildConanRemoteUrl(server, repo);
+        String serverUrl = Utils.buildConanRemoteUrl(server, repo);
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("serverUrl", serverUrl);
         stepVariables.put("serverName", serverName);
@@ -52,15 +52,6 @@ public class ConanRemote implements Serializable {
         stepVariables.put("force", force);
         stepVariables.put("verifySSL", verifySSL);
         return stepVariables;
-    }
-
-    private String buildConanRemoteUrl(ArtifactoryServer server, String repo) {
-        StringBuilder serverURL = new StringBuilder(server.getUrl());
-        if (!StringUtils.endsWith(serverURL.toString(), "/")) {
-            serverURL.append("/");
-        }
-        serverURL.append("api/conan/").append(repo);
-        return serverURL.toString();
     }
 
     private Map<String, Object> getAddUserExecutionArguments(ArtifactoryServer server, String serverName) {

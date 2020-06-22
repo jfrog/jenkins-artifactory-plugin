@@ -325,6 +325,18 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void conanTest(String pipelineName, String buildName) throws Exception {
+        String buildNumber = "7";
+        try {
+            runPipeline(pipelineName);
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, "DownloadOnly");
+            assertEquals(module.getDependencies().size(), 12);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
     @Test
     public void uploadFailNoOpTest() throws Exception {
         try {

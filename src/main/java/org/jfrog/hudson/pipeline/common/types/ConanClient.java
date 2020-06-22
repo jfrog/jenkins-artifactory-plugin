@@ -1,12 +1,10 @@
 package org.jfrog.hudson.pipeline.common.types;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -41,14 +39,6 @@ public class ConanClient implements Serializable {
         this.remote.setConanHome(conanHomePath);
     }
 
-    public String getLogFilePath() {
-        String separator = unixAgent ? "/" : "\\";
-        if (StringUtils.endsWith(getUserPath(), separator)) {
-            return getUserPath() + CONAN_LOG_FILE;
-        }
-        return getUserPath() + separator + CONAN_LOG_FILE;
-    }
-
     @Whitelisted
     public ConanRemote getRemote() {
         return this.remote;
@@ -75,7 +65,6 @@ public class ConanClient implements Serializable {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("command", command);
         stepVariables.put("conanHome", getUserPath());
-        stepVariables.put("buildLogPath", getLogFilePath());
         stepVariables.put("buildInfo", buildInfo);
         return stepVariables;
     }

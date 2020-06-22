@@ -96,6 +96,11 @@ public class DeclarativeITest extends CommonITestsPipeline {
         super.goTest("goCustomModuleName", "declarative:goCustomModuleName test", "my-Go-module");
     }
 
+    @Test
+    public void conanTest() throws Exception {
+        super.conanTest("conan", "declarative:conan test");
+    }
+
 
     @Test
     public void setPropsTest() throws Exception {

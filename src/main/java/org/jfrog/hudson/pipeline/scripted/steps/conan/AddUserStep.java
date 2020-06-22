@@ -7,7 +7,6 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.util.ArgumentListBuilder;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
@@ -15,6 +14,7 @@ import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.util.CredentialManager;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -66,22 +66,14 @@ public class AddUserStep extends AbstractStepImpl {
 
         @Override
         protected Boolean run() throws Exception {
-            ArgumentListBuilder args = new ArgumentListBuilder();
             org.jfrog.hudson.ArtifactoryServer artifactoryServer = Utils.prepareArtifactoryServer(null, step.getServer());
             ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(artifactoryServer);
             CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, artifactoryServer);
             String username = deployerConfig.provideCredentials(build.getParent()).getUsername();
+            String password = deployerConfig.provideCredentials(build.getParent()).getPassword();
             String serverName = step.getServerName();
-            args.addTokenized("conan user");
-            args.add(username);
-            args.add("-p");
-            args.addMasked(deployerConfig.provideCredentials(build.getParent()).getPassword());
-            args.add("-r");
-            args.add(serverName);
-            EnvVars extendedEnv = new EnvVars(env);
-            extendedEnv.put(Utils.CONAN_USER_HOME, step.getConanHome());
-            listener.getLogger().println("Adding conan user '" + username + "', server '" + serverName + "'");
-            Utils.exeConan(args, ws, launcher, listener, extendedEnv);
+            ConanExecutor executor = new ConanExecutor(step.getConanHome(), ws, launcher, listener, env, build);
+            executor.execUserAdd(username, password, serverName);
             return true;
         }
     }

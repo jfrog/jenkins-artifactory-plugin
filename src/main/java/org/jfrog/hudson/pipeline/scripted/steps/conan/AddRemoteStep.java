@@ -7,12 +7,11 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.util.ArgumentListBuilder;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class AddRemoteStep extends AbstractStepImpl {
@@ -74,17 +73,8 @@ public class AddRemoteStep extends AbstractStepImpl {
 
         @Override
         protected Boolean run() throws Exception {
-            ArgumentListBuilder args = new ArgumentListBuilder();
-            args.addTokenized("conan remote add");
-            if (step.getForce()) {
-                args.add("--force");
-            }
-            args.add(step.getServerName());
-            args.add(step.getServerUrl());
-            args.add(step.getVerifySSL() ? "True" : "False");
-            EnvVars extendedEnv = new EnvVars(env);
-            extendedEnv.put(Utils.CONAN_USER_HOME, step.getConanHome());
-            Utils.exeConan(args, ws, launcher, listener, extendedEnv);
+            ConanExecutor conanExecutor = new ConanExecutor(step.getConanHome(), ws, launcher, listener, env, build);
+            conanExecutor.execRemoteAdd(step.getServerName(), step.getServerUrl(), step.getForce(), step.getVerifySSL());
             return true;
         }
     }

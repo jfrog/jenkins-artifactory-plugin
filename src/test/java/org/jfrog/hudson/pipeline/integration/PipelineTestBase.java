@@ -182,6 +182,7 @@ public class PipelineTestBase {
             put("GRADLE_CI_PROJECT_PATH", getProjectPath("gradle-example-ci"));
             put("NPM_PROJECT_PATH", getProjectPath("npm-example"));
             put("GO_PROJECT_PATH", getProjectPath("go-example"));
+            put("CONAN_PROJECT_PATH", getProjectPath("conan-example"));
             put("DOCKER_PROJECT_PATH", getProjectPath("docker-example"));
             put("TEST_TEMP_FOLDER", fixWindowsPath(testTemporaryFolder.getRoot().getAbsolutePath()));
             put("LOCAL_REPO1", getRepoKey(TestRepository.LOCAL_REPO1));

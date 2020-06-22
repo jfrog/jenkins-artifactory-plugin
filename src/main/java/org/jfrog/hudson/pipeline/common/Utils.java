@@ -32,10 +32,7 @@ import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.util.GitUtils;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.common.types.DistributionConfig;
-import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
-import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
+import org.jfrog.hudson.pipeline.common.types.*;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.*;
 
@@ -221,34 +218,6 @@ public class Utils {
                 return tempFile.getAbsolutePath();
             }
         });
-    }
-
-    public static void exeConan(ArgumentListBuilder args, FilePath ws, Launcher launcher, TaskListener listener, EnvVars env) {
-        try {
-            if (!ws.exists()) {
-                ws.mkdirs();
-            }
-            if (launcher.isUnix()) {
-                boolean hasMaskedArguments = args.hasMaskedArguments();
-                StringBuilder sb = new StringBuilder();
-                for (String arg : args.toList()) {
-                    sb.append(escapeUnixArgument(arg)).append(" ");
-                }
-                args.clear();
-                args.add("sh", "-c");
-                if (hasMaskedArguments) {
-                    args.addMasked(sb.toString());
-                } else {
-                    args.add(sb.toString());
-                }
-            } else {
-                args = args.toWindowsCommand();
-            }
-        } catch (Exception e) {
-            listener.error("Couldn't execute the conan client executable. " + e.getMessage());
-            throw new Run.RunnerAbortedException();
-        }
-        launch("Conan", launcher, args, env, listener, ws);
     }
 
     /**
@@ -502,5 +471,37 @@ public class Utils {
 
         return new XrayScanConfig((String) xrayScanParams.get(BUILD_NAME),
                 (String) xrayScanParams.get(BUILD_NUMBER), (Boolean) xrayScanParams.get(failBuild));
+    }
+
+    public static FilePath createConanTempHome(FilePath ws) throws Exception {
+        // Create the @tmp directory
+        FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
+
+        // Create the conan directory
+        return tempDir.createTempDir("conan", "");
+    }
+
+    public static FilePath getConanHomeDirectory(String userPath, EnvVars env, Launcher launcher, FilePath ws) throws Exception {
+        FilePath conanHomeDirectory;
+        if (StringUtils.isEmpty(userPath)) {
+            conanHomeDirectory = env.containsKey(Utils.CONAN_USER_HOME) ? new FilePath(new File(env.get(Utils.CONAN_USER_HOME))) : createConanTempHome(ws);
+        } else {
+            conanHomeDirectory = new FilePath(launcher.getChannel(), userPath);
+        }
+
+        if (!conanHomeDirectory.exists()) {
+            conanHomeDirectory.mkdirs();
+        }
+        conanHomeDirectory.child(ConanClient.CONAN_LOG_FILE).touch(Calendar.getInstance().getTimeInMillis());
+        return conanHomeDirectory;
+    }
+
+    public static String buildConanRemoteUrl(ArtifactoryServer server, String repo) {
+        StringBuilder serverURL = new StringBuilder(server.getUrl());
+        if (!StringUtils.endsWith(serverURL.toString(), "/")) {
+            serverURL.append("/");
+        }
+        serverURL.append("api/conan/").append(repo);
+        return serverURL.toString();
     }
 }

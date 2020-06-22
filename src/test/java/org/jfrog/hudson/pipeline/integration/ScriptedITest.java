@@ -97,6 +97,11 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void conanTest() throws Exception {
+        super.conanTest("conan", "scripted:conan test");
+    }
+
+    @Test
     public void setPropsTest() throws Exception {
         super.setPropsTest("scripted:setProps test");
     }
