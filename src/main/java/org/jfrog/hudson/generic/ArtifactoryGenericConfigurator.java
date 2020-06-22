@@ -311,16 +311,12 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                 publishedDependencies = artifactsResolver.retrievePublishedDependencies(resolvePattern);
                 buildDependencies = artifactsResolver.retrieveBuildDependencies(resolvePattern);
             }
-
             return createEnvironmentOnSuccessfulSetup();
-        } catch (Exception e) {
-            e.printStackTrace(listener.error(e.getMessage()));
         } finally {
             if (dependenciesClient != null) {
                 dependenciesClient.close();
             }
         }
-        return null;
     }
 
     private Environment createEnvironmentOnSuccessfulSetup() {
