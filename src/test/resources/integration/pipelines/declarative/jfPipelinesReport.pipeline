@@ -1,0 +1,9 @@
+package integration.pipelines.declarative
+
+node("TestSlave") {
+
+    stage "Set output resources"
+    jfPipelines(
+            reportStatus: "UNSTABLE"
+    )
+}

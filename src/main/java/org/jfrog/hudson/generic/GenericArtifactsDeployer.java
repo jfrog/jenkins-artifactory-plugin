@@ -9,7 +9,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
-import jenkins.model.Jenkins;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Artifact;
@@ -18,13 +17,13 @@ import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.extractor.ModuleParallelDeployHelper;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.util.PublishedItemsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.UploadSpecHelper;
-import org.jfrog.build.extractor.ModuleParallelDeployHelper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.Utils;
@@ -36,6 +35,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**
  * Deploys artifacts to Artifactory. This class is used only in free style generic configurator.
@@ -77,7 +78,7 @@ public class GenericArtifactsDeployer {
             String spec = SpecUtils.getSpecStringFromSpecConf(configurator.getUploadSpec(), env, workingDir, listener.getLogger());
             artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, spec, artifactoryServer,
                     credentialsConfig.provideCredentials(build.getParent()), propertiesToAdd,
-                    ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy), artifactoryServer.getDeploymentThreads()));
+                    createProxyConfiguration(), artifactoryServer.getDeploymentThreads()));
         } else {
             String deployPattern = Util.replaceMacro(configurator.getDeployPattern(), env);
             deployPattern = StringUtils.replace(deployPattern, "\r\n", "\n");
@@ -89,7 +90,7 @@ public class GenericArtifactsDeployer {
             String repositoryKey = Util.replaceMacro(configurator.getRepositoryKey(), env);
             artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, pairs, artifactoryServer,
                     credentialsConfig.provideCredentials(build.getParent()), repositoryKey, propertiesToAdd,
-                    ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy)));
+                    createProxyConfiguration()));
         }
     }
 

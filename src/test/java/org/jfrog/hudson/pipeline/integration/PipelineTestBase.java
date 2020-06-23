@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.integration;
 
-import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Label;
 import hudson.model.Slave;
@@ -21,6 +20,10 @@ import org.jfrog.artifactory.client.ArtifactoryRequest;
 import org.jfrog.artifactory.client.impl.ArtifactoryRequestImpl;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.hudson.ArtifactoryBuilder;
+import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
+import org.jfrog.hudson.jfpipelines.Utils;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 import org.junit.rules.TestName;
@@ -36,7 +39,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.*;
+import java.util.stream.Stream;
 
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.junit.Assert.fail;
@@ -49,7 +52,7 @@ public class PipelineTestBase {
     @ClassRule // The Jenkins instance
     public static JenkinsRule jenkins = new JenkinsRule();
     static Slave slave;
-    private static Logger log = LogManager.getRootLogger();
+    private static final Logger log = LogManager.getRootLogger();
     @Rule
     public TestName testName = new TestName();
     @ClassRule
@@ -68,7 +71,7 @@ public class PipelineTestBase {
     static ArtifactoryBuildInfoClient buildInfoClient;
     static Artifactory artifactoryClient;
 
-    private static ClassLoader classLoader = PipelineTestBase.class.getClassLoader();
+    private static final ClassLoader classLoader = PipelineTestBase.class.getClassLoader();
     PipelineType pipelineType;
 
     PipelineTestBase(PipelineType pipelineType) {
@@ -80,8 +83,9 @@ public class PipelineTestBase {
         currentTime = System.currentTimeMillis();
         verifyEnvironment();
         createSlave();
-        setJarsLibEnv();
+        setEnvVars();
         createClients();
+        createJFrogPipelinesServer();
         cleanUpArtifactory(artifactoryClient);
         createPipelineSubstitution();
         // Create repositories
@@ -170,6 +174,16 @@ public class PipelineTestBase {
     }
 
     /**
+     * Create JFrog Pipelines server in the Global configuration.
+     */
+    private static void createJFrogPipelinesServer() {
+        ArtifactoryBuilder.DescriptorImpl artifactoryBuilder = (ArtifactoryBuilder.DescriptorImpl) jenkins.getInstance().getDescriptor(ArtifactoryBuilder.class);
+        Assert.assertNotNull(artifactoryBuilder);
+        JFrogPipelinesServer server = new JFrogPipelinesServer("http://127.0.0.1:1080", CredentialsConfig.EMPTY_CREDENTIALS_CONFIG, 300, false, 3);
+        artifactoryBuilder.setJfrogPipelinesServer(server);
+    }
+
+    /**
      * Creates string substitution for the pipelines. The tests use it to replace strings in the pipelines after
      * loading them.
      */
@@ -214,6 +228,7 @@ public class PipelineTestBase {
      */
     WorkflowRun runPipeline(String name) throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
+        Utils.injectJfPipelinesInfoParameter(project, "{\"stepId\":\"5\"}"); // For JFrog Pipelines tests
         FilePath slaveWs = slave.getWorkspaceFor(project);
         if (slaveWs == null) {
             throw new Exception("Slave workspace not found");
@@ -255,13 +270,15 @@ public class PipelineTestBase {
     }
 
     /**
-     * Set ARTIFACTORY_JARS_LIB env to be used in Maven and Gradle tests.
-     * The Maven and Gradle steps will copy the jars from this directory to the local test cache.
+     * Set node environment variables.
      */
-    private static void setJarsLibEnv() {
-        EnvironmentVariablesNodeProperty prop = new EnvironmentVariablesNodeProperty();
-        EnvVars envVars = prop.getEnvVars();
-        envVars.put("ARTIFACTORY_JARS_LIB", Paths.get("target", "artifactory", "WEB-INF", "lib").toAbsolutePath().toString());
+    private static void setEnvVars() {
+        EnvironmentVariablesNodeProperty prop = new EnvironmentVariablesNodeProperty(
+                // Set ARTIFACTORY_JARS_LIB env to be used in Maven and Gradle tests.
+                // The Maven and Gradle steps will copy the jars from this directory to the local test cache.
+                new EnvironmentVariablesNodeProperty.Entry("ARTIFACTORY_JARS_LIB",
+                        Paths.get("target", "artifactory", "WEB-INF", "lib").toAbsolutePath().toString())
+        );
         jenkins.jenkins.getGlobalNodeProperties().add(prop);
     }
 

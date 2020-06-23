@@ -6,13 +6,14 @@ import hudson.model.*;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.NullLog;
-import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBaseClient;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.*;
 
 import java.io.IOException;
 import java.util.List;
+
+import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**
  * @author Shay Yaakov
@@ -76,8 +77,8 @@ public abstract class RepositoriesUtils {
             client.setConnectionTimeout(artifactoryServer.getTimeout());
             setRetryParams(artifactoryServer, client);
 
-            if (Jenkins.getInstance().proxy != null && !artifactoryServer.isBypassProxy()) {
-                client.setProxyConfiguration(createProxyConfiguration(Jenkins.getInstance().proxy));
+            if (Jenkins.get().proxy != null && !artifactoryServer.isBypassProxy()) {
+                client.setProxyConfiguration(createProxyConfiguration());
             }
 
             virtualRepositories = RepositoriesUtils.generateVirtualRepos(client);
@@ -103,28 +104,15 @@ public abstract class RepositoriesUtils {
         try {
             client.setConnectionTimeout(artifactoryServer.getTimeout());
             setRetryParams(artifactoryServer, client);
-            if (Jenkins.getInstance().proxy != null && !artifactoryServer.isBypassProxy()) {
-                client.setProxyConfiguration(createProxyConfiguration(Jenkins.getInstance().proxy));
+            if (Jenkins.get().proxy != null && !artifactoryServer.isBypassProxy()) {
+                client.setProxyConfiguration(createProxyConfiguration());
             }
 
             localRepository = client.getLocalRepositoriesKeys();
             return localRepository;
         } finally {
-          client.close();
+            client.close();
         }
-    }
-
-    public static ProxyConfiguration createProxyConfiguration(hudson.ProxyConfiguration proxy) {
-        ProxyConfiguration proxyConfiguration = null;
-        if (proxy != null) {
-            proxyConfiguration = new ProxyConfiguration();
-            proxyConfiguration.host = proxy.name;
-            proxyConfiguration.port = proxy.port;
-            proxyConfiguration.username = proxy.getUserName();
-            proxyConfiguration.password = proxy.getPassword();
-        }
-
-        return proxyConfiguration;
     }
 
     public static ArtifactoryServer getArtifactoryServer(String artifactoryIdentity, List<ArtifactoryServer> artifactoryServers) {

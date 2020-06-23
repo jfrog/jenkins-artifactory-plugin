@@ -18,7 +18,10 @@ package org.jfrog.hudson;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import hudson.Extension;
-import hudson.model.*;
+import hudson.model.BuildableItem;
+import hudson.model.BuildableItemWithBuildWrappers;
+import hudson.model.Descriptor;
+import hudson.model.Item;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
@@ -30,8 +33,12 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
+import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.client.Version;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesHttpClient;
+import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
@@ -40,11 +47,12 @@ import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
-import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**
  * @author Yossi Shaul
@@ -65,6 +73,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         private boolean useCredentialsPlugin;
         private List<ArtifactoryServer> artifactoryServers;
+        private JFrogPipelinesServer jfrogPipelinesServer = new JFrogPipelinesServer();
 
         public DescriptorImpl() {
             super(ArtifactoryBuilder.class);
@@ -74,7 +83,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         @SuppressWarnings("unused")
         @RequirePOST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
-            Jenkins jenkins = Jenkins.getInstance();
+            Jenkins jenkins = Jenkins.getInstanceOrNull();
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
                 return PluginsUtils.fillPluginCredentials(project, ACL.SYSTEM);
             }
@@ -82,29 +91,13 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         /**
-         * Performs on-the-fly validation of the form field 'name'.
+         * Performs on-the-fly validation of the form field 'ServerId'.
          *
          * @param value This parameter receives the value that the user has typed.
          * @return Indicates the outcome of the validation. This is sent to the browser.
          */
-        public FormValidation doCheckName(@QueryParameter String value) throws IOException, ServletException {
-            if (value.length() == 0) {
-                return FormValidation.error("Please set a name");
-            }
-            if (value.length() < 4) {
-                return FormValidation.warning("Isn't the name too short?");
-            }
-            return FormValidation.ok();
-        }
-
-        /**
-         * Performs on-the-fly validation of the form field 'ServerId'.
-         *
-         * @param value          This parameter receives the value that the user has typed.
-         * @param artifactoryUrl This parameter receives the value that the user has typed as artifactory Url.
-         * @return Indicates the outcome of the validation. This is sent to the browser.
-         */
-        public FormValidation doCheckServerId(@QueryParameter String value, @QueryParameter String artifactoryUrl, @QueryParameter String username, @QueryParameter String password, @QueryParameter String credentialsId) throws IOException, ServletException {
+        @SuppressWarnings("unused")
+        public FormValidation doCheckServerId(@QueryParameter String value) {
             if (value.length() == 0) {
                 return FormValidation.error("Please set server ID");
             }
@@ -124,6 +117,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return FormValidation.ok();
         }
 
+        @SuppressWarnings("unused")
         @RequirePOST
         public FormValidation doTestConnection(
                 @QueryParameter("artifactoryUrl") final String url,
@@ -133,10 +127,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 @QueryParameter("credentialsId") final String deployerCredentialsId,
                 @QueryParameter("username") final String deployerCredentialsUsername,
                 @QueryParameter("password") final String deployerCredentialsPassword,
-                @QueryParameter("connectionRetry") final int connectionRetry
-
-        ) throws ServletException {
-            if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+                @QueryParameter("connectionRetry") final int connectionRetry) {
+            if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                 return FormValidation.error("Testing the connection requires 'Administer' permission");
             }
             if (StringUtils.isBlank(url)) {
@@ -166,8 +158,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             }
 
             try {
-                if (!bypassProxy && Jenkins.getInstance().proxy != null) {
-                    client.setProxyConfiguration(RepositoriesUtils.createProxyConfiguration(Jenkins.getInstance().proxy));
+                if (!bypassProxy && Jenkins.get().proxy != null) {
+                    client.setProxyConfiguration(createProxyConfiguration());
                 }
 
                 if (StringUtils.isNotBlank(timeout)) {
@@ -189,6 +181,55 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             }
         }
 
+        @SuppressWarnings("unused")
+        @RequirePOST
+        public FormValidation doTestJFrogPipelinesConnection(
+                @QueryParameter("pipelinesIntegrationUrl") final String url,
+                @QueryParameter("pipelinesTimeout") final String timeout,
+                @QueryParameter("pipelinesBypassProxy") final boolean bypassProxy,
+                @QueryParameter("credentialsId") final String credentialsId,
+                @QueryParameter("pipelinesConnectionRetries") final int connectionRetry) {
+            if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+                return FormValidation.error("Testing the connection requires 'Administer' permission");
+            }
+            if (StringUtils.isBlank(url)) {
+                return FormValidation.error("Please set a valid JFrog Pipelines integration URL");
+            }
+            if (connectionRetry < 0) {
+                return FormValidation.error("Connection Retries can not be less then 0");
+            }
+
+            StringCredentialsImpl accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(credentialsId, null);
+            if (accessTokenCredentials == null) {
+                return FormValidation.error("Please set credentials with access token as 'Secret text'");
+            }
+            String accessToken = accessTokenCredentials.getSecret().getPlainText();
+
+            try (JFrogPipelinesHttpClient client = new JFrogPipelinesHttpClient(url, accessToken, new NullLog())) {
+                if (!bypassProxy) {
+                    ProxyConfiguration proxyConfiguration = createProxyConfiguration();
+                    if (proxyConfiguration != null) {
+                        client.setProxyConfiguration(proxyConfiguration);
+                    }
+                }
+
+                if (StringUtils.isNotBlank(timeout)) {
+                    client.setConnectionTimeout(Integer.parseInt(timeout));
+                }
+                client.setConnectionRetries(connectionRetry);
+
+                Version version;
+                try {
+                    version = client.verifyCompatibleVersion();
+                } catch (UnsupportedOperationException uoe) {
+                    return FormValidation.warning(uoe.getMessage());
+                } catch (Exception e) {
+                    return FormValidation.error(e.getMessage());
+                }
+                return FormValidation.ok("Found JFrog Pipelines " + version.toString());
+            }
+        }
+
         /**
          * This human readable name is used in the configuration screen.
          */
@@ -197,30 +238,13 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return "Artifactory Plugin";
         }
 
-        @SuppressWarnings({"unchecked"})
         @Override
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
-            Jenkins jenkins = Jenkins.getInstance();
+            Jenkins jenkins = Jenkins.getInstanceOrNull();
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
                 boolean useCredentialsPlugin = (Boolean) o.get("useCredentialsPlugin");
-                Object servers = o.get("artifactoryServer");    // an array or single object
-                List<ArtifactoryServer> artifactoryServers;
-                if (!JSONNull.getInstance().equals(servers)) {
-                    artifactoryServers = req.bindJSONToList(ArtifactoryServer.class, servers);
-                } else {
-                    artifactoryServers = null;
-                }
-
-                if (!isServerIDConfigured(artifactoryServers)) {
-                    throw new FormException("Please set the Artifactory server ID.", "ServerID");
-                }
-
-                if (isServerDuplicated(artifactoryServers)) {
-                    throw new FormException("The Artifactory server ID you have entered is already configured", "Server ID");
-                }
-
-                setArtifactoryServers(artifactoryServers);
-
+                configureArtifactoryServers(req, o);
+                configureJFrogPipelinesServer(o);
                 if (useCredentialsPlugin && !this.useCredentialsPlugin) {
                     resetJobsCredentials();
                     resetServersCredentials();
@@ -230,6 +254,33 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 return super.configure(req, o);
             }
             throw new FormException("User doesn't have permissions to save", "Server ID");
+        }
+
+        private void configureArtifactoryServers(StaplerRequest req, JSONObject o) throws FormException {
+            List<ArtifactoryServer> artifactoryServers = null;
+            Object artifactoryServerObj = o.get("artifactoryServer"); // an array or single object
+            if (!JSONNull.getInstance().equals(artifactoryServerObj)) {
+                artifactoryServers = req.bindJSONToList(ArtifactoryServer.class, artifactoryServerObj);
+            }
+
+            if (!isServerIDConfigured(artifactoryServers)) {
+                throw new FormException("Please set the Artifactory server ID.", "ServerID");
+            }
+
+            if (isServerDuplicated(artifactoryServers)) {
+                throw new FormException("The Artifactory server ID you have entered is already configured", "Server ID");
+            }
+            setArtifactoryServers(artifactoryServers);
+        }
+
+        private void configureJFrogPipelinesServer(JSONObject o) {
+            String credentialsId = ((JSONObject) o.get("credentialsConfig")).optString("credentialsId");
+            CredentialsConfig credentialsConfig = new CredentialsConfig("", "", credentialsId);
+            credentialsConfig.setIgnoreCredentialPluginDisabled(true);
+            JFrogPipelinesServer jfrogPipelinesServer = new JFrogPipelinesServer(o.getString("pipelinesIntegrationUrl"),
+                    credentialsConfig, o.optInt("pipelinesTimeout"), o.getBoolean("pipelinesBypassProxy"),
+                    o.optInt("pipelinesConnectionRetries"));
+            setJfrogPipelinesServer(jfrogPipelinesServer);
         }
 
         private void resetServersCredentials() {
@@ -244,11 +295,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         private void resetJobsCredentials() {
-            List<AbstractProject> jobs = Jenkins.getInstance().getAllItems(AbstractProject.class);
-            for (AbstractProject job : jobs) {
-                if (!(job instanceof BuildableItemWithBuildWrappers)) {
-                    continue;
-                }
+            List<BuildableItemWithBuildWrappers> jobs = Jenkins.get().getAllItems(BuildableItemWithBuildWrappers.class);
+            for (BuildableItem job : jobs) {
                 ResolverOverrider resolver = ActionableHelper.getResolverOverrider(job);
                 if (resolver != null) {
                     if (resolver.getResolverCredentialsConfig() != null) {
@@ -275,14 +323,21 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return artifactoryServers;
         }
 
+        public JFrogPipelinesServer getJfrogPipelinesServer() {
+            return jfrogPipelinesServer;
+        }
+
         public boolean getUseCredentialsPlugin() {
             return useCredentialsPlugin;
         }
 
         // Required by external plugins.
-        @SuppressWarnings({"UnusedDeclaration"})
         public void setArtifactoryServers(List<ArtifactoryServer> artifactoryServers) {
             this.artifactoryServers = artifactoryServers;
+        }
+
+        public void setJfrogPipelinesServer(JFrogPipelinesServer jfrogPipelinesServer) {
+            this.jfrogPipelinesServer = jfrogPipelinesServer;
         }
 
         @SuppressWarnings({"UnusedDeclaration"})
@@ -291,7 +346,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         private boolean isServerDuplicated(List<ArtifactoryServer> artifactoryServers) {
-            Set<String> serversNames = new HashSet<String>();
+            Set<String> serversNames = new HashSet<>();
             if (artifactoryServers == null) {
                 return false;
             }

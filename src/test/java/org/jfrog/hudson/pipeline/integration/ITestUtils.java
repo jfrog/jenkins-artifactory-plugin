@@ -1,10 +1,14 @@
 package org.jfrog.hudson.pipeline.integration;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import hudson.FilePath;
 import hudson.model.Slave;
+import jenkins.model.Jenkins;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
+import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.artifactory.client.Artifactory;
 import org.jfrog.artifactory.client.ArtifactoryRequest;
@@ -34,6 +38,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.jfrog.artifactory.client.model.impl.RepositoryTypeImpl.*;
+import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.junit.Assert.*;
 
 /**
@@ -41,8 +46,8 @@ import static org.junit.Assert.*;
  */
 class ITestUtils {
 
-    private static Pattern REPO_PATTERN = Pattern.compile("^jenkins-artifactory-tests(-\\w*)+-(\\d*)$");
-    private static long currentTime = System.currentTimeMillis();
+    private static final Pattern REPO_PATTERN = Pattern.compile("^jenkins-artifactory-tests(-\\w*)+-(\\d*)$");
+    private static final long currentTime = System.currentTimeMillis();
 
     /**
      * Get the integration tests dir.
@@ -286,6 +291,28 @@ class ITestUtils {
                 .apiUrl("api/build/" + encodeBuildName(buildName))
                 .addQueryParam("deleteAll", "1")
                 .addQueryParam("artifacts", "1"));
+    }
+
+    /**
+     * Check Jenkins job info node for JFrog Pipelines tests.
+     *
+     * @param node - The node that container the Jenkins job info node.
+     */
+    static void checkJenkinsJobInfo(JsonNode node, boolean completed) {
+        JsonNode jobInfo = getAndAssertChild(node, "jobInfo", null);
+        JsonNode jobName = getAndAssertChild(jobInfo, "job-name", null);
+        getAndAssertChild(jobInfo, "job-number", "1");
+        if (completed) {
+            JsonNode duration = getAndAssertChild(jobInfo, "duration", null);
+            assertTrue(NumberUtils.isDigits(duration.asText()));
+        }
+        JsonNode startTime = getAndAssertChild(jobInfo, "start-time", null);
+        assertTrue(NumberUtils.isDigits(startTime.asText()));
+        JsonNode buildUrl = getAndAssertChild(jobInfo, "build-url", null);
+        WorkflowJob job = (WorkflowJob) Jenkins.get().getItem(jobName.textValue());
+        assertNotNull(job);
+        WorkflowRun lastBuild = job.getLastBuild();
+        assertEquals(lastBuild.getParent().getAbsoluteUrl() + lastBuild.getNumber(), buildUrl.asText());
     }
 
     private static String encodeBuildName(String buildName) throws UnsupportedEncodingException {

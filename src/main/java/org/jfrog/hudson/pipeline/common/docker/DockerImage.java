@@ -4,7 +4,6 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Sets;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
@@ -30,6 +29,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import static org.jfrog.hudson.util.ExtractorUtils.entityToString;
+import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**
  * Created by romang on 8/9/16.
@@ -129,11 +129,11 @@ public class DockerImage implements Serializable {
 
         try {
             dependenciesClient = server.createArtifactoryDependenciesClient(preferredResolver.provideCredentials(build.getParent()),
-                    server.createProxyConfiguration(Jenkins.getInstance().proxy), listener);
+                    createProxyConfiguration(), listener);
 
             CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(config, server);
             propertyChangeClient = server.createArtifactoryClient(preferredDeployer.provideCredentials(build.getParent()),
-                    server.createProxyConfiguration(Jenkins.getInstance().proxy));
+                    createProxyConfiguration());
 
             Module buildInfoModule = new Module();
             buildInfoModule.setId(imageTag.substring(imageTag.indexOf("/") + 1));

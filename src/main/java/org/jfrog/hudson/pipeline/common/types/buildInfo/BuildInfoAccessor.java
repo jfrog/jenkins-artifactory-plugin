@@ -3,7 +3,6 @@ package org.jfrog.hudson.pipeline.common.types.buildInfo;
 import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Dependency;
@@ -17,6 +16,7 @@ import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.BuildInfoDeployer;
 import org.jfrog.hudson.util.CredentialManager;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
+import org.jfrog.hudson.util.ProxyUtils;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -110,7 +110,7 @@ public class BuildInfoAccessor {
     public ArtifactoryBuildInfoClient createArtifactoryClient(ArtifactoryServer server, Run build, TaskListener listener) {
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(new ArtifactoryConfigurator(server), server);
         return server.createArtifactoryClient(preferredDeployer.provideCredentials(build.getParent()),
-                server.createProxyConfiguration(Jenkins.getInstance().proxy), new JenkinsBuildInfoLog(listener));
+                ProxyUtils.createProxyConfiguration(), new JenkinsBuildInfoLog(listener));
     }
 
     public BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryServer server, ArtifactoryBuildInfoClient client)

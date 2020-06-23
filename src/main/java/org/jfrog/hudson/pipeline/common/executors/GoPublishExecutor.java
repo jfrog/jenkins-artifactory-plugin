@@ -3,7 +3,6 @@ package org.jfrog.hudson.pipeline.common.executors;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import jenkins.model.Jenkins;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.util.Log;
@@ -12,11 +11,12 @@ import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.go.GoPublishCallable;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
-import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
+import org.jfrog.hudson.util.ProxyUtils;
 
 public class GoPublishExecutor implements Executor {
 
@@ -68,7 +68,7 @@ public class GoPublishExecutor implements Executor {
                 .setUsername(deployerCredentials.getUsername())
                 .setPassword(deployerCredentials.getPassword())
                 .setAccessToken(deployerCredentials.getAccessToken())
-                .setProxyConfiguration(ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy))
+                .setProxyConfiguration(ProxyUtils.createProxyConfiguration())
                 .setLog(logger)
                 .setConnectionRetry(server.getConnectionRetry())
                 .setConnectionTimeout(server.getTimeout());

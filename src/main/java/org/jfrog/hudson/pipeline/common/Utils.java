@@ -1,7 +1,5 @@
 package org.jfrog.hudson.pipeline.common;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
@@ -87,13 +85,6 @@ public class Utils {
             return new BuildInfo(build);
         }
         return buildinfo;
-    }
-
-    public static ObjectMapper mapper() {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return mapper;
     }
 
     public static EnvVars extractBuildParameters(Run build, TaskListener listener) {
@@ -375,7 +366,7 @@ public class Utils {
         if (server.isBypassProxy()) {
             return null;
         }
-        return org.jfrog.hudson.ArtifactoryServer.createProxyConfiguration(Jenkins.getInstance().proxy);
+        return ProxyUtils.createProxyConfiguration();
     }
 
     public static ArrayListMultimap<String, String> getPropertiesMap(BuildInfo buildInfo, Run build, StepContext context) throws IOException, InterruptedException {

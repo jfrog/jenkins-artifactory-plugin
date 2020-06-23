@@ -8,7 +8,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.GetArtifactoryServerExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -19,10 +18,12 @@ import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.jfrog.hudson.util.ExtractorUtils.createAndGetTempDir;
+import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
 public class DeclarativePipelineUtils {
 
@@ -79,7 +80,7 @@ public class DeclarativePipelineUtils {
             return getArtifactoryServerExecutor.getArtifactoryServer();
         }
         JsonNode jsonNode = buildDataFile.get(CreateServerStep.STEP_NAME);
-        ArtifactoryServer server = Utils.mapper().treeToValue(jsonNode, ArtifactoryServer.class);
+        ArtifactoryServer server = createMapper().treeToValue(jsonNode, ArtifactoryServer.class);
         JsonNode credentialsId = jsonNode.get("credentialsId");
         if (credentialsId != null && !credentialsId.asText().isEmpty()) {
             server.setCredentialsId(credentialsId.asText());
@@ -134,7 +135,7 @@ public class DeclarativePipelineUtils {
             }
             return buildInfo;
         }
-        return Utils.mapper().treeToValue(buildDataFile.get(BuildInfoStep.STEP_NAME), BuildInfo.class);
+        return createMapper().treeToValue(buildDataFile.get(BuildInfoStep.STEP_NAME), BuildInfo.class);
     }
 
     /**
@@ -170,13 +171,37 @@ public class DeclarativePipelineUtils {
             return;
         }
 
-        for (File buildDataDir : buildDataDirs) {
-            try {
-                FileUtils.deleteDirectory(buildDataDir);
-                logger.debug(buildDataDir.getAbsolutePath() + " deleted");
-            } catch (IOException e) {
-                logger.error("Failed while attempting to delete old build data dir: " + buildDataDir.toString(), e);
-            }
+        Arrays.stream(buildDataDirs).forEach(buildDataDir -> deleteBuildDataDir(buildDataDir, logger));
+    }
+
+    /**
+     * Delete build data dir from input.
+     *
+     * @param buildDataDir - The directory to delete
+     * @param logger       - The logger
+     */
+    public static void deleteBuildDataDir(File buildDataDir, Log logger) {
+        try {
+            FileUtils.deleteDirectory(buildDataDir);
+            logger.debug(buildDataDir.getAbsolutePath() + " deleted");
+        } catch (IOException e) {
+            logger.error("Failed while attempting to delete old build data dir: " + buildDataDir.toString(), e);
+        }
+    }
+
+    /**
+     * Delete build data dir associated with the build number.
+     *
+     * @param ws     - The workspace
+     * @param logger - The logger
+     */
+    public static void deleteBuildDataDir(FilePath ws, String buildNumber, Log logger) {
+        try {
+            FilePath buildDataDir = createAndGetTempDir(ws).child(PIPELINE_CACHE_DIR_NAME).child(buildNumber);
+            buildDataDir.deleteRecursive();
+            logger.debug(buildDataDir.getRemote() + " deleted");
+        } catch (IOException | InterruptedException e) {
+            logger.error("Failed while attempting to delete build data dir for build number " + buildNumber, e);
         }
     }
 }

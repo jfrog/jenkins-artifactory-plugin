@@ -5,7 +5,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
-import jenkins.model.Jenkins;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.build.extractor.issuesCollection.IssuesCollector;
@@ -16,6 +15,7 @@ import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.Issues;
 import org.jfrog.hudson.util.CredentialManager;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
+import org.jfrog.hudson.util.ProxyUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class CollectIssuesExecutor implements Executor {
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(new ArtifactoryConfigurator(server), server);
         return server.createBuildInfoClientBuilder(preferredDeployer.provideCredentials(build.getParent()),
-                server.createProxyConfiguration(Jenkins.getInstance().proxy), new JenkinsBuildInfoLog(listener));
+                ProxyUtils.createProxyConfiguration(), new JenkinsBuildInfoLog(listener));
     }
 
     public static class CollectIssuesCallable extends MasterToSlaveFileCallable<org.jfrog.build.api.Issues> {

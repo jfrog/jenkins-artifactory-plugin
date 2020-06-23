@@ -13,12 +13,11 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
-import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.GradleExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer;
 import org.jfrog.hudson.pipeline.common.types.builds.GradleBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.GradleResolver;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -29,6 +28,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
+
+import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
 /**
  * Run Gradle-Artifactory task.
@@ -152,7 +153,7 @@ public class GradleStep extends AbstractStepImpl {
             if (buildDataFile == null) {
                 throw new IOException("Deployer " + step.deployerId + " doesn't exist!");
             }
-            GradleDeployer deployer = Utils.mapper().treeToValue(buildDataFile.get(GradleDeployerStep.STEP_NAME), GradleDeployer.class);
+            GradleDeployer deployer = createMapper().treeToValue(buildDataFile.get(GradleDeployerStep.STEP_NAME), GradleDeployer.class);
             deployer.setServer(getArtifactoryServer(buildNumber, buildDataFile));
             step.gradleBuild.setDeployer(deployer);
             addProperties(buildDataFile);
@@ -173,7 +174,7 @@ public class GradleStep extends AbstractStepImpl {
             if (buildDataFile == null) {
                 throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
             }
-            GradleResolver resolver = Utils.mapper().treeToValue(buildDataFile.get(GradleResolverStep.STEP_NAME), GradleResolver.class);
+            GradleResolver resolver = createMapper().treeToValue(buildDataFile.get(GradleResolverStep.STEP_NAME), GradleResolver.class);
             resolver.setServer(getArtifactoryServer(buildNumber, buildDataFile));
             step.gradleBuild.setResolver(resolver);
         }

@@ -126,4 +126,14 @@ public class DeclarativeITest extends CommonITestsPipeline {
     public void collectIssuesTest() throws Exception {
         super.collectIssuesTest("declarative:collectIssues test");
     }
+
+    @Test
+    public void jfPipelinesOutputResourcesTest() throws Exception {
+        super.jfPipelinesOutputResourcesTest();
+    }
+
+    @Test
+    public void jfPipelinesReportStatusTest() throws Exception {
+        super.jfPipelinesReportStatusTest();
+    }
 }

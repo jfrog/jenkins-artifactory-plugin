@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.build.client.artifactoryXrayResponse.ArtifactoryXrayResponse;
 import org.jfrog.build.client.artifactoryXrayResponse.Summary;
-import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.util.SerializationUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -26,7 +26,7 @@ public class XrayScanResult implements Serializable {
     @Whitelisted
     public String toString() {
         try {
-            return Utils.mapper().writerWithDefaultPrettyPrinter().writeValueAsString(scanResult);
+            return SerializationUtils.createMapper().writerWithDefaultPrettyPrinter().writeValueAsString(scanResult);
         } catch (JsonProcessingException e) {
             throw new RuntimeJsonMappingException("Failed while processing the JSON result: \n" + Arrays.toString(e.getStackTrace()));
         }
