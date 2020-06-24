@@ -38,7 +38,6 @@ public class ConanExecutor implements Executor {
     private EnvVars env;
     private Run build;
 
-
     public ConanExecutor(String conanHome, FilePath ws, Launcher launcher, TaskListener listener, EnvVars env, Run build) {
         this(null, conanHome, ws, launcher, listener, env, build);
     }
@@ -177,11 +176,7 @@ public class ConanExecutor implements Executor {
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
         FilePath outputFilePath = tempDir.createTextTempFile("conan", "build-info", "", true);
         // We will use this executor to run conan's collect build info command
-        conanCmdArgs = new ArgumentListBuilder();
-        conanCmdArgs.add(CONAN_BUILD_INFO_CMD);
-        conanCmdArgs.add(getLogFilePath());
-        conanCmdArgs.add("--output");
-        conanCmdArgs.add(outputFilePath.getRemote());
+        conanCmdArgs = new ArgumentListBuilder(CONAN_BUILD_INFO_CMD, getLogFilePath(), "--output", outputFilePath.getRemote());
         execute();
         return outputFilePath;
     }
