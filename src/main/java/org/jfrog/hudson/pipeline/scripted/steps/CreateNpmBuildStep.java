@@ -1,9 +1,8 @@
 package org.jfrog.hudson.pipeline.scripted.steps;
 
+import com.google.inject.Inject;
 import hudson.Extension;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -13,8 +12,13 @@ public class CreateNpmBuildStep extends AbstractStepImpl {
     public CreateNpmBuildStep() {
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<NpmBuild> {
+    public static class Execution extends SynchronousStepExecution<NpmBuild> {
         private static final long serialVersionUID = 1L;
+
+        @Inject
+        public Execution(StepContext context) {
+            super(context);
+        }
 
         @Override
         protected NpmBuild run() throws Exception {

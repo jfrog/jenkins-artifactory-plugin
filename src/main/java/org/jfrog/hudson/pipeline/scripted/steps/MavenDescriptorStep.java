@@ -3,18 +3,15 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.FilePath;
-import hudson.Launcher;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.StringUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.build.extractor.maven.reader.ModuleName;
 import org.jfrog.build.extractor.maven.transformer.PomTransformer;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.BufferedReader;
@@ -64,23 +61,20 @@ public class MavenDescriptorStep extends AbstractStepImpl {
         return versionPerModule;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<Boolean> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Boolean> {
 
-        @Inject(optional = true)
         private transient MavenDescriptorStep step;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient Launcher launcher;
-
         private String pomFile;
         private boolean failOnSnapshot;
         private boolean dryRun;
         private String version = "";
         private Map<String, String> versionPerModule = new HashedMap();
+
+        @Inject
+        public Execution(MavenDescriptorStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
 
         @Override

@@ -1,21 +1,16 @@
 package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
 import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.NpmInstallExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
 
 /**
  * Created by Yahav Itzhak on 25 Nov 2018.
@@ -40,26 +35,15 @@ public class NpmInstallStep extends AbstractStepImpl {
         this.module = module;
     }
 
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<BuildInfo> {
 
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @StepContextParameter
-        private transient Launcher launcher;
-
-        @StepContextParameter
-        private transient EnvVars env;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient Run build;
-
-        @Inject(optional = true)
         private transient NpmInstallStep step;
+
+        @Inject
+        public Execution(NpmInstallStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected BuildInfo run() throws Exception {

@@ -3,16 +3,16 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.model.Run;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
 
 /**
  * Created by yahavi on 13/03/2017.
@@ -42,14 +42,15 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
         return this.displayName;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<Boolean> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Boolean> {
 
-        @StepContextParameter
-        private transient Run build;
-
-        @Inject(optional = true)
         private transient AddInteractivePromotionStep step;
+
+        @Inject
+        public Execution(AddInteractivePromotionStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Boolean run() throws Exception {

@@ -5,16 +5,16 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.executors.PublishBuildInfoExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+
+import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class PublishBuildInfoStep extends AbstractStepImpl {
@@ -39,20 +39,15 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
         this.buildNumber = buildNumber;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<Void> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
 
-        @StepContextParameter
-        private transient Run build;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @Inject(optional = true)
         private transient PublishBuildInfoStep step;
+
+        @Inject
+        public Execution(PublishBuildInfoStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Void run() throws Exception {

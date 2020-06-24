@@ -1,13 +1,17 @@
 package org.jfrog.hudson.pipeline.declarative.steps.generic;
 
+import com.google.inject.Inject;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
 
 import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesActionType;
 
@@ -21,17 +25,10 @@ public class SetPropsStep extends EditPropsStep {
 
     public static class Execution extends EditPropsStep.Execution {
 
-        @StepContextParameter
-        private transient Run build;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient EnvVars env;
+        @Inject
+        public Execution(EditPropsStep step, StepContext context) throws IOException, InterruptedException {
+            super(step, context);
+        }
 
         @Override
         protected Void run() throws Exception {

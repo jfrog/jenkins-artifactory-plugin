@@ -2,14 +2,9 @@ package org.jfrog.hudson.pipeline.declarative.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.FilePath;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -17,6 +12,7 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -89,20 +85,15 @@ public class BuildInfoStep extends AbstractStepImpl {
         buildInfo.getRetention().setMaxDays(days);
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<Void> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
 
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient Run build;
-
-        @Inject(optional = true)
         private transient BuildInfoStep step;
+
+        @Inject
+        public Execution(BuildInfoStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Void run() throws Exception {

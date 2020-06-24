@@ -1,11 +1,13 @@
 package org.jfrog.hudson.pipeline.declarative.steps.generic;
 
+import com.google.inject.Inject;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -13,6 +15,8 @@ import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class DownloadStep extends GenericStep {
@@ -24,17 +28,10 @@ public class DownloadStep extends GenericStep {
 
     public static class Execution extends GenericStep.Execution {
 
-        @StepContextParameter
-        private transient Run build;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @StepContextParameter
-        private transient EnvVars env;
+        @Inject
+        public Execution(GenericStep step, StepContext context) throws IOException, InterruptedException {
+            super(step, context);
+        }
 
         @Override
         protected Void run() throws Exception {

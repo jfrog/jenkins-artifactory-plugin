@@ -2,17 +2,15 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.executors.XrayExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
 import org.jfrog.hudson.pipeline.common.types.XrayScanResult;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class XrayScanBuildStep extends AbstractStepImpl {
@@ -34,17 +32,15 @@ public class XrayScanBuildStep extends AbstractStepImpl {
         return xrayScanConfig;
     }
 
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<XrayScanResult> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<XrayScanResult> {
 
-        @StepContextParameter
-        private transient Run build;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @Inject(optional = true)
         private transient XrayScanBuildStep step;
+
+        @Inject
+        public Execution(XrayScanBuildStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected XrayScanResult run() throws Exception {

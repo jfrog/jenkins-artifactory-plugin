@@ -2,21 +2,17 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.inject.Inject;
-import hudson.EnvVars;
 import hudson.Extension;
-import hudson.Launcher;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import org.apache.commons.cli.MissingArgumentException;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.DockerExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
 
 /**
  * Created by romang on 5/2/16.
@@ -68,24 +64,16 @@ public class DockerPushStep extends AbstractStepImpl {
         return targetRepo;
     }
 
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<BuildInfo> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<BuildInfo> {
 
-        @Inject(optional = true)
         private transient DockerPushStep step;
 
-        @StepContextParameter
-        private transient TaskListener listener;
+        @Inject
+        public Execution(DockerPushStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
-        @StepContextParameter
-        private transient Run build;
-
-        @StepContextParameter
-        private transient Launcher launcher;
-
-        @StepContextParameter
-        private transient EnvVars envVars; 
-        
         @Override
         protected BuildInfo run() throws Exception {
             if (step.getImage() == null) {
@@ -100,7 +88,7 @@ public class DockerPushStep extends AbstractStepImpl {
             BuildInfo buildInfo = Utils.prepareBuildinfo(build, step.getBuildInfo());
 
             ArtifactoryServer server = step.getServer();
-            DockerExecutor dockerExecutor = new DockerExecutor(server, buildInfo, build, step.image, step.targetRepo, step.host, launcher, step.properties, listener, envVars);
+            DockerExecutor dockerExecutor = new DockerExecutor(server, buildInfo, build, step.image, step.targetRepo, step.host, launcher, step.properties, listener, env);
             dockerExecutor.execute();
             return dockerExecutor.getBuildInfo();
         }

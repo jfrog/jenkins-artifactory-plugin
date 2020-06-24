@@ -1,20 +1,16 @@
 package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
 import hudson.Extension;
-import hudson.FilePath;
 import hudson.Util;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousNonBlockingStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.EditPropsExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
 
 import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesActionType;
 
@@ -55,21 +51,15 @@ public class EditPropsStep extends AbstractStepImpl {
         return failNoOp;
     }
 
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Boolean> {
-        @StepContextParameter
-        private transient FilePath ws;
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Boolean> {
 
-        @StepContextParameter
-        private transient Run build;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @StepContextParameter
-        private transient EnvVars env;
-
-        @Inject(optional = true)
         private transient EditPropsStep step;
+
+        @Inject
+        public Execution(EditPropsStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Boolean run() throws Exception {

@@ -7,21 +7,20 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobInfo;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.jfpipelines.OutputResource;
 import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
 import org.jfrog.hudson.jfpipelines.payloads.JobStatusPayload;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -57,17 +56,15 @@ public class JfPipelinesStep extends AbstractStepImpl {
         this.reportStatus = reportStatus;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<Void> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
 
-        @StepContextParameter
-        private transient Run<?, ?> build;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @Inject(optional = true)
         private transient JfPipelinesStep step;
+
+        @Inject
+        public Execution(JfPipelinesStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Void run() throws Exception {

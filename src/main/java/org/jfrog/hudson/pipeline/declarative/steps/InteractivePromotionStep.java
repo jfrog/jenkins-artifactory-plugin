@@ -7,15 +7,19 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+
+import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class InteractivePromotionStep extends PromoteBuildStep {
@@ -38,20 +42,15 @@ public class InteractivePromotionStep extends PromoteBuildStep {
         this.displayName = displayName;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<Boolean> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousStepExecution<Boolean> {
 
-        @StepContextParameter
-        private transient Run build;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @Inject(optional = true)
         private transient InteractivePromotionStep step;
+
+        @Inject
+        public Execution(InteractivePromotionStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Boolean run() throws Exception {

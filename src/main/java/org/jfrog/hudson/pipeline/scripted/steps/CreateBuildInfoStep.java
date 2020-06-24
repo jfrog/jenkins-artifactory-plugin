@@ -2,13 +2,13 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.model.Run;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
 
 /**
  * Created by romang on 5/2/16.
@@ -19,14 +19,15 @@ public class CreateBuildInfoStep extends AbstractStepImpl {
     public CreateBuildInfoStep() {
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<BuildInfo> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousStepExecution<BuildInfo> {
 
-        @StepContextParameter
-        private transient Run build;
-
-        @Inject(optional = true)
         private transient CreateBuildInfoStep step;
+
+        @Inject
+        public Execution(CreateBuildInfoStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected BuildInfo run() throws Exception {

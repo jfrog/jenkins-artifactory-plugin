@@ -2,13 +2,13 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import hudson.model.Run;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.executors.GetArtifactoryServerExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
+
+import java.io.IOException;
 
 /**
  * Created by romang on 4/21/16.
@@ -25,15 +25,15 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
         return artifactoryServerID;
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<org.jfrog.hudson.pipeline.common.types.ArtifactoryServer> {
+    public static class Execution extends ArtifactorySynchronousStepExecution<ArtifactoryServer> {
 
-        private static final long serialVersionUID = 1L;
-
-        @StepContextParameter
-        private transient Run build;
-
-        @Inject(optional = true)
         private transient GetArtifactoryServerStep step;
+
+        @Inject
+        public Execution(GetArtifactoryServerStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected org.jfrog.hudson.pipeline.common.types.ArtifactoryServer run() throws Exception {

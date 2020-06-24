@@ -1,9 +1,8 @@
 package org.jfrog.hudson.pipeline.scripted.steps;
 
+import com.google.inject.Inject;
 import hudson.Extension;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractSynchronousStepExecution;
+import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -13,8 +12,13 @@ public class CreateGoBuildStep extends AbstractStepImpl {
     public CreateGoBuildStep() {
     }
 
-    public static class Execution extends AbstractSynchronousStepExecution<GoBuild> {
+    public static class Execution extends SynchronousStepExecution<GoBuild> {
         private static final long serialVersionUID = 1L;
+
+        @Inject
+        public Execution(StepContext context) {
+            super(context);
+        }
 
         @Override
         protected GoBuild run() throws Exception {
