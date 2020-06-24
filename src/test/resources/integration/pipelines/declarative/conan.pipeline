@@ -22,13 +22,24 @@ node("TestSlave") {
         id: "myConanClient"
     )
 
-    stage "Copy project example"
-    FileUtils.copyDirectory(Paths.get("${CONAN_PROJECT_PATH}").toFile(), Paths.get(pwd(), "declarative-conan-example").toFile())
+    rtConanRemote (
+        name: "conanTestRemote",
+        serverId: serverId,
+        repo: "${CONAN_LOCAL}",
+        clientId: "myConanClient"
+    )
 
     stage "Conan Install"
     rtConanRun(
         clientId: "myConanClient",
-        command: "install ./declarative-conan-example/ --build missing",
+        command: "install zlib/1.2.11@conan/stable --build missing",
+        buildName: buildName,
+        buildNumber: buildNumber
+    )
+
+    rtConanRun(
+        clientId: "myConanClient",
+        command: "upload zlib/1.2.11@conan/stable --all -r conanTestRemote --confirm",
         buildName: buildName,
         buildNumber: buildNumber
     )

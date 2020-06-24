@@ -193,6 +193,7 @@ public class PipelineTestBase {
             put("GO_LOCAL", getRepoKey(TestRepository.GO_LOCAL));
             put("GO_REMOTE", getRepoKey(TestRepository.GO_REMOTE));
             put("GO_VIRTUAL", getRepoKey(TestRepository.GO_VIRTUAL));
+            put("CONAN_LOCAL", getRepoKey(TestRepository.CONAN_LOCAL));
         }});
     }
 

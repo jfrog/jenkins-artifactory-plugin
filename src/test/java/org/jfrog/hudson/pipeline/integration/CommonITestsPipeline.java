@@ -331,7 +331,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
             runPipeline(pipelineName);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, "DownloadOnly");
-            assertEquals(module.getDependencies().size(), 12);
+            assertTrue(module.getDependencies().size() > 0);
+            module = getAndAssertModule(buildInfo, "zlib/1.2.11@conan/stable");
+            assertTrue(module.getArtifacts().size() > 0);
         } finally {
             deleteBuild(artifactoryClient, buildName);
         }
