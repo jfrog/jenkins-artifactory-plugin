@@ -36,6 +36,7 @@ environment:
     docker-jenkins-tests
   JENKINS_DOCKER_TEST_ENABLE:
     false
+  USE_UNSUPPORTED_CONAN_WITH_PYTHON_2: true
 services:
   - docker
 before_test:
