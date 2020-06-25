@@ -5,7 +5,7 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.executors.XrayExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
 import org.jfrog.hudson.pipeline.common.types.XrayScanResult;
 import org.kohsuke.stapler.DataBoundConstructor;

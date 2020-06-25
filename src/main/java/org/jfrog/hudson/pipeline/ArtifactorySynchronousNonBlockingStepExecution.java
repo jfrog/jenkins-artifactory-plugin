@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.common.types;
+package org.jfrog.hudson.pipeline;
 
 import com.google.inject.Inject;
 import hudson.EnvVars;
@@ -14,7 +14,7 @@ import java.io.IOException;
 public abstract class ArtifactorySynchronousNonBlockingStepExecution<T> extends SynchronousNonBlockingStepExecution<T> {
     protected static final long serialVersionUID = 1L;
 
-    protected transient Run build;
+    protected transient Run<?, ?> build;
 
     protected transient TaskListener listener;
 

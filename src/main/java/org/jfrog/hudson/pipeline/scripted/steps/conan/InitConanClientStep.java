@@ -6,7 +6,7 @@ import hudson.FilePath;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
-import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousStepExecution;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.ConanClient;
 import org.kohsuke.stapler.DataBoundConstructor;
 

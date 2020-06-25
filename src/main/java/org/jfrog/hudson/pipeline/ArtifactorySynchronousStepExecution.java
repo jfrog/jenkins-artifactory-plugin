@@ -1,4 +1,4 @@
-package org.jfrog.hudson.pipeline.common.types;
+package org.jfrog.hudson.pipeline;
 
 import hudson.EnvVars;
 import hudson.FilePath;
@@ -13,7 +13,7 @@ import java.io.IOException;
 public abstract class ArtifactorySynchronousStepExecution<T> extends SynchronousStepExecution<T> {
     protected static final long serialVersionUID = 1L;
 
-    protected transient Run build;
+    protected transient Run<?, ?> build;
 
     protected transient TaskListener listener;
 

@@ -1,14 +1,10 @@
 package org.jfrog.hudson.pipeline.declarative.steps.conan;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
 import hudson.Extension;
-import hudson.FilePath;
-import hudson.Launcher;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.ConanClient;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -16,6 +12,8 @@ import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
+
+import java.io.IOException;
 
 public class ConanRunStep extends AbstractStepImpl {
 
@@ -48,26 +46,15 @@ public class ConanRunStep extends AbstractStepImpl {
         return this.clientId;
     }
 
-    public static class Execution extends AbstractSynchronousNonBlockingStepExecution<Void> {
-        private static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        @StepContextParameter
-        private transient Launcher launcher;
-
-        @StepContextParameter
-        private transient TaskListener listener;
-
-        @StepContextParameter
-        private transient FilePath ws;
-
-        @StepContextParameter
-        private transient EnvVars env;
-
-        @StepContextParameter
-        private transient Run build;
-
-        @Inject(optional = true)
         private transient ConanRunStep step;
+
+        @Inject
+        public Execution(ConanRunStep step, StepContext context) throws IOException, InterruptedException {
+            super(context);
+            this.step = step;
+        }
 
         @Override
         protected Void run() throws Exception {

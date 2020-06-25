@@ -11,7 +11,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.build.extractor.maven.reader.ModuleName;
 import org.jfrog.build.extractor.maven.transformer.PomTransformer;
-import org.jfrog.hudson.pipeline.common.types.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.BufferedReader;

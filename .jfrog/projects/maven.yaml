@@ -1,0 +1,10 @@
+version: 1
+type: maven
+resolver:
+  serverId: rt-local
+  snapshotRepo: jcenter
+  releaseRepo: jcenter
+deployer:
+  serverId: rt-local
+  snapshotRepo: libs-snapshot
+  releaseRepo: libs-release

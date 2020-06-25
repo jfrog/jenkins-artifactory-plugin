@@ -1,0 +1,64 @@
+{
+  "version": 0,
+  "artifactsMap": {
+    "is-number:7.0.0": {
+      "artifact": {
+        "generalInfo": {
+          "componentId": "is-number:7.0.0",
+          "name": "is-number",
+          "path": null,
+          "pkgType": "npm",
+          "groupId": "is-number",
+          "artifactId": "is-number",
+          "version": "7.0.0"
+        },
+        "issues": [],
+        "licenses": [
+          {
+            "components": [
+              "npm://is-number:7.0.0"
+            ],
+            "fullName": "The MIT License",
+            "name": "MIT",
+            "moreInfoUrl": [
+              "https://spdx.org/licenses/MIT.html",
+              "https://spdx.org/licenses/MIT",
+              "http://www.opensource.org/licenses/mit-license.php",
+              "http://www.opensource.org/licenses/MIT"
+            ]
+          }
+        ]
+      },
+      "lastUpdated": 1581165569524
+    },
+    "big-integer:1.6.40": {
+      "artifact": {
+        "generalInfo": {
+          "componentId": "big-integer:1.6.40",
+          "name": "big-integer",
+          "path": null,
+          "pkgType": "npm",
+          "groupId": "big-integer",
+          "artifactId": "big-integer",
+          "version": "1.6.40"
+        },
+        "issues": [],
+        "licenses": [
+          {
+            "components": [
+              "npm://big-integer:1.6.40"
+            ],
+            "fullName": "Unlicense",
+            "name": "Unlicense",
+            "moreInfoUrl": [
+              "https://spdx.org/licenses/Unlicense.html",
+              "https://spdx.org/licenses/Unlicense",
+              "http://unlicense.org/"
+            ]
+          }
+        ]
+      },
+      "lastUpdated": 1581165569524
+    }
+  }
+}
