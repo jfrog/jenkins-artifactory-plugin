@@ -15,13 +15,13 @@ node("TestSlave") {
     def conanClient = Artifactory.newConanClient()
 
     stage "Add Conan Remote"
-    conanClient.remote.add server: rtServer, repo: "${CONAN_LOCAL}", remoteName: "conanTestRemote"
+    String serverName = conanClient.remote.add server: rtServer, repo: "${CONAN_LOCAL}"
 
     stage "Conan Install"
     conanClient.run(command: "install zlib/1.2.11@conan/stable --build missing", buildInfo: buildInfo)
 
     stage "Conan Upload"
-    conanClient.run(command: "upload zlib/1.2.11@conan/stable --all -r conanTestRemote --confirm", buildInfo: buildInfo)
+    conanClient.run(command: "upload zlib/1.2.11@conan/stable --all -r ${serverName} --confirm", buildInfo: buildInfo)
 
     stage "Publish build info"
     rtServer.publishBuildInfo buildInfo
