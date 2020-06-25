@@ -42,8 +42,8 @@ public class CreateArtifactoryServerStep extends AbstractStepImpl {
     }
 
     /**
-     * We doesn't use additional context fields in this step execution,
-     * so we extends SynchronousStepExecution directly and not ArtifactorySynchronousStepExecution
+     * We don't use additional context fields in this step execution,
+     * so we extend SynchronousStepExecution directly and not ArtifactorySynchronousStepExecution
      */
     public static class Execution extends SynchronousStepExecution<ArtifactoryServer> {
         private static final long serialVersionUID = 1L;
