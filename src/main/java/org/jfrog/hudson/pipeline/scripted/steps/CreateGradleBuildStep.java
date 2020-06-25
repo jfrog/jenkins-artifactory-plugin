@@ -12,6 +12,10 @@ public class CreateGradleBuildStep extends AbstractStepImpl {
     public CreateGradleBuildStep() {
     }
 
+    /**
+     * We doesn't use additional context fields in this step execution,
+     * so we extends SynchronousStepExecution directly and not ArtifactorySynchronousStepExecution
+     */
     public static class Execution extends SynchronousStepExecution<GradleBuild> {
         private static final long serialVersionUID = 1L;
 

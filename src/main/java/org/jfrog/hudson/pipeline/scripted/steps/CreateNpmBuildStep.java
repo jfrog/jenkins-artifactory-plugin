@@ -12,6 +12,10 @@ public class CreateNpmBuildStep extends AbstractStepImpl {
     public CreateNpmBuildStep() {
     }
 
+    /**
+     * We doesn't use additional context fields in this step execution,
+     * so we extends SynchronousStepExecution directly and not ArtifactorySynchronousStepExecution
+     */
     public static class Execution extends SynchronousStepExecution<NpmBuild> {
         private static final long serialVersionUID = 1L;
 
