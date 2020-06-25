@@ -1,9 +1,5 @@
 package integration.pipelines.scripted
 
-import org.apache.commons.io.FileUtils
-
-import java.nio.file.Paths
-
 node("TestSlave") {
     stage "Configure Artifactory"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
@@ -15,13 +11,13 @@ node("TestSlave") {
     def conanClient = Artifactory.newConanClient()
 
     stage "Add Conan Remote"
-    String serverName = conanClient.remote.add server: rtServer, repo: "${CONAN_LOCAL}"
+    String remoteName = conanClient.remote.add server: rtServer, repo: "${CONAN_LOCAL}"
 
     stage "Conan Install"
     conanClient.run(command: "install zlib/1.2.11@conan/stable --build missing", buildInfo: buildInfo)
 
     stage "Conan Upload"
-    conanClient.run(command: "upload zlib/1.2.11@conan/stable --all -r ${serverName} --confirm", buildInfo: buildInfo)
+    conanClient.run(command: "upload zlib/1.2.11@conan/stable --all -r " + remoteName + " --confirm", buildInfo: buildInfo)
 
     stage "Publish build info"
     rtServer.publishBuildInfo buildInfo

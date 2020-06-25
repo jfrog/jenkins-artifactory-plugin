@@ -2,13 +2,15 @@ package org.jfrog.hudson.pipeline.scripted.steps.conan;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.util.CredentialManager;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -38,7 +40,7 @@ public class AddUserStep extends AbstractStepImpl {
         return conanHome;
     }
 
-    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Boolean> {
+    public static class Execution extends ArtifactorySynchronousStepExecution<Boolean> {
 
         private transient AddUserStep step;
 
