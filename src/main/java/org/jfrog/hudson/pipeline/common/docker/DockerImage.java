@@ -277,7 +277,9 @@ public class DockerImage implements Serializable {
 
         List<Dependency> dependencies = new ArrayList<Dependency>();
         List<Artifact> artifacts = new ArrayList<Artifact>();
-        Iterator<String> it = DockerUtils.getLayersDigests(manifest).iterator();
+        // Filter out duplicate layers from manifest by using HashSet.
+        // Docker manifest may hold 'empty layers', as a result, docker promote will fail to promote the same layer more than once.
+        Iterator<String> it = new ArrayList<>(new HashSet<>(DockerUtils.getLayersDigests(manifest))).iterator();
         for (int i = 0; i < dependencyLayerNum; i++) {
             String digest = it.next();
             DockerLayer layer = layers.getByDigest(digest);
