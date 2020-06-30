@@ -178,7 +178,7 @@ public class DockerImage implements Serializable {
     private void findAndSetManifestFromArtifactory(ArtifactoryServer server, ArtifactoryDependenciesClient dependenciesClient, TaskListener listener) throws IOException {
         // Try to get manifest, assuming reverse proxy
         String proxyImagePath = DockerUtils.getImagePath(imageTag);
-        String proxyManifestPath = StringUtils.join(new String[]{server.getUrl(), targetRepo, proxyImagePath, "manifest.json"}, "/");
+        String proxyManifestPath = StringUtils.join(new String[]{server.getArtifactoryUrl(), targetRepo, proxyImagePath, "manifest.json"}, "/");
         try {
             listener.getLogger().println("Trying to fetch manifest from Artifactory, assuming reverse proxy configuration.");
             checkAndSetManifestAndImagePathCandidates(proxyManifestPath, proxyImagePath, dependenciesClient, listener);
@@ -190,7 +190,7 @@ public class DockerImage implements Serializable {
 
         // Try to get manifest, assuming proxy-less
         String proxyLessImagePath = proxyImagePath.substring(proxyImagePath.indexOf("/") + 1);
-        String proxyLessManifestPath = StringUtils.join(new String[]{server.getUrl(), targetRepo, proxyLessImagePath, "manifest.json"}, "/");
+        String proxyLessManifestPath = StringUtils.join(new String[]{server.getArtifactoryUrl(), targetRepo, proxyLessImagePath, "manifest.json"}, "/");
         listener.getLogger().println("Trying to fetch manifest from Artifactory, assuming proxy-less configuration.");
         checkAndSetManifestAndImagePathCandidates(proxyLessManifestPath, proxyLessImagePath, dependenciesClient, listener);
     }
@@ -272,7 +272,7 @@ public class DockerImage implements Serializable {
             throw new IllegalStateException("Could not find the history docker layer: " + imageId + " for image: " + imageTag + " in Artifactory.");
         }
 
-        HttpResponse res = dependenciesClient.downloadArtifact(server.getUrl() + "/" + historyLayer.getFullPath());
+        HttpResponse res = dependenciesClient.downloadArtifact(server.getArtifactoryUrl() + "/" + historyLayer.getFullPath());
         int dependencyLayerNum = DockerUtils.getNumberOfDependentLayers(ExtractorUtils.entityToString(res.getEntity()));
 
         List<Dependency> dependencies = new ArrayList<Dependency>();

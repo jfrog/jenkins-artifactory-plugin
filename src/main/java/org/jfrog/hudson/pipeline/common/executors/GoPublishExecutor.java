@@ -64,7 +64,7 @@ public class GoPublishExecutor implements Executor {
         ArtifactoryServer server = deployer.getArtifactoryServer();
         Credentials deployerCredentials = server.getDeployerCredentialsConfig().provideCredentials(build.getParent());
         return new ArtifactoryBuildInfoClientBuilder()
-                .setArtifactoryUrl(server.getUrl())
+                .setArtifactoryUrl(server.getArtifactoryUrl())
                 .setUsername(deployerCredentials.getUsername())
                 .setPassword(deployerCredentials.getPassword())
                 .setAccessToken(deployerCredentials.getAccessToken())

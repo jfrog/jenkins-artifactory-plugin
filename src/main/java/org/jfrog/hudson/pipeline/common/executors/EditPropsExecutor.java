@@ -39,7 +39,7 @@ public class EditPropsExecutor implements Executor {
         CredentialsConfig preferredDeployer = server.getDeployerCredentialsConfig();
         Boolean success = ws.act(new EditPropertiesCallable(new JenkinsBuildInfoLog(listener),
                 preferredDeployer.provideCredentials(build.getParent()),
-            server.getUrl(), spec, Utils.getProxyConfiguration(server), editType, props));
+            server.getArtifactoryUrl(), spec, Utils.getProxyConfiguration(server), editType, props));
 
         if (failNoOp && !success) {
             throw new RuntimeException("Fail-no-op: No files were affected while editing properties.");

@@ -216,7 +216,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
     public String getArtifactoryUrl() {
         ArtifactoryServer server = getArtifactoryServer();
-        return server != null ? server.getUrl() : null;
+        return server != null ? server.getArtifactoryUrl() : null;
     }
 
     /**
@@ -449,7 +449,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
         private List<Repository> refreshRepositories(ArtifactoryServer artifactoryServer, CredentialsConfig credentialsConfig)
                 throws IOException {
-            List<String> repositoriesKeys = RepositoriesUtils.getLocalRepositories(artifactoryServer.getUrl(),
+            List<String> repositoriesKeys = RepositoriesUtils.getLocalRepositories(artifactoryServer.getArtifactoryUrl(),
                     credentialsConfig, artifactoryServer, item);
             List<Repository> releaseRepositories = RepositoriesUtils.createRepositoriesList(repositoriesKeys);
             Collections.sort(releaseRepositories);

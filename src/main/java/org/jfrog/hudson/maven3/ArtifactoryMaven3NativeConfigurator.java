@@ -121,7 +121,7 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
     public ArtifactoryServer getArtifactoryServer() {
         List<ArtifactoryServer> servers = getDescriptor().getArtifactoryServers();
         for (ArtifactoryServer server : servers) {
-            if (server.getName().equals(getArtifactoryName())) {
+            if (server.getServerId().equals(getArtifactoryName())) {
                 return server;
             }
         }

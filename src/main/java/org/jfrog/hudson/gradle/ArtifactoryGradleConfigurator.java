@@ -268,7 +268,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
 
     public String getArtifactoryUrl() {
         ArtifactoryServer server = getArtifactoryServer();
-        return server != null ? server.getUrl() : null;
+        return server != null ? server.getArtifactoryUrl() : null;
     }
 
     public boolean isDeployArtifacts() {

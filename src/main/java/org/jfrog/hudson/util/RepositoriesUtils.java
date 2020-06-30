@@ -118,7 +118,7 @@ public abstract class RepositoriesUtils {
     public static ArtifactoryServer getArtifactoryServer(String artifactoryIdentity, List<ArtifactoryServer> artifactoryServers) {
         if (artifactoryServers != null) {
             for (ArtifactoryServer server : artifactoryServers) {
-                if (server.getUrl().equals(artifactoryIdentity) || server.getName().equals(artifactoryIdentity)) {
+                if (server.getArtifactoryUrl().equals(artifactoryIdentity) || server.getServerId().equals(artifactoryIdentity)) {
                     return server;
                 }
             }

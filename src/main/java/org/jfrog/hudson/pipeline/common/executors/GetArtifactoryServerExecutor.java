@@ -43,7 +43,7 @@ public class GetArtifactoryServerExecutor implements Executor {
             return;
         }
         for (ArtifactoryServer server : artifactoryConfiguredServers) {
-            if (server.getName().equals(artifactoryServerID)) {
+            if (server.getServerId().equals(artifactoryServerID)) {
                 artifactoryServers.add(server);
             }
         }
@@ -54,7 +54,7 @@ public class GetArtifactoryServerExecutor implements Executor {
             throw new RuntimeException("Duplicate configured Artifactory server ID: " + artifactoryServerID);
         }
         ArtifactoryServer server = artifactoryServers.get(0);
-        artifactoryServer = new org.jfrog.hudson.pipeline.common.types.ArtifactoryServer(artifactoryServerID, server.getUrl(),
+        artifactoryServer = new org.jfrog.hudson.pipeline.common.types.ArtifactoryServer(artifactoryServerID, server.getArtifactoryUrl(),
                 server.getDeploymentThreads());
         if (PluginsUtils.isCredentialsPluginEnabled()) {
             artifactoryServer.setCredentialsId(server.getResolvingCredentialsConfig().getCredentialsId());

@@ -24,11 +24,11 @@
 
                 <table width="100%">
                     <f:entry title="Server ID" help="/plugin/artifactory/help/ArtifactoryBuilder/help-serverId.html">
-                        <f:textbox field="serverId" value="${server.name}"/>
+                        <f:textbox field="serverId" value="${server.serverId}"/>
                     </f:entry>
 
                     <f:entry title="URL" help="/plugin/artifactory/help/ArtifactoryBuilder/help-url.html">
-                        <f:textbox field="artifactoryUrl" value="${server.url}" use="required"/>
+                        <f:textbox field="artifactoryUrl" value="${server.artifactoryUrl}" use="required"/>
                     </f:entry>
 
                     <f:advanced>

@@ -64,7 +64,7 @@ public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
     }
 
     public void deploy() throws IOException {
-        String url = configurator.getArtifactoryServer().getUrl() + "/api/build";
+        String url = configurator.getArtifactoryServer().getArtifactoryUrl() + "/api/build";
         listener.getLogger().println("Deploying build info to: " + url);
         client.sendBuildInfo(buildInfo);
     }

@@ -101,12 +101,12 @@ public class ArtifactoryServer implements Serializable {
         this.deploymentThreads = deploymentThreads != null && deploymentThreads > 0 ? deploymentThreads : DEFAULT_DEPLOYMENT_THREADS_NUMBER;
     }
 
-    public String getName() {
+    public String getServerId() {
         return id;
     }
 
-    public String getUrl() {
-        return url != null ? url : getName();
+    public String getArtifactoryUrl() {
+        return url != null ? url : getServerId();
     }
 
     public CredentialsConfig getDeployerCredentialsConfig() {

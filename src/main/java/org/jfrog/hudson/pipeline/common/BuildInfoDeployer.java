@@ -7,7 +7,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
-import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.AbstractBuildInfoDeployer;
 import org.jfrog.hudson.BuildInfoResultAction;
@@ -93,7 +92,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
     }
 
     public void deploy() throws IOException {
-        String artifactoryUrl = configurator.getArtifactoryServer().getUrl();
+        String artifactoryUrl = configurator.getArtifactoryServer().getArtifactoryUrl();
         listener.getLogger().println("Deploying build info to: " + artifactoryUrl + "/api/build");
         BuildRetention retention = buildInfo.getBuildRetention();
         buildInfo.setBuildRetention(null);

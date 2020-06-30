@@ -336,7 +336,7 @@ public class ExtractorUtils {
             configuration.setTimeout(artifactoryServer.getTimeout());
             setRetryParams(configuration, artifactoryServer);
 
-            configuration.publisher.setContextUrl(artifactoryServer.getUrl());
+            configuration.publisher.setContextUrl(artifactoryServer.getArtifactoryUrl());
         }
 
         ServerDetails serverDetails = context.getServerDetails();

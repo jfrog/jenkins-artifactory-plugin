@@ -50,7 +50,7 @@ public class GenericDownloadExecutor implements Executor {
         Credentials resolverCredentials = preferredResolver.provideCredentials(build.getParent());
         List<Dependency> resolvedDependencies =
                 ws.act(new FilesResolverCallable(new JenkinsBuildInfoLog(listener),
-                        resolverCredentials, server.getUrl(), spec, Utils.getProxyConfiguration(server)));
+                        resolverCredentials, server.getArtifactoryUrl(), spec, Utils.getProxyConfiguration(server)));
         if (failNoOp && resolvedDependencies.isEmpty()) {
             throw new RuntimeException("Fail-no-op: No files were affected in the download process.");
         }
