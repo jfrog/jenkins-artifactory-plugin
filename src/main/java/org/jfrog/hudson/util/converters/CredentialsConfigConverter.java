@@ -42,14 +42,12 @@ public class CredentialsConfigConverter extends XStream2.PassthruConverter<Crede
                 Credentials credentials = (Credentials) credentialsObj;
                 Field usernameField = credentialsConfigClass.getDeclaredField("username");
                 usernameField.setAccessible(true);
-                usernameField.set(credentialsConfig, credentials.getUsername());
+                usernameField.set(credentialsConfig, hudson.util.Secret.fromString(credentials.getUsername()));
                 Field passwordField = credentialsConfigClass.getDeclaredField("password");
                 passwordField.setAccessible(true);
-                passwordField.set(credentialsConfig, credentials.getPassword());
+                passwordField.set(credentialsConfig, hudson.util.Secret.fromString(hudson.util.Scrambler.descramble(credentials.getPassword())));
             }
-        } catch (NoSuchFieldException e) {
-            converterErrors.add(getConversionErrorMessage(credentialsConfig, e));
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             converterErrors.add(getConversionErrorMessage(credentialsConfig, e));
         }
     }
