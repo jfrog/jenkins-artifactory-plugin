@@ -46,7 +46,7 @@ public class CollectIssuesExecutor implements Executor {
         ArtifactoryBuildInfoClientBuilder clientBuilder = getBuildInfoClientBuilder(pipelineServer, build, listener);
 
         // Collect issues
-        org.jfrog.build.api.Issues newIssues = ws.act(new CollectIssuesCallable(new JenkinsBuildInfoLog(listener), config, clientBuilder, buildName));
+        org.jfrog.build.api.Issues newIssues = ws.act(new CollectIssuesCallable(new JenkinsBuildInfoLog(listener), config, clientBuilder, buildName,ws,listener));
 
         // Convert and append Issues
         this.issues.convertAndAppend(newIssues);
@@ -64,18 +64,22 @@ public class CollectIssuesExecutor implements Executor {
         private String config;
         private ArtifactoryBuildInfoClientBuilder clientBuilder;
         private String buildName;
+        private transient FilePath ws;
+        private transient TaskListener listener;
 
         CollectIssuesCallable(Log logger, String config, ArtifactoryBuildInfoClientBuilder clientBuilder,
-                              String buildName) {
+                              String buildName, FilePath ws, TaskListener listener) {
             this.logger = logger;
             this.config = config;
             this.clientBuilder = clientBuilder;
             this.buildName = buildName;
+            this.ws = ws;
+            this.listener = listener;
         }
 
         public org.jfrog.build.api.Issues invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
             IssuesCollector issuesCollector = new IssuesCollector();
-            return issuesCollector.collectIssues(file, logger, config, clientBuilder, buildName);
+            return issuesCollector.collectIssues(file, logger, config, clientBuilder, buildName,Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
         }
     }
 }

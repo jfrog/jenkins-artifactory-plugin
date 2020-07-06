@@ -123,7 +123,9 @@ public class BuildInfoAccessor {
     }
 
     public void appendVcs(Vcs vcs) {
-        this.buildInfo.appendVcs(vcs);
+        if (StringUtils.isNotEmpty(vcs.getRevision()) && StringUtils.isNotEmpty(vcs.getUrl())){
+            this.buildInfo.appendVcs(vcs);
+        }
     }
 
     public List<Vcs> getVcs() {
