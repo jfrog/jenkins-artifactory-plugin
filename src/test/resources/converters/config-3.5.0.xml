@@ -1,0 +1,35 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<org.jfrog.hudson.ArtifactoryBuilder_-DescriptorImpl plugin="artifactory@3.4.1">
+    <useCredentialsPlugin>false</useCredentialsPlugin>
+    <artifactoryServers>
+        <org.jfrog.hudson.ArtifactoryServer>
+            <url>http://artifactory.acme.org</url>
+            <id>test1</id>
+            <timeout>300</timeout>
+            <bypassProxy>false</bypassProxy>
+            <connectionRetry>3</connectionRetry>
+            <deploymentThreads>3</deploymentThreads>
+            <deployerCredentialsConfig>
+                <credentials>
+                    <username>deployer</username>
+                    <!--password is '$ecretDeployer' scrambled with hudson.util.Scrambler#scramble-->
+<!--                    <password>$ecretDeployer=</password>-->
+                    <password>JGVjcmV0RGVwbG95ZXI=</password>
+                </credentials>
+                <credentialsId></credentialsId>
+                <overridingCredentials>false</overridingCredentials>
+                <ignoreCredentialPluginDisabled>false</ignoreCredentialPluginDisabled>
+            </deployerCredentialsConfig>
+            <resolverCredentialsConfig>
+                <credentials>
+                    <username>resolver</username>
+                    <!--password is '$ecretResolver' scrambled with hudson.util.Scrambler#scramble-->
+                    <password>JGVjcmV0UmVzb2x2ZXI=</password>
+                </credentials>
+                <credentialsId></credentialsId>
+                <overridingCredentials>true</overridingCredentials>
+                <ignoreCredentialPluginDisabled>false</ignoreCredentialPluginDisabled>
+            </resolverCredentialsConfig>
+        </org.jfrog.hudson.ArtifactoryServer>
+    </artifactoryServers>
+</org.jfrog.hudson.ArtifactoryBuilder_-DescriptorImpl>
