@@ -275,11 +275,11 @@ public class DockerImage implements Serializable {
         HttpResponse res = dependenciesClient.downloadArtifact(server.getUrl() + "/" + historyLayer.getFullPath());
         int dependencyLayerNum = DockerUtils.getNumberOfDependentLayers(ExtractorUtils.entityToString(res.getEntity()));
 
-        List<Dependency> dependencies = new ArrayList<Dependency>();
-        List<Artifact> artifacts = new ArrayList<Artifact>();
+        LinkedHashSet<Dependency> dependencies = new LinkedHashSet<>();
+        LinkedHashSet<Artifact> artifacts = new LinkedHashSet<>();
         // Filter out duplicate layers from manifest by using HashSet.
         // Docker manifest may hold 'empty layers', as a result, docker promote will fail to promote the same layer more than once.
-        Iterator<String> it = new ArrayList<>(new HashSet<>(DockerUtils.getLayersDigests(manifest))).iterator();
+        Iterator<String> it = DockerUtils.getLayersDigests(manifest).iterator();
         for (int i = 0; i < dependencyLayerNum; i++) {
             String digest = it.next();
             DockerLayer layer = layers.getByDigest(digest);
@@ -291,7 +291,7 @@ public class DockerImage implements Serializable {
             Artifact artifact = new ArtifactBuilder(layer.getFileName()).sha1(layer.getSha1()).properties(buildInfoItemsProps).build();
             artifacts.add(artifact);
         }
-        buildInfoModule.setDependencies(dependencies);
+        buildInfoModule.setDependencies(new ArrayList<>(dependencies));
 
         while (it.hasNext()) {
             String digest = it.next();
@@ -304,7 +304,7 @@ public class DockerImage implements Serializable {
             Artifact artifact = new ArtifactBuilder(layer.getFileName()).sha1(layer.getSha1()).properties(buildInfoItemsProps).build();
             artifacts.add(artifact);
         }
-        buildInfoModule.setArtifacts(artifacts);
+        buildInfoModule.setArtifacts(new ArrayList<>(artifacts));
     }
 
     /**
