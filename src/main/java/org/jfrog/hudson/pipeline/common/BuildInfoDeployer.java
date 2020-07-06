@@ -83,12 +83,6 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
             return new ArrayList<>();
         }
         List<Vcs> vcsList = Utils.extractVcsBuildData(build);
-        // For backward compatibility:
-        if (!vcsList.isEmpty()) {
-            Vcs lastVcs = vcsList.get(vcsList.size() - 1);
-            buildInfo.setVcsUrl(lastVcs.getUrl());
-            buildInfo.setVcsRevision(lastVcs.getRevision());
-        }
         return vcsList;
     }
 
