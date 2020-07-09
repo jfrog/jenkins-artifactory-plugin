@@ -2,21 +2,21 @@ package org.jfrog.hudson.pipeline.declarative.steps.npm;
 
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
-import org.jfrog.hudson.pipeline.declarative.steps.common.NpmGoDeployerResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
+import org.jfrog.hudson.pipeline.declarative.steps.common.DeployerResolverBase;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
  * @author yahavi
  */
-public class NpmResolverStep extends NpmGoDeployerResolver {
+public class NpmResolverStep extends DeployerResolverBase {
 
     static final String STEP_NAME = "rtNpmResolver";
 
     @DataBoundConstructor
     public NpmResolverStep(String id, String serverId, String repo) {
         super(STEP_NAME, id, serverId);
-        NpmGoResolver npmResolver = new NpmGoResolver();
+        CommonResolver npmResolver = new CommonResolver();
         npmResolver.setRepo(repo);
         buildDataFile.putPOJO(npmResolver);
     }

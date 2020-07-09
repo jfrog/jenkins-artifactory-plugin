@@ -9,7 +9,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
-import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 
 /**
  * Created by Yahav Itzhak on 25 Nov 2018.
@@ -25,7 +25,7 @@ public class NpmInstallExecutor extends NpmExecutor {
 
     @Override
     public void execute() throws Exception {
-        NpmGoResolver resolver = (NpmGoResolver) npmBuild.getResolver();
+        CommonResolver resolver = (CommonResolver) npmBuild.getResolver();
         if (resolver.isEmpty()) {
             throw new IllegalStateException("Resolver must be configured with resolution repository and Artifactory server");
         }

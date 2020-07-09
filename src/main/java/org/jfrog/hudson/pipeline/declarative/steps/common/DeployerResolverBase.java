@@ -15,16 +15,16 @@ import java.io.IOException;
 import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils.writeBuildDataFile;
 
 /**
- * Base class for npm/Go deployer and resolver.
+ * Base class for build tools deployer and resolver.
  *
  * @author yahavi
  */
-public class NpmGoDeployerResolver extends AbstractStepImpl {
+public class DeployerResolverBase extends AbstractStepImpl {
 
     protected BuildDataFile buildDataFile;
 
     @DataBoundConstructor
-    public NpmGoDeployerResolver(String stepName, String stepId, String serverId) {
+    public DeployerResolverBase(String stepName, String stepId, String serverId) {
         buildDataFile = new BuildDataFile(stepName, stepId).put("serverId", serverId);
     }
 
@@ -35,10 +35,10 @@ public class NpmGoDeployerResolver extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient NpmGoDeployerResolver step;
+        private transient DeployerResolverBase step;
 
         @Inject
-        public Execution(NpmGoDeployerResolver step, StepContext context) throws IOException, InterruptedException {
+        public Execution(DeployerResolverBase step, StepContext context) throws IOException, InterruptedException {
             super(context);
             this.step = step;
         }
