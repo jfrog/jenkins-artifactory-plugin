@@ -66,13 +66,13 @@
                                name="deployerCredentialsConfig">
                         <f:block>
                             <input type="hidden" name="stapler-class" value="org.jfrog.hudson.CredentialsConfig"/>
-                            <r:blockWrapper id="deployerCredentialsId${server.url}">
+                            <r:blockWrapper id="deployerCredentialsId${server.artifactoryUrl}">
                                 <f:entry title="${%Credentials}" name="credentialsId" field="credentialsId">
                                     <c:select default="${server.deployerCredentialsConfig.credentialsId}"/>
                                 </f:entry>
                             </r:blockWrapper>
 
-                            <r:blockWrapper id="legacyDeployerCredentials${server.url}">
+                            <r:blockWrapper id="legacyDeployerCredentials${server.artifactoryUrl}">
                                 <f:entry title="Username"
                                          help="/plugin/artifactory/help/common/help-deployerUserName.html">
                                     <f:textbox name="username" field="username"
@@ -100,13 +100,13 @@
                                 <input type="hidden" name="overridingCredentials" value="true"/>
                                 <input type="hidden" name="stapler-class"
                                        value="org.jfrog.hudson.CredentialsConfig"/>
-                                <r:blockWrapper id="resolverCredentialsId${server.url}">
+                                <r:blockWrapper id="resolverCredentialsId${server.artifactoryUrl}">
                                     <f:entry title="${%Credentials}" field="credentialsId">
                                         <c:select default="${server.resolverCredentialsConfig.credentialsId}"/>
                                     </f:entry>
                                 </r:blockWrapper>
 
-                                <r:blockWrapper id="legacyResolverCredentials${server.url}">
+                                <r:blockWrapper id="legacyResolverCredentials${server.artifactoryUrl}">
                                     <f:entry title="Username"
                                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-resolverUserName.html">
                                         <f:textbox field="username"

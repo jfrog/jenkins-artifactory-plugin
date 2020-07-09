@@ -2,18 +2,18 @@
     <j:set var="uniqueId" value="${h.generateId()}"/>
     <f:dropdownList name="resolverDetails" title="${%Artifactory server}">
         <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
-            <f:dropdownListBlock value="${s.name}" title="${s.url}" selected="${s.name==instance.artifactoryName}">
+            <f:dropdownListBlock value="${s.serverId}" title="${s.artifactoryUrl}" selected="${s.serverId==instance.artifactoryName}">
                 <f:nested>
-                    <input type="hidden" name="artifactoryName" value="${s.name}"/>
-                    <input type="hidden" name="artifactoryUrl" id="artifactoryUrlResolver${s.url}" value="${s.url}"/>
+                    <input type="hidden" name="artifactoryName" value="${s.serverId}"/>
+                    <input type="hidden" name="artifactoryUrl" id="artifactoryUrlResolver${s.artifactoryUrl}" value="${s.artifactoryUrl}"/>
                     <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
-                    <r:dynamicRepos id="maven3NativeReleaseRepositoryKeys-${s.url}-${uniqueId}"
+                    <r:dynamicRepos id="maven3NativeReleaseRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                     title="Resolution releases repository"
                                     field="resolveReleaseRepository"
                                     repositories="${instance.virtualRepositoryList}"
                                     repositoryConf="${instance.resolverDetails.resolveReleaseRepository}"/>
 
-                    <r:dynamicRepos id="maven3NativeSnapshotRepositoryKeys-${s.url}-${uniqueId}"
+                    <r:dynamicRepos id="maven3NativeSnapshotRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                     title="Resolution snapshots repository"
                                     field="resolveSnapshotRepository"
                                     repositories="${instance.virtualRepositoryList}"
@@ -24,7 +24,7 @@
                     </script>
                     <r:repos bind="maven3NativeResolveBind"
                              jsFunction="artifactoryMaven3NativeConfigurator"
-                             repoUrl="artifactoryUrlResolver${s.url}"
+                             repoUrl="artifactoryUrlResolver${s.artifactoryUrl}"
                              credentialsDescriber="overridingResolverCredentials-${uniqueId}"/>
                 </f:nested>
             </f:dropdownListBlock>
