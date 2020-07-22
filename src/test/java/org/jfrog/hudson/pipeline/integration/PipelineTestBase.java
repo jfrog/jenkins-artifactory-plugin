@@ -225,12 +225,15 @@ public class PipelineTestBase {
     /**
      * Run pipeline script.
      *
-     * @param name - Pipeline name from 'jenkins-artifactory-plugin/src/test/resources/integration/pipelines'.
+     * @param name                     - Pipeline name from 'jenkins-artifactory-plugin/src/test/resources/integration/pipelines'
+     * @param injectPipelinesParameter - True if this is a JFrog pipelines test
      * @return the Jenkins job
      */
-    WorkflowRun runPipeline(String name) throws Exception {
+    WorkflowRun runPipeline(String name, boolean injectPipelinesParameter) throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
-        Utils.injectJfPipelinesInfoParameter(project, "{\"stepId\":\"5\"}"); // For JFrog Pipelines tests
+        if (injectPipelinesParameter) {
+            Utils.injectJfPipelinesInfoParameter(project, "{\"stepId\":\"5\"}"); // For JFrog Pipelines tests
+        }
         FilePath slaveWs = slave.getWorkspaceFor(project);
         if (slaveWs == null) {
             throw new Exception("Slave workspace not found");
