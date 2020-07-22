@@ -47,7 +47,7 @@ public class AbstractBuildInfoDeployer {
     }
 
     protected Build createBuildInfo(String buildAgentName, String buildAgentVersion, BuildType buildType) {
-        String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build);
+        String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build, env);
         BuildInfoBuilder builder = new BuildInfoBuilder(buildName)
                 .number(BuildUniqueIdentifierHelper.getBuildNumber(build)).type(buildType)
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())

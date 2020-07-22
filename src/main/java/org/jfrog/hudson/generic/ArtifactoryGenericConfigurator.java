@@ -6,6 +6,7 @@ import hudson.FilePath;
 import hudson.Launcher;
 import hudson.matrix.MatrixConfiguration;
 import hudson.model.*;
+import hudson.EnvVars;
 import hudson.tasks.BuildWrapper;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
@@ -354,7 +355,8 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                         if (deployBuildInfo) {
                             new GenericBuildInfoDeployer(ArtifactoryGenericConfigurator.this, client, build,
                                     listener, deployedArtifacts, buildDependencies, publishedDependencies).deploy();
-                            String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGenericConfigurator.this, build);
+                            EnvVars env = build.getEnvironment(listener);
+                            String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGenericConfigurator.this, build, env);
                             // add the result action (prefer always the same index)
                             build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                             build.getActions().add(new UnifiedPromoteBuildAction(build, ArtifactoryGenericConfigurator.this));

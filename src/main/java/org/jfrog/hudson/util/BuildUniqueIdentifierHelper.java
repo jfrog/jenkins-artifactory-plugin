@@ -3,6 +3,8 @@ package org.jfrog.hudson.util;
 import hudson.matrix.Combination;
 import hudson.matrix.MatrixRun;
 import hudson.model.*;
+import hudson.EnvVars;
+import hudson.Util;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;
 import org.jfrog.hudson.BuildInfoAwareConfigurator;
 import org.jfrog.hudson.action.ActionableHelper;
@@ -140,7 +142,15 @@ public class BuildUniqueIdentifierHelper {
         return buildNumber;
     }
 
-    public static String getBuildNameConsiderOverride(BuildInfoAwareConfigurator configurator, Run build) {
-        return configurator.isOverrideBuildName() ? configurator.getCustomBuildName() : BuildUniqueIdentifierHelper.getBuildName(build);
+    public static String getBuildNameOverrideResolved(BuildInfoAwareConfigurator configurator, EnvVars env) {
+        String buildName = configurator.getCustomBuildName();
+        if (buildName.matches(".*\\$\\{.+\\}.*") && env != null) {
+            buildName = Util.replaceMacro(buildName, env);
+        }
+        return buildName;
+    }
+
+    public static String getBuildNameConsiderOverride(BuildInfoAwareConfigurator configurator, Run build, EnvVars env) {
+        return configurator.isOverrideBuildName() ? getBuildNameOverrideResolved(configurator, env) : BuildUniqueIdentifierHelper.getBuildName(build);
     }
 }

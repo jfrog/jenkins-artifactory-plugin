@@ -76,7 +76,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         }
         // For backward compatibility if publishedBuildsDetails is empty calculate it from the old structs.
         if (publishedBuildsDetails.size() == 0 && artifactoryRedeployPublisher != null && build != null) {
-            String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(artifactoryRedeployPublisher, build);
+            String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(artifactoryRedeployPublisher, build, null);
             return generateUrl(artifactoryRedeployPublisher.getArtifactoryName(), build, buildName);
         } else if (publishedBuildsDetails.size() == 1) {
             return publishedBuildsDetails.get(0).getBuildInfoUrl();

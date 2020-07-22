@@ -68,7 +68,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
     public UnifiedPromoteBuildAction(Run build, BuildInfoAwareConfigurator configurator) {
         this(build);
         String buildName = BuildUniqueIdentifierHelper.
-                getBuildNameConsiderOverride(configurator, build);
+                getBuildNameConsiderOverride(configurator, build, null);
         String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         PromotionConfig promotionConfig = new PromotionConfig();
         promotionConfig.setBuildName(buildName);

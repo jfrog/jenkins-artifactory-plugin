@@ -304,8 +304,8 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
             listener.getLogger().append("M2 Release build, not uploading artifacts to Artifactory. ");
             return true;
         }
-
-        String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryRedeployPublisher.this, build);
+        EnvVars env = build.getEnvironment(listener);
+        String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryRedeployPublisher.this, build, env);
         // The following if statement Checks if the build job uses Maven 3:
         if (isExtractorUsed(build.getEnvironment(listener))) {
             if (deployBuildInfo) {

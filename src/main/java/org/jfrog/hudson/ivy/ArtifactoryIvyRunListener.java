@@ -56,12 +56,10 @@ public class ArtifactoryIvyRunListener extends RunListener<AbstractBuild> {
                 return;
             }
             if (artifactoryIvyConfigurator.isDeployBuildInfo()) {
-                String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(artifactoryIvyConfigurator, run);
+                String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(artifactoryIvyConfigurator, run, null);
                 run.getActions().add(new BuildInfoResultAction(artifactoryIvyConfigurator.getArtifactoryUrl(), run, buildName));
                 run.getActions().add(new UnifiedPromoteBuildAction(run, artifactoryIvyConfigurator));
             }
         }
     }
 }
-
-

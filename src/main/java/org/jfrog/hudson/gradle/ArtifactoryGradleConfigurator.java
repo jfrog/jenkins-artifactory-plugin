@@ -25,6 +25,7 @@ import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.MatrixProject;
 import hudson.model.*;
 import hudson.model.listeners.RunListener;
+import hudson.EnvVars;
 import hudson.plugins.gradle.Gradle;
 import hudson.tasks.BuildWrapper;
 import hudson.util.ListBoxModel;
@@ -520,7 +521,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 }
                 if (result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
                     if (isDeployBuildInfo()) {
-                        String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGradleConfigurator.this, build);
+                        EnvVars env = build.getEnvironment(listener);
+                        String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGradleConfigurator.this, build, env);
                         build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                         ArtifactoryGradleConfigurator configurator =
                                 ActionableHelper.getBuildWrapper(build.getProject(),
