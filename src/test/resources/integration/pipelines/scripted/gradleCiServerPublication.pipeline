@@ -1,0 +1,28 @@
+package integration.pipelines.scripted
+
+import org.apache.commons.io.FileUtils
+
+import java.nio.file.Paths
+
+node("TestSlave") {
+    stage "Configure Artifactory"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:gradle-ci-publication test"
+    buildInfo.number = "3"
+
+    stage "Configure Gradle build"
+    def rtGradle = Artifactory.newGradleBuild()
+    rtGradle.deployer releaseRepo: "${LOCAL_REPO1}", snapshotRepo: "{LOCAL_REPO1}", server: rtServer
+    rtGradle.deployer.publications.add("nonDefaultPublication")
+    rtGradle.resolver repo: "${JCENTER_REMOTE_REPO}", server: rtServer
+
+    stage "Copy project example"
+    FileUtils.copyDirectory(Paths.get("${GRADLE_CI_PUBLICATION_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-gradle-example-ci-server-publication").toFile())
+
+    stage "Run Gradle"
+    rtGradle.run rootDir: "scripted-gradle-example-ci-server-publication", buildFile: "build.gradle", tasks: "clean artifactoryPublish", buildInfo: buildInfo
+
+    stage "Publish build info"
+    rtServer.publishBuildInfo buildInfo
+}

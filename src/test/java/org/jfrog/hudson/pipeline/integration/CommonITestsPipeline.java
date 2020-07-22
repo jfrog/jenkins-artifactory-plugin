@@ -306,6 +306,27 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void gradleCiServerPublicationTest(String buildName) throws Exception {
+        Set<String> expectedArtifacts = Sets.newHashSet(pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.jar", pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.pom");
+        String buildNumber = "3";
+        try {
+            runPipeline("gradleCiServerPublication");
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            assertEquals(5, buildInfo.getModules().size());
+
+            Module module = getAndAssertModule(buildInfo, "org.jfrog.example.gradle:" + pipelineType.toString() + "-gradle-example-ci-server-publication:1.0");
+            assertModuleArtifacts(module, expectedArtifacts);
+            assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
+
+            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:services:1.0");
+            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:api:1.0");
+            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:shared:1.0");
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.example.gradle:webservice:1.0");
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
     void npmTest(String pipelineName, String buildName, String moduleName) throws Exception {
         Set<String> expectedArtifact = Sets.newHashSet("package-name1:0.0.1");
         Set<String> expectedDependencies = Sets.newHashSet("big-integer-1.6.40.tgz", "is-number-7.0.0.tgz");

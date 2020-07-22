@@ -20,6 +20,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.DeployerOverrider;
 import org.jfrog.hudson.ServerDetails;
+import org.jfrog.hudson.pipeline.common.types.GradlePublications;
 import org.jfrog.hudson.util.IncludesExcludes;
 
 /**
@@ -57,6 +58,7 @@ public class PublisherContext {
     private String customBuildName;
     private boolean overrideBuildName;
     private int connectionRetry;
+    private GradlePublications gradlePublications;
 
     private PublisherContext() {
     }
@@ -179,6 +181,10 @@ public class PublisherContext {
 
     public void setArtifactoryPluginVersion(String artifactoryPluginVersion) {
         this.artifactoryPluginVersion = artifactoryPluginVersion;
+    }
+
+    public GradlePublications getGradlePublications() {
+        return this.gradlePublications;
     }
 
     public static class Builder {
@@ -328,6 +334,11 @@ public class PublisherContext {
 
         public Builder connectionRetry(int connectionRetry){
             publisher.connectionRetry = connectionRetry;
+            return this;
+        }
+
+        public Builder publications(GradlePublications publications){
+            publisher.gradlePublications = publications;
             return this;
         }
     }

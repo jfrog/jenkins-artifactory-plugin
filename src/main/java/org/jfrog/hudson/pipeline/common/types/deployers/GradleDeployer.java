@@ -7,6 +7,7 @@ import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.types.GradlePublications;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
@@ -17,6 +18,7 @@ import java.io.IOException;
  */
 public class GradleDeployer extends Deployer {
     private static final String repoValidationMessage = "The Deployer should be set with either 'repo' or both 'releaseRepo' and 'snapshotRepo'";
+    private GradlePublications publications = new GradlePublications();
     private Boolean deployMavenDescriptors;
     private Boolean deployIvyDescriptors;
     private String ivyPattern = "[organisation]/[module]/ivy-[revision].xml";
@@ -141,6 +143,16 @@ public class GradleDeployer extends Deployer {
         this.releaseRepo = releaseRepo;
     }
 
+    @Whitelisted
+    public GradlePublications getPublications() {
+        return this.publications;
+    }
+
+    @Whitelisted
+    public void setPublications(GradlePublications publications) {
+        this.publications = publications;
+    }
+
     public boolean isEmpty() {
         return server == null || (StringUtils.isEmpty(repo) && StringUtils.isEmpty(snapshotRepo) &&
                 StringUtils.isEmpty(releaseRepo));
@@ -169,6 +181,7 @@ public class GradleDeployer extends Deployer {
                 .includeEnvVars(isIncludeEnvVars())
                 .maven2Compatible(getMavenCompatible())
                 .deploymentProperties(ExtractorUtils.buildPropertiesString(getProperties()))
-                .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
+                .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
+                .publications(getPublications());
     }
 }

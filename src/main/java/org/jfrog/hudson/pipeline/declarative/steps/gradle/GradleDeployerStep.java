@@ -91,6 +91,11 @@ public class GradleDeployerStep extends GradleDeployerResolver {
         gradleDeployer.setThreads(threads);
     }
 
+    @DataBoundSetter
+    public void setPublications(List<String> publications) {
+        gradleDeployer.getPublications().setPublications(publications);
+    }
+
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 

@@ -49,7 +49,7 @@ public class GradleBuild extends PackageManagerBuild {
 
     @Whitelisted
     public void deployer(Map<String, Object> deployerArguments) throws Exception {
-        setDeployer(deployerArguments, Arrays.asList("repo", "snapshotRepo", "releaseRepo", "server", "deployArtifacts", "includeEnvVars", "usesPlugin", "deployMaven", "deployIvy", "ivyPattern", "artifactPattern"));
+        setDeployer(deployerArguments, Arrays.asList("repo", "snapshotRepo", "releaseRepo", "server", "deployArtifacts", "includeEnvVars", "usesPlugin", "deployMaven", "deployIvy", "ivyPattern", "artifactPattern", "publications"));
     }
 
     @Whitelisted
