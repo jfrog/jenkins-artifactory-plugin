@@ -30,6 +30,7 @@ import hudson.tasks.Publisher;
 import hudson.util.DescribableList;
 import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.client.ArtifactoryHttpClient;
 import org.jfrog.hudson.DeployerOverrider;
@@ -305,8 +306,8 @@ public abstract class ActionableHelper implements Serializable {
      */
     public static void deleteFilePathOnExit(FilePath filePath) throws IOException, InterruptedException {
         filePath.act(new MasterToSlaveFileCallable<Void>() {
-            public Void invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
-                file.deleteOnExit();
+            public Void invoke(File file, VirtualChannel virtualChannel) throws IOException {
+                FileUtils.forceDeleteOnExit(file);
                 return null;
             }
         });
