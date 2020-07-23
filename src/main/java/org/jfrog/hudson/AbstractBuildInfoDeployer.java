@@ -46,10 +46,10 @@ public class AbstractBuildInfoDeployer {
         this.env = build.getEnvironment(listener);
     }
 
-    protected Build createBuildInfo(String buildAgentName, String buildAgentVersion, BuildType buildType) {
+    protected Build createBuildInfo(String buildAgentName, String buildAgentVersion) {
         String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build);
         BuildInfoBuilder builder = new BuildInfoBuilder(buildName)
-                .number(BuildUniqueIdentifierHelper.getBuildNumber(build)).type(buildType)
+                .number(BuildUniqueIdentifierHelper.getBuildNumber(build))
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .buildAgent(new BuildAgent(buildAgentName, buildAgentVersion))
                 .agent(new Agent("Jenkins", Jenkins.VERSION));

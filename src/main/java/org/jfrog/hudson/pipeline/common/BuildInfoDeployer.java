@@ -39,7 +39,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
         this.build = build;
         envVars = buildinfoAccessor.getEnvVars();
         sysVars = buildinfoAccessor.getSysVars();
-        buildInfo = createBuildInfo("Pipeline", "", BuildType.GENERIC);
+        buildInfo = createBuildInfo("Pipeline", "");
         buildInfo.setBuildRetention(buildinfoAccessor.getRetention().createBuildRetention());
         asyncBuildRetention = buildinfoAccessor.getRetention().isAsync();
 
