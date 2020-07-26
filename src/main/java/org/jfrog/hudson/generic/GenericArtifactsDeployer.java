@@ -241,7 +241,7 @@ public class GenericArtifactsDeployer {
                     .targetRepository(repositoryKey)
                     .md5(checksums.get(MD5)).sha1(checksums.get(SHA1))
                     .addProperties(buildProperties)
-                    .buildToolProduct(DeployDetails.BuildToolProduct.GENERIC);
+                    .packageType(DeployDetails.PackageType.GENERIC);
             result.add(builder.build());
 
             return result;

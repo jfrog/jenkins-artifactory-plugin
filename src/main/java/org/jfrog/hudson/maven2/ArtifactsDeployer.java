@@ -169,7 +169,7 @@ public class ArtifactsDeployer {
                 .addProperty(BuildInfoFields.BUILD_NAME, ExtractorUtils.sanitizeBuildName(mavenModuleSetBuild.getParent().getFullName()))
                 .addProperty(BuildInfoFields.BUILD_NUMBER, mavenModuleSetBuild.getNumber() + "")
                 .addProperty(BuildInfoFields.BUILD_TIMESTAMP, mavenBuild.getTimestamp().getTime().getTime() + "")
-                .buildToolProduct(DeployDetails.BuildToolProduct.MAVEN);
+                .packageType(DeployDetails.PackageType.MAVEN);
 
         String identifier = BuildUniqueIdentifierHelper.getUpstreamIdentifier(rootBuild);
         if (StringUtils.isNotBlank(identifier)) {

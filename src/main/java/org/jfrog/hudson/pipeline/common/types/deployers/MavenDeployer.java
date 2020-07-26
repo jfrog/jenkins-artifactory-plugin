@@ -128,7 +128,7 @@ public class MavenDeployer extends Deployer {
             boolean isMaven = true;
             List<Artifact> curArtifacts = Lists.newArrayList();
             for (DeployDetails curDetails : detailsSet) {
-                isMaven = (curDetails.getBuildToolProduct() == DeployDetails.BuildToolProduct.MAVEN) && isMaven;
+                isMaven = (curDetails.getPackageType() == DeployDetails.PackageType.MAVEN) && isMaven;
                 Artifact artifact = new ArtifactBuilder(FilenameUtils.getName(curDetails.getArtifactPath()))
                         .md5(curDetails.getMd5())
                         .sha1(curDetails.getSha1())

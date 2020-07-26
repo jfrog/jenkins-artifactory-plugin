@@ -198,9 +198,9 @@ public class BuildInfo implements Serializable {
                                                         String backwardCompatibleDeployableArtifactsPath,
                                                         FilePath ws,
                                                         TaskListener listener,
-                                                        DeployDetails.BuildToolProduct buildToolProduct) throws IOException, InterruptedException {
+                                                        DeployDetails.PackageType packageType) throws IOException, InterruptedException {
         Map<String, List<DeployDetails>> deployableArtifactsToAppend = ws.act(new DeployPathsAndPropsCallable(deployableArtifactsPath,
-                backwardCompatibleDeployableArtifactsPath, listener, this, buildToolProduct));
+                backwardCompatibleDeployableArtifactsPath, listener, this, packageType));
         // Preserve existing modules if there are duplicates
         appendDeployableArtifactsByModule(deployableArtifactsToAppend);
     }
@@ -301,14 +301,14 @@ public class BuildInfo implements Serializable {
         private String backwardCompatibleDeployableArtifactsPath;
         private TaskListener listener;
         private ArrayListMultimap<String, String> propertiesMap;
-        private final DeployDetails.BuildToolProduct buildToolProduct;
+        private final DeployDetails.PackageType packageType;
 
-        DeployPathsAndPropsCallable(String deployableArtifactsPath, String backwardCompatibleDeployableArtifactsPath, TaskListener listener, BuildInfo buildInfo, DeployDetails.BuildToolProduct buildToolProduct) {
+        DeployPathsAndPropsCallable(String deployableArtifactsPath, String backwardCompatibleDeployableArtifactsPath, TaskListener listener, BuildInfo buildInfo, DeployDetails.PackageType packageType) {
             this.deployableArtifactsPath = deployableArtifactsPath;
             this.backwardCompatibleDeployableArtifactsPath = backwardCompatibleDeployableArtifactsPath;
             this.listener = listener;
             this.propertiesMap = getBuildPropertiesMap(buildInfo);
-            this.buildToolProduct = buildToolProduct;
+            this.packageType = packageType;
         }
 
         public Map<String, List<DeployDetails>> invoke(File file, VirtualChannel virtualChannel) throws IOException {
@@ -327,7 +327,7 @@ public class BuildInfo implements Serializable {
                             .addProperties(propertiesMap)
                             .targetRepository("empty_repo")
                             .sha1(artifact.getSha1())
-                            .buildToolProduct(buildToolProduct);
+                            .packageType(packageType);
                     moduleDeployDetails.add(builder.build());
                 }
                 results.put(module, moduleDeployDetails);

@@ -257,7 +257,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
                                     .targetRepository(deployer.getTargetRepository(artifactPath))
                                     .md5(checksums.get(MD5)).sha1(artifact.getSha1())
                                     .addProperties(artifact.getProperties()).addProperties(deployer.getProperties())
-                                    .buildToolProduct(artifact.getBuildToolProduct());
+                                    .packageType(artifact.getPackageType());
                             deployDetails.add(builder.build());
                         }
                     }
