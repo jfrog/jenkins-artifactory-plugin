@@ -101,6 +101,10 @@ public class DeclarativeITest extends CommonITestsPipeline {
         super.conanTest("conan", "declarative:conan test");
     }
 
+    @Test
+    public void pipTest() throws Exception {
+        super.pipTest("pip", "declarative:pip test", "my-pip-module");
+    }
 
     @Test
     public void setPropsTest() throws Exception {

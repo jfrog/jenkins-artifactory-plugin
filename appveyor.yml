@@ -44,11 +44,13 @@ before_test:
   - cmd: "choco install gradle -i -s %JENKINS_ARTIFACTORY_URL%/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
   - cmd: refreshenv
   - cmd: pip install conan -q
+  - ps: setx JENKINS_PIP_ENV_INIT "C:\\Python37-x64\\python -m venv pip-venv && pip-venv\Scripts\activate.ps1"
   - sh: sudo pip install conan -q
   - sh: curl -s "https://get.sdkman.io" | bash
   - sh: source "/home/appveyor/.sdkman/bin/sdkman-init.sh"
   - sh: export MAVEN_HOME=/home/appveyor/.sdkman/candidates/maven/current && sdk use maven 3.3.9 || sdk install maven 3.3.9
   - sh: export GRADLE_HOME=/home/appveyor/.sdkman/candidates/gradle/current && sdk default gradle || sdk install gradle
+  - sh: export JENKINS_PIP_ENV_INIT="python -m venv pip-venv && source pip-venv/bin/activate"
   - sh: touch tests.log
   - sh: tail -f tests.log &
 

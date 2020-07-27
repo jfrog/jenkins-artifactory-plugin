@@ -12,7 +12,9 @@ enum TestRepository {
     GO_LOCAL("jenkins-artifactory-tests-go-local", RepoType.LOCAL),
     GO_REMOTE("jenkins-artifactory-tests-go-remote", RepoType.REMOTE),
     GO_VIRTUAL("jenkins-artifactory-tests-go-virtual", RepoType.VIRTUAL),
-    CONAN_LOCAL("jenkins-artifactory-tests-conan-local", RepoType.LOCAL);
+    CONAN_LOCAL("jenkins-artifactory-tests-conan-local", RepoType.LOCAL),
+    PIP_REMOTE("jenkins-artifactory-tests-pip-remote", RepoType.REMOTE),
+    PIP_VIRTUAL("jenkins-artifactory-tests-pip-virtual", RepoType.VIRTUAL);
 
     enum RepoType {
         LOCAL,

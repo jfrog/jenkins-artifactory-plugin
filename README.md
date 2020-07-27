@@ -33,14 +33,15 @@ To run unit tests execute the following command:
 #### Running integration tests
 Before running the integration tests, set the following environment variables.
 
-*JENKINS_ARTIFACTORY_URL*
-*JENKINS_ARTIFACTORY_USERNAME*
-*JENKINS_ARTIFACTORY_PASSWORD*
-*JENKINS_ARTIFACTORY_DOCKER_DOMAIN* (For example, server-docker-local.jfrog.io)
-*JENKINS_ARTIFACTORY_DOCKER_REPO* (For example, docker-local)
-*JENKINS_ARTIFACTORY_DOCKER_HOST* - Optional address of the docker daemon (For example, tcp://127.0.0.1:1234)
-*MAVEN_HOME* - The local maven installation path.
-*GRADLE_HOME* - The local gradle installation path).
+*JENKINS_ARTIFACTORY_URL*<br>
+*JENKINS_ARTIFACTORY_USERNAME*<br>
+*JENKINS_ARTIFACTORY_PASSWORD*<br>
+*JENKINS_ARTIFACTORY_DOCKER_DOMAIN* (For example, server-docker-local.jfrog.io)<br>
+*JENKINS_ARTIFACTORY_DOCKER_REPO* (For example, docker-local)<br>
+*JENKINS_ARTIFACTORY_DOCKER_HOST* - Optional address of the docker daemon (For example, tcp://127.0.0.1:1234)<br>
+*JENKINS_PIP_ENV_INIT* - Optional command to activate pip virtual-environment for tests execution (For example, source /Users/user/jenkins-venv/bin/activate)<br>
+*MAVEN_HOME* - The local maven installation path.<br>
+*GRADLE_HOME* - The local gradle installation path).<br>
 
 To disable build scan with Xray integration tests, set *JENKINS_XRAY_TEST_ENABLE* to *false*.
 

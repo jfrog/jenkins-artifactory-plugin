@@ -350,6 +350,19 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void pipTest(String pipelineName, String buildName, String moduleName) throws Exception {
+        int expectedDependencies = 5;
+        String buildNumber = "4";
+        try {
+            runPipeline(pipelineName);
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, moduleName);
+            assertEquals(expectedDependencies, module.getDependencies().size());
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
     @Test
     public void uploadFailNoOpTest() throws Exception {
         try {
