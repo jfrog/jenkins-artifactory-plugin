@@ -139,6 +139,13 @@ public class ArtifactoryPipelineGlobal implements Serializable {
     }
 
     @Whitelisted
+    public NugetBuild newNugetBuild() {
+        NugetBuild nugetBuild = (NugetBuild) cpsScript.invokeMethod("newNugetBuild", Maps.newLinkedHashMap());
+        nugetBuild.setCpsScript(cpsScript);
+        return nugetBuild;
+    }
+
+    @Whitelisted
     public ConanClient newConanClient(Map<String, Object> clientArgs) {
         ConanClient client = new ConanClient();
         String userPath = (String) clientArgs.get("userHome");
