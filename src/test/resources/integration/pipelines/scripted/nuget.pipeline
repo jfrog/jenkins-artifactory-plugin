@@ -1,0 +1,27 @@
+package integration.pipelines.scripted
+
+import org.apache.commons.io.FileUtils
+
+import java.nio.file.Paths
+
+node("TestSlave") {
+    stage "Configure Artifactory"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:nuget test"
+    buildInfo.number = "12"
+
+    stage "Configure NuGet build"
+    def rtNuget = Artifactory.newNugetBuild()
+    rtNuget.resolver repo: "${NUGET_REMOTE}", server: rtServer
+
+    stage "Copy project example"
+    FileUtils.copyDirectory(Paths.get("${NUGET_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-nuget-example").toFile())
+
+    stage "NuGet restore"
+    rtNuget.run args: "restore scripted-nuget-example/", buildInfo: buildInfo
+
+    stage "Publish build info"
+    rtServer.publishBuildInfo buildInfo
+
+}

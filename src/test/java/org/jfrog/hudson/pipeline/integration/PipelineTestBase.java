@@ -199,6 +199,7 @@ public class PipelineTestBase {
             put("PIP_PROJECT_PATH", getProjectPath("pip-example"));
             put("CONAN_PROJECT_PATH", getProjectPath("conan-example"));
             put("DOCKER_PROJECT_PATH", getProjectPath("docker-example"));
+            put("NUGET_PROJECT_PATH", getProjectPath("nuget-example"));
             put("TEST_TEMP_FOLDER", fixWindowsPath(testTemporaryFolder.getRoot().getAbsolutePath()));
             put("LOCAL_REPO1", getRepoKey(TestRepository.LOCAL_REPO1));
             put("LOCAL_REPO2", getRepoKey(TestRepository.LOCAL_REPO2));
@@ -211,6 +212,7 @@ public class PipelineTestBase {
             put("PIP_REMOTE", getRepoKey(TestRepository.PIP_REMOTE));
             put("PIP_VIRTUAL", getRepoKey(TestRepository.PIP_VIRTUAL));
             put("CONAN_LOCAL", getRepoKey(TestRepository.CONAN_LOCAL));
+            put("NUGET_REMOTE", getRepoKey(TestRepository.NUGET_REMOTE));
         }});
     }
 

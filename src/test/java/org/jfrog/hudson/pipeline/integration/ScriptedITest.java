@@ -107,6 +107,11 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void nugetTest() throws Exception {
+        super.nugetTest("nuget", "scripted:nuget test", "packagesconfig");
+    }
+
+    @Test
     public void setPropsTest() throws Exception {
         super.setPropsTest("scripted:setProps test");
     }

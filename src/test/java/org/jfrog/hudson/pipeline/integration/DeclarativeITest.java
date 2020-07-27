@@ -107,6 +107,11 @@ public class DeclarativeITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void nugetTest() throws Exception {
+        super.nugetTest("nuget", "declarative:nuget test", "packagesconfig");
+    }
+
+    @Test
     public void setPropsTest() throws Exception {
         super.setPropsTest("declarative:setProps test");
     }
