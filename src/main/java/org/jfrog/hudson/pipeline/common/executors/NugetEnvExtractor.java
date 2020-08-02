@@ -23,7 +23,7 @@ public class NugetEnvExtractor extends EnvExtractor {
 
     @Override
     protected void addExtraConfiguration(ArtifactoryClientConfiguration configuration) {
-        configuration.buildToolHandler.setBuildToolArgs(args);
-        configuration.buildToolHandler.setBuildToolModule(module);
+        configuration.packageManagerHandler.setPackageManagerArgs(args);
+        configuration.packageManagerHandler.setPackageManagerModule(module);
     }
 }

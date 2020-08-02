@@ -368,7 +368,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> expectedDependencies = Sets.newHashSet("bootstrap:4.0.0", "jQuery:3.0.0", "Microsoft.Web.Xdt:2.1.1", "Newtonsoft.Json:11.0.2", "NuGet.Core:2.14.0", "popper.js:1.12.9");
         String buildNumber = "12";
         try {
-            runPipeline(pipelineName);
+            runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, moduleName);
             assertModuleDependencies(module, expectedDependencies);
