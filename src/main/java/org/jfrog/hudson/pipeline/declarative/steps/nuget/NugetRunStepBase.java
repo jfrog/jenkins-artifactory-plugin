@@ -66,7 +66,6 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
         this.args = args;
     }
 
-
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
         private transient NugetRunStepBase step;
@@ -81,7 +80,6 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
         protected Void run() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            // We set useDotnetCli param to false, to use the nuget client.
             NugetRunExecutor nugetRunExecutor = new NugetRunExecutor(buildInfo, launcher, step.nugetBuild, step.javaArgs, step.args, ws, step.module, env, listener, build);
             nugetRunExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(nugetRunExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));

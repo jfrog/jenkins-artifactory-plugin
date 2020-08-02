@@ -29,8 +29,8 @@ public class NpmEnvExtractor extends EnvExtractor {
 
     @Override
     protected void addExtraConfiguration(ArtifactoryClientConfiguration configuration) {
-        configuration.packageManagerHandler.setPackageManagerArgs(args);
-        configuration.packageManagerHandler.setPackageManagerPath(path);
-        configuration.packageManagerHandler.setPackageManagerModule(module);
+        configuration.packageManagerHandler.setArgs(args);
+        configuration.packageManagerHandler.setPath(path);
+        configuration.packageManagerHandler.setModule(module);
     }
 }

@@ -25,9 +25,8 @@ public class NugetEnvExtractor extends EnvExtractor {
 
     @Override
     protected void addExtraConfiguration(ArtifactoryClientConfiguration configuration) {
-        configuration.packageManagerHandler.setPackageManagerArgs(args);
-        configuration.packageManagerHandler.setPackageManagerModule(module);
+        configuration.packageManagerHandler.setArgs(args);
+        configuration.packageManagerHandler.setModule(module);
         configuration.dotnetHandler.setUseDotnetCli(useDotnetCli);
-
     }
 }

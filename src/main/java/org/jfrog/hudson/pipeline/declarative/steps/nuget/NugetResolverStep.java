@@ -40,6 +40,4 @@ public class NugetResolverStep extends DeployerResolverBase {
             return true;
         }
     }
-
-
 }

@@ -40,6 +40,4 @@ public class DotnetResolverStep extends DeployerResolverBase {
             return true;
         }
     }
-
-
 }
