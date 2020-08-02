@@ -17,8 +17,11 @@ import java.util.Objects;
 
 /**
  * Created by Bar Belity on 08/07/2020.
+ *
+ * Base class for build-info external processes.
+ * Used for running build-tools extractors in a new java process.
  */
-public abstract class ExtractorJarExecutor implements Executor {
+public abstract class BuildInfoProcessRunner implements Executor {
 
     TaskListener listener;
     BuildInfo buildInfo;
@@ -30,7 +33,7 @@ public abstract class ExtractorJarExecutor implements Executor {
     EnvVars env;
     Run build;
 
-    public ExtractorJarExecutor(BuildInfo buildInfo, Launcher launcher, String javaArgs, FilePath ws, String path, String module, EnvVars env, TaskListener listener, Run build) {
+    public BuildInfoProcessRunner(BuildInfo buildInfo, Launcher launcher, String javaArgs, FilePath ws, String path, String module, EnvVars env, TaskListener listener, Run build) {
         this.listener = listener;
         this.buildInfo = Utils.prepareBuildinfo(build, buildInfo);
         this.launcher = launcher;

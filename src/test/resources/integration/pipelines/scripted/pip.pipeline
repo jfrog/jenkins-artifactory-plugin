@@ -11,7 +11,7 @@ node("TestSlave") {
     buildInfo.name = "scripted:pip test"
     buildInfo.number = "4"
 
-    stage "Configure npm build"
+    stage "Configure pip build"
     def rtPip = Artifactory.newPipBuild()
     rtPip.resolver repo: "${PIP_VIRTUAL}", server: rtServer
 

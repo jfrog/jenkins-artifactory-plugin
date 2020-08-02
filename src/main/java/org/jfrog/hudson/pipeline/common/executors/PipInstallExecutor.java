@@ -16,7 +16,7 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 /**
  * Created by Bar Belity on 07/07/2020.
  */
-public class PipInstallExecutor extends ExtractorJarExecutor {
+public class PipInstallExecutor extends BuildInfoProcessRunner {
 
     PipBuild pipBuild;
     String pipArgs;

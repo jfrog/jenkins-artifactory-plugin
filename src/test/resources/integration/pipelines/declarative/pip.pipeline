@@ -17,7 +17,7 @@ node("TestSlave") {
             password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     )
 
-    stage "Configure npm build"
+    stage "Configure pip build"
 
     rtPipResolver(
             id: "PIP_RESOLVER",

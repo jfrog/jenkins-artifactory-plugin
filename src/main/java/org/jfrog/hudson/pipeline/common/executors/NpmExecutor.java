@@ -14,7 +14,7 @@ import org.jfrog.hudson.util.ExtractorUtils;
 /**
  * @author yahavi
  */
-public abstract class NpmExecutor extends ExtractorJarExecutor {
+public abstract class NpmExecutor extends BuildInfoProcessRunner {
 
     NpmBuild npmBuild;
 
