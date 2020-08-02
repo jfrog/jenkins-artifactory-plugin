@@ -354,7 +354,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         int expectedDependencies = 5;
         String buildNumber = "4";
         try {
-            runPipeline(pipelineName);
+            runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, moduleName);
             assertEquals(expectedDependencies, module.getDependencies().size());

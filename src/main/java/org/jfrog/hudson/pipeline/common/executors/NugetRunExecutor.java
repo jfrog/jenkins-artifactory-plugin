@@ -13,7 +13,7 @@ import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
-public class NugetRunExecutor extends ExtractorJarExecutor {
+public class NugetRunExecutor extends BuildInfoProcessRunner {
 
     private NugetBuild nugetBuild;
     private String nugetArgs;
