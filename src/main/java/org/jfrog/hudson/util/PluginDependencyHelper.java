@@ -8,6 +8,7 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.extractor.BuildInfoExtractor;
+import org.jfrog.hudson.action.ActionableHelper;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -20,16 +21,19 @@ public class PluginDependencyHelper {
 
     public static FilePath getActualDependencyDirectory(File localDependencyFile, FilePath rootPath)
             throws IOException, InterruptedException {
-
+        long currentTime = System.currentTimeMillis();
         File localDependencyDir = localDependencyFile.getParentFile();
         String pluginVersion = Jenkins.get().getPluginManager().getPlugin("artifactory").getVersion();
-        if (pluginVersion.contains(" ")) {
-            //Trim the plugin version in case we're working on a snapshot version (contains illegal chars)
+        boolean isSnapshot = pluginVersion.contains(" ");
+        if (isSnapshot) {
+            // Trim the plugin version in case we're working on a snapshot version (contains illegal chars)
             pluginVersion = StringUtils.split(pluginVersion, " ")[0];
+            // Add timestamp suffix to ensure using the latest build-info jars during development.
+            // This suffix practically disables the cache in snapshots.
+            pluginVersion += "-" + currentTime;
         }
 
         FilePath remoteDependencyDir = new FilePath(rootPath, "cache/artifactory-plugin/" + pluginVersion);
-
         if (!remoteDependencyDir.exists()) {
             remoteDependencyDir.mkdirs();
         }
@@ -52,9 +56,11 @@ public class PluginDependencyHelper {
             }
 
             //Mark that all the dependencies have been transferred successfully for future references
-            remoteDependencyMark.touch(System.currentTimeMillis());
+            remoteDependencyMark.touch(currentTime);
         }
-
+        if (isSnapshot) {
+            ActionableHelper.deleteFilePathOnExit(remoteDependencyDir);
+        }
         return remoteDependencyDir;
     }
 

@@ -22,19 +22,19 @@
         <j:set var="uniqueId" value="${h.generateId()}"/>
         <f:dropdownList name="deployerDetails" title="${%Artifactory server}">
             <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
-                <f:dropdownListBlock value="${s.name}" title="${s.url}" selected="${s.name==instance.artifactoryName}">
+                <f:dropdownListBlock value="${s.serverId}" title="${s.artifactoryUrl}" selected="${s.serverId==instance.artifactoryName}">
                     <f:nested>
-                        <input type="hidden" name="artifactoryName" value="${s.name}"/>
-                        <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.url}" value="${s.url}"/>
+                        <input type="hidden" name="artifactoryName" value="${s.serverId}"/>
+                        <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.artifactoryUrl}" value="${s.artifactoryUrl}"/>
                         <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
-                        <r:dynamicRepos id="maven3RepositoryKeys-${s.url}-${uniqueId}"
+                        <r:dynamicRepos id="maven3RepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                         title="Target releases repository"
                                         field="deployReleaseRepository"
                                         repositoryConf="${instance.deployerDetails.deployReleaseRepository}"
                                         repositories="${instance.releaseRepositoryList}"
                                         helpUrl="/plugin/artifactory/help/common/help-deployReleases.html"/>
 
-                        <r:dynamicRepos id="maven3SnapshotsRepositoryKeys-${s.url}-${uniqueId}"
+                        <r:dynamicRepos id="maven3SnapshotsRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                         title="Target snapshots repository"
                                         field="deploySnapshotRepository"
                                         repositoryConf="${instance.deployerDetails.deploySnapshotRepository}"
@@ -47,7 +47,7 @@
                         </script>
                         <r:repos bind="maven3DeployBind"
                                  jsFunction="artifactoryMaven3Configurator"
-                                 repoUrl="artifactoryUrlDeploy${s.url}"
+                                 repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"
                                  credentialsDescriber="overridingDeployerCredentials-maven3-${uniqueId}"/>
                     </f:nested>
                 </f:dropdownListBlock>
@@ -69,28 +69,28 @@
 
                     <f:dropdownList name="resolverDetails" title="${%Artifactory server}">
                         <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
-                            <f:dropdownListBlock value="${s.name}" title="${s.url}"
-                                                 selected="${s.name==instance.resolverDetails.artifactoryName}">
+                            <f:dropdownListBlock value="${s.serverId}" title="${s.artifactoryUrl}"
+                                                 selected="${s.serverId==instance.resolverDetails.artifactoryName}">
 
                                 <f:nested>
-                                    <input type="hidden" name="artifactoryName" value="${s.name}"/>
-                                    <input type="hidden" name="artifactoryUrl" id="artifactoryUrlResolve${s.url}"
-                                           value="${s.url}"/>
+                                    <input type="hidden" name="artifactoryName" value="${s.serverId}"/>
+                                    <input type="hidden" name="artifactoryUrl" id="artifactoryUrlResolve${s.artifactoryUrl}"
+                                           value="${s.artifactoryUrl}"/>
                                     <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
                                     <input type="hidden" name="downloadReleaseRepositoryDisplayName"
-                                           id="downloadReleaseRepositoryDisplayName-maven3-${s.url}"
+                                           id="downloadReleaseRepositoryDisplayName-maven3-${s.artifactoryUrl}"
                                            value="${instance.resolverDetails.downloadReleaseRepositoryDisplayName}"/>
                                     <input type="hidden" name="downloadSnapshotRepositoryDisplayName"
-                                           id="downloadSnapshotRepositoryDisplayName-maven3-${s.url}"
+                                           id="downloadSnapshotRepositoryDisplayName-maven3-${s.artifactoryUrl}"
                                            value="${instance.resolverDetails.downloadSnapshotRepositoryDisplayName}"/>
 
-                                    <r:dynamicRepos id="maven3NativeReleaseRepositoryKeys-${s.url}-${uniqueId}"
+                                    <r:dynamicRepos id="maven3NativeReleaseRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                                     title="Resolution releases repository"
                                                     field="resolveReleaseRepository"
                                                     repositoryConf="${instance.resolverDetails.resolveReleaseRepository}"
                                                     repositories="${instance.resolveReleaseRepositoryList}"/>
 
-                                    <r:dynamicRepos id="maven3NativeSnapshotRepositoryKeys-${s.url}-${uniqueId}"
+                                    <r:dynamicRepos id="maven3NativeSnapshotRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                                     title="Resolution snapshots repository"
                                                     field="resolveSnapshotRepository"
                                                     repositoryConf="${instance.resolverDetails.resolveSnapshotRepository}"
@@ -101,7 +101,7 @@
                                     </script>
                                     <r:repos bind="maven3ResolveBind"
                                              jsFunction="artifactoryMaven3NativeConfigurator"
-                                             repoUrl="artifactoryUrlResolve${s.url}"
+                                             repoUrl="artifactoryUrlResolve${s.artifactoryUrl}"
                                              credentialsDescriber="overridingResolverCredentials-maven3-${uniqueId}"/>
                                 </f:nested>
                             </f:dropdownListBlock>

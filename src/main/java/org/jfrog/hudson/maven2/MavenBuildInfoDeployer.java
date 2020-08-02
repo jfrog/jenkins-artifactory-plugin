@@ -28,7 +28,6 @@ import hudson.model.TaskListener;
 import hudson.tasks.Fingerprinter;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Build;
-import org.jfrog.build.api.BuildType;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.builder.DependencyBuilder;
@@ -59,7 +58,7 @@ public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
             MavenModuleSetBuild build, TaskListener listener) throws IOException, InterruptedException {
         super(configurator, build, listener, client);
         this.configurator = configurator;
-        buildInfo = createBuildInfo("Maven", build.getParent().getMaven().getName(), BuildType.MAVEN);
+        buildInfo = createBuildInfo("Maven", build.getParent().getMaven().getName());
         gatherModuleAndDependencyInfo(build);
     }
 
