@@ -46,6 +46,7 @@
         <buildinfo.npm.version>2.18.x-SNAPSHOT</buildinfo.npm.version>
         <buildinfo.go.version>2.18.x-SNAPSHOT</buildinfo.go.version>
         <buildinfo.pip.version>2.18.x-SNAPSHOT</buildinfo.pip.version>
+        <buildinfo.nuget.version>2.18.x-SNAPSHOT</buildinfo.nuget.version>
 
     </properties>
 

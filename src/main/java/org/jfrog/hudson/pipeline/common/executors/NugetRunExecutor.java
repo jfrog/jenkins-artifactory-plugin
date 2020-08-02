@@ -15,9 +15,9 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 public class NugetRunExecutor extends ExtractorJarExecutor {
 
-    NugetBuild nugetBuild;
-    String nugetArgs;
-    Log logger;
+    private NugetBuild nugetBuild;
+    private String nugetArgs;
+    private Log logger;
 
     public NugetRunExecutor(BuildInfo buildInfo, Launcher launcher, NugetBuild nugetBuild, String javaArgs, String nugetArgs, FilePath ws, String module, EnvVars env, TaskListener listener, Run build) {
         // We send an empty string as path since we run a native command.
@@ -34,7 +34,7 @@ public class NugetRunExecutor extends ExtractorJarExecutor {
             throw new IllegalStateException("Resolver must be configured with resolution repository and Artifactory server");
         }
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
-        EnvExtractor envExtractor = new NugetEnvExtractor(build, buildInfo, resolver, listener, launcher, tempDir, env, nugetArgs, module);
+        EnvExtractor envExtractor = new NugetEnvExtractor(build, buildInfo, resolver, listener, launcher, tempDir, env, nugetArgs, module, nugetBuild.useDotnetCli());
         super.execute("nuget", "org.jfrog.build.extractor.nuget.extractor.NugetRun", envExtractor, tempDir);
     }
 }

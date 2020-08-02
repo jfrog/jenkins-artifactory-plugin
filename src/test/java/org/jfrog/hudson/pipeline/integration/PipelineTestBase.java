@@ -200,6 +200,7 @@ public class PipelineTestBase {
             put("CONAN_PROJECT_PATH", getProjectPath("conan-example"));
             put("DOCKER_PROJECT_PATH", getProjectPath("docker-example"));
             put("NUGET_PROJECT_PATH", getProjectPath("nuget-example"));
+            put("DOTNET_PROJECT_PATH", getProjectPath("dotnet-example"));
             put("TEST_TEMP_FOLDER", fixWindowsPath(testTemporaryFolder.getRoot().getAbsolutePath()));
             put("LOCAL_REPO1", getRepoKey(TestRepository.LOCAL_REPO1));
             put("LOCAL_REPO2", getRepoKey(TestRepository.LOCAL_REPO2));

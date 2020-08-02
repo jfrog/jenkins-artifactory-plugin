@@ -112,6 +112,11 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void dotnetTest() throws Exception {
+        super.dotnetTest("dotnet", "scripted:dotnet test", "reference");
+    }
+
+    @Test
     public void setPropsTest() throws Exception {
         super.setPropsTest("scripted:setProps test");
     }

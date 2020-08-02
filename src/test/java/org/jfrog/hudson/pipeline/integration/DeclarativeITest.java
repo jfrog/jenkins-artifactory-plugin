@@ -112,6 +112,11 @@ public class DeclarativeITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void dotnetTest() throws Exception {
+        super.dotnetTest("dotnet", "declarative:dotnet test", "reference");
+    }
+
+    @Test
     public void setPropsTest() throws Exception {
         super.setPropsTest("declarative:setProps test");
     }

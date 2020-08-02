@@ -22,7 +22,7 @@ public class NugetRunStep extends AbstractStepImpl {
     private String module;
 
     @DataBoundConstructor
-    public NugetRunStep(BuildInfo buildInfo, NugetBuild nugetBuild, String javaArgs, String path, String args, String module) {
+    public NugetRunStep(BuildInfo buildInfo, NugetBuild nugetBuild, String javaArgs, String args, String module) {
         this.buildInfo = buildInfo;
         this.nugetBuild = nugetBuild;
         this.javaArgs = javaArgs;
@@ -42,7 +42,6 @@ public class NugetRunStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo run() throws Exception {
-            //Utils.addNpmToPath(ws, listener, env, launcher, step.pipBuild.getTool());
             NugetRunExecutor nugetRunExecutor = new NugetRunExecutor(step.buildInfo, launcher, step.nugetBuild, step.javaArgs, step.args, ws, step.module, env, listener, build);
             nugetRunExecutor.execute();
             return nugetRunExecutor.getBuildInfo();

@@ -4,32 +4,33 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-public class NugetRunStep extends NugetRunStepBase {
+public class DotnetRunStep extends NugetRunStepBase {
 
     @DataBoundConstructor
-    public NugetRunStep() {
+    public DotnetRunStep() {
         super();
+        this.nugetBuild.SetUseDotnetCli(true);
     }
 
     public String getResolverStepName() {
-        return NugetResolverStep.STEP_NAME;
+        return DotnetResolverStep.STEP_NAME;
     }
 
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(NugetRunStep.Execution.class);
+            super(Execution.class);
         }
 
         @Override
         public String getFunctionName() {
-            return "rtNugetRun";
+            return "rtDotnetRun";
         }
 
         @Override
         public String getDisplayName() {
-            return "run Artifactory NuGet";
+            return "run Artifactory .NET";
         }
 
         @Override

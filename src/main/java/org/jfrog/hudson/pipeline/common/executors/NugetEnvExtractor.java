@@ -12,18 +12,22 @@ import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 public class NugetEnvExtractor extends EnvExtractor {
     private String args;
     private String module;
+    private boolean useDotnetCli;
 
     public NugetEnvExtractor(Run build, BuildInfo buildInfo, Resolver resolver,
                              TaskListener buildListener, Launcher launcher, FilePath tempDir,
-                             EnvVars env, String args, String module) {
+                             EnvVars env, String args, String module, boolean useDotnetCli) {
         super(build, buildInfo, null, resolver, buildListener, launcher, tempDir, env);
         this.args = args;
         this.module = module;
+        this.useDotnetCli = useDotnetCli;
     }
 
     @Override
     protected void addExtraConfiguration(ArtifactoryClientConfiguration configuration) {
         configuration.packageManagerHandler.setPackageManagerArgs(args);
         configuration.packageManagerHandler.setPackageManagerModule(module);
+        configuration.dotnetHandler.setUseDotnetCli(useDotnetCli);
+
     }
 }

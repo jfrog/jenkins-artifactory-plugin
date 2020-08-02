@@ -377,6 +377,19 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void dotnetTest(String pipelineName, String buildName, String moduleName) throws Exception {
+        Set<String> expectedDependencies = Sets.newHashSet("bootstrap:4.0.0", "jQuery:3.0.0", "Microsoft.Web.Xdt:2.1.0", "Newtonsoft.Json:11.0.2", "NuGet.Core:2.14.0", "popper.js:1.12.9");
+        String buildNumber = "13";
+        try {
+            runPipeline(pipelineName, false);
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, moduleName);
+            assertModuleDependencies(module, expectedDependencies);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
     @Test
     public void uploadFailNoOpTest() throws Exception {
         try {
