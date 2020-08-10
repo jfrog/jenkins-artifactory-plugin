@@ -37,6 +37,7 @@ environment:
 
   matrix:
     - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      # .NET CLI version
       CLI_VERSION: Latest
       JENKINS_PIP_ENV_INIT: C:\\projects\\jenkins-artifactory-plugin\\pip-venv\\Scripts\\activate.bat
     - APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
