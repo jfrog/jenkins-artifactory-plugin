@@ -16,8 +16,11 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Module;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.pipeline.common.docker.utils.DockerUtils;
+import org.jfrog.hudson.trigger.ArtifactoryTrigger;
+import org.jfrog.hudson.util.RepositoriesUtils;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
@@ -637,5 +640,30 @@ public class CommonITestsPipeline extends PipelineTestBase {
                 assertFalse(requestTree.has("outputResources"));
             }
         }
+    }
+
+    public void buildTriggerGlobalServerTest() throws Exception {
+        // Run pipeline
+        WorkflowRun run = runPipeline("buildTriggerGlobalServer", false);
+
+        // Check trigger
+        ArtifactoryTrigger artifactoryTrigger = checkArtifactoryTrigger(run);
+
+        // Change something in Artifactory server
+        ArtifactoryServer server = RepositoriesUtils.getArtifactoryServer("LOCAL", RepositoriesUtils.getArtifactoryServers());
+        server.setConnectionRetry(4);
+
+        // Make sure the change took place
+        server = artifactoryTrigger.getArtifactoryServer();
+        assertNotNull(server);
+        assertEquals(4, server.getConnectionRetry());
+    }
+
+    public void buildTriggerNewServerTest() throws Exception {
+        // Run pipeline
+        WorkflowRun run = runPipeline("buildTriggerNewServer", false);
+
+        // Check trigger
+        checkArtifactoryTrigger(run);
     }
 }

@@ -1,0 +1,10 @@
+package integration.pipelines.scripted
+
+node("TestSlave") {
+    stage "Configuration"
+    // Dummy artifactory server
+    def rtServer = Artifactory.newServer url: "http://127.0.0.1:8081/artifactory", username: "admin", password: "password"
+
+    stage "Add build trigger"
+    rtServer.setBuildTrigger spec: "* * * * *", paths: "libs-release-local"
+}

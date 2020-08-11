@@ -1,0 +1,9 @@
+package integration.pipelines.scripted
+
+node("TestSlave") {
+    stage "Configuration"
+    def rtServer = Artifactory.server "LOCAL"
+
+    stage "Add build trigger"
+    rtServer.setBuildTrigger spec: "* * * * *", paths: "libs-release-local"
+}

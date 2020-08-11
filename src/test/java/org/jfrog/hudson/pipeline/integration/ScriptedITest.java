@@ -150,4 +150,14 @@ public class ScriptedITest extends CommonITestsPipeline {
     public void appendBuildInfoTest() throws Exception {
         super.appendBuildInfoTest("scripted:appendBuildInfo test");
     }
+
+    @Test
+    public void buildTriggerGlobalServerTest() throws Exception {
+        super.buildTriggerGlobalServerTest();
+    }
+
+    @Test
+    public void buildTriggerNewServerTest() throws Exception {
+        super.buildTriggerNewServerTest();
+    }
 }

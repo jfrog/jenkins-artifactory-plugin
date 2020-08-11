@@ -21,6 +21,7 @@ import org.jfrog.artifactory.client.impl.ArtifactoryRequestImpl;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryBuilder;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.jfpipelines.Utils;
@@ -35,10 +36,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
@@ -85,7 +83,7 @@ public class PipelineTestBase {
         createSlave();
         setEnvVars();
         createClients();
-        createJFrogPipelinesServer();
+        setGlobalConfiguration();
         cleanUpArtifactory(artifactoryClient);
         createPipelineSubstitution();
         // Create repositories
@@ -174,13 +172,19 @@ public class PipelineTestBase {
     }
 
     /**
-     * Create JFrog Pipelines server in the Global configuration.
+     * For jfPipelines tests - Create JFrog Pipelines server in the Global configuration.
+     * For buildTrigger tests - Create an empty list of Artifactory servers.
      */
-    private static void createJFrogPipelinesServer() {
+    private static void setGlobalConfiguration() {
         ArtifactoryBuilder.DescriptorImpl artifactoryBuilder = (ArtifactoryBuilder.DescriptorImpl) jenkins.getInstance().getDescriptor(ArtifactoryBuilder.class);
         Assert.assertNotNull(artifactoryBuilder);
         JFrogPipelinesServer server = new JFrogPipelinesServer("http://127.0.0.1:1080", CredentialsConfig.EMPTY_CREDENTIALS_CONFIG, 300, false, 3);
         artifactoryBuilder.setJfrogPipelinesServer(server);
+        CredentialsConfig cred = new CredentialsConfig("admin", "password", "cred1");
+        List<ArtifactoryServer> artifactoryServers = new ArrayList<ArtifactoryServer>() {{
+            add(new ArtifactoryServer("LOCAL", "http://127.0.0.1:8081/artifactory", cred, cred, 0, false, 3, null));
+        }};
+        artifactoryBuilder.setArtifactoryServers(artifactoryServers);
     }
 
     /**

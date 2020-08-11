@@ -3,6 +3,8 @@ package org.jfrog.hudson.pipeline.integration;
 import com.fasterxml.jackson.databind.JsonNode;
 import hudson.FilePath;
 import hudson.model.Slave;
+import hudson.triggers.Trigger;
+import hudson.triggers.TriggerDescriptor;
 import jenkins.model.Jenkins;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -22,16 +24,15 @@ import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.hudson.ArtifactoryServer;
+import org.jfrog.hudson.trigger.ArtifactoryTrigger;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -313,6 +314,27 @@ class ITestUtils {
         assertNotNull(job);
         WorkflowRun lastBuild = job.getLastBuild();
         assertEquals(lastBuild.getParent().getAbsoluteUrl() + lastBuild.getNumber(), buildUrl.asText());
+    }
+
+    /**
+     * Check artifactory build trigger.
+     *
+     * @param run - The pipeline run object
+     * @return the artifactory trigger.
+     */
+    static ArtifactoryTrigger checkArtifactoryTrigger(WorkflowRun run) {
+        Map<TriggerDescriptor, Trigger<?>> triggers = run.getParent().getTriggers();
+        assertNotNull(triggers);
+        ArtifactoryTrigger artifactoryTrigger = (ArtifactoryTrigger) triggers.values().stream()
+                .filter(trigger -> trigger instanceof ArtifactoryTrigger)
+                .findAny().orElse(null);
+        assertNotNull(artifactoryTrigger);
+        ArtifactoryServer server = artifactoryTrigger.getArtifactoryServer();
+        assertNotNull(server);
+        assertTrue(artifactoryTrigger.getArtifactoryServers().contains(server));
+        assertEquals("libs-release-local", artifactoryTrigger.getPaths());
+        assertEquals("* * * * *", artifactoryTrigger.getSpec());
+        return artifactoryTrigger;
     }
 
     private static String encodeBuildName(String buildName) throws UnsupportedEncodingException {

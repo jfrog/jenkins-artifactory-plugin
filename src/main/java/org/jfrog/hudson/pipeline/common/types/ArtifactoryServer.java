@@ -8,10 +8,10 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesActionType;
 import static org.jfrog.hudson.pipeline.common.Utils.BUILD_INFO;
@@ -24,6 +24,7 @@ public class ArtifactoryServer implements Serializable {
     public static final long serialVersionUID = 1L;
 
     public static final String SPEC = "spec";
+    public static final String PATHS = "paths";
     public static final String SERVER = "server";
     public static final String BUILD_NAME = "buildName";
     public static final String BUILD_NUMBER = "buildNumber";
@@ -40,7 +41,7 @@ public class ArtifactoryServer implements Serializable {
     private boolean bypassProxy;
     private transient CpsScript cpsScript;
     private boolean usesCredentialsId;
-    private Connection connection = new Connection();
+    private final Connection connection = new Connection();
     private int deploymentThreads;
 
     public ArtifactoryServer() {
@@ -258,6 +259,21 @@ public class ArtifactoryServer implements Serializable {
         cpsScript.invokeMethod("xrayScanBuild", stepVariables);
     }
 
+    @Whitelisted
+    public void setBuildTrigger(Map<String, Object> arguments) {
+        List<String> mandatoryParams = new ArrayList<>(Arrays.asList(PATHS, SPEC));
+        if (!arguments.keySet().containsAll(mandatoryParams)) {
+            throw new IllegalArgumentException(mandatoryParams.toString() + " are mandatory arguments");
+        }
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        stepVariables.put(SERVER, this);
+        stepVariables.put(PATHS, arguments.get(PATHS));
+        stepVariables.put(SPEC, arguments.get(SPEC));
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryBuildTrigger", stepVariables);
+    }
+
     public String getServerName() {
         return serverName;
     }
@@ -330,7 +346,6 @@ public class ArtifactoryServer implements Serializable {
 
     @Whitelisted
     public void setDeploymentThreads(int deploymentThreads) {
-         this.deploymentThreads = deploymentThreads;
+        this.deploymentThreads = deploymentThreads;
     }
-
 }

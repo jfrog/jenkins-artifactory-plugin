@@ -1,0 +1,10 @@
+package integration.pipelines.declarative
+
+node("TestSlave") {
+    stage "Add build trigger"
+    rtBuildTrigger(
+            serverId: "LOCAL",
+            spec: "* * * * *",
+            paths: "libs-release-local"
+    )
+}

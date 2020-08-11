@@ -155,4 +155,14 @@ public class DeclarativeITest extends CommonITestsPipeline {
     public void jfPipelinesReportStatusTest() throws Exception {
         super.jfPipelinesReportStatusTest();
     }
+
+    @Test
+    public void buildTriggerGlobalServerTest() throws Exception {
+        super.buildTriggerGlobalServerTest();
+    }
+
+    @Test
+    public void buildTriggerNewServerTest() throws Exception {
+        super.buildTriggerNewServerTest();
+    }
 }
