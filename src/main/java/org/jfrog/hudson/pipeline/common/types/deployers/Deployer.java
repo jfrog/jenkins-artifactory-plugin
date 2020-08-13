@@ -211,7 +211,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
             }
             if (!deployableArtifactsByModule.isEmpty()) {
                 ws.act(new LateDeployCallable(listener, deployableArtifactsByModule, artifactoryServer, credentials, proxy, getThreads()));
-                MavenDeployer.addDeployedMavenArtifactsActionFromDetails(build, artifactoryServer.getArtifactoryUrl(), deployableArtifactsByModule);
+                MavenDeployer.addDeployedArtifactsActionFromDetails(build, artifactoryServer.getArtifactoryUrl(), deployableArtifactsByModule);
             }
         } else {
             throw new RuntimeException("Cannot deploy the files from agent: " + agentName + " since they were built on agent: " + buildInfo.getAgentName());
@@ -281,6 +281,8 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
 
         /**
          * Late deploy for build tools' deployable artifacts.
+         * Artifacts that were not deployed during the build phase (deployArtifacts set to false at the deployer), can
+         * be deployed in a later stage using this callable through the dedicated step.
          * */
         public LateDeployCallable(TaskListener listener, Map<String, Set<DeployDetails>> deployableArtifactsByModule,
                                          org.jfrog.hudson.ArtifactoryServer server, Credentials credentials,

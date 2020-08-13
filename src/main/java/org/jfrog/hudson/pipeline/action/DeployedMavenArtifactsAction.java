@@ -57,6 +57,5 @@ public class DeployedMavenArtifactsAction implements RunAction2 {
     public void addDeployedMavenArtifacts(String artifactoryUrl, List<Artifact> deployed) {
        deployed.forEach(artifact ->
            deployedMavenArtifacts.add(new DeployedMavenArtifact(artifactoryUrl, artifact.getRemotePath(), artifact.getName())));
-
     }
 }

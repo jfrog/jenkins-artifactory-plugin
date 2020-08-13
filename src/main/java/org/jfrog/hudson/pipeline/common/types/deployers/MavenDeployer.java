@@ -115,15 +115,21 @@ public class MavenDeployer extends Deployer {
         return dummy;
     }
 
-    public static void addDeployedMavenArtifactsActionFromModules(Run build, String artifactoryUrl, List<Module> modules) {
+    /**
+     * Adds artifacts from the provided modules to the Deployed Maven Artifacts Summary Action.
+     */
+    public static void addDeployedArtifactsActionFromModules(Run build, String artifactoryUrl, List<Module> modules) {
         for (Module module : modules) {
             if (module.getArtifacts() != null) {
-                addDeployedMavenArtifactsAction(build, artifactoryUrl, module.getArtifacts());
+                addDeployedArtifactsAction(build, artifactoryUrl, module.getArtifacts());
             }
         }
     }
 
-    public static void addDeployedMavenArtifactsActionFromDetails(Run build, String artifactoryUrl, Map<String, Set<DeployDetails>> deployableArtifactsByModule) {
+    /**
+     * Adds artifacts from the provided DeployDetails map to the Deployed Maven Artifacts Summary Action.
+     */
+    public static void addDeployedArtifactsActionFromDetails(Run build, String artifactoryUrl, Map<String, Set<DeployDetails>> deployableArtifactsByModule) {
         deployableArtifactsByModule.forEach((module, detailsSet) -> {
             boolean isMaven = true;
             List<Artifact> curArtifacts = Lists.newArrayList();
@@ -138,12 +144,16 @@ public class MavenDeployer extends Deployer {
                 curArtifacts.add(artifact);
             }
             if (isMaven) {
-                addDeployedMavenArtifactsAction(build, artifactoryUrl, curArtifacts);
+                addDeployedArtifactsAction(build, artifactoryUrl, curArtifacts);
             }
         });
     }
 
-    public static void addDeployedMavenArtifactsAction(Run build, String artifactoryUrl, List<Artifact> mavenArtifacts) {
+    /**
+     * Adds the provided artifacts to the Deployed Maven Artifacts Summary Action.
+     * If such action was not initialized yet, initialize a new one.
+     */
+    public static void addDeployedArtifactsAction(Run build, String artifactoryUrl, List<Artifact> mavenArtifacts) {
         synchronized (build.getActions()) {
             DeployedMavenArtifactsAction action = build.getAction(DeployedMavenArtifactsAction.class);
             // Initialize action if haven't done so yet.
