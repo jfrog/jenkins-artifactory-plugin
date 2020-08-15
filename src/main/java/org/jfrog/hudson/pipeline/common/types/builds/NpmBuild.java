@@ -3,7 +3,7 @@ package org.jfrog.hudson.pipeline.common.types.builds;
 import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
+import org.jfrog.hudson.pipeline.common.types.deployers.CommonDeployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 
 import java.util.Arrays;
@@ -23,7 +23,7 @@ public class NpmBuild extends PackageManagerBuild {
     public static final String DEPLOY_ARTIFACTS = "deployArtifacts";
 
     public NpmBuild() {
-        deployer = new NpmGoDeployer();
+        deployer = new CommonDeployer();
         resolver = new CommonResolver();
     }
 

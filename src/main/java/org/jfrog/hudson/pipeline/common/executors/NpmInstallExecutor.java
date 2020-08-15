@@ -7,8 +7,8 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.CommonDeployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 
 /**
@@ -29,6 +29,6 @@ public class NpmInstallExecutor extends NpmExecutor {
         if (resolver.isEmpty()) {
             throw new IllegalStateException("Resolver must be configured with resolution repository and Artifactory server");
         }
-        super.execute(new NpmGoDeployer(), resolver, args, "NpmInstall");
+        super.execute(new CommonDeployer(), resolver, args, "NpmInstall");
     }
 }

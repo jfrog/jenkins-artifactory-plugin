@@ -6,8 +6,8 @@ import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.CommonDeployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 
 /**
@@ -21,7 +21,7 @@ public class NpmPublishExecutor extends NpmExecutor {
 
     @Override
     public void execute() throws Exception {
-        NpmGoDeployer deployer = (NpmGoDeployer) npmBuild.getDeployer();
+        CommonDeployer deployer = (CommonDeployer) npmBuild.getDeployer();
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }

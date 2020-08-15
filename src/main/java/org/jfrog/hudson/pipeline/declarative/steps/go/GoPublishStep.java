@@ -4,13 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.GoPublishExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
-import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
+import org.jfrog.hudson.pipeline.common.types.deployers.CommonDeployer;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -99,7 +101,7 @@ public class GoPublishStep extends AbstractStepImpl {
             if (buildDataFile == null) {
                 throw new IOException("Deployer " + step.deployerId + " doesn't exist!");
             }
-            NpmGoDeployer deployer = SerializationUtils.createMapper().treeToValue(buildDataFile.get(GoDeployerStep.STEP_NAME), NpmGoDeployer.class);
+            CommonDeployer deployer = SerializationUtils.createMapper().treeToValue(buildDataFile.get(GoDeployerStep.STEP_NAME), CommonDeployer.class);
             deployer.setServer(getArtifactoryServer(buildNumber, buildDataFile));
             step.goBuild.setDeployer(deployer);
             addProperties(buildDataFile);

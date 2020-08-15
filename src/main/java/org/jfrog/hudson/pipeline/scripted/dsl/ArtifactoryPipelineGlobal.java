@@ -55,7 +55,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public Docker docker(Map<String, Object> dockerArguments) {
-        List<String> keysAsList = Arrays.asList("server", "host");
+        List<String> keysAsList = Arrays.asList("server", "host", "javaArgs");
         if (!keysAsList.containsAll(dockerArguments.keySet())) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList);
         }
@@ -193,7 +193,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
         if (!promotionArguments.keySet().containsAll(mandatoryParams)) {
             throw new IllegalArgumentException(mandatoryParams.toString() + " are mandatory arguments");
         }
-        if (!allowedParams.containsAll(promotionArguments.keySet())){
+        if (!allowedParams.containsAll(promotionArguments.keySet())) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + allowedParams.toString());
         }
         stepVariables.put("promotionConfig", Utils.createPromotionConfig((Map<String, Object>) promotionArguments.get("promotionConfig"), false));

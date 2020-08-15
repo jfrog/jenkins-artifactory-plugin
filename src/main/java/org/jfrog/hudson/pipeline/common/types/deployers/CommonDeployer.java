@@ -11,7 +11,7 @@ import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
-public class NpmGoDeployer extends Deployer {
+public class CommonDeployer extends Deployer {
     private String repo;
 
     @Override

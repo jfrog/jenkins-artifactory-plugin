@@ -1,9 +1,6 @@
 package org.jfrog.hudson.pipeline.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.command.BuildImageCmd;
-import com.github.dockerjava.core.command.BuildImageResultCallback;
 import com.google.common.collect.Sets;
 import hudson.EnvVars;
 import hudson.model.Result;
@@ -30,9 +27,7 @@ import org.mockserver.model.JsonBody;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -495,11 +490,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             }
             String imageName = domainName + "jfrog_artifactory_jenkins_tests:2";
             String host = System.getenv("JENKINS_ARTIFACTORY_DOCKER_HOST");
-            DockerClient dockerClient = DockerUtils.getDockerClient(host, new EnvVars());
-            String projectPath = getProjectPath("docker-example");
-            // Build the docker image with the name provided from env.
-            BuildImageCmd buildImageCmd = dockerClient.buildImageCmd(Paths.get(projectPath).toFile()).withTags(new HashSet<>(Arrays.asList(imageName)));
-            buildImageCmd.exec(new BuildImageResultCallback()).awaitImageId();
+            DockerAgentUtils.buildImage(imageName, host, new EnvVars(), getProjectPath("docker-example"));
             // Run pipeline
             runPipeline("dockerPush", false);
             String buildNumber = "3";

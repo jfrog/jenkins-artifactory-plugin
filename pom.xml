@@ -47,7 +47,7 @@
         <buildinfo.go.version>2.19.x-SNAPSHOT</buildinfo.go.version>
         <buildinfo.pip.version>2.19.x-SNAPSHOT</buildinfo.pip.version>
         <buildinfo.nuget.version>2.19.x-SNAPSHOT</buildinfo.nuget.version>
-
+        <buildinfo.docker.version>2.18.x-SNAPSHOT</buildinfo.docker.version>
     </properties>
 
     <developers>
@@ -374,6 +374,11 @@
         </dependency>
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
+            <artifactId>build-info-extractor-docker</artifactId>
+            <version>${buildinfo.docker.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-nuget</artifactId>
             <version>${buildinfo.nuget.version}</version>
         </dependency>
@@ -457,17 +462,6 @@
             <artifactId>plexus-classworlds</artifactId>
             <version>2.5.2</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java</artifactId>
-            <version>3.1.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>jcl-over-slf4j</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
@@ -641,7 +635,7 @@
                     <url>https://oss.jfrog.org/artifactory/jfrog-dependencies</url>
                 </repository>
                 <repository>
-                    <snapshots />
+                    <snapshots/>
                     <id>snapshots</id>
                     <name>libs-snapshot</name>
                     <url>https://oss.jfrog.org/artifactory/libs-snapshot</url>
@@ -657,7 +651,7 @@
                     <url>https://oss.jfrog.org/artifactory/jfrog-dependencies</url>
                 </pluginRepository>
                 <pluginRepository>
-                    <snapshots />
+                    <snapshots/>
                     <id>snapshots</id>
                     <name>plugins-snapshot</name>
                     <url>https://oss.jfrog.org/artifactory/plugins-snapshot</url>

@@ -3,14 +3,15 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.apache.commons.cli.MissingArgumentException;
-import org.jenkinsci.plugins.workflow.steps.*;
-import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.docker.utils.DockerAgentUtils;
-import org.jfrog.hudson.pipeline.common.docker.utils.DockerUtils;
-import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.build.extractor.docker.DockerUtils;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.executors.DockerPullExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -23,16 +24,18 @@ public class DockerPullStep extends AbstractStepImpl {
 
     private final String image;
     private final ArtifactoryServer server;
-    private String host;
     private final BuildInfo buildInfo;
+    private String host;
+    private String javaArgs;
 
 
     @DataBoundConstructor
-    public DockerPullStep(String image, String host, BuildInfo buildInfo, ArtifactoryServer server) {
+    public DockerPullStep(String image, String host, String javaArgs, BuildInfo buildInfo, ArtifactoryServer server) {
         this.image = image;
         this.host = host;
         this.buildInfo = buildInfo;
         this.server = server;
+        this.javaArgs = javaArgs;
     }
 
     public BuildInfo getBuildInfo() {
@@ -49,6 +52,10 @@ public class DockerPullStep extends AbstractStepImpl {
 
     public String getHost() {
         return host;
+    }
+
+    public String getJavaArgs() {
+        return javaArgs;
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<BuildInfo> {
@@ -75,12 +82,11 @@ public class DockerPullStep extends AbstractStepImpl {
             }
 
             ArtifactoryServer server = step.getServer();
-            Credentials serverCredentials = server.createCredentialsConfig().provideCredentials(build.getParent());
-
-            DockerAgentUtils.pullImage(launcher, imageTag, serverCredentials, step.getHost(), env);
+            DockerPullExecutor dockerExecutor = new DockerPullExecutor(server, buildInfo, build, step.image, step.host, step.javaArgs, launcher, listener, ws, env);
+            dockerExecutor.execute();
             JenkinsBuildInfoLog log = new JenkinsBuildInfoLog(listener);
             log.info("Successfully pulled docker image: " + imageTag);
-            return buildInfo;
+            return dockerExecutor.getBuildInfo();
         }
     }
 

@@ -1,22 +1,21 @@
 package org.jfrog.hudson.pipeline.scripted.steps;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.apache.commons.cli.MissingArgumentException;
-import org.jenkinsci.plugins.workflow.steps.*;
-import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.executors.DockerExecutor;
-import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.Utils;
+import org.jfrog.hudson.pipeline.common.executors.DockerPushExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
+import java.util.HashMap;
 
-/**
- * Created by romang on 5/2/16.
- */
 @SuppressWarnings("unused")
 public class DockerPushStep extends AbstractStepImpl {
 
@@ -25,12 +24,13 @@ public class DockerPushStep extends AbstractStepImpl {
     private String host;
     private BuildInfo buildInfo;
     private String targetRepo;
+    private String javaArgs;
     // Properties to attach to the deployed docker layers.
-    private ArrayListMultimap<String, String> properties;
+    private HashMap<String, String> properties;
 
     @DataBoundConstructor
     public DockerPushStep(String image, String host, String targetRepo,
-                          BuildInfo buildInfo, ArrayListMultimap<String, String> properties, ArtifactoryServer server) {
+                          BuildInfo buildInfo, HashMap<String, String> properties, ArtifactoryServer server, String javaArgs) {
 
         this.image = image;
         this.host = host;
@@ -38,6 +38,7 @@ public class DockerPushStep extends AbstractStepImpl {
         this.buildInfo = buildInfo;
         this.properties = properties;
         this.server = server;
+        this.javaArgs = javaArgs;
     }
 
     public ArtifactoryServer getServer() {
@@ -48,7 +49,7 @@ public class DockerPushStep extends AbstractStepImpl {
         return image;
     }
 
-    public ArrayListMultimap<String, String> getProperties() {
+    public HashMap<String, String> getProperties() {
         return properties;
     }
 
@@ -88,7 +89,7 @@ public class DockerPushStep extends AbstractStepImpl {
             BuildInfo buildInfo = Utils.prepareBuildinfo(build, step.getBuildInfo());
 
             ArtifactoryServer server = step.getServer();
-            DockerExecutor dockerExecutor = new DockerExecutor(server, buildInfo, build, step.image, step.targetRepo, step.host, launcher, step.properties, listener, env);
+            DockerPushExecutor dockerExecutor = new DockerPushExecutor(server, buildInfo, build, step.image, step.targetRepo, step.host, step.javaArgs, launcher, step.properties, listener, ws, env);
             dockerExecutor.execute();
             return dockerExecutor.getBuildInfo();
         }
