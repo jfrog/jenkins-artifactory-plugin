@@ -9,6 +9,7 @@ import java.io.Serializable;
  */
 public class PromotionConfig implements Serializable {
 
+    private String id;
     private String buildName;
     private String buildNumber;
     private String targetRepo;
@@ -18,6 +19,14 @@ public class PromotionConfig implements Serializable {
     private boolean includeDependencies;
     private boolean copy;
     private boolean failFast = true;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getBuildName() {
         return buildName;

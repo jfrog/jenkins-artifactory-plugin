@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.jfrog.hudson.util.SerializationUtils.createMapper;
+
 /**
  * This badge action is added to a successful staged builds. It allows performing additional promotion.
  *
@@ -109,35 +111,34 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         return new ArrayList<PromotionInfo>(promotionCandidates.values());
     }
 
+    public String getBuildData() {
+        try {
+            return createMapper().writeValueAsString(loadBuild());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+    }
+
     /**
      * Load the related repositories, plugins and a promotion config associated to the buildId.
      * Called from the UI.
      *
-     * @param buildId - The unique build id.
      * @return LoadBuildsResponse e.g. list of repositories, plugins and a promotion config.
      */
     @JavaScriptMethod
     @SuppressWarnings({"UnusedDeclaration"})
-    public LoadBuildsResponse loadBuild(String buildId) {
+    public LoadBuildsResponse loadBuild() {
         LoadBuildsResponse response = new LoadBuildsResponse();
         // When we load a new build we need also to reset the promotion plugin.
         // The null plugin is related to 'None' plugin.
         setPromotionPlugin(null);
         try {
-            this.currentPromotionCandidate = promotionCandidates.get(buildId);
-            if (this.currentPromotionCandidate == null) {
-                throw new IllegalArgumentException("Can't find build by ID: " + buildId);
-            }
             List<String> repositoryKeys = getRepositoryKeys();
             List<UserPluginInfo> plugins = getPromotionsUserPluginInfo();
-            PromotionConfig promotionConfig = getPromotionConfig();
-            String defaultTargetRepository = getDefaultPromotionTargetRepository();
-            if (StringUtils.isNotBlank(defaultTargetRepository) && repositoryKeys.contains(defaultTargetRepository)) {
-                promotionConfig.setTargetRepo(defaultTargetRepository);
-            }
             response.addRepositories(repositoryKeys);
             response.setPlugins(plugins);
-            response.setPromotionConfig(promotionConfig);
+            response.setPromotionConfigs(getPromotionConfigs(repositoryKeys));
             response.setSuccess(true);
         } catch (Exception e) {
             response.setResponseMessage(e.getMessage());
@@ -247,8 +248,20 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         return repos;
     }
 
-    public PromotionConfig getPromotionConfig() {
-        return this.currentPromotionCandidate.getPromotionConfig();
+    public List<PromotionConfig> getPromotionConfigs(List<String> repoKeys) {
+        String defaultTargetRepo = getDefaultPromotionTargetRepository();
+        boolean setTargetRepo = StringUtils.isNotBlank(defaultTargetRepo) && repoKeys.contains(defaultTargetRepo);
+
+        List<PromotionConfig> configs = new ArrayList<>();
+        for (PromotionInfo info : getPromotionCandidates()) {
+            PromotionConfig config = info.getPromotionConfig();
+            config.setId(info.getId());
+            if (setTargetRepo) {
+                config.setTargetRepo(defaultTargetRepo);
+            }
+            configs.add(config);
+        }
+        return configs;
     }
 
     @SuppressWarnings({"UnusedDeclaration"})

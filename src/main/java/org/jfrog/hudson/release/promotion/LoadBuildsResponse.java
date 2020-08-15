@@ -13,7 +13,7 @@ public class LoadBuildsResponse {
 
     private List<Repository> repositories = new ArrayList<Repository>();
     private List<UserPluginInfo> plugins = new ArrayList<UserPluginInfo>();
-    private PromotionConfig promotionConfig;
+    private List<PromotionConfig> promotionConfigs;
     private String responseMessage = "Build not found";
     private boolean success;
 
@@ -52,11 +52,11 @@ public class LoadBuildsResponse {
         this.plugins = plugins;
     }
 
-    public PromotionConfig getPromotionConfig() {
-        return this.promotionConfig;
+    public List<PromotionConfig> getPromotionConfigs() {
+        return this.promotionConfigs;
     }
 
-    public void setPromotionConfig(PromotionConfig promotionConfig) {
-        this.promotionConfig = promotionConfig;
+    public void setPromotionConfigs(List<PromotionConfig> promotionConfigs) {
+        this.promotionConfigs = promotionConfigs;
     }
 }
