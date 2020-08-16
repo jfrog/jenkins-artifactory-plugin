@@ -123,7 +123,7 @@ public class BuildInfoAccessor {
     }
 
     public void appendVcs(Vcs vcs) {
-            this.buildInfo.appendVcs(vcs);
+        this.buildInfo.appendVcs(vcs);
     }
 
     public List<Vcs> getVcs() {
