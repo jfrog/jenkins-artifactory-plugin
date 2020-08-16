@@ -54,8 +54,8 @@
             These two st:adjunct tags have been replaced by the two below script tags.
                 <st:adjunct includes="lib.jfrog.repos.repos"/>
                 <st:adjunct includes="lib.jfrog.promotions.promotions"/> -->
-            <script src='/adjuncts/8c218759/lib/jfrog/promotions/promotions.js' type='text/javascript'></script>
-            <script src='/adjuncts/8c218759/lib/jfrog/repos/repos.js' type='text/javascript'></script>
+            <script src='${rootURL}/adjuncts/8c218759/lib/jfrog/promotions/promotions.js' type='text/javascript'></script>
+            <script src='${rootURL}/adjuncts/8c218759/lib/jfrog/repos/repos.js' type='text/javascript'></script>
             <script>
                 var selectPlugin = document.getElementById("pluginList");
                 selectPlugin.onchange = onPluginChange;
