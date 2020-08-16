@@ -4,7 +4,6 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Node;
-import hudson.model.Result;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.plugins.gradle.Gradle;
@@ -13,6 +12,7 @@ import hudson.util.ArgumentListBuilder;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.BuildInfoFields;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.gradle.GradleInitScriptWriter;
 import org.jfrog.hudson.pipeline.common.Utils;
@@ -71,7 +71,7 @@ public class GradleExecutor implements Executor {
         ActionableHelper.deleteFilePath(tempDir, initScriptPath);
         // Read the deployable artifacts map from the 'json' file in the agent and append them to the buildInfo object.
         buildInfo.getAndAppendDeployableArtifactsByModule(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS),
-                extendedEnv.get(BuildInfoFields.BACKWARD_COMPATIBLE_DEPLOYABLE_ARTIFACTS), tempDir, listener);
+                extendedEnv.get(BuildInfoFields.BACKWARD_COMPATIBLE_DEPLOYABLE_ARTIFACTS), tempDir, listener, DeployDetails.PackageType.GRADLE);
         buildInfo.setAgentName(Utils.getAgentName(ws));
     }
 

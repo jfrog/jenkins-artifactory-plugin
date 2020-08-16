@@ -2,7 +2,7 @@
  * @author Yahav Itzhak
  */
 
-function loadBuild(instance, doDisplaySuccessMessage) {
+function loadBuild(buildData, doDisplaySuccessMessage) {
     var spinner;
     var target;
 
@@ -15,34 +15,43 @@ function loadBuild(instance, doDisplaySuccessMessage) {
     if (!buildId) {
         displayErrorResponse(spinner, target, "Please choose a build");
     } else {
-        instance.loadBuild(buildId, function (res) {
-            res = JSON.parse(res.responseText);
-            if (!res.success) {
-                displayErrorResponse(spinner, target, res["responseMessage"]);
-                return;
+        res = JSON.parse(buildData);
+        if (!res.success) {
+            displayErrorResponse(spinner, target, res["responseMessage"]);
+            return;
+        }
+        var repositoryKeys = res["repositories"];
+        var plugins = res["plugins"];
+        var promotionConfigs = res["promotionConfigs"];
+        var promotionConfig
+
+        for (var i = 0; i < promotionConfigs.length; i++) {
+            promotionConfig = promotionConfigs[i];
+            if (promotionConfig["id"] == buildId) {
+                break;
             }
-            var repositoryKeys = res["repositories"];
-            var plugins = res["plugins"];
-            var promotionConfig = res["promotionConfig"];
-            var selectPlugin = document.getElementById("pluginList");
-            var selectTarget = document.getElementById("targetRepositoryKey");
-            var selectSource = document.getElementById("sourceRepositoryKey");
-            removePlugins(selectPlugin);
-            removeElements(selectTarget);
-            removeElements(selectSource);
-            var pluginNames = extractPluginNames(plugins);
-            createPluginElements(plugins);
-            fillSelect(selectPlugin, pluginNames);
-            fillSelect(selectTarget, repositoryKeys);
-            fillSelect(selectSource, repositoryKeys);
-            fillNonePluginFormDefaultValues(promotionConfig, selectTarget, selectSource);
-            selectPlugin.onchange();
-            if (doDisplaySuccessMessage){
-                displaySuccessMessage(spinner, target);
-            } else {
-                spinner.style.display = "none";
-            }
-        });
+        }
+
+        var selectPlugin = document.getElementById("pluginList");
+        var selectTarget = document.getElementById("targetRepositoryKey");
+        var selectSource = document.getElementById("sourceRepositoryKey");
+
+        removePlugins(selectPlugin);
+        removeElements(selectTarget);
+        removeElements(selectSource);
+
+        var pluginNames = extractPluginNames(plugins);
+        createPluginElements(plugins);
+        fillSelect(selectPlugin, pluginNames);
+        fillSelect(selectTarget, repositoryKeys);
+        fillSelect(selectSource, repositoryKeys);
+        fillNonePluginFormDefaultValues(promotionConfig, selectTarget, selectSource);
+        selectPlugin.onchange();
+        if (doDisplaySuccessMessage){
+            displaySuccessMessage(spinner, target);
+        } else {
+            spinner.style.display = "none";
+        }
     }
 }
 

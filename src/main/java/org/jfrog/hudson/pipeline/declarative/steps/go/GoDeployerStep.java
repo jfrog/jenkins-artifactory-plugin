@@ -3,13 +3,13 @@ package org.jfrog.hudson.pipeline.declarative.steps.go;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
-import org.jfrog.hudson.pipeline.declarative.steps.common.NpmGoDeployerResolver;
+import org.jfrog.hudson.pipeline.declarative.steps.common.DeployerResolverBase;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.util.List;
 
-public class GoDeployerStep extends NpmGoDeployerResolver {
+public class GoDeployerStep extends DeployerResolverBase {
 
     static final String STEP_NAME = "rtGoDeployer";
     private NpmGoDeployer goDeployer;

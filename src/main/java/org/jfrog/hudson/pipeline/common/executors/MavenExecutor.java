@@ -8,6 +8,7 @@ import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.build.api.BuildInfoFields;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.maven3.Maven3Builder;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -15,6 +16,8 @@ import org.jfrog.hudson.pipeline.common.types.builds.MavenBuild;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer;
 import org.jfrog.hudson.util.ExtractorUtils;
+
+import static org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer.addDeployedArtifactsActionFromModules;
 
 public class MavenExecutor implements Executor {
 
@@ -67,10 +70,18 @@ public class MavenExecutor implements Executor {
         Maven3Builder maven3Builder = new Maven3Builder(mavenBuild.getTool(), pom, goals, mavenOpts);
         convertJdkPath(launcher, extendedEnv);
         maven3Builder.perform(build, launcher, listener, extendedEnv, ws, tempDir);
+
         String generatedBuildPath = extendedEnv.get(BuildInfoFields.GENERATED_BUILD_INFO);
-        buildInfo.append(Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath));
+        org.jfrog.build.api.Build generatedBuild = Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath);
+        // Add action only if artifacts were actually deployed.
+        if (deployer.isDeployArtifacts()) {
+            addDeployedArtifactsActionFromModules(this.build, deployer.getArtifactoryServer().getArtifactoryUrl(), generatedBuild.getModules());
+        }
+        buildInfo.append(generatedBuild);
+
         // Read the deployable artifacts map from the 'json' file in the agent and append them to the buildInfo object.
-        buildInfo.getAndAppendDeployableArtifactsByModule(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS), "", tempDir, listener);
+        buildInfo.getAndAppendDeployableArtifactsByModule(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS),
+                "", tempDir, listener, DeployDetails.PackageType.MAVEN);
         buildInfo.setAgentName(Utils.getAgentName(ws));
     }
 

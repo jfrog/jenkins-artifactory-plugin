@@ -54,7 +54,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
         Files.list(FILES_PATH).filter(Files::isRegularFile)
                 .forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
-        WorkflowRun build = runPipeline("downloadByPattern");
+        WorkflowRun build = runPipeline("downloadByPattern", false);
         try {
             for (String fileName : expectedDependencies) {
                 assertTrue(isExistInWorkspace(slave, build, "downloadByPattern-test", fileName));
@@ -73,7 +73,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
         Files.list(FILES_PATH).filter(Files::isRegularFile)
                 .forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
-        WorkflowRun build = runPipeline("downloadByAql");
+        WorkflowRun build = runPipeline("downloadByAql", false);
         try {
             for (String fileName : expectedDependencies) {
                 assertTrue(isExistInWorkspace(slave, build, "downloadByAql-test", fileName));
@@ -93,7 +93,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> unexpected = getTestFilesNamesByLayer(0);
         unexpected.addAll(getTestFilesNamesByLayer(1));
         unexpected.removeAll(expectedDependencies);
-        WorkflowRun build = runPipeline("downloadByPatternAndBuild");
+        WorkflowRun build = runPipeline("downloadByPatternAndBuild", false);
         try {
             assertTrue(isExistInWorkspace(slave, build, "downloadByPatternAndBuild-test", "a.in"));
             for (String fileName : unexpected) {
@@ -112,7 +112,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> unexpected = getTestFilesNamesByLayer(1);
         String buildNumber = "5";
 
-        WorkflowRun build = runPipeline("downloadByBuildOnly");
+        WorkflowRun build = runPipeline("downloadByBuildOnly", false);
         try {
             for (String fileName : expectedDependencies) {
                 assertTrue(isExistInWorkspace(slave, build, "downloadByBuildOnly-test", fileName));
@@ -130,7 +130,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void downloadNonExistingBuildTest(String buildName) throws Exception {
         try {
-            runPipeline("downloadNonExistingBuild");
+            runPipeline("downloadNonExistingBuild", false);
             fail("Job expected to fail");
         } catch (AssertionError t) {
             assertTrue(t.getMessage().contains("Fail-no-op: No files were affected in the download process."));
@@ -148,7 +148,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> unexpected = Sets.newHashSet("a4", "a5");
         String buildNumber = "6";
 
-        WorkflowRun build = runPipeline("downloadByShaAndBuild");
+        WorkflowRun build = runPipeline("downloadByShaAndBuild", false);
         try {
             // Only a.in should be in workspace
             assertTrue(isExistInWorkspace(slave, build, "downloadByShaAndBuild-test", "a3"));
@@ -173,7 +173,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> unexpected = Sets.newHashSet("a3", "a5");
         String buildNumber = "6";
 
-        WorkflowRun build = runPipeline("downloadByShaAndBuildName");
+        WorkflowRun build = runPipeline("downloadByShaAndBuildName", false);
         try {
             // Only a.in should be in workspace
             assertTrue(isExistInWorkspace(slave, build, "downloadByShaAndBuildName-test", "a4"));
@@ -193,7 +193,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> expectedArtifacts = getTestFilesNamesByLayer(0);
         String buildNumber = "3";
 
-        runPipeline("upload");
+        runPipeline("upload", false);
         try {
             expectedArtifacts.forEach(artifactName ->
                     assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
@@ -209,7 +209,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> expectedArtifactsAndDependencies = getTestFilesNamesByLayer(0);
         String buildNumber = "3";
 
-        WorkflowRun build = runPipeline("uploadDownloadCustomModuleName");
+        WorkflowRun build = runPipeline("uploadDownloadCustomModuleName", false);
         try {
             expectedArtifactsAndDependencies.forEach(artifactName ->
                     assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
@@ -231,7 +231,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
         Files.list(FILES_PATH).filter(Files::isRegularFile)
                 .forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
-        WorkflowRun build = runPipeline("promote");
+        WorkflowRun build = runPipeline("promote", false);
         try {
             for (String fileName : expectedDependencies) {
                 assertTrue(isExistInWorkspace(slave, build, "promotion-test", fileName));
@@ -252,7 +252,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> expectedArtifacts = Sets.newHashSet("multi-3.7-SNAPSHOT.pom");
         String buildNumber = "3";
         try {
-            runPipeline("maven");
+            runPipeline("maven", false);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             assertFilteredProperties(buildInfo);
             assertEquals(4, buildInfo.getModules().size());
@@ -271,7 +271,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     void gradleTest(String buildName) throws Exception {
         String buildNumber = "3";
         try {
-            runPipeline("gradle");
+            runPipeline("gradle", false);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             assertFilteredProperties(buildInfo);
             assertEquals(4, buildInfo.getModules().size());
@@ -289,7 +289,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> expectedArtifacts = Sets.newHashSet(pipelineType.toString() + "-gradle-example-ci-server-1.0.jar", "ivy-1.0.xml", pipelineType.toString() + "-gradle-example-ci-server-1.0.pom");
         String buildNumber = "3";
         try {
-            runPipeline("gradleCiServer");
+            runPipeline("gradleCiServer", false);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             assertEquals(5, buildInfo.getModules().size());
 
@@ -332,7 +332,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> expectedDependencies = Sets.newHashSet("big-integer-1.6.40.tgz", "is-number-7.0.0.tgz");
         String buildNumber = "3";
         try {
-            runPipeline(pipelineName);
+            runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, moduleName);
             assertModuleDependencies(module, expectedDependencies);
@@ -347,7 +347,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> expectedDependencies = Sets.newHashSet("rsc.io/sampler:v1.3.0", "golang.org/x/text:v0.0.0-20170915032832-14c0d48ead0c", "rsc.io/quote:v1.5.2");
         String buildNumber = "7";
         try {
-            runPipeline(pipelineName);
+            runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, moduleName);
             assertModuleDependencies(module, expectedDependencies);
@@ -360,7 +360,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     void conanTest(String pipelineName, String buildName) throws Exception {
         String buildNumber = "7";
         try {
-            runPipeline(pipelineName);
+            runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             Module module = getAndAssertModule(buildInfo, "DownloadOnly");
             assertTrue(module.getDependencies().size() > 0);
@@ -371,10 +371,47 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void pipTest(String pipelineName, String buildName, String moduleName) throws Exception {
+        int expectedDependencies = 5;
+        String buildNumber = "4";
+        try {
+            runPipeline(pipelineName, false);
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, moduleName);
+            assertEquals(expectedDependencies, module.getDependencies().size());
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void nugetTest(String pipelineName, String buildName, String moduleName) throws Exception {
+        String buildNumber = "12";
+        try {
+            runPipeline(pipelineName, false);
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, moduleName);
+            assertTrue(module.getDependencies() != null && module.getDependencies().size() > 0);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
+    void dotnetTest(String pipelineName, String buildName, String moduleName) throws Exception {
+        String buildNumber = "13";
+        try {
+            runPipeline(pipelineName, false);
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Module module = getAndAssertModule(buildInfo, moduleName);
+            assertTrue(module.getDependencies() != null && module.getDependencies().size() > 0);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
     @Test
     public void uploadFailNoOpTest() throws Exception {
         try {
-            runPipeline("uploadFailNoOp");
+            runPipeline("uploadFailNoOp", false);
             fail("Job expected to fail");
         } catch (AssertionError t) {
             assertTrue(t.getMessage().contains("Fail-no-op: No files were affected in the upload process."));
@@ -387,7 +424,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     @Test
     public void downloadFailNoOpTest() throws Exception {
         try {
-            runPipeline("downloadFailNoOp");
+            runPipeline("downloadFailNoOp", false);
             fail("Job expected to fail");
         } catch (AssertionError t) {
             assertTrue(t.getMessage().contains("Fail-no-op: No files were affected in the download process."));
@@ -398,7 +435,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> expectedDependencies = Sets.newHashSet("a.in");
         String buildNumber = "3";
 
-        WorkflowRun build = runPipeline("setProps");
+        WorkflowRun build = runPipeline("setProps", false);
         try {
             // Only a.in is expected to exist in workspace
             assertTrue("a.in doesn't exist locally", isExistInWorkspace(slave, build, "setProps-test", "a.in"));
@@ -421,7 +458,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> expectedDependencies = Sets.newHashSet("b.in", "c.in");
         String buildNumber = "3";
 
-        WorkflowRun build = runPipeline("deleteProps");
+        WorkflowRun build = runPipeline("deleteProps", false);
         try {
             // Only b.in, c.in are expected to exist in workspace
             assertFalse("a.in exists locally", isExistInWorkspace(slave, build, "deleteProps-test", "a.in"));
@@ -461,7 +498,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             BuildImageCmd buildImageCmd = dockerClient.buildImageCmd(Paths.get(projectPath).toFile()).withTags(new HashSet<>(Arrays.asList(imageName)));
             buildImageCmd.exec(new BuildImageResultCallback()).awaitImageId();
             // Run pipeline
-            runPipeline("dockerPush");
+            runPipeline("dockerPush", false);
             String buildNumber = "3";
 
             // Get build info
@@ -484,7 +521,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     private void xrayScanTest(String buildName, String pipelineJobName, boolean failBuild) throws Exception {
         try {
-            runPipeline(pipelineJobName);
+            runPipeline(pipelineJobName, false);
             if (failBuild) {
                 fail("Job expected to fail");
             }
@@ -511,7 +548,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         String buildNumber = "3";
         // Clear older build if exists
         deleteBuild(artifactoryClient, buildName);
-        runPipeline("collectIssues");
+        runPipeline("collectIssues", false);
         try {
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             // Assert Issues
@@ -537,7 +574,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         String buildNumber = "3";
         // Clear older build if exists
         deleteBuild(artifactoryClient, buildName);
-        WorkflowRun build = runPipeline("append");
+        WorkflowRun build = runPipeline("append", false);
         try {
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             // Assert Issues
@@ -561,7 +598,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void jfPipelinesOutputResourcesTest() throws Exception {
         try (ClientAndServer mockServer = ClientAndServer.startClientAndServer(1080)) {
-            runPipeline("jfPipelinesResources");
+            runPipeline("jfPipelinesResources", true);
             HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
             assertEquals(2, ArrayUtils.getLength(requests));
 
@@ -604,7 +641,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     public void jfPipelinesReportStatusTest() throws Exception {
         try (ClientAndServer mockServer = ClientAndServer.startClientAndServer(1080)) {
-            runPipeline("jfPipelinesReport");
+            runPipeline("jfPipelinesReport", true);
             // Get sent request from the mock server
             HttpRequest[] requests = mockServer.retrieveRecordedRequests(null);
             assertEquals(2, ArrayUtils.getLength(requests));

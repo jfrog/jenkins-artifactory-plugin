@@ -3,11 +3,10 @@
 <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout"
          xmlns:t="/lib/hudson" xmlns:f="/lib/form" xmlns:r="/lib/jfrog">
-    <st:adjunct includes="lib.jfrog.repos.repos"/>
-    <st:adjunct includes="lib.jfrog.promotions.promotions"/>
+
     <l:layout>
         <l:main-panel>
-            <f:form method="post" action="submit">
+            <f:form method="post" action="submit" name="form">
                 <f:section title="Artifactory Pro Release Promotion">
                     <j:choose>
                         <j:when test="${it.PromoteInfoListSize > 1}">
@@ -23,10 +22,18 @@
                                     </j:forEach>
                                 </select>
                             </f:entry>
-                            <r:promotions title="${%Load build}"
-                                          id="loadBuild"
-                                          progress="${%Refreshing...}"
-                                          instance="buildBind"/>
+                            <f:entry>
+                                <div style="float:right">
+                                    <input type="button" value="${%Load build}" class="yui-button validate-button"
+                                           onclick="loadBuild('${it.buildsData}', true)" id="loadBuild"/>
+                                </div>
+                                <div style="display:none;" id="spinnerDiv">
+                                    <img src="${imagesURL}/spinner.gif"/>
+                                    ${%Refreshing...}
+                                </div>
+                                <div><!-- this is where the error message goes --></div>
+                                <div><!-- this is where the warning message goes --></div>
+                            </f:entry>
                         </j:when>
                         <j:otherwise>
                             <div style="display:none;" id="spinnerDiv">
@@ -43,13 +50,19 @@
                     </td>
                 </f:section>
             </f:form>
+            <!--
+            These two st:adjunct tags have been replaced by the two below script tags.
+                <st:adjunct includes="lib.jfrog.repos.repos"/>
+                <st:adjunct includes="lib.jfrog.promotions.promotions"/> -->
+            <script src='${rootURL}/adjuncts/8c218759/lib/jfrog/promotions/promotions.js' type='text/javascript'></script>
+            <script src='${rootURL}/adjuncts/8c218759/lib/jfrog/repos/repos.js' type='text/javascript'></script>
             <script>
                 var selectPlugin = document.getElementById("pluginList");
                 selectPlugin.onchange = onPluginChange;
                 var buildBind = <st:bind value="${it}"/>;
                 var promoteInfoListSize = "${it.PromoteInfoListSize}";
                 if (promoteInfoListSize == 1) {
-                    loadBuild(buildBind, false); // Auto-load
+                    loadBuild('${it.buildsData}', false); // Auto-load
                 }
             </script>
         </l:main-panel>

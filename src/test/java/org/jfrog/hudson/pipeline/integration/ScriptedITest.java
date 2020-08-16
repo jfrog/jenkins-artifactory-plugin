@@ -107,6 +107,21 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void pipTest() throws Exception {
+        super.pipTest("pip", "scripted:pip test", "my-pip-module");
+    }
+
+    @Test
+    public void nugetTest() throws Exception {
+        super.nugetTest("nuget", "scripted:nuget test", "packagesconfig");
+    }
+
+    @Test
+    public void dotnetTest() throws Exception {
+        super.dotnetTest("dotnet", "scripted:dotnet test", "reference");
+    }
+
+    @Test
     public void setPropsTest() throws Exception {
         super.setPropsTest("scripted:setProps test");
     }

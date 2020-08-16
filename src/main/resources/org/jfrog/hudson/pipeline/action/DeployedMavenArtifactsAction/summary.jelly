@@ -1,0 +1,12 @@
+<j:jelly xmlns:j="jelly:core"
+         xmlns:t="/lib/hudson">
+    <j:if test="${!empty it.deployedMavenArtifacts}">
+        <t:summary icon="${it.iconFileName}"> Deployed Maven Artifacts
+            <ul>
+                <j:forEach var="artifact" items="${it.deployedMavenArtifacts}">
+                    <li><a href="${artifact.url}">${artifact.name}</a></li>
+                </j:forEach>
+            </ul>
+        </t:summary>
+    </j:if>
+</j:jelly>

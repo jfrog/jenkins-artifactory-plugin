@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
-import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,7 +21,7 @@ public class GoBuild extends PackageManagerBuild {
 
     public GoBuild() {
         deployer = new NpmGoDeployer();
-        resolver = new NpmGoResolver();
+        resolver = new CommonResolver();
     }
 
     @Whitelisted
@@ -37,16 +37,16 @@ public class GoBuild extends PackageManagerBuild {
     @Whitelisted
     public void run(Map<String, Object> args) {
         Map<String, Object> stepVariables = prepareGoStep(args, Arrays.asList(PATH, ARGS, BUILD_INFO, MODULE));
-        // Throws CpsCallableInvocation - Must be the last line in this method
         stepVariables.put(GO_CMD_ARGS, args.get(ARGS));
+        // Throws CpsCallableInvocation - Must be the last line in this method
         cpsScript.invokeMethod("artifactoryGoRun", stepVariables);
     }
 
     @Whitelisted
     public void publish(Map<String, Object> args) {
         Map<String, Object> stepVariables = prepareGoStep(args, Arrays.asList(PATH, VERSION, BUILD_INFO, MODULE));
-        // Throws CpsCallableInvocation - Must be the last line in this method
         stepVariables.put(VERSION, args.get(VERSION));
+        // Throws CpsCallableInvocation - Must be the last line in this method
         cpsScript.invokeMethod("artifactoryGoPublish", stepVariables);
     }
 
@@ -60,7 +60,7 @@ public class GoBuild extends PackageManagerBuild {
         Map<String, Object> stepVariables = getGoArguments((String) args.get(PATH),
                 (String) args.get(MODULE),
                 (BuildInfo) args.get(BUILD_INFO));
-        appendBuildInfo(cpsScript, stepVariables); // todo take output
+        appendBuildInfo(cpsScript, stepVariables);
         return stepVariables;
     }
 

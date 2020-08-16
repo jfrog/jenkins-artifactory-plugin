@@ -15,7 +15,7 @@ import org.jfrog.hudson.go.GoRunCallable;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
-import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.ProxyUtils;
@@ -55,7 +55,7 @@ public class GoRunExecutor implements Executor {
     @Override
     public void execute() throws Exception {
         GoRunCallable runCallable = new GoRunCallable(path, goCmdArgs, module, logger, env);
-        addResolverDetailsToCallable((NpmGoResolver) goBuild.getResolver(), runCallable);
+        addResolverDetailsToCallable((CommonResolver) goBuild.getResolver(), runCallable);
         Build build = ws.act(runCallable);
         if (build == null) {
             throw new RuntimeException("go run failed");
@@ -64,7 +64,7 @@ public class GoRunExecutor implements Executor {
         buildInfo.setAgentName(Utils.getAgentName(ws));
     }
 
-    private void addResolverDetailsToCallable(NpmGoResolver resolver, GoRunCallable callable) throws IOException {
+    private void addResolverDetailsToCallable(CommonResolver resolver, GoRunCallable callable) throws IOException {
         if (resolver.isEmpty()) {
             return;
         }

@@ -11,13 +11,16 @@ import jenkins.MasterToSlaveFileCallable;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.util.FileChecksumCalculator;
+import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.extractor.ModuleParallelDeployHelper;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
+import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.DeployerOverrider;
 import org.jfrog.hudson.ServerDetails;
-import org.jfrog.hudson.generic.GenericArtifactsDeployer;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.Filter;
@@ -25,6 +28,7 @@ import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.Env;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.IncludesExcludes;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.ProxyUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
@@ -206,7 +210,8 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
                 throw new RuntimeException("Deployment failed");
             }
             if (!deployableArtifactsByModule.isEmpty()) {
-                ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, deployableArtifactsByModule, artifactoryServer, credentials, proxy, getThreads()));
+                ws.act(new LateDeployCallable(listener, deployableArtifactsByModule, artifactoryServer, credentials, proxy, getThreads()));
+                MavenDeployer.addDeployedArtifactsActionFromDetails(build, artifactoryServer.getArtifactoryUrl(), deployableArtifactsByModule);
             }
         } else {
             throw new RuntimeException("Cannot deploy the files from agent: " + agentName + " since they were built on agent: " + buildInfo.getAgentName());
@@ -251,7 +256,8 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
                                     .artifactPath(artifactPath)
                                     .targetRepository(deployer.getTargetRepository(artifactPath))
                                     .md5(checksums.get(MD5)).sha1(artifact.getSha1())
-                                    .addProperties(artifact.getProperties()).addProperties(deployer.getProperties());
+                                    .addProperties(artifact.getProperties()).addProperties(deployer.getProperties())
+                                    .packageType(artifact.getPackageType());
                             deployDetails.add(builder.build());
                         }
                     }
@@ -262,6 +268,41 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
                 }
             }
             return isSuccess ? results : null;
+        }
+    }
+
+    public static class LateDeployCallable extends MasterToSlaveFileCallable<Void> {
+        private final TaskListener listener;
+        private final org.jfrog.hudson.ArtifactoryServer server;
+        private final Credentials credentials;
+        private final ProxyConfiguration proxyConfiguration;
+        private final Map<String, Set<DeployDetails>> deployableArtifactsByModule;
+        private final int threads;
+
+        /**
+         * Late deploy for build tools' deployable artifacts.
+         * Artifacts that were not deployed during the build phase (deployArtifacts set to false at the deployer), can
+         * be deployed in a later stage using this callable through the dedicated step.
+         * */
+        public LateDeployCallable(TaskListener listener, Map<String, Set<DeployDetails>> deployableArtifactsByModule,
+                                         org.jfrog.hudson.ArtifactoryServer server, Credentials credentials,
+                                         ProxyConfiguration proxyConfiguration, int threads) {
+            this.listener = listener;
+            this.deployableArtifactsByModule = deployableArtifactsByModule;
+            this.server = server;
+            this.credentials = credentials;
+            this.proxyConfiguration = proxyConfiguration;
+            this.threads = threads;
+        }
+
+        public Void invoke(File workspace, VirtualChannel channel) throws IOException, InterruptedException {
+            Log log = new JenkinsBuildInfoLog(listener);
+            ArtifactoryBuildInfoClientBuilder clientBuilder = server.createBuildInfoClientBuilder(credentials, proxyConfiguration, log);
+
+            try (ArtifactoryBuildInfoClient client = clientBuilder.build()) {
+                new ModuleParallelDeployHelper().deployArtifacts(client, deployableArtifactsByModule, threads);
+            }
+            return null;
         }
     }
 }

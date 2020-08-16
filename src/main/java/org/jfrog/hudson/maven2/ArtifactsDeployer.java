@@ -168,7 +168,8 @@ public class ArtifactsDeployer {
                 .md5(mavenArtifact.md5sum).sha1(checksums.get(SHA1))
                 .addProperty(BuildInfoFields.BUILD_NAME, ExtractorUtils.sanitizeBuildName(mavenModuleSetBuild.getParent().getFullName()))
                 .addProperty(BuildInfoFields.BUILD_NUMBER, mavenModuleSetBuild.getNumber() + "")
-                .addProperty(BuildInfoFields.BUILD_TIMESTAMP, mavenBuild.getTimestamp().getTime().getTime() + "");
+                .addProperty(BuildInfoFields.BUILD_TIMESTAMP, mavenBuild.getTimestamp().getTime().getTime() + "")
+                .packageType(DeployDetails.PackageType.MAVEN);
 
         String identifier = BuildUniqueIdentifierHelper.getUpstreamIdentifier(rootBuild);
         if (StringUtils.isNotBlank(identifier)) {

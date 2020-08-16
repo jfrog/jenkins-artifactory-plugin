@@ -11,7 +11,7 @@
                     <tr>
                         <td>
                             <a href="${publishedBuildDetails.buildInfoUrl}" target="_blank">
-                                <img src="/jenkins/${it.iconFileName}" style="width: 48px; height: 48px; margin-right:1em;" alt="[Artifactory]"/>
+                                <img src="${rootURL}${it.iconFileName}" style="width: 48px; height: 48px; margin-right:1em;" alt="[Artifactory]"/>
                             </a>
                         </td>
                         <td style="vertical-align:middle">

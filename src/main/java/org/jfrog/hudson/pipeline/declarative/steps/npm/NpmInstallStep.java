@@ -11,7 +11,7 @@ import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
-import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -113,7 +113,7 @@ public class NpmInstallStep extends AbstractStepImpl {
             if (buildDataFile == null) {
                 throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
             }
-            NpmGoResolver resolver = SerializationUtils.createMapper().treeToValue(buildDataFile.get(NpmResolverStep.STEP_NAME), NpmGoResolver.class);
+            CommonResolver resolver = SerializationUtils.createMapper().treeToValue(buildDataFile.get(NpmResolverStep.STEP_NAME), CommonResolver.class);
             resolver.setServer(getArtifactoryServer(buildNumber, buildDataFile));
             step.npmBuild.setResolver(resolver);
         }

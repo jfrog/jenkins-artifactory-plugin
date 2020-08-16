@@ -1,0 +1,28 @@
+package integration.pipelines.scripted
+
+import org.apache.commons.io.FileUtils
+
+import java.nio.file.Paths
+
+node("TestSlave") {
+    stage "Configure Artifactory"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:pip test"
+    buildInfo.number = "4"
+
+    stage "Configure pip build"
+    def rtPip = Artifactory.newPipBuild()
+    rtPip.resolver repo: "${PIP_VIRTUAL}", server: rtServer
+
+    stage "Copy project example"
+    FileUtils.copyDirectory(Paths.get("${PIP_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-pip-example").toFile())
+
+    stage "Install pip"
+    String installPath = Paths.get(pwd(), "scripted-pip-example", "requirements.txt").toString()
+    String pipInitScript = "${env.JENKINS_PIP_ENV_INIT}".toString()
+    rtPip.install buildInfo: buildInfo, args: "-r " + installPath + " --no-cache-dir --force-reinstall", envActivation: pipInitScript, module: "my-pip-module"
+
+    stage "Publish build info"
+    rtServer.publishBuildInfo buildInfo
+}

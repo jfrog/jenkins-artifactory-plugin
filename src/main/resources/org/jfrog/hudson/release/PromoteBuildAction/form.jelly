@@ -5,7 +5,7 @@
          xmlns:t="/lib/hudson" xmlns:f="/lib/form">
     <l:layout>
         <l:main-panel>
-            <f:form method="post" action="submit">
+            <f:form method="post" action="submit" name="form">
                 <f:section title="Artifactory Pro Release Promotion">
                     <f:dropdownList name="promotionPlugin" title="${%Promotion plugin}"
                                     help="/plugin/artifactory/help/release/ReleaseAction/help-promotionPlugin.html">

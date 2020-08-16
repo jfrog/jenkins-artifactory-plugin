@@ -1,0 +1,7 @@
+{
+  "rclass": "virtual",
+  "packageType": "pypi",
+  "repositories": [
+    "${PIP_REMOTE}"
+  ]
+}

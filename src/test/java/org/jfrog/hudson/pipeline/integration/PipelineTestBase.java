@@ -197,8 +197,11 @@ public class PipelineTestBase {
             put("GRADLE_CI_PUBLICATION_PROJECT_PATH", getProjectPath("gradle-example-ci-publications"));
             put("NPM_PROJECT_PATH", getProjectPath("npm-example"));
             put("GO_PROJECT_PATH", getProjectPath("go-example"));
+            put("PIP_PROJECT_PATH", getProjectPath("pip-example"));
             put("CONAN_PROJECT_PATH", getProjectPath("conan-example"));
             put("DOCKER_PROJECT_PATH", getProjectPath("docker-example"));
+            put("NUGET_PROJECT_PATH", getProjectPath("nuget-example"));
+            put("DOTNET_PROJECT_PATH", getProjectPath("dotnet-example"));
             put("TEST_TEMP_FOLDER", fixWindowsPath(testTemporaryFolder.getRoot().getAbsolutePath()));
             put("LOCAL_REPO1", getRepoKey(TestRepository.LOCAL_REPO1));
             put("LOCAL_REPO2", getRepoKey(TestRepository.LOCAL_REPO2));
@@ -208,7 +211,10 @@ public class PipelineTestBase {
             put("GO_LOCAL", getRepoKey(TestRepository.GO_LOCAL));
             put("GO_REMOTE", getRepoKey(TestRepository.GO_REMOTE));
             put("GO_VIRTUAL", getRepoKey(TestRepository.GO_VIRTUAL));
+            put("PIP_REMOTE", getRepoKey(TestRepository.PIP_REMOTE));
+            put("PIP_VIRTUAL", getRepoKey(TestRepository.PIP_VIRTUAL));
             put("CONAN_LOCAL", getRepoKey(TestRepository.CONAN_LOCAL));
+            put("NUGET_REMOTE", getRepoKey(TestRepository.NUGET_REMOTE));
         }});
     }
 
@@ -226,12 +232,15 @@ public class PipelineTestBase {
     /**
      * Run pipeline script.
      *
-     * @param name - Pipeline name from 'jenkins-artifactory-plugin/src/test/resources/integration/pipelines'.
+     * @param name                     - Pipeline name from 'jenkins-artifactory-plugin/src/test/resources/integration/pipelines'
+     * @param injectPipelinesParameter - True if this is a JFrog pipelines test
      * @return the Jenkins job
      */
-    WorkflowRun runPipeline(String name) throws Exception {
+    WorkflowRun runPipeline(String name, boolean injectPipelinesParameter) throws Exception {
         WorkflowJob project = jenkins.createProject(WorkflowJob.class);
-        Utils.injectJfPipelinesInfoParameter(project, "{\"stepId\":\"5\"}"); // For JFrog Pipelines tests
+        if (injectPipelinesParameter) {
+            Utils.injectJfPipelinesInfoParameter(project, "{\"stepId\":\"5\"}"); // For JFrog Pipelines tests
+        }
         FilePath slaveWs = slave.getWorkspaceFor(project);
         if (slaveWs == null) {
             throw new Exception("Slave workspace not found");

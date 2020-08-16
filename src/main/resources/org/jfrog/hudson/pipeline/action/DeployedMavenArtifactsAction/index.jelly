@@ -1,0 +1,15 @@
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout" xmlns:f="/lib/form">
+    <l:layout title="Maven Artifacts">
+        <st:include it="${it.build}" page="sidepanel.jelly"/>
+        <l:main-panel>
+            <h1> Maven Artifacts </h1>
+            <f:section title="Deployed" name="deployedMavenArtifacts">
+                <ul>
+                    <j:forEach var="artifact" items="${it.deployedMavenArtifacts}">
+                        <li><a href="${artifact.url}">${artifact.name}</a></li>
+                    </j:forEach>
+                </ul>
+            </f:section>
+        </l:main-panel>
+    </l:layout>
+</j:jelly>

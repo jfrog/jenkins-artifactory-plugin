@@ -2,20 +2,20 @@
     <j:set var="uniqueId" value="${h.generateId()}"/>
     <f:dropdownList name="deployerDetails" title="${%Artifactory server}">
         <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
-            <f:dropdownListBlock value="${s.name}" title="${s.url}" selected="${s.name==instance.artifactoryName}">
+            <f:dropdownListBlock value="${s.serverId}" title="${s.artifactoryUrl}" selected="${s.serverId==instance.artifactoryName}">
                 <f:nested>
-                    <input type="hidden" name="artifactoryName" value="${s.name}"/>
-                    <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.url}" value="${s.url}"/>
+                    <input type="hidden" name="artifactoryName" value="${s.serverId}"/>
+                    <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.artifactoryUrl}" value="${s.artifactoryUrl}"/>
                     <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
 
-                    <r:dynamicRepos id="publishRepositoryKey-${s.url}-${uniqueId}"
+                    <r:dynamicRepos id="publishRepositoryKey-${s.artifactoryUrl}-${uniqueId}"
                                     field="deployReleaseRepository"
                                     title="Target releases repository"
                                     repositoryConf="${instance.deployerDetails.deployReleaseRepository}"
                                     repositories="${instance.releaseRepositoryList}"
                                     helpUrl="/plugin/artifactory/help/common/help-deployReleases.html"/>
 
-                    <r:dynamicRepos id="publishSnapshotsRepositoryKeys-${s.url}-${uniqueId}"
+                    <r:dynamicRepos id="publishSnapshotsRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                     title="Target snapshot repository"
                                     field="deploySnapshotRepository"
                                     repositoryConf="${instance.deployerDetails.deploySnapshotRepository}"
@@ -24,10 +24,10 @@
 
                     <f:entry title="${%Custom staging configuration}"
                              help="/plugin/artifactory/help/release/common/help-stagingPlugin.html">
-                        <select class="setting-input" name="userPluginKey" id="customStagingConfiguration-${s.url}-${uniqueId}"
+                        <select class="setting-input" name="userPluginKey" id="customStagingConfiguration-${s.artifactoryUrl}-${uniqueId}"
                                 onchange="setStagingParamsSelectedValue(this)">
                             <j:choose>
-                                <j:when test="${s.name==instance.artifactoryName}">
+                                <j:when test="${s.serverId==instance.artifactoryName}">
                                     <j:choose>
                                         <f:option selected="${instance.deployerDetails.stagingPlugin.pluginName}"
                                                   value="${instance.deployerDetails.stagingPlugin.pluginName}">
@@ -39,7 +39,7 @@
                         </select>
                         <div id="stagingParamsDiv-${uniqueId}">
                             <j:choose>
-                                <j:when test="${s.name==instance.artifactoryName}">
+                                <j:when test="${s.serverId==instance.artifactoryName}">
                                     <j:choose>
                                         <j:when test="${instance.deployerDetails.stagingPlugin != null}">
                                             <j:choose>
@@ -62,7 +62,7 @@
                     </script>
                     <r:repos bind="bindToDescriptor"
                              jsFunction="artifactoryRedeployPublisher"
-                             repoUrl="artifactoryUrlDeploy${s.url}"
+                             repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"
                              credentialsDescriber="overridingDeployerCredentials-${uniqueId}"/>
                 </f:nested>
             </f:dropdownListBlock>

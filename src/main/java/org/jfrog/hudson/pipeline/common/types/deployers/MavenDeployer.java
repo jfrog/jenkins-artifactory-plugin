@@ -1,14 +1,26 @@
 package org.jfrog.hudson.pipeline.common.types.deployers;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import hudson.model.Run;
+import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
+import org.jfrog.build.api.Artifact;
+import org.jfrog.build.api.Module;
+import org.jfrog.build.api.builder.ArtifactBuilder;
+import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.pipeline.action.DeployedMavenArtifactsAction;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Tamirh on 16/08/2016.
@@ -101,5 +113,55 @@ public class MavenDeployer extends Deployer {
         dummy.setDeployEvenIfUnstable(false);
         dummy.setThreads(1);
         return dummy;
+    }
+
+    /**
+     * Adds artifacts from the provided modules to the Deployed Maven Artifacts Summary Action.
+     */
+    public static void addDeployedArtifactsActionFromModules(Run build, String artifactoryUrl, List<Module> modules) {
+        for (Module module : modules) {
+            if (module.getArtifacts() != null) {
+                addDeployedArtifactsAction(build, artifactoryUrl, module.getArtifacts());
+            }
+        }
+    }
+
+    /**
+     * Adds artifacts from the provided DeployDetails map to the Deployed Maven Artifacts Summary Action.
+     */
+    public static void addDeployedArtifactsActionFromDetails(Run build, String artifactoryUrl, Map<String, Set<DeployDetails>> deployableArtifactsByModule) {
+        deployableArtifactsByModule.forEach((module, detailsSet) -> {
+            boolean isMaven = true;
+            List<Artifact> curArtifacts = Lists.newArrayList();
+            for (DeployDetails curDetails : detailsSet) {
+                isMaven = (curDetails.getPackageType() == DeployDetails.PackageType.MAVEN) && isMaven;
+                Artifact artifact = new ArtifactBuilder(FilenameUtils.getName(curDetails.getArtifactPath()))
+                        .md5(curDetails.getMd5())
+                        .sha1(curDetails.getSha1())
+                        .type(FilenameUtils.getExtension(curDetails.getArtifactPath()))
+                        .remotePath(curDetails.getTargetRepository() + "/" + curDetails.getArtifactPath())
+                        .build();
+                curArtifacts.add(artifact);
+            }
+            if (isMaven) {
+                addDeployedArtifactsAction(build, artifactoryUrl, curArtifacts);
+            }
+        });
+    }
+
+    /**
+     * Adds the provided artifacts to the Deployed Maven Artifacts Summary Action.
+     * If such action was not initialized yet, initialize a new one.
+     */
+    public static void addDeployedArtifactsAction(Run build, String artifactoryUrl, List<Artifact> mavenArtifacts) {
+        synchronized (build.getActions()) {
+            DeployedMavenArtifactsAction action = build.getAction(DeployedMavenArtifactsAction.class);
+            // Initialize action if haven't done so yet.
+            if (action == null) {
+                action = new DeployedMavenArtifactsAction(build);
+                build.getActions().add(action);
+            }
+            action.addDeployedMavenArtifacts(artifactoryUrl, mavenArtifacts);
+        }
     }
 }

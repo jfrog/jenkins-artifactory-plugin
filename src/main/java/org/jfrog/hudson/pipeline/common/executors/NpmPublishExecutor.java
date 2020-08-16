@@ -8,7 +8,7 @@ import hudson.model.TaskListener;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.NpmGoDeployer;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
-import org.jfrog.hudson.pipeline.common.types.resolvers.NpmGoResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 
 /**
  * Created by Yahav Itzhak on 25 Nov 2018.
@@ -25,6 +25,6 @@ public class NpmPublishExecutor extends NpmExecutor {
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }
-        super.execute(deployer, new NpmGoResolver(), "", "NpmPublish");
+        super.execute(deployer, new CommonResolver(), "", "NpmPublish");
     }
 }

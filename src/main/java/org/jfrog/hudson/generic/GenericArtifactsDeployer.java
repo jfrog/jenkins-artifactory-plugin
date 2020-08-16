@@ -17,7 +17,6 @@ import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
-import org.jfrog.build.extractor.ModuleParallelDeployHelper;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
@@ -56,7 +55,7 @@ public class GenericArtifactsDeployer {
 
     public GenericArtifactsDeployer(Run build, ArtifactoryGenericConfigurator configurator,
                                     BuildListener listener, CredentialsConfig credentialsConfig)
-            throws IOException, InterruptedException, NoSuchAlgorithmException {
+            throws IOException, InterruptedException {
         this.build = build;
         this.configurator = configurator;
         this.listener = listener;
@@ -117,7 +116,6 @@ public class GenericArtifactsDeployer {
         private ProxyConfiguration proxyConfiguration;
         private PatternType patternType = PatternType.ANT;
         private String spec;
-        private Map<String, Set<DeployDetails>> deployableArtifactsByModule;
         private int threads;
 
         // Generic deploy by pattern pairs
@@ -146,17 +144,6 @@ public class GenericArtifactsDeployer {
             this.threads = threads;
         }
 
-        // Late deploy for build tools' deployable artifacts
-        public FilesDeployerCallable(TaskListener listener, Map<String, Set<DeployDetails>> deployableArtifactsByModule,
-                                     ArtifactoryServer server, Credentials credentials, ProxyConfiguration proxyConfiguration, int threads) {
-            this.listener = listener;
-            this.deployableArtifactsByModule = deployableArtifactsByModule;
-            this.server = server;
-            this.credentials = credentials;
-            this.proxyConfiguration = proxyConfiguration;
-            this.threads = threads;
-        }
-
         public List<Artifact> invoke(File workspace, VirtualChannel channel) throws IOException, InterruptedException {
             Log log = new JenkinsBuildInfoLog(listener);
 
@@ -175,15 +162,7 @@ public class GenericArtifactsDeployer {
                 }
             }
 
-            // Option 2. Maven & Gradle Pipeline late deploy - Deployable Artifacts by Module are already set.
-            if (deployableArtifactsByModule != null) {
-                try (ArtifactoryBuildInfoClient client = clientBuilder.build()) {
-                    new ModuleParallelDeployHelper().deployArtifacts(client, deployableArtifactsByModule, threads);
-                }
-                return convertDeployDetailsByModuleToArtifacts(deployableArtifactsByModule);
-            }
-
-            // Option 3. Generic deploy - Fetch the artifacts details from workspace by using 'patternPairs'.
+            // Option 2. Generic deploy - Fetch the artifacts details from workspace by using 'patternPairs'.
             Set<DeployDetails> artifactsToDeploy = Sets.newHashSet();
             Multimap<String, File> targetPathToFilesMap = buildTargetPathToFiles(workspace);
             for (Map.Entry<String, File> entry : targetPathToFilesMap.entries()) {
@@ -203,14 +182,6 @@ public class GenericArtifactsDeployer {
                         .sha1(detail.getSha1()).type(ext).build();
                 result.add(artifact);
             }
-            return result;
-        }
-
-        private List<Artifact> convertDeployDetailsByModuleToArtifacts(Map<String, Set<DeployDetails>> detailsByModule) {
-            List<Artifact> result = Lists.newArrayList();
-            detailsByModule.forEach((module, details) -> {
-                result.addAll(convertDeployDetailsToArtifacts(details));
-            });
             return result;
         }
 
@@ -269,7 +240,8 @@ public class GenericArtifactsDeployer {
                     .artifactPath(path)
                     .targetRepository(repositoryKey)
                     .md5(checksums.get(MD5)).sha1(checksums.get(SHA1))
-                    .addProperties(buildProperties);
+                    .addProperties(buildProperties)
+                    .packageType(DeployDetails.PackageType.GENERIC);
             result.add(builder.build());
 
             return result;

@@ -51,7 +51,7 @@ public abstract class EnvExtractor implements Executor {
     protected abstract void addExtraConfiguration(ArtifactoryClientConfiguration configuration);
 
     private PublisherContext createPublisherContext() throws IOException {
-        if (publisher.isEmpty()) {
+        if (publisher == null || publisher.isEmpty()) {
             return null;
         }
         return publisher.getContextBuilder().build();
