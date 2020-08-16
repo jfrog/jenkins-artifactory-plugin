@@ -310,7 +310,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Set<String> expectedArtifacts = Sets.newHashSet(pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.jar", pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.pom");
         String buildNumber = "3";
         try {
-            runPipeline("gradleCiServerPublication");
+            runPipeline("gradleCiServerPublication", false);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             assertEquals(5, buildInfo.getModules().size());
 
