@@ -46,7 +46,6 @@ import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.maven3.ArtifactoryMaven3Configurator;
 import org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.types.GradlePublications;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.resolvers.MavenResolver;
 import org.jfrog.hudson.release.ReleaseAction;
@@ -400,9 +399,9 @@ public class ExtractorUtils {
             configuration.setEnvVarsIncludePatterns(Util.replaceMacro(envVarsPatterns.getIncludePatterns(), env));
             configuration.setEnvVarsExcludePatterns(Util.replaceMacro(envVarsPatterns.getExcludePatterns(), env));
         }
-        GradlePublications gradlePublications = context.getGradlePublications();
+        List<String> gradlePublications = context.getGradlePublications();
         if (gradlePublications != null) {
-            String publications = String.join(",", gradlePublications.getPublications());
+            String publications = String.join(",", gradlePublications);
             configuration.publisher.setPublications(publications);
         }
         addDeploymentProperties(context, configuration.publisher, env);

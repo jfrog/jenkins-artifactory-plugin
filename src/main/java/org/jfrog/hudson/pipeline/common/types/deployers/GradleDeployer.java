@@ -182,6 +182,6 @@ public class GradleDeployer extends Deployer {
                 .maven2Compatible(getMavenCompatible())
                 .deploymentProperties(ExtractorUtils.buildPropertiesString(getProperties()))
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
-                .publications(getPublications());
+                .publications(getPublications().getPublications());
     }
 }
