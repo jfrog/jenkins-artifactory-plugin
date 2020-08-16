@@ -111,9 +111,17 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         return new ArrayList<PromotionInfo>(promotionCandidates.values());
     }
 
-    public String getBuildData() {
+    /**
+     * Load the related repositories, plugins and a promotion config associated to all builds
+     * relevant for this build promotion action.
+     * Called from the UI.
+     *
+     * @return JSON string representation of the LoadBuildsResponse class.
+     */
+    @SuppressWarnings({"UnusedDeclaration"})
+    public String getBuildsData() {
         try {
-            return createMapper().writeValueAsString(loadBuild());
+            return createMapper().writeValueAsString(loadBuilds());
         } catch (Exception e) {
             e.printStackTrace();
             return e.getMessage();
@@ -126,9 +134,8 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
      *
      * @return LoadBuildsResponse e.g. list of repositories, plugins and a promotion config.
      */
-    @JavaScriptMethod
     @SuppressWarnings({"UnusedDeclaration"})
-    public LoadBuildsResponse loadBuild() {
+    private LoadBuildsResponse loadBuilds() {
         LoadBuildsResponse response = new LoadBuildsResponse();
         // When we load a new build we need also to reset the promotion plugin.
         // The null plugin is related to 'None' plugin.

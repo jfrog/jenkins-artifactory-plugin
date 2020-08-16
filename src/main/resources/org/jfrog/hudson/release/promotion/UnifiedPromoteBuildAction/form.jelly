@@ -25,7 +25,7 @@
                             <f:entry>
                                 <div style="float:right">
                                     <input type="button" value="${%Load build}" class="yui-button validate-button"
-                                           onclick="loadBuild('${it.getBuildData()}', true)" id="loadBuild"/>
+                                           onclick="loadBuild('${it.buildsData}', true)" id="loadBuild"/>
                                 </div>
                                 <div style="display:none;" id="spinnerDiv">
                                     <img src="${imagesURL}/spinner.gif"/>
@@ -62,7 +62,7 @@
                 var buildBind = <st:bind value="${it}"/>;
                 var promoteInfoListSize = "${it.PromoteInfoListSize}";
                 if (promoteInfoListSize == 1) {
-                    loadBuild('${it.getBuildData()}', false); // Auto-load
+                    loadBuild('${it.buildsData}', false); // Auto-load
                 }
             </script>
         </l:main-panel>
