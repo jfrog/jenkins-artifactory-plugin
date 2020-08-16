@@ -1,11 +1,13 @@
 package org.jfrog.hudson.pipeline.common.types;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +22,7 @@ public class Docker implements Serializable {
     private String host;
     private String javaArgs;
     // Properties to attach to the deployed docker layers.
-    private HashMap<String, String> properties = new HashMap();
+    private ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
     private ArtifactoryServer server;
 
     public Docker() {
@@ -50,7 +52,7 @@ public class Docker implements Serializable {
 
     @Whitelisted
     public Docker addProperty(String key, String... values) {
-        properties.put(key, String.join(",", values));
+        properties.putAll(key, Arrays.asList(values));
         return this;
     }
 

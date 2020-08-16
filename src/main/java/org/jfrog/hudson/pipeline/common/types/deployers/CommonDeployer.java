@@ -57,7 +57,7 @@ public class CommonDeployer extends Deployer {
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
                 .deployerOverrider(this)
                 .includeEnvVars(isIncludeEnvVars())
-                .deploymentProperties(ExtractorUtils.buildPropertiesString(getProperties()))
+                .deploymentProperties(org.jfrog.build.api.util.Utils.buildPropertiesString(getProperties()))
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
     }
 }

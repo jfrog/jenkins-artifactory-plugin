@@ -91,7 +91,7 @@ public class MavenDeployer extends Deployer {
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .includeEnvVars(isIncludeEnvVars())
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
-                .deploymentProperties(ExtractorUtils.buildPropertiesString(getProperties()))
+                .deploymentProperties(org.jfrog.build.api.util.Utils.buildPropertiesString(getProperties()))
                 .includesExcludes(getArtifactsIncludeExcludeForDeyployment());
     }
 

@@ -180,7 +180,7 @@ public class GradleDeployer extends Deployer {
                 .deployerOverrider(this)
                 .includeEnvVars(isIncludeEnvVars())
                 .maven2Compatible(getMavenCompatible())
-                .deploymentProperties(ExtractorUtils.buildPropertiesString(getProperties()))
+                .deploymentProperties(org.jfrog.build.api.util.Utils.buildPropertiesString(getProperties()))
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .publications(getPublications().getPublications());
     }

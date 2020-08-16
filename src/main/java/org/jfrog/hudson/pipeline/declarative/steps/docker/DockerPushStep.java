@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.declarative.steps.docker;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
@@ -14,7 +15,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 /**
  * @author Alexei Vainshtein
@@ -29,7 +29,7 @@ public class DockerPushStep extends AbstractStepImpl {
     private String buildNumber;
     private String buildName;
     private String targetRepo;
-    private HashMap<String, String> properties = new HashMap();
+    private ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
     private String javaArgs;
 
     @DataBoundConstructor

@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.scripted.steps;
 
+import com.google.common.collect.ArrayListMultimap;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.apache.commons.cli.MissingArgumentException;
@@ -14,7 +15,6 @@ import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.util.HashMap;
 
 @SuppressWarnings("unused")
 public class DockerPushStep extends AbstractStepImpl {
@@ -26,11 +26,11 @@ public class DockerPushStep extends AbstractStepImpl {
     private String targetRepo;
     private String javaArgs;
     // Properties to attach to the deployed docker layers.
-    private HashMap<String, String> properties;
+    private ArrayListMultimap<String, String> properties;
 
     @DataBoundConstructor
     public DockerPushStep(String image, String host, String targetRepo,
-                          BuildInfo buildInfo, HashMap<String, String> properties, ArtifactoryServer server, String javaArgs) {
+                          BuildInfo buildInfo, ArrayListMultimap<String, String> properties, ArtifactoryServer server, String javaArgs) {
 
         this.image = image;
         this.host = host;
@@ -49,7 +49,7 @@ public class DockerPushStep extends AbstractStepImpl {
         return image;
     }
 
-    public HashMap<String, String> getProperties() {
+    public ArrayListMultimap<String, String> getProperties() {
         return properties;
     }
 

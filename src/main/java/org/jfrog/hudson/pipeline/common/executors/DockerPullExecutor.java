@@ -30,7 +30,7 @@ public class DockerPullExecutor extends BuildInfoProcessRunner {
         CommonResolver resolver = new CommonResolver();
         resolver.setServer(this.server);
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
-        EnvExtractor envExtractor = new DockerEnvExtractor(build, buildInfo, null, listener, launcher, tempDir, env, imageTag, host, null);
+        EnvExtractor envExtractor = new DockerEnvExtractor(build, buildInfo, null, listener, launcher, tempDir, env, imageTag, host);
         super.execute("docker", "org.jfrog.build.extractor.docker.extractor.DockerPull", envExtractor, tempDir);
     }
 
