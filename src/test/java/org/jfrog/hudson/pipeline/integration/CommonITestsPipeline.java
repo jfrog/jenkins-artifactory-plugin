@@ -13,7 +13,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Module;
-import org.jfrog.build.extractor.docker.DockerAgentUtils;
+import org.jfrog.build.extractor.docker.DockerJavaWrapper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.trigger.ArtifactoryTrigger;
@@ -490,7 +490,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             }
             String imageName = domainName + "jfrog_artifactory_jenkins_tests:2";
             String host = System.getenv("JENKINS_ARTIFACTORY_DOCKER_HOST");
-            DockerAgentUtils.buildImage(imageName, host, new EnvVars(), getProjectPath("docker-example"));
+            DockerJavaWrapper.buildImage(imageName, host, new EnvVars(), getProjectPath("docker-example"));
             // Run pipeline
             runPipeline("dockerPush", false);
             String buildNumber = "3";

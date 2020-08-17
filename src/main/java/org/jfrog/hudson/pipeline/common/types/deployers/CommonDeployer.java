@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.common.types.deployers;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
+import org.jfrog.build.extractor.clientConfiguration.util.DeploymentUrlUtils;
 import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
@@ -10,6 +11,8 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
+
+import java.io.UnsupportedEncodingException;
 
 public class CommonDeployer extends Deployer {
     private String repo;
@@ -49,7 +52,7 @@ public class CommonDeployer extends Deployer {
 
     @Override
     @JsonIgnore
-    public PublisherContext.Builder getContextBuilder() {
+    public PublisherContext.Builder getContextBuilder() throws UnsupportedEncodingException {
         return new PublisherContext.Builder()
                 .artifactoryServer(getArtifactoryServer())
                 .serverDetails(getDetails())
@@ -57,7 +60,7 @@ public class CommonDeployer extends Deployer {
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
                 .deployerOverrider(this)
                 .includeEnvVars(isIncludeEnvVars())
-                .deploymentProperties(org.jfrog.build.api.util.Utils.buildPropertiesString(getProperties()))
+                .deploymentProperties(DeploymentUrlUtils.buildMatrixParamsString(getProperties(), false))
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
     }
 }

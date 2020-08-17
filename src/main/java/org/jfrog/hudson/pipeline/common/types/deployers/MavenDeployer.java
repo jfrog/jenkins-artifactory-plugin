@@ -10,6 +10,7 @@ import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
+import org.jfrog.build.extractor.clientConfiguration.util.DeploymentUrlUtils;
 import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
@@ -18,6 +19,7 @@ import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -81,7 +83,7 @@ public class MavenDeployer extends Deployer {
 
     @Override
     @JsonIgnore
-    public PublisherContext.Builder getContextBuilder() {
+    public PublisherContext.Builder getContextBuilder() throws UnsupportedEncodingException {
         return new PublisherContext.Builder().artifactoryServer(getArtifactoryServer())
                 .deployerOverrider(this)
                 .serverDetails(getDetails())
@@ -91,7 +93,7 @@ public class MavenDeployer extends Deployer {
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .includeEnvVars(isIncludeEnvVars())
                 .skipBuildInfoDeploy(!isDeployBuildInfo())
-                .deploymentProperties(org.jfrog.build.api.util.Utils.buildPropertiesString(getProperties()))
+                .deploymentProperties(DeploymentUrlUtils.buildMatrixParamsString(getProperties(), false))
                 .includesExcludes(getArtifactsIncludeExcludeForDeyployment());
     }
 
