@@ -64,8 +64,8 @@ public class CollectIssuesExecutor implements Executor {
         private String config;
         private ArtifactoryBuildInfoClientBuilder clientBuilder;
         private String buildName;
-        private transient FilePath ws;
-        private transient TaskListener listener;
+        private FilePath ws;
+        private TaskListener listener;
 
         CollectIssuesCallable(Log logger, String config, ArtifactoryBuildInfoClientBuilder clientBuilder,
                               String buildName, FilePath ws, TaskListener listener) {
@@ -79,7 +79,7 @@ public class CollectIssuesExecutor implements Executor {
 
         public org.jfrog.build.api.Issues invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
             IssuesCollector issuesCollector = new IssuesCollector();
-            return issuesCollector.collectIssues(file, logger, config, clientBuilder, buildName,Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
+            return issuesCollector.collectIssues(file, logger, config, clientBuilder, buildName, Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
         }
     }
 }
