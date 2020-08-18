@@ -314,6 +314,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertEquals(5, buildInfo.getModules().size());
 
             Module module = getAndAssertModule(buildInfo, "org.jfrog.example.gradle:" + pipelineType.toString() + "-gradle-example-ci-server-publication:1.0");
+            // Gradle 6 and above produce an extra artifact of type "module".
+            // Inorder to allow the test to run on Gradle 6 and above, we remove it.
             module.setArtifacts(module.getArtifacts().stream().filter(art -> !art.getType().toLowerCase().equals("module")).collect(Collectors.toList()));
             assertModuleArtifacts(module, expectedArtifacts);
             assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
