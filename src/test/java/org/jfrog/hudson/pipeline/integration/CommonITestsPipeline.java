@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
@@ -305,7 +306,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void gradleCiServerPublicationTest(String buildName) throws Exception {
-        Set<String> expectedArtifacts = Sets.newHashSet(pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.jar", pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.pom", pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.module");
+        Set<String> expectedArtifacts = Sets.newHashSet(pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.jar", pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.pom");
         String buildNumber = "3";
         try {
             runPipeline("gradleCiServerPublication", false);
@@ -313,6 +314,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertEquals(5, buildInfo.getModules().size());
 
             Module module = getAndAssertModule(buildInfo, "org.jfrog.example.gradle:" + pipelineType.toString() + "-gradle-example-ci-server-publication:1.0");
+            module.setArtifacts(module.getArtifacts().stream().filter(art -> !art.getType().toLowerCase().equals("module")).collect(Collectors.toList()));
             assertModuleArtifacts(module, expectedArtifacts);
             assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
 
