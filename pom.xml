@@ -27,7 +27,7 @@
     <packaging>hpi</packaging>
     <name>Jenkins Artifactory Plugin</name>
     <description>Integrates Artifactory to Jenkins</description>
-    <url>https://wiki.jenkins-ci.org/display/JENKINS/Artifactory+Plugin</url>
+    <url>https://github.com/jenkinsci/artifactory-plugin</url>
 
     <properties>
         <!-- Minimal version required by Pipeline dependencies in 2.14.0 -->
