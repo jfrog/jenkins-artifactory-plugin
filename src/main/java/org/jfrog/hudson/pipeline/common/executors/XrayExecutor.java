@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.common.executors;
 
+import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
@@ -47,7 +48,7 @@ public class XrayExecutor implements Executor {
         xrayScanResult = new XrayScanResult(buildScanResult);
 
         if (xrayScanResult.isFoundVulnerable()) {
-            addXrayResultAction(xrayScanResult.getScanUrl());
+            addXrayResultAction(xrayScanResult.getScanUrl(), xrayScanConfig.getBuildName(), xrayScanConfig.getBuildNumber());
             if (xrayScanConfig.getFailBuild()) {
                 throw new XrayScanException(xrayScanResult);
             }
@@ -65,11 +66,24 @@ public class XrayExecutor implements Executor {
         return xrayScanResult;
     }
 
-    private void addXrayResultAction(String xrayUrl) {
+    private void addXrayResultAction(String xrayUrl, String buildName, String buildNumber) {
+        String encodedXrayUrl = encodeXrayUrl(xrayUrl, buildName, buildNumber);
         synchronized (build) {
-            XrayScanResultAction action = new XrayScanResultAction(xrayUrl, build);
+            XrayScanResultAction action = new XrayScanResultAction(encodedXrayUrl, build);
             build.addAction(action);
         }
+    }
+
+    /**
+     * Encode the buildName and buildNumber of the scan results URL.
+     *
+     * @param xrayUrl     - The Xray scan results URL
+     * @param buildName   - The build name
+     * @param buildNumber - The build number
+     * @return encoded Xray scan results URL
+     */
+    private String encodeXrayUrl(String xrayUrl, String buildName, String buildNumber) {
+        return StringUtils.replaceOnce(xrayUrl, buildName + "/" + buildNumber, Util.rawEncode(buildName) + "/" + Util.rawEncode(buildNumber));
     }
 
     public static class XrayScanException extends Exception {
