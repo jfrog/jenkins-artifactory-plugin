@@ -34,10 +34,10 @@ public class Env implements Serializable {
      * Collect environment variables and system properties under with filter constrains
      */
     public void collectVariables(EnvVars env, Run build, TaskListener listener) {
-        EnvVars buildParameters = Utils.extractBuildParameters(build, listener);
-        if (buildParameters != null) {
-            env.putAll(buildParameters);
-        }
+        collectVariables(env).collectVariables(build, listener);
+    }
+
+    public Env collectVariables(EnvVars env) {
         this.envVars.putAll(env);
         Map<String, String> sysEnv = new HashMap<>();
         Properties systemProperties = System.getProperties();
@@ -47,6 +47,15 @@ public class Env implements Serializable {
             sysEnv.put(propertyKey, systemProperties.getProperty(propertyKey));
         }
         this.sysVars.putAll(sysEnv);
+        return this;
+    }
+
+    public Env collectVariables(Run build, TaskListener listener) {
+        EnvVars buildParameters = Utils.extractBuildParameters(build, listener);
+        if (buildParameters != null) {
+            this.envVars.putAll(buildParameters);
+        }
+        return this;
     }
 
     /**
@@ -59,9 +68,9 @@ public class Env implements Serializable {
     }
 
     /**
-     * Append environment variables and system properties from othre PipelineEvn object
+     * Append environment variables and system properties from other PipelineEvn object
      */
-    protected void append(Env env) {
+    public void append(Env env) {
         this.envVars.putAll(env.envVars);
         this.sysVars.putAll(env.sysVars);
     }
