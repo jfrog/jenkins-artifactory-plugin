@@ -29,9 +29,22 @@ public class DockerPullExecutor extends BuildInfoProcessRunner {
         }
         CommonResolver resolver = new CommonResolver();
         resolver.setServer(this.server);
+        resolver.setRepo(getDockerRepo(this.imageTag));
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
-        EnvExtractor envExtractor = new DockerEnvExtractor(build, buildInfo, null, listener, launcher, tempDir, env, imageTag, host);
+        EnvExtractor envExtractor = new DockerEnvExtractor(build, buildInfo, null, resolver, listener, launcher, tempDir, env, imageTag, host);
         super.execute("docker", "org.jfrog.build.extractor.docker.extractor.DockerPull", envExtractor, tempDir);
+    }
+
+    // In order to push/pull from images from Artifactory images must be present in following template:
+    // artprod.mycompany/<DOCKER_REPOSITORY>:<DOCKER_TAG>
+    // 'getDockerRepo' returns the DOCKER_REPOSITORY
+    private String getDockerRepo(String imageTag) {
+        int dockerRepoStartidx = imageTag.indexOf('/');
+        int dockerRepoEndidx = imageTag.indexOf(':');
+        if (dockerRepoStartidx == -1 || dockerRepoEndidx == -1) {
+            return "";
+        }
+        return imageTag.substring(dockerRepoStartidx + 1, dockerRepoEndidx);
     }
 
     public BuildInfo getBuildInfo() {

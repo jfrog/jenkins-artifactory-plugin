@@ -41,7 +41,7 @@ public class DockerPushExecutor extends BuildInfoProcessRunner {
         deployer.setServer(this.server);
         deployer.setProperties(this.properties);
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
-        EnvExtractor envExtractor = new DockerEnvExtractor(build, buildInfo, deployer, listener, launcher, tempDir, env, imageTag, host);
+        EnvExtractor envExtractor = new DockerEnvExtractor(build, buildInfo, deployer, null, listener, launcher, tempDir, env, imageTag, host);
         super.execute("docker", "org.jfrog.build.extractor.docker.extractor.DockerPush", envExtractor, tempDir);
     }
 
