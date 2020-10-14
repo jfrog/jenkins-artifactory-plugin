@@ -8,7 +8,6 @@ import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.jfrog.hudson.pipeline.common.Utils.BUILD_INFO;
@@ -57,15 +56,15 @@ public class Docker implements Serializable {
     }
 
     @Whitelisted
-    public void push(String imageTag, String targetRepository) {
-        push(imageTag, targetRepository, null);
+    public void push(String imageTag, String targetRepo) {
+        push(imageTag, targetRepo, null);
     }
 
     @Whitelisted
-    public void push(String imageTag, String targetRepository, BuildInfo providedBuildInfo) {
+    public void push(String imageTag, String targetRepo, BuildInfo providedBuildInfo) {
         Map<String, Object> dockerArguments = Maps.newLinkedHashMap();
         dockerArguments.put("image", imageTag);
-        dockerArguments.put("targetRepo", targetRepository);
+        dockerArguments.put("targetRepo", targetRepo);
         dockerArguments.put(BUILD_INFO, providedBuildInfo);
         push(dockerArguments);
     }
@@ -82,14 +81,15 @@ public class Docker implements Serializable {
     }
 
     @Whitelisted
-    public void pull(String imageTag) {
-        pull(imageTag, null);
+    public void pull(String imageTag, String targetRepository) {
+        pull(imageTag, targetRepository, null);
     }
 
     @Whitelisted
-    public void pull(String imageTag, BuildInfo providedBuildInfo) {
+    public void pull(String imageTag, String targetRepo, BuildInfo providedBuildInfo) {
         Map<String, Object> dockerArguments = Maps.newLinkedHashMap();
         dockerArguments.put("image", imageTag);
+        dockerArguments.put("targetRepo", targetRepo);
         dockerArguments.put(BUILD_INFO, providedBuildInfo);
         pull(dockerArguments);
     }

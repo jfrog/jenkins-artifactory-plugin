@@ -25,17 +25,18 @@ public class DockerPullStep extends AbstractStepImpl {
     private final String image;
     private final ArtifactoryServer server;
     private final BuildInfo buildInfo;
-    private String host;
-    private String javaArgs;
-
+    private final String host;
+    private final String javaArgs;
+    private final String targetRepository;
 
     @DataBoundConstructor
-    public DockerPullStep(String image, String host, String javaArgs, BuildInfo buildInfo, ArtifactoryServer server) {
+    public DockerPullStep(String image, String host, String targetRepository, String javaArgs, BuildInfo buildInfo, ArtifactoryServer server) {
         this.image = image;
         this.host = host;
         this.buildInfo = buildInfo;
         this.server = server;
         this.javaArgs = javaArgs;
+        this.targetRepository = targetRepository;
     }
 
     public BuildInfo getBuildInfo() {
@@ -48,6 +49,10 @@ public class DockerPullStep extends AbstractStepImpl {
 
     public ArtifactoryServer getServer() {
         return server;
+    }
+
+    public String getTargetRepository() {
+        return targetRepository;
     }
 
     public String getHost() {
@@ -82,7 +87,7 @@ public class DockerPullStep extends AbstractStepImpl {
             }
 
             ArtifactoryServer server = step.getServer();
-            DockerPullExecutor dockerExecutor = new DockerPullExecutor(server, buildInfo, build, step.image, step.host, step.javaArgs, launcher, listener, ws, env);
+            DockerPullExecutor dockerExecutor = new DockerPullExecutor(server, buildInfo, build, step.image, step.targetRepository, step.host, step.javaArgs, launcher, listener, ws, env);
             dockerExecutor.execute();
             JenkinsBuildInfoLog log = new JenkinsBuildInfoLog(listener);
             log.info("Successfully pulled docker image: " + imageTag);
