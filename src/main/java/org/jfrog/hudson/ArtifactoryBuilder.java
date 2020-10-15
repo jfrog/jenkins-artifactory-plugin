@@ -31,7 +31,7 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.client.ProxyConfiguration;
@@ -143,7 +143,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             String username = StringUtils.EMPTY;
             String password = StringUtils.EMPTY;
             
-            StringCredentialsImpl accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(deployerCredentialsId, null);
+            StringCredentials accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(deployerCredentialsId, null);
             if (accessTokenCredentials != null) {
                 accessToken = accessTokenCredentials.getSecret().getPlainText();
             } else {
@@ -206,7 +206,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 return FormValidation.error("Connection Retries can not be less then 0");
             }
 
-            StringCredentialsImpl accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(credentialsId, null);
+            StringCredentials accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(credentialsId, null);
             if (accessTokenCredentials == null) {
                 return FormValidation.error("Please set credentials with access token as 'Secret text'");
             }

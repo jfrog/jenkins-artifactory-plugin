@@ -21,7 +21,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.util.Credentials;
-import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 
 import java.io.IOException;
 import java.net.URL;
@@ -51,7 +51,7 @@ public class PluginsUtils {
                 .withMatching(
                         CredentialsMatchers.anyOf(
                                 CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class),
-                                CredentialsMatchers.instanceOf(StringCredentialsImpl.class),
+                                CredentialsMatchers.instanceOf(StringCredentials.class),
                                 CredentialsMatchers.instanceOf(StandardCertificateCredentials.class)
                         ),
                         CredentialsProvider.lookupCredentials(StandardCredentials.class,
@@ -80,10 +80,10 @@ public class PluginsUtils {
         return Credentials.EMPTY_CREDENTIALS;
     }
 
-    public static StringCredentialsImpl accessTokenCredentialsLookup(String credentialsId, Item item) {
-        StringCredentialsImpl accessTokenPasswordCredentials = CredentialsMatchers.firstOrNull(
+    public static StringCredentials accessTokenCredentialsLookup(String credentialsId, Item item) {
+        StringCredentials accessTokenPasswordCredentials = CredentialsMatchers.firstOrNull(
                 CredentialsProvider.lookupCredentials(
-                        StringCredentialsImpl.class,
+                        StringCredentials.class,
                         item,
                         item instanceof Queue.Task
                                 ? Tasks.getAuthenticationOf((Queue.Task) item)

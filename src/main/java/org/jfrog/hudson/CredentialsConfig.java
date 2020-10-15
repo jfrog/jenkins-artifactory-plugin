@@ -4,7 +4,7 @@ import hudson.model.Item;
 import hudson.util.Secret;
 import hudson.util.XStream2;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl;
+import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.converters.CredentialsConfigConverter;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
@@ -101,7 +101,7 @@ public class CredentialsConfig implements Serializable {
 
     public String provideAccessToken(Item item) {
         if (isUsingCredentialsPlugin()) {
-            StringCredentialsImpl accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(credentialsId, item);
+            StringCredentials accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(credentialsId, item);
             if (accessTokenCredentials != null) {
                 return accessTokenCredentials.getSecret().getPlainText();
             }
