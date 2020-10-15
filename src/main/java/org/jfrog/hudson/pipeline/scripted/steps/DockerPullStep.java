@@ -27,16 +27,16 @@ public class DockerPullStep extends AbstractStepImpl {
     private final BuildInfo buildInfo;
     private final String host;
     private final String javaArgs;
-    private final String targetRepository;
+    private String targetRepo;
 
     @DataBoundConstructor
-    public DockerPullStep(String image, String host, String targetRepository, String javaArgs, BuildInfo buildInfo, ArtifactoryServer server) {
+    public DockerPullStep(String image, String host, String targetRepo, String javaArgs, BuildInfo buildInfo, ArtifactoryServer server) {
         this.image = image;
         this.host = host;
         this.buildInfo = buildInfo;
         this.server = server;
         this.javaArgs = javaArgs;
-        this.targetRepository = targetRepository;
+        this.targetRepo = targetRepo;
     }
 
     public BuildInfo getBuildInfo() {
@@ -51,8 +51,8 @@ public class DockerPullStep extends AbstractStepImpl {
         return server;
     }
 
-    public String getTargetRepository() {
-        return targetRepository;
+    public String getTargetRepo() {
+        return targetRepo;
     }
 
     public String getHost() {
@@ -79,7 +79,10 @@ public class DockerPullStep extends AbstractStepImpl {
                 getContext().onFailure(new MissingArgumentException("Missing 'image' parameter"));
                 return null;
             }
-
+            if (step.getTargetRepo() == null) {
+                getContext().onFailure(new MissingArgumentException("Missing 'targetRepo' parameter"));
+                return null;
+            }
             BuildInfo buildInfo = Utils.prepareBuildinfo(build, step.getBuildInfo());
             String imageTag = step.getImage();
             if (!DockerUtils.isImageVersioned(imageTag)) {
@@ -87,7 +90,7 @@ public class DockerPullStep extends AbstractStepImpl {
             }
 
             ArtifactoryServer server = step.getServer();
-            DockerPullExecutor dockerExecutor = new DockerPullExecutor(server, buildInfo, build, step.image, step.targetRepository, step.host, step.javaArgs, launcher, listener, ws, env);
+            DockerPullExecutor dockerExecutor = new DockerPullExecutor(server, buildInfo, build, step.image, step.targetRepo, step.host, step.javaArgs, launcher, listener, ws, env);
             dockerExecutor.execute();
             JenkinsBuildInfoLog log = new JenkinsBuildInfoLog(listener);
             log.info("Successfully pulled docker image: " + imageTag);
