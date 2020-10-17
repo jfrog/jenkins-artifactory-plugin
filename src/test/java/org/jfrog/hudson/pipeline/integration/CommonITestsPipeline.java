@@ -485,9 +485,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
         Assume.assumeTrue("Skipping Xray tests", JENKINS_DOCKER_TEST_ENABLE == null || Boolean.parseBoolean(JENKINS_DOCKER_TEST_ENABLE));
         try {
             // Get image name
-            String domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_DOMAIN");
+            String domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN");
             if (StringUtils.isBlank(domainName)) {
-                throw new MissingArgumentException("The JENKINS_ARTIFACTORY_DOCKER_DOMAIN environment variable is not set.");
+                throw new MissingArgumentException("The JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN environment variable is not set.");
             }
             if (!StringUtils.endsWith(domainName, "/")) {
                 domainName += "/";
@@ -509,6 +509,31 @@ public class CommonITestsPipeline extends PipelineTestBase {
         } finally {
             deleteBuild(artifactoryClient, buildName);
         }
+    }
+
+    void dockerPullTest(String buildName) throws Exception {
+        Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS);
+        Assume.assumeTrue("Skipping Xray tests", JENKINS_DOCKER_TEST_ENABLE == null || Boolean.parseBoolean(JENKINS_DOCKER_TEST_ENABLE));
+        // Get image name
+        String domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN");
+        if (StringUtils.isBlank(domainName)) {
+            throw new MissingArgumentException("The JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN environment variable is not set.");
+        }
+        if (!StringUtils.endsWith(domainName, "/")) {
+            domainName += "/";
+        }
+        String imageName = domainName + "hello-world:latest";
+        String host = System.getenv("JENKINS_ARTIFACTORY_DOCKER_HOST");
+        // Run pipeline
+        runPipeline("dockerPull", false);
+        String buildNumber = "1";
+        // Get build info
+        Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+        assertEquals(1, buildInfo.getModules().size());
+        List<Module> modules = buildInfo.getModules();
+        Module module = modules.get(0);
+        assertEquals(null, module.getArtifacts());
+        assertTrue(module.getDependencies().size() > 0);
     }
 
     void xrayScanTest(String buildName, boolean failBuild) throws Exception {

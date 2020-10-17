@@ -137,6 +137,11 @@ public class DeclarativeITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void dockerPullTest() throws Exception {
+        super.dockerPullTest("declarative:dockerPull test");
+    }
+
+    @Test
     public void xrayScanFailTrueTest() throws Exception {
         super.xrayScanTest("declarative:xrayScanFailBuildTrue test", true);
     }

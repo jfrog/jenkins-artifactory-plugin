@@ -137,6 +137,11 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void dockerPullTest() throws Exception {
+        super.dockerPullTest("scripted:dockerPull test");
+    }
+
+    @Test
     public void xrayScanFailTrueTest() throws Exception {
         super.xrayScanTest("scripted:xrayScanFailBuildTrue test", true);
     }
