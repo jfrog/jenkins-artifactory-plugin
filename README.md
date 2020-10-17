@@ -24,7 +24,7 @@ To build the plugin, please use Maven 3.6.1 or above, with JDK 8, and run:
 
 ## Tests
 ### Unit tests
-To run unit tests execute the following command: 
+To run unit tests execute the following command:
 ```
 > mvn clean test
 ```
@@ -36,8 +36,10 @@ Before running the integration tests, set the following environment variables.
 *JENKINS_ARTIFACTORY_URL*<br>
 *JENKINS_ARTIFACTORY_USERNAME*<br>
 *JENKINS_ARTIFACTORY_PASSWORD*<br>
-*JENKINS_ARTIFACTORY_DOCKER_DOMAIN* (For example, server-docker-local.jfrog.io)<br>
-*JENKINS_ARTIFACTORY_DOCKER_REPO* (For example, docker-local)<br>
+*JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN* (For example, server-docker-local.jfrog.io)<br>
+*JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN* (For example, server-docker-remote.jfrog.io)<br>
+*JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO* (For example, docker-local)<br>
+*JENKINS_ARTIFACTORY_DOCKER_PULL_REPO* (For example, docker-remote)<br>
 *JENKINS_ARTIFACTORY_DOCKER_HOST* - Optional address of the docker daemon (For example, tcp://127.0.0.1:1234)<br>
 *JENKINS_PIP_ENV_INIT* - Optional command to activate pip virtual-environment for tests execution (For example, source /Users/user/jenkins-venv/bin/activate)<br>
 *MAVEN_HOME* - The local maven installation path.<br>
@@ -51,4 +53,4 @@ Run the integration tests.
 ```
 #### Integration tests results and progress
 The tests results are printed to the console (standard output) when the tests finish.
-Since JUnit however does not indicate which tests are currently running, a file named *tests.log* is created in the current directory, which logs the tests progress. 
+Since JUnit however does not indicate which tests are currently running, a file named *tests.log* is created in the current directory, which logs the tests progress.
