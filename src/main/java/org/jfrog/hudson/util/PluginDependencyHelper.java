@@ -39,7 +39,7 @@ public class PluginDependencyHelper {
         }
 
         //Check if the dependencies have already been transferred successfully
-        FilePath remoteDependencyMark = new FilePath(remoteDependencyDir, "ok");
+        FilePath remoteDependencyMark = new FilePath(remoteDependencyDir, "done");
         if (!remoteDependencyMark.exists()) {
 
             File[] localDependencies = localDependencyDir.listFiles();
