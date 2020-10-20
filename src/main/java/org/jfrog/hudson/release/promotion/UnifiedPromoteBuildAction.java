@@ -15,7 +15,6 @@
 
 package org.jfrog.hudson.release.promotion;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import hudson.model.*;
@@ -24,6 +23,7 @@ import hudson.security.Permission;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.jfrog.build.api.builder.PromotionBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.*;
@@ -33,7 +33,6 @@ import org.jfrog.hudson.util.CredentialManager;
 import org.jfrog.hudson.util.ProxyUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
-import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.servlet.ServletException;
@@ -51,9 +50,8 @@ import static org.jfrog.hudson.util.SerializationUtils.createMapper;
  * @author Noam Y. Tenne
  */
 public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeAction {
-    private final Run build;
-    private Map<String, PromotionInfo> promotionCandidates = new HashMap<String, PromotionInfo>();
-    private PromotionInfo currentPromotionCandidate;
+    private final Run<?, ?> build;
+    private final Map<String, PromotionInfo> promotionCandidates = new HashMap<>();
     private String targetStatus;
     private String targetRepositoryKey;
     private String sourceRepositoryKey;
@@ -63,11 +61,11 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
     private boolean includeDependencies;
     private PluginSettings promotionPlugin;
 
-    public UnifiedPromoteBuildAction(Run build) {
+    public UnifiedPromoteBuildAction(Run<?, ?> build) {
         this.build = build;
     }
 
-    public UnifiedPromoteBuildAction(Run build, BuildInfoAwareConfigurator configurator) {
+    public UnifiedPromoteBuildAction(Run<?, ?> build, BuildInfoAwareConfigurator configurator) {
         this(build);
         String buildName = BuildUniqueIdentifierHelper.
                 getBuildNameConsiderOverride(configurator, build);
@@ -80,26 +78,19 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
 
     public void addPromotionCandidate(PromotionConfig promotionConfig, BuildInfoAwareConfigurator configurator, String displayName) {
         PromotionInfo promotionCandidate = new PromotionInfo(promotionConfig, configurator, promotionCandidates.size(), displayName);
-        if (this.currentPromotionCandidate == null) {
-            this.currentPromotionCandidate = promotionCandidate;
-        }
         promotionCandidates.put(promotionCandidate.getId(), promotionCandidate);
     }
 
-    private String getCurrentBuildName() {
-        return currentPromotionCandidate.getBuildName();
+    private BuildInfoAwareConfigurator getFirstConfigurator() {
+        return promotionCandidates.get("0").getConfigurator();
     }
 
-    private String getCurrentBuildNumber() {
-        return currentPromotionCandidate.getBuildNumber();
-    }
-
-    private BuildInfoAwareConfigurator getCurrentConfigurator() {
-        return currentPromotionCandidate.getConfigurator();
+    private PromotionInfo getPromotionCandidate(String id) {
+        return promotionCandidates.get(id);
     }
 
     private String getDefaultPromotionTargetRepository() {
-        BuildInfoAwareConfigurator configurator = getCurrentConfigurator();
+        BuildInfoAwareConfigurator configurator = getFirstConfigurator();
         return configurator != null ? configurator.getDefaultPromotionTargetRepository() : "";
     }
 
@@ -108,7 +99,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
      */
     @SuppressWarnings({"UnusedDeclaration"})
     public List<PromotionInfo> getPromotionCandidates() {
-        return new ArrayList<PromotionInfo>(promotionCandidates.values());
+        return new ArrayList<>(promotionCandidates.values());
     }
 
     /**
@@ -148,7 +139,9 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
             response.setPromotionConfigs(getPromotionConfigs(repositoryKeys));
             response.setSuccess(true);
         } catch (Exception e) {
-            response.setResponseMessage(e.getMessage());
+            // Set error message to display in the promotion page.
+            // The error message should not contain new lines and double quotes.
+            response.setResponseMessage(e.getMessage().replaceAll("[\n\"]", ""));
         }
         return response;
     }
@@ -178,7 +171,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         return getACL().hasPermission(getPermission());
     }
 
-    public Run getBuild() {
+    public Run<?, ?> getBuild() {
         return build;
     }
 
@@ -187,6 +180,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         this.targetStatus = targetStatus;
     }
 
+    @SuppressWarnings({"UnusedDeclaration"})
     public void setTargetRepositoryKey(String targetRepositoryKey) {
         this.targetRepositoryKey = targetRepositoryKey;
     }
@@ -240,7 +234,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
      * @return List of target repositories for deployment (release repositories first). Called from the UI.
      */
     public List<String> getRepositoryKeys() throws IOException {
-        final BuildInfoAwareConfigurator configurator = getCurrentConfigurator();
+        final BuildInfoAwareConfigurator configurator = getFirstConfigurator();
         if (configurator == null) {
             return Lists.newArrayList();
         }
@@ -316,11 +310,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                     Map<String, String> paramMap = Maps.newHashMap();
                     settings.setPluginName(pluginName);
                     Map<String, Object> filteredPluginSettings = Maps.filterKeys(pluginSettings,
-                            new Predicate<String>() {
-                                public boolean apply(String input) {
-                                    return StringUtils.isNotBlank(input) && !"pluginName".equals(input);
-                                }
-                            });
+                            input -> StringUtils.isNotBlank(input) && !"pluginName".equals(input));
                     for (Map.Entry<String, Object> settingsEntry : filteredPluginSettings.entrySet()) {
                         String key = settingsEntry.getKey();
                         paramMap.put(key, pluginSettings.getString(key));
@@ -334,10 +324,12 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
             }
         }
 
-        final BuildInfoAwareConfigurator configurator = getCurrentConfigurator();
+        String configuratorId = (String) formData.getOrDefault("promotionCandidates", "0");
+        PromotionInfo promotionCandidate = getPromotionCandidate(configuratorId);
+        BuildInfoAwareConfigurator configurator = promotionCandidate.getConfigurator();
         ArtifactoryServer server = configurator.getArtifactoryServer();
 
-        new PromoteWorkerThread(server, CredentialManager.getPreferredDeployer((DeployerOverrider) configurator, server), ciUser).start();
+        new PromoteWorkerThread(promotionCandidate, CredentialManager.getPreferredDeployer((DeployerOverrider) configurator, server), ciUser).start();
 
         resp.sendRedirect(".");
     }
@@ -362,7 +354,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
     }
 
     private List<UserPluginInfo> getPromotionsUserPluginInfo() {
-        final BuildInfoAwareConfigurator configurator = getCurrentConfigurator();
+        final BuildInfoAwareConfigurator configurator = getFirstConfigurator();
         if (configurator == null) {
             return Lists.newArrayList(UserPluginInfo.NO_PLUGIN);
         }
@@ -388,30 +380,28 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
      */
     public final class PromoteWorkerThread extends TaskThread {
 
-        private final ArtifactoryServer artifactoryServer;
+        private final PromotionInfo promotionCandidate;
         private final CredentialsConfig deployerConfig;
         private final String ciUser;
 
-        PromoteWorkerThread(ArtifactoryServer artifactoryServer, CredentialsConfig deployerConfig, String ciUser) {
+        PromoteWorkerThread(PromotionInfo promotionCandidate, CredentialsConfig deployerConfig, String ciUser) {
             super(UnifiedPromoteBuildAction.this, ListenerAndText.forMemory(null));
-            this.artifactoryServer = artifactoryServer;
+            this.promotionCandidate = promotionCandidate;
             this.deployerConfig = deployerConfig;
             this.ciUser = ciUser;
         }
 
         @Override
         protected void perform(TaskListener listener) {
-            ArtifactoryBuildInfoClient client = null;
-            try {
-                long started = System.currentTimeMillis();
-                listener.getLogger().println("Promoting build ....");
-
-                client = artifactoryServer.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
-                        ProxyUtils.createProxyConfiguration());
-
-                if ((promotionPlugin != null) &&
-                        !UserPluginInfo.NO_PLUGIN_KEY.equals(promotionPlugin.getPluginName())) {
-                    handlePluginPromotion(listener, client);
+            long started = System.currentTimeMillis();
+            listener.getLogger().println("Promoting build ....");
+            ArtifactoryServer server = promotionCandidate.getConfigurator().getArtifactoryServer();
+            String buildName = promotionCandidate.getBuildName();
+            String buildNumber = promotionCandidate.getBuildNumber();
+            try (ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
+                    ProxyUtils.createProxyConfiguration())) {
+                if ((promotionPlugin != null) && !UserPluginInfo.NO_PLUGIN_KEY.equals(promotionPlugin.getPluginName())) {
+                    handlePluginPromotion(listener, client, buildName, buildNumber);
                 } else {
                     PromotionBuilder promotionBuilder = new PromotionBuilder()
                             .status(targetStatus)
@@ -423,8 +413,6 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                             .copy(useCopy)
                             .failFast(failFast);
 
-                    String buildName = getCurrentBuildName();
-                    String buildNumber = getCurrentBuildNumber();
                     PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), client, listener, buildName, buildNumber);
                 }
 
@@ -438,23 +426,21 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                 workerThread = null;
             } catch (Throwable e) {
                 e.printStackTrace(listener.error(e.getMessage()));
-            } finally {
-                if (client != null) {
-                    client.close();
-                }
             }
         }
 
-        private void handlePluginPromotion(TaskListener listener, ArtifactoryBuildInfoClient client) throws IOException {
-            String buildName = getCurrentBuildName();
-            String buildNumber = getCurrentBuildNumber();
-            HttpResponse pluginPromotionResponse = client.executePromotionUserPlugin(
-                    promotionPlugin.getPluginName(), buildName, buildNumber, promotionPlugin.getParamMap());
+        private void handlePluginPromotion(TaskListener listener, ArtifactoryBuildInfoClient client, String buildName, String buildNumber) throws IOException {
+            HttpResponse response = null;
             try {
-                PromotionUtils.validatePromotionSuccessful(pluginPromotionResponse, false, failFast, listener);
+                response = client.executePromotionUserPlugin(promotionPlugin.getPluginName(), buildName, buildNumber, promotionPlugin.getParamMap());
+                PromotionUtils.validatePromotionSuccessful(response, false, failFast, listener);
                 listener.getLogger().println("Promotion completed successfully!");
             } catch (IOException e) {
                 listener.error(e.getMessage());
+            } finally {
+                if (response != null) {
+                    EntityUtils.consume(response.getEntity());
+                }
             }
         }
     }

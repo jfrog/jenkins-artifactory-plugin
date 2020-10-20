@@ -2,7 +2,7 @@
  * @author Yahav Itzhak
  */
 
-function loadBuild(buildData, doDisplaySuccessMessage) {
+function loadBuild(buildData) {
     var spinner;
     var target;
 
@@ -47,11 +47,7 @@ function loadBuild(buildData, doDisplaySuccessMessage) {
         fillSelect(selectSource, repositoryKeys);
         fillNonePluginFormDefaultValues(promotionConfig, selectTarget, selectSource);
         selectPlugin.onchange();
-        if (doDisplaySuccessMessage){
-            displaySuccessMessage(spinner, target);
-        } else {
-            spinner.style.display = "none";
-        }
+        spinner.style.display = "none";
     }
 }
 

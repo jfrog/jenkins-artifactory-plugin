@@ -8,12 +8,18 @@
         <l:main-panel>
             <f:form method="post" action="submit" name="form">
                 <f:section title="Artifactory Pro Release Promotion">
+                    <div style="display:none;" id="spinnerDiv">
+                        <img src="${imagesURL}/spinner.gif"/>
+                        ${attrs.progress}
+                    </div>
+                    <div><!-- this is where the error message goes --></div>
+                    <div><!-- this is where the warning message goes --></div>
                     <j:choose>
                         <j:when test="${it.PromoteInfoListSize > 1}">
                             <f:entry title="${%Build}" field="promotionCandidates"
                                      help="/plugin/artifactory/help/release/PromoteBuildAction/help-build.html">
                                 <select class="setting-input" name="promotionCandidates"
-                                        id="buildId">
+                                        id="buildId" onchange="loadBuild('${it.buildsData}')">
                                     <j:forEach var="promotionCandidate"
                                                items="${it.promotionCandidates}">
                                         <option value="${promotionCandidate.id}">
@@ -22,26 +28,11 @@
                                     </j:forEach>
                                 </select>
                             </f:entry>
-                            <f:entry>
-                                <div style="float:right">
-                                    <input type="button" value="${%Load build}" class="yui-button validate-button"
-                                           onclick="loadBuild('${it.buildsData}', true)" id="loadBuild"/>
-                                </div>
-                                <div style="display:none;" id="spinnerDiv">
-                                    <img src="${imagesURL}/spinner.gif"/>
-                                    ${%Refreshing...}
-                                </div>
-                                <div><!-- this is where the error message goes --></div>
-                                <div><!-- this is where the warning message goes --></div>
-                            </f:entry>
+
                         </j:when>
                         <j:otherwise>
-                            <div style="display:none;" id="spinnerDiv">
-                                <img src="${imagesURL}/spinner.gif"/>
-                                ${attrs.progress}
-                            </div>
-                            <div><!-- this is where the error message goes --></div>
-                            <input type="hidden" name="promotionCandidates" value="${it.promotionCandidates[0].id}" id="buildId"/>
+                            <input type="hidden" name="promotionCandidates" value="${it.promotionCandidates[0].id}"
+                                   id="buildId"/>
                         </j:otherwise>
                     </j:choose>
                     <r:promotionPlugins/>
@@ -54,15 +45,16 @@
             These two st:adjunct tags have been replaced by the two below script tags.
                 <st:adjunct includes="lib.jfrog.repos.repos"/>
                 <st:adjunct includes="lib.jfrog.promotions.promotions"/> -->
-            <script src='${rootURL}/adjuncts/8c218759/lib/jfrog/promotions/promotions.js' type='text/javascript'></script>
+            <script src='${rootURL}/adjuncts/8c218759/lib/jfrog/promotions/promotions.js'
+                    type='text/javascript'></script>
             <script src='${rootURL}/adjuncts/8c218759/lib/jfrog/repos/repos.js' type='text/javascript'></script>
             <script>
                 var selectPlugin = document.getElementById("pluginList");
                 selectPlugin.onchange = onPluginChange;
-                var buildBind = <st:bind value="${it}"/>;
+                var buildBind =<st:bind value="${it}"/>;
                 var promoteInfoListSize = "${it.PromoteInfoListSize}";
-                if (promoteInfoListSize == 1) {
-                    loadBuild('${it.buildsData}', false); // Auto-load
+                if (promoteInfoListSize >= 1) {
+                loadBuild('${it.buildsData}'); // Auto-load
                 }
             </script>
         </l:main-panel>
