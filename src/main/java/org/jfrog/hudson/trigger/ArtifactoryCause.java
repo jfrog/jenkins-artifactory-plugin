@@ -1,16 +1,22 @@
 package org.jfrog.hudson.trigger;
 
 import hudson.model.Cause;
+import org.kohsuke.stapler.export.Exported;
 
 /**
  * @author Alexei Vainshtein
  */
 public class ArtifactoryCause extends Cause {
 
-    private String url;
+    private final String url;
 
     public ArtifactoryCause(String url) {
         this.url = url;
+    }
+
+    @Exported(visibility = 3)
+    public String getUrl() {
+        return url;
     }
 
     @Override
