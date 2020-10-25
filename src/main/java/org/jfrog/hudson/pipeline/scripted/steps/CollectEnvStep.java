@@ -40,8 +40,7 @@ public class CollectEnvStep extends AbstractStepImpl {
 
         @Override
         protected Boolean run() throws Exception {
-            CollectEnvExecutor collectEnvExecutor = new CollectEnvExecutor(build, listener, ws,
-                    step.getEnv(), env);
+            CollectEnvExecutor collectEnvExecutor = new CollectEnvExecutor(build, listener, ws, step.getEnv(), env);
             collectEnvExecutor.execute();
             return true;
         }

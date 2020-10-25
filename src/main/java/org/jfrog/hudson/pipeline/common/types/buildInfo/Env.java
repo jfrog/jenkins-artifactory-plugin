@@ -34,9 +34,15 @@ public class Env implements Serializable {
      * Collect environment variables and system properties under with filter constrains
      */
     public void collectVariables(EnvVars env, Run build, TaskListener listener) {
-        collectVariables(env).collectVariables(build, listener);
+        collectVariables(env).collectBuildParameters(build, listener);
     }
 
+    /**
+     * Collect environment variables and system properties.
+     *
+     * @param env - Additional variables to be added on top of the collected system properties and env variables.
+     * @return Env which includes system properties, environment variable, and env.
+     */
     public Env collectVariables(EnvVars env) {
         this.envVars.putAll(env);
         Map<String, String> sysEnv = new HashMap<>();
@@ -50,7 +56,7 @@ public class Env implements Serializable {
         return this;
     }
 
-    public Env collectVariables(Run build, TaskListener listener) {
+    public Env collectBuildParameters(Run<?, ?> build, TaskListener listener) {
         EnvVars buildParameters = Utils.extractBuildParameters(build, listener);
         if (buildParameters != null) {
             this.envVars.putAll(buildParameters);
@@ -84,13 +90,13 @@ public class Env implements Serializable {
     }
 
     @Whitelisted
-    public void setCapture(boolean capture) {
-        this.capture = capture;
+    public boolean isCapture() {
+        return capture;
     }
 
     @Whitelisted
-    public boolean isCapture() {
-        return capture;
+    public void setCapture(boolean capture) {
+        this.capture = capture;
     }
 
     @Whitelisted
@@ -102,29 +108,29 @@ public class Env implements Serializable {
         cpsScript.invokeMethod("collectEnv", stepVariables);
     }
 
-    public void setFilter(EnvFilter filter) {
-        this.filter = filter;
-    }
-
     @Whitelisted
     public EnvFilter getFilter() {
         return filter;
     }
 
-    public void setEnvVars(Map<String, String> envVars) {
-        this.envVars = envVars;
+    public void setFilter(EnvFilter filter) {
+        this.filter = filter;
     }
 
     public Map<String, String> getEnvVars() {
         return envVars;
     }
 
-    public void setSysVars(Map<String, String> sysVars) {
-        this.sysVars = sysVars;
+    public void setEnvVars(Map<String, String> envVars) {
+        this.envVars = envVars;
     }
 
     public Map<String, String> getSysVars() {
         return sysVars;
+    }
+
+    public void setSysVars(Map<String, String> sysVars) {
+        this.sysVars = sysVars;
     }
 
     public void setCpsScript(CpsScript cpsScript) {

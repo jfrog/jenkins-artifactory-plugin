@@ -12,13 +12,13 @@ import java.io.File;
 import java.io.IOException;
 
 public class CollectEnvExecutor implements Executor {
+    private final Run<?, ?> build;
+    private final Env env;
+    private final EnvVars envVars;
     private transient TaskListener listener;
     private transient FilePath ws;
-    private Run build;
-    private Env env;
-    private EnvVars envVars;
 
-    public CollectEnvExecutor(Run build, TaskListener listener, FilePath ws, Env env, EnvVars envVars) {
+    public CollectEnvExecutor(Run<?, ?> build, TaskListener listener, FilePath ws, Env env, EnvVars envVars) {
         this.listener = listener;
         this.ws = ws;
         this.env = env;
@@ -27,12 +27,15 @@ public class CollectEnvExecutor implements Executor {
     }
 
     public void execute() throws IOException, InterruptedException {
-        env.append(ws.act(new CollectEnvExecutor.CollectEnvCallable(env.collectVariables(build, listener), envVars)));
+        // Collect env vars & system properties.
+        Env collectedEnv = ws.act(new CollectEnvCallable(env.collectBuildParameters(build, listener), envVars));
+        // Append the collected env.
+        env.append(collectedEnv);
     }
 
     public static class CollectEnvCallable extends MasterToSlaveFileCallable<Env> {
-        private EnvVars envVars;
-        private Env env;
+        private final EnvVars envVars;
+        private final Env env;
 
         CollectEnvCallable(Env env, EnvVars envVars) {
             this.env = env;
