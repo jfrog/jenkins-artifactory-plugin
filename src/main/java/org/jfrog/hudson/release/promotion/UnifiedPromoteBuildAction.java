@@ -141,7 +141,10 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         } catch (Exception e) {
             // Set error message to display in the promotion page.
             // The error message should not contain new lines and double quotes.
-            response.setResponseMessage(e.getMessage().replaceAll("[\n\"]", ""));
+            String message = e.getMessage()
+                    .replace("\n", " ")
+                    .replace("\"", "");
+            response.setResponseMessage(message);
         }
         return response;
     }
