@@ -26,7 +26,7 @@ node("TestSlave") {
             buildName: buildName,
             buildNumber: buildNumber,
             host: host,
-            targetRepo: targetRepo
+            sourceRepo: targetRepo
     )
 
 

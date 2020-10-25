@@ -7,6 +7,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.DockerPullExecutor;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -17,20 +18,19 @@ import java.io.IOException;
 
 public class DockerPullStep extends AbstractStepImpl {
 
-    private String serverId;
-    private String image;
+    private final String serverId;
+    private final String image;
+    private final String sourceRepo;
     private String host;
     private String buildNumber;
     private String buildName;
-    private String targetRepo;
     private String javaArgs;
 
     @DataBoundConstructor
-    public DockerPullStep(String serverId, String image, String targetRepo, String javaArgs) {
+    public DockerPullStep(String serverId, String image, String sourceRepo) {
         this.serverId = serverId;
         this.image = image;
-        this.targetRepo = targetRepo;
-        this.javaArgs = javaArgs;
+        this.sourceRepo = sourceRepo;
     }
 
     @DataBoundSetter
@@ -66,8 +66,8 @@ public class DockerPullStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.buildName, step.buildNumber);
-            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
-            DockerPullExecutor dockerExecutor = new DockerPullExecutor(pipelineServer, buildInfo, build, step.image, step.targetRepo, step.host, step.javaArgs, launcher, listener, ws, env);
+            ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
+            DockerPullExecutor dockerExecutor = new DockerPullExecutor(pipelineServer, buildInfo, build, step.image, step.sourceRepo, step.host, step.javaArgs, launcher, listener, ws, env);
             dockerExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(dockerExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
             return null;

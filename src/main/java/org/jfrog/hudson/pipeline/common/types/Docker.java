@@ -81,15 +81,15 @@ public class Docker implements Serializable {
     }
 
     @Whitelisted
-    public void pull(String imageTag, String targetRepository) {
-        pull(imageTag, targetRepository, null);
+    public void pull(String imageTag, String sourceRepo) {
+        pull(imageTag, sourceRepo, null);
     }
 
     @Whitelisted
-    public void pull(String imageTag, String targetRepo, BuildInfo providedBuildInfo) {
+    public void pull(String imageTag, String sourceRepo, BuildInfo providedBuildInfo) {
         Map<String, Object> dockerArguments = Maps.newLinkedHashMap();
         dockerArguments.put("image", imageTag);
-        dockerArguments.put("targetRepo", targetRepo);
+        dockerArguments.put("sourceRepo", sourceRepo);
         dockerArguments.put(BUILD_INFO, providedBuildInfo);
         pull(dockerArguments);
     }

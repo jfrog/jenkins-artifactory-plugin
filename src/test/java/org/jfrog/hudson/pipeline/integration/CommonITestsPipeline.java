@@ -512,7 +512,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void dockerPullTest(String buildName) throws Exception {
         Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS);
-        // Get image name
+        // Assert 'JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN' environment variable exist
         String domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN");
         if (StringUtils.isBlank(domainName)) {
             throw new MissingArgumentException("The JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN environment variable is not set.");
@@ -524,13 +524,18 @@ public class CommonITestsPipeline extends PipelineTestBase {
         String host = System.getenv("JENKINS_ARTIFACTORY_DOCKER_HOST");
         // Run pipeline
         runPipeline("dockerPull", false);
+
+        // Check that the actual image exist
+        assertNotEquals("", DockerJavaWrapper.getImageIdFromTag(imageName, host, new EnvVars(), null));
+
+        //Check build info
         String buildNumber = "1";
         // Get build info
         Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
         assertEquals(1, buildInfo.getModules().size());
         List<Module> modules = buildInfo.getModules();
         Module module = modules.get(0);
-        assertEquals(null, module.getArtifacts());
+        assertNull(module.getArtifacts());
         assertTrue(module.getDependencies().size() > 0);
     }
 

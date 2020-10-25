@@ -6,12 +6,12 @@ node("TestSlave") {
         domainName += "/"
     }
     def imageName = domainName + "hello-world:latest"
-    def targetRepo = "${env.JENKINS_ARTIFACTORY_DOCKER_PULL_REPO}"
+    def sourceRepo = "${env.JENKINS_ARTIFACTORY_DOCKER_PULL_REPO}"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
 
     stage "dockerPull"
     def rtDocker = Artifactory.docker (rtServer, "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}")
-    def buildInfo = rtDocker.pull imageName, targetRepo
+    def buildInfo = rtDocker.pull imageName, sourceRepo
     buildInfo.name = "scripted:dockerPull test"
     buildInfo.number = "1"
 
