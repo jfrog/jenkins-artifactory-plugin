@@ -28,7 +28,7 @@ public class CollectEnvStep extends AbstractStepImpl {
         return env;
     }
 
-    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Boolean> {
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
         private transient CollectEnvStep step;
 
@@ -39,10 +39,10 @@ public class CollectEnvStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Void run() throws Exception {
             CollectEnvExecutor collectEnvExecutor = new CollectEnvExecutor(build, listener, ws, step.getEnv(), env);
             collectEnvExecutor.execute();
-            return true;
+            return null;
         }
     }
 
