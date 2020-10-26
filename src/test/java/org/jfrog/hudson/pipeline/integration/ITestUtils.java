@@ -23,7 +23,9 @@ import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
+import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.docker.DockerJavaWrapper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.trigger.ArtifactoryTrigger;
 
@@ -339,5 +341,11 @@ class ITestUtils {
 
     private static String encodeBuildName(String buildName) throws UnsupportedEncodingException {
         return URLEncoder.encode(buildName, "UTF-8").replace("+", "%20");
+    }
+
+    public static String getImageId(String image, String host, Log logger) {
+        String id = DockerJavaWrapper.InspectImage(image, host, Collections.emptyMap(), logger).getId().replace(":", "__");
+        assertNotNull(id);
+        return id.replace(":", "__");
     }
 }

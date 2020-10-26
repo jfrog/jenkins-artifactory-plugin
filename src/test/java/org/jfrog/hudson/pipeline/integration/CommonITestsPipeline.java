@@ -11,7 +11,9 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
+import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Build;
+import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.extractor.docker.DockerJavaWrapper;
 import org.jfrog.hudson.ArtifactoryServer;
@@ -505,6 +507,12 @@ public class CommonITestsPipeline extends PipelineTestBase {
             Module module = modules.get(0);
             assertEquals(7, module.getArtifacts().size());
             assertEquals(5, module.getDependencies().size());
+
+            // Verify image's id exists in build-info.
+            List<Artifact> deps = module.getArtifacts();
+            assertFalse(deps.isEmpty());
+            String imageId = getImageId(imageName, host, null).replace(":", "__");
+            assertTrue(deps.stream().anyMatch(dep -> dep.getName().equals(imageId)));
         } finally {
             deleteBuild(artifactoryClient, buildName);
         }
@@ -517,26 +525,30 @@ public class CommonITestsPipeline extends PipelineTestBase {
         if (StringUtils.isBlank(domainName)) {
             throw new MissingArgumentException("The JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN environment variable is not set.");
         }
-        if (!StringUtils.endsWith(domainName, "/")) {
-            domainName += "/";
-        }
+        domainName = StringUtils.appendIfMissing(domainName, "/");
         String imageName = domainName + "hello-world:latest";
         String host = System.getenv("JENKINS_ARTIFACTORY_DOCKER_HOST");
         // Run pipeline
         runPipeline("dockerPull", false);
 
         // Check that the actual image exist
-        assertNotEquals("", DockerJavaWrapper.getImageIdFromTag(imageName, host, new EnvVars(), null));
+        assertNotEquals(StringUtils.EMPTY, DockerJavaWrapper.getImageIdFromTag(imageName, host, new EnvVars(), null));
 
         //Check build info
         String buildNumber = "1";
+
         // Get build info
         Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
         assertEquals(1, buildInfo.getModules().size());
         List<Module> modules = buildInfo.getModules();
         Module module = modules.get(0);
         assertNull(module.getArtifacts());
-        assertTrue(module.getDependencies().size() > 0);
+
+        // Verify image's id exists in build-info.
+        List<Dependency> deps = module.getDependencies();
+        assertFalse(deps.isEmpty());
+        String imageId = getImageId(imageName, host, null).replace(":", "__");
+        assertTrue(deps.stream().anyMatch(dep -> dep.getId().equals(imageId)));
     }
 
     void xrayScanTest(String buildName, boolean failBuild) throws Exception {
