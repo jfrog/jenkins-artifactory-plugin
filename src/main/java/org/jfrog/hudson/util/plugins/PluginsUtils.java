@@ -101,7 +101,7 @@ public class PluginsUtils {
 
     private static ArtifactoryBuilder.DescriptorImpl getDescriptor() {
         ArtifactoryBuilder.DescriptorImpl descriptor = (ArtifactoryBuilder.DescriptorImpl)
-                Hudson.getInstance().getDescriptor(ArtifactoryBuilder.class);
+                Hudson.get().getDescriptor(ArtifactoryBuilder.class);
         if (descriptor != null) {
             return descriptor;
         }

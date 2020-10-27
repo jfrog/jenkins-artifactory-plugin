@@ -131,7 +131,7 @@ public class GradleExecutor implements Executor {
 
     private GradleInstallation getGradleInstallation() {
         if (!StringUtils.isEmpty(gradleBuild.getTool())) {
-            GradleInstallation[] installations = Jenkins.getInstance().getDescriptorByType(Gradle.DescriptorImpl.class).getInstallations();
+            GradleInstallation[] installations = Jenkins.get().getDescriptorByType(Gradle.DescriptorImpl.class).getInstallations();
             for (GradleInstallation i : installations) {
                 if (gradleBuild.getTool().equals(i.getName())) {
                     return i;

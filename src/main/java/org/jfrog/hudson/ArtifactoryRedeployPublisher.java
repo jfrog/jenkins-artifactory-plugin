@@ -550,7 +550,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         }
 
         public boolean isJiraPluginEnabled() {
-            return (Jenkins.getInstance().getPlugin("jira") != null);
+            return (Jenkins.get().getPlugin("jira") != null);
         }
 
         public boolean isUseCredentialsPlugin() {

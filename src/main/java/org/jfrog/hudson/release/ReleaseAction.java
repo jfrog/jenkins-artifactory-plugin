@@ -285,7 +285,7 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
             // Read values from the request and override the staging plugin values:
             overrideStagingPluginParams(req);
             // Schedule the release build:
-            Queue.WaitingItem item = Jenkins.getInstance().getQueue().schedule(
+            Queue.WaitingItem item = Jenkins.get().getQueue().schedule(
                 project, 0,
                 new Action[]{this, new CauseAction(new Cause.UserIdCause())}
             );

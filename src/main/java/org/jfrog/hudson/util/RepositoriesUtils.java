@@ -133,7 +133,7 @@ public abstract class RepositoriesUtils {
      */
     public static List<ArtifactoryServer> getArtifactoryServers() {
         ArtifactoryBuilder.DescriptorImpl descriptor = (ArtifactoryBuilder.DescriptorImpl)
-                Hudson.getInstance().getDescriptor(ArtifactoryBuilder.class);
+                Hudson.get().getDescriptor(ArtifactoryBuilder.class);
         return descriptor.getArtifactoryServers();
     }
 

@@ -78,7 +78,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
     }
 
     private List<Vcs> getVcsFromGitPlugin(Run build) {
-        if (Jenkins.getInstance().getPlugin(PluginsUtils.GIT_PLUGIN_ID) == null) {
+        if (Jenkins.get().getPlugin(PluginsUtils.GIT_PLUGIN_ID) == null) {
             return new ArrayList<>();
         }
         List<Vcs> vcsList = Utils.extractVcsBuildData(build);

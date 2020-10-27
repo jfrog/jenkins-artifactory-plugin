@@ -193,7 +193,7 @@ public abstract class ActionableHelper implements Serializable {
     }
 
     public static String getBuildUrl(Run build) {
-        String root = Hudson.getInstance().getRootUrl();
+        String root = Hudson.get().getRootUrl();
         if (StringUtils.isBlank(root)) {
             return "";
         }
@@ -251,10 +251,10 @@ public abstract class ActionableHelper implements Serializable {
     public static String getArtifactoryPluginVersion() {
         String pluginsSortName = "artifactory";
         //Validates Jenkins existence because in some jobs the Jenkins instance is unreachable
-        if (Jenkins.getInstance() != null
-                && Jenkins.getInstance().getPlugin(pluginsSortName) != null
-                && Jenkins.getInstance().getPlugin(pluginsSortName).getWrapper() != null) {
-            return Jenkins.getInstance().getPlugin(pluginsSortName).getWrapper().getVersion();
+        if (Jenkins.get() != null
+                && Jenkins.get().getPlugin(pluginsSortName) != null
+                && Jenkins.get().getPlugin(pluginsSortName).getWrapper() != null) {
+            return Jenkins.get().getPlugin(pluginsSortName).getWrapper().getVersion();
         }
         return "";
     }
@@ -315,7 +315,7 @@ public abstract class ActionableHelper implements Serializable {
 
     public static Node getNode(Launcher launcher) {
         Node node = null;
-        Jenkins j = Jenkins.getInstance();
+        Jenkins j = Jenkins.get();
         for (Computer c : j.getComputers()) {
             if (c.getChannel() == launcher.getChannel()) {
                 node = c.getNode();

@@ -283,7 +283,7 @@ public class Maven3Builder extends Builder {
         public boolean isApplicable(Class<? extends AbstractProject> jobType) {
             return hudson.model.FreeStyleProject.class.isAssignableFrom(jobType) ||
                     hudson.matrix.MatrixProject.class.isAssignableFrom(jobType) ||
-                    (Jenkins.getInstance().getPlugin(PluginsUtils.MULTIJOB_PLUGIN_ID) != null &&
+                    (Jenkins.get().getPlugin(PluginsUtils.MULTIJOB_PLUGIN_ID) != null &&
                             com.tikal.jenkins.plugins.multijob.MultiJobProject.class.isAssignableFrom(jobType));
         }
 
@@ -298,7 +298,7 @@ public class Maven3Builder extends Builder {
         }
 
         public Maven.MavenInstallation[] getInstallations() {
-            return Jenkins.getInstance().getDescriptorByType(Maven.DescriptorImpl.class).getInstallations();
+            return Jenkins.get().getDescriptorByType(Maven.DescriptorImpl.class).getInstallations();
         }
 
         @Override

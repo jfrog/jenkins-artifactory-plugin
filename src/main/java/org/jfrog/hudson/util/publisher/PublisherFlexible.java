@@ -50,7 +50,7 @@ public class PublisherFlexible<T extends Publisher> implements PublisherFind<T> 
      */
     public T find(AbstractProject<?, ?> project, Class<T> type) {
         // First check that the Flexible Publish plugin is installed:
-        if (Jenkins.getInstance().getPlugin(FLEXIBLE_PUBLISH_PLUGIN) != null) {
+        if (Jenkins.get().getPlugin(FLEXIBLE_PUBLISH_PLUGIN) != null) {
             // Iterate all the project's publishers and find the flexible publisher:
             for (Publisher publisher : project.getPublishersList()) {
                 // Found the flexible publisher:

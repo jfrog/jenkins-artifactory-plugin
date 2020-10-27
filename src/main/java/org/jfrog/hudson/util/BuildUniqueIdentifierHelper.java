@@ -73,7 +73,7 @@ public class BuildUniqueIdentifierHelper {
      * @return The project which answers the full name.
      */
     private static AbstractProject<?, ?> getProject(String fullName) {
-        Item item = Hudson.getInstance().getItemByFullName(fullName);
+        Item item = Hudson.get().getItemByFullName(fullName);
         if (item != null && item instanceof AbstractProject) {
             return (AbstractProject<?, ?>) item;
         }

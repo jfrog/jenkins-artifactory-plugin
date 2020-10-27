@@ -42,7 +42,7 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
         this.item = item;
         Class<?> itemClass = item.getClass();
         return itemClass.isAssignableFrom(FreeStyleProject.class) || itemClass.isAssignableFrom(MatrixProject.class) ||
-                (Jenkins.getInstance().getPlugin(PluginsUtils.MULTIJOB_PLUGIN_ID) != null &&
+                (Jenkins.get().getPlugin(PluginsUtils.MULTIJOB_PLUGIN_ID) != null &&
                         itemClass.isAssignableFrom(MultiJobProject.class)) ||
                 PluginsUtils.PROMOTION_BUILD_PLUGIN_CLASS.equals(itemClass.getSimpleName());
     }
@@ -76,7 +76,7 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
 
     @SuppressWarnings("unused")
     public boolean isJiraPluginEnabled() {
-        return (Jenkins.getInstance().getPlugin("jira") != null);
+        return (Jenkins.get().getPlugin("jira") != null);
 
     }
 

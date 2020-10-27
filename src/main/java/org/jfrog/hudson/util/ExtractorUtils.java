@@ -181,7 +181,7 @@ public class ExtractorUtils {
             setProxy(configuration);
         }
 
-        if ((Jenkins.getInstance().getPlugin("jira") != null) && (publisherContext != null) &&
+        if ((Jenkins.get().getPlugin("jira") != null) && (publisherContext != null) &&
                 publisherContext.isEnableIssueTrackerIntegration()) {
             new IssuesTrackerHelper(build, listener, publisherContext.isAggregateBuildIssues(),
                     publisherContext.getAggregationBuildStatus()).setIssueTrackerInfo(configuration);
@@ -205,7 +205,7 @@ public class ExtractorUtils {
     }
 
     private static void setProxy(ArtifactoryClientConfiguration configuration) {
-        Jenkins j = Jenkins.getInstance();
+        Jenkins j = Jenkins.get();
         if (j.proxy != null) {
             configuration.proxy.setHost(j.proxy.name);
             configuration.proxy.setPort(j.proxy.port);
