@@ -571,7 +571,7 @@
                         <goals>
                             <goal>enforce</goal>
                         </goals>
-                        <configuration combine.children="append">
+                        <configuration>
                             <rules>
                                 <bannedDependencies>
                                     <excludes>
