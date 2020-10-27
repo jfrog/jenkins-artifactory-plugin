@@ -95,7 +95,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
     }
 
     private void addBuildInfoResultAction(String artifactoryUrl) {
-        synchronized (build.getActions()) {
+        synchronized (build.getAllActions()) {
             BuildInfoResultAction action = build.getAction(BuildInfoResultAction.class);
             if (action == null) {
                 action = new BuildInfoResultAction(build);

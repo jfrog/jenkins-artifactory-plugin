@@ -62,7 +62,7 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
             PromotionConfig pipelinePromotionConfig = step.getPromotionConfig();
             org.jfrog.hudson.release.promotion.PromotionConfig promotionConfig = Utils.convertPromotionConfig(pipelinePromotionConfig);
 
-            synchronized (build.getActions()) {
+            synchronized (build.getAllActions()) {
                 UnifiedPromoteBuildAction action = build.getAction(UnifiedPromoteBuildAction.class);
                 if (action == null) {
                     action = new UnifiedPromoteBuildAction(this.build);
