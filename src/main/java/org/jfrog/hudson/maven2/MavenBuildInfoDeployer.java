@@ -112,7 +112,7 @@ public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
                 moduleBuilder.addDependency(dependencyBuilder.build());
             }
             // delete them once used
-            build.getActions().removeAll(build.getActions(MavenDependenciesRecord.class));
+            build.removeActions(MavenDependenciesRecord.class);
         }
     }
 

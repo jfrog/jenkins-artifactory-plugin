@@ -735,7 +735,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
             releaseAction.reset();
 
             // remove the release action from the build. the stage action is the point of interaction for successful builds
-            run.getActions().remove(releaseAction);
+            run.removeAction(releaseAction);
         }
     }
 
