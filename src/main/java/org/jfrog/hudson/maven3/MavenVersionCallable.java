@@ -19,7 +19,6 @@ package org.jfrog.hudson.maven3;
 import hudson.maven.MavenEmbedderException;
 import hudson.maven.MavenEmbedderUtils;
 import jenkins.security.MasterToSlaveCallable;
-import org.kohsuke.stapler.framework.io.IOException2;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,7 +43,7 @@ public class MavenVersionCallable extends MasterToSlaveCallable<Boolean, IOExcep
         try {
             return MavenEmbedderUtils.isAtLeastMavenVersion(new File(mavenHome), version);
         } catch (MavenEmbedderException e) {
-            throw new IOException2(e);
+            throw new IOException(e);
         }
     }
 }
