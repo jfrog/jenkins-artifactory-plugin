@@ -521,14 +521,13 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 if (result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
                     if (isDeployBuildInfo()) {
                         String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGradleConfigurator.this, build);
-                        build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+                        build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
                         ArtifactoryGradleConfigurator configurator =
                                 ActionableHelper.getBuildWrapper(build.getProject(),
                                         ArtifactoryGradleConfigurator.class);
                         if (configurator != null) {
                             if (isAllowPromotionOfNonStagedBuilds()) {
-                                build.getActions()
-                                        .add(new UnifiedPromoteBuildAction(build, ArtifactoryGradleConfigurator.this));
+                                build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryGradleConfigurator.this));
                             }
                         }
                     }

@@ -74,7 +74,7 @@ public class MavenDependenciesRecorder extends MavenReporter {
                 // add the action
                 //TODO: [by yl] These actions are persisted into the build.xml of each build run - we need another
                 //context to store these actions
-                build.getActions().add(new MavenDependenciesRecord(build, d));
+                build.addAction(new MavenDependenciesRecord(build, d));
                 return null;
             }
         });

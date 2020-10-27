@@ -66,7 +66,7 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
                 UnifiedPromoteBuildAction action = build.getAction(UnifiedPromoteBuildAction.class);
                 if (action == null) {
                     action = new UnifiedPromoteBuildAction(this.build);
-                    build.getActions().add(action);
+                    build.addAction(action);
                 }
                 action.addPromotionCandidate(promotionConfig, configurator, step.getDisplayName());
             }

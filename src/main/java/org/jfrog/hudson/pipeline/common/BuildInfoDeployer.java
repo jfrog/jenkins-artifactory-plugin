@@ -99,7 +99,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
             BuildInfoResultAction action = build.getAction(BuildInfoResultAction.class);
             if (action == null) {
                 action = new BuildInfoResultAction(build);
-                build.getActions().add(action);
+                build.addAction(action);
             }
             action.addBuildInfoResults(artifactoryUrl, buildInfo);
         }

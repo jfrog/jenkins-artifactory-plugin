@@ -393,8 +393,8 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                 Result result = build.getResult();
                 if (deployBuildInfo && result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
                     String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryMaven3Configurator.this, build);
-                    build.getActions().add(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
-                    build.getActions().add(new UnifiedPromoteBuildAction(build, ArtifactoryMaven3Configurator.this));
+                    build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+                    build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryMaven3Configurator.this));
                 }
                 return true;
             }

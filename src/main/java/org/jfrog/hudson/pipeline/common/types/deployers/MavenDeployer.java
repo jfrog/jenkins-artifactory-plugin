@@ -161,7 +161,7 @@ public class MavenDeployer extends Deployer {
             // Initialize action if haven't done so yet.
             if (action == null) {
                 action = new DeployedMavenArtifactsAction(build);
-                build.getActions().add(action);
+                build.addAction(action);
             }
             action.addDeployedMavenArtifacts(artifactoryUrl, mavenArtifacts);
         }

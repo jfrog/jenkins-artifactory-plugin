@@ -355,8 +355,8 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                 if (!finalPublisherContext.isSkipBuildInfoDeploy() && (result == null ||
                         result.isBetterOrEqualTo(Result.SUCCESS))) {
                     String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryIvyFreeStyleConfigurator.this, build);
-                    build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
-                    build.getActions().add(new UnifiedPromoteBuildAction(build, ArtifactoryIvyFreeStyleConfigurator.this));
+                    build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+                    build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryIvyFreeStyleConfigurator.this));
                 }
 
                 // Aborted action by the user:

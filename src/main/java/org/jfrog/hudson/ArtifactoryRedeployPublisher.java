@@ -363,9 +363,9 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     private void addJobActions(AbstractBuild build, String buildName) {
-        build.getActions().add(0, new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+        build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
         if (isAllowPromotionOfNonStagedBuilds()) {
-            build.getActions().add(new UnifiedPromoteBuildAction(build, this));
+            build.addAction(new UnifiedPromoteBuildAction(build, this));
         }
     }
 
