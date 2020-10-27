@@ -11,6 +11,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.*;
+import org.jfrog.build.api.Module;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.client.DeployableArtifactDetail;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
