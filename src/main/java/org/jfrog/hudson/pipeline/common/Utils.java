@@ -132,7 +132,7 @@ public class Utils {
     }
 
     public static Computer getCurrentComputer(Launcher launcher) {
-        Jenkins j = Jenkins.getInstance();
+        Jenkins j = Jenkins.get();
         for (Computer c : j.getComputers()) {
             if (c.getChannel() == launcher.getChannel()) {
                 return c;
@@ -439,7 +439,7 @@ public class Utils {
     }
 
     private static NodeJSInstallation getNpmInstallation(String nodeTool) {
-        NodeJSInstallation[] installations = Jenkins.getInstance().getDescriptorByType(NodeJSInstallation.DescriptorImpl.class).getInstallations();
+        NodeJSInstallation[] installations = Jenkins.get().getDescriptorByType(NodeJSInstallation.DescriptorImpl.class).getInstallations();
         return Arrays.stream(installations)
                 .filter(i -> nodeTool.equals(i.getName()))
                 .findFirst()
