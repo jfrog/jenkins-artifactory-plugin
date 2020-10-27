@@ -39,15 +39,15 @@
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
         <skipITs>true</skipITs>
 
-        <buildinfo.version>2.19.x-SNAPSHOT</buildinfo.version>
-        <buildinfo.maven3.version>2.19.x-SNAPSHOT</buildinfo.maven3.version>
-        <buildinfo.gradle.version>4.17.x-SNAPSHOT</buildinfo.gradle.version>
-        <buildinfo.ivy.version>2.19.x-SNAPSHOT</buildinfo.ivy.version>
-        <buildinfo.npm.version>2.19.x-SNAPSHOT</buildinfo.npm.version>
-        <buildinfo.go.version>2.19.x-SNAPSHOT</buildinfo.go.version>
-        <buildinfo.pip.version>2.19.x-SNAPSHOT</buildinfo.pip.version>
-        <buildinfo.nuget.version>2.19.x-SNAPSHOT</buildinfo.nuget.version>
-        <buildinfo.docker.version>2.19.x-SNAPSHOT</buildinfo.docker.version>
+        <buildinfo.version>2.20.0</buildinfo.version>
+        <buildinfo.maven3.version>2.20.0</buildinfo.maven3.version>
+        <buildinfo.gradle.version>4.18.0</buildinfo.gradle.version>
+        <buildinfo.ivy.version>2.20.0</buildinfo.ivy.version>
+        <buildinfo.npm.version>2.20.0</buildinfo.npm.version>
+        <buildinfo.go.version>2.20.0</buildinfo.go.version>
+        <buildinfo.pip.version>2.20.0</buildinfo.pip.version>
+        <buildinfo.nuget.version>2.20.0</buildinfo.nuget.version>
+        <buildinfo.docker.version>2.20.0</buildinfo.docker.version>
     </properties>
 
     <developers>
