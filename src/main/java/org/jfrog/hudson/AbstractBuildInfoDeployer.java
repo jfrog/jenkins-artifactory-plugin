@@ -103,7 +103,7 @@ public class AbstractBuildInfoDeployer {
 
         addBuildInfoProperties(builder);
 
-        if ((Jenkins.getInstance().getPlugin("jira") != null) && configurator.isEnableIssueTrackerIntegration()) {
+        if ((Jenkins.get().getPlugin("jira") != null) && configurator.isEnableIssueTrackerIntegration()) {
             new IssuesTrackerHelper(build, listener, configurator.isAggregateBuildIssues(),
                     configurator.getAggregationBuildStatus()).setIssueTrackerInfo(builder);
         }
@@ -125,7 +125,7 @@ public class AbstractBuildInfoDeployer {
         Build buildInfo = builder.build();
         // for backwards compatibility for Artifactory 2.2.3
         if (parent != null) {
-            buildInfo.setParentBuildId(parent.getUpstreamProject());
+            buildInfo.setParentName(parent.getUpstreamProject());
         }
 
         return buildInfo;
