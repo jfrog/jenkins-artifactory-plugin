@@ -34,8 +34,8 @@ public class PublisherFlexible<T extends Publisher> implements PublisherFind<T> 
 
         List<ConditionalPublisher> conditions = ((FlexiblePublisher) flexiblePublisher).getPublishers();
         for (ConditionalPublisher condition : conditions) {
-            if (type.isInstance(condition.getPublisher())) {
-                return type.cast(condition.getPublisher());
+            if (type.isInstance(condition.getPublisherList().get(0))) {
+                return type.cast(condition.getPublisherList().get(0));
             }
         }
 
