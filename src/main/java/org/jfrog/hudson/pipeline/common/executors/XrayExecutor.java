@@ -21,13 +21,14 @@ import org.jfrog.hudson.XrayScanResultAction;
  */
 public class XrayExecutor implements Executor {
 
-    private XrayScanConfig xrayScanConfig;
-    private TaskListener listener;
-    private ArtifactoryServer server;
-    private final Run build;
+    private final XrayScanConfig xrayScanConfig;
+    private final ArtifactoryServer server;
+    private final TaskListener listener;
+    private final Run<?, ?> build;
+
     private XrayScanResult xrayScanResult;
 
-    public XrayExecutor(XrayScanConfig xrayScanConfig, TaskListener listener, ArtifactoryServer server, Run build) {
+    public XrayExecutor(XrayScanConfig xrayScanConfig, TaskListener listener, ArtifactoryServer server, Run<?, ?> build) {
         this.xrayScanConfig = xrayScanConfig;
         this.listener = listener;
         this.server = server;
@@ -39,7 +40,7 @@ public class XrayExecutor implements Executor {
         Log log = new JenkinsBuildInfoLog(listener);
         Credentials credentials = server.createCredentialsConfig().provideCredentials(build.getParent());
         ArtifactoryXrayClient client = new ArtifactoryXrayClient(server.getUrl(), credentials.getUsername(),
-                credentials.getPassword(), log);
+                credentials.getPassword(), credentials.getAccessToken(), log);
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(Utils.prepareArtifactoryServer(null, server));
         if (proxyConfiguration != null) {
             client.setProxyConfiguration(proxyConfiguration);
