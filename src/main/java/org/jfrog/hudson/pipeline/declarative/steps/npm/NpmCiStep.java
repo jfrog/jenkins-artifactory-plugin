@@ -5,34 +5,34 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 /**
- * Run npm-install task.
+ * Run npm-ci task.
  *
- * @author yahavi
+ * Created by Bar Belity on 19/11/2020.
  */
 @SuppressWarnings("unused")
-public class NpmInstallStep extends NpmInstallCiStepBase {
+public class NpmCiStep extends NpmInstallCiStepBase {
 
     @DataBoundConstructor
-    public NpmInstallStep() {
+    public NpmCiStep() {
         super();
-        this.ciCommand = false;
+        this.ciCommand = true;
     }
 
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(NpmInstallStep.Execution.class);
+            super(NpmCiStep.Execution.class);
         }
 
         @Override
         public String getFunctionName() {
-            return "rtNpmInstall";
+            return "rtNpmCi";
         }
 
         @Override
         public String getDisplayName() {
-            return "run Artifactory npm install";
+            return "run Artifactory npm ci";
         }
 
         @Override

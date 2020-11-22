@@ -8,8 +8,8 @@ node("TestSlave") {
     stage "Configure Artifactory"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     def buildInfo = Artifactory.newBuildInfo()
-    buildInfo.name = "scripted:npm test"
-    buildInfo.number = "3"
+    buildInfo.name = "scripted:npm ci test"
+    buildInfo.number = "4"
 
     stage "Configure npm build"
     def rtNpm = Artifactory.newNpmBuild()
@@ -20,8 +20,8 @@ node("TestSlave") {
     stage "Copy project example"
     FileUtils.copyDirectory(Paths.get("${NPM_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-npm-example").toFile())
 
-    stage "Install npm"
-    rtNpm.install buildInfo: buildInfo, path: "scripted-npm-example"
+    stage "Rum npm ci"
+    rtNpm.ci buildInfo: buildInfo, path: "scripted-npm-example"
 
 
     stage "Publish npm"

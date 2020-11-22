@@ -331,10 +331,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
-    void npmTest(String pipelineName, String buildName, String moduleName) throws Exception {
+    void npmTest(String pipelineName, String buildName, String buildNumber, String moduleName) throws Exception {
         Set<String> expectedArtifact = Sets.newHashSet("package-name1:0.0.1");
         Set<String> expectedDependencies = Sets.newHashSet("big-integer-1.6.40.tgz", "is-number-7.0.0.tgz");
-        String buildNumber = "3";
         try {
             runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);

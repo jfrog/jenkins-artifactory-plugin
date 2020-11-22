@@ -23,10 +23,10 @@ public abstract class NpmExecutor extends BuildInfoProcessRunner {
         this.npmBuild = npmBuild;
     }
 
-    public void execute(Deployer deployer, Resolver resolver, String args, String classToExecute) throws Exception {
+    public void execute(Deployer deployer, Resolver resolver, String args, boolean isCiCommand, String classToExecute) throws Exception {
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
-        EnvExtractor envExtractor = new NpmEnvExtractor(build,
-                buildInfo, deployer, resolver, listener, launcher, tempDir, env, args, path, module);
+        EnvExtractor envExtractor = new NpmEnvExtractor(build, buildInfo, deployer, resolver, listener, launcher,
+                tempDir, env, args, path, module, isCiCommand);
         super.execute("npm", "org.jfrog.build.extractor.npm.extractor." + classToExecute, envExtractor, tempDir);
     }
 }

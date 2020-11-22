@@ -82,13 +82,18 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
-    public void npmTest() throws Exception {
-        super.npmTest("npm", "scripted:npm test", "package-name1:0.0.1");
+    public void npmInstallTest() throws Exception {
+        super.npmTest("npmInstall", "scripted:npm install test", "3", "package-name1:0.0.1");
+    }
+
+    @Test
+    public void npmCiTest() throws Exception {
+        super.npmTest("npmCi", "scripted:npm ci test", "4", "package-name1:0.0.1");
     }
 
     @Test
     public void npmCustomModuleNameTest() throws Exception {
-        super.npmTest("npmCustomModuleName", "scripted:npmCustomModuleName test", "my-npm-module");
+        super.npmTest("npmCustomModuleName", "scripted:npmCustomModuleName test", "3", "my-npm-module");
     }
 
     @Test

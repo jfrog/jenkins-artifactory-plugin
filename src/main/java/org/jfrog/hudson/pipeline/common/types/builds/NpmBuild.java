@@ -36,6 +36,14 @@ public class NpmBuild extends PackageManagerBuild {
     }
 
     @Whitelisted
+    public void ci(Map<String, Object> args) {
+        Map<String, Object> stepVariables = prepareNpmStep(args, Arrays.asList(PATH, JAVA_ARGS, ARGS, BUILD_INFO, MODULE));
+        stepVariables.put(ARGS, args.get(ARGS));
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("artifactoryNpmCi", stepVariables);
+    }
+
+    @Whitelisted
     public void publish(Map<String, Object> args) {
         Map<String, Object> stepVariables = prepareNpmStep(args, Arrays.asList(PATH, JAVA_ARGS, BUILD_INFO, MODULE));
         // Throws CpsCallableInvocation - Must be the last line in this method

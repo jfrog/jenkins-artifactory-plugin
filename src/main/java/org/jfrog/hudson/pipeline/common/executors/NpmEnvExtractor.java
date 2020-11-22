@@ -17,14 +17,16 @@ public class NpmEnvExtractor extends EnvExtractor {
     private String args;
     private String path;
     private String module;
+    private boolean isCiCommand;
 
     public NpmEnvExtractor(Run build, BuildInfo buildInfo, Deployer deployer, Resolver resolver,
                            TaskListener buildListener, Launcher launcher, FilePath tempDir,
-                           EnvVars env, String args, String path, String module) {
+                           EnvVars env, String args, String path, String module, boolean isCiCommand) {
         super(build, buildInfo, deployer, resolver, buildListener, launcher, tempDir, env);
         this.args = args;
         this.path = path;
         this.module = module;
+        this.isCiCommand = isCiCommand;
     }
 
     @Override
@@ -32,5 +34,6 @@ public class NpmEnvExtractor extends EnvExtractor {
         configuration.packageManagerHandler.setArgs(args);
         configuration.packageManagerHandler.setPath(path);
         configuration.packageManagerHandler.setModule(module);
+        configuration.npmHandler.setIsCiCommand(isCiCommand);
     }
 }

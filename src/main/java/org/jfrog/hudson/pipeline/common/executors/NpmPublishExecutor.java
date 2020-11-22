@@ -25,6 +25,6 @@ public class NpmPublishExecutor extends NpmExecutor {
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }
-        super.execute(deployer, new CommonResolver(), "", "NpmPublish");
+        super.execute(deployer, new CommonResolver(), "", false, "NpmPublish");
     }
 }

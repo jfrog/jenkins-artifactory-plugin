@@ -1,0 +1,34 @@
+package integration.pipelines.scripted
+
+import org.apache.commons.io.FileUtils
+
+import java.nio.file.Paths
+
+node("TestSlave") {
+    stage "Configure Artifactory"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:npm install test"
+    buildInfo.number = "3"
+
+    stage "Configure npm build"
+    def rtNpm = Artifactory.newNpmBuild()
+    rtNpm.deployer repo: "${NPM_LOCAL}", server: rtServer
+    rtNpm.resolver repo: "${NPM_REMOTE}", server: rtServer
+
+
+    stage "Copy project example"
+    FileUtils.copyDirectory(Paths.get("${NPM_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-npm-example").toFile())
+
+    stage "Install npm"
+    rtNpm.install buildInfo: buildInfo, path: "scripted-npm-example"
+
+
+    stage "Publish npm"
+    rtNpm.publish buildInfo: buildInfo, path: "scripted-npm-example"
+
+
+    stage "Publish build info"
+    rtServer.publishBuildInfo buildInfo
+
+}
