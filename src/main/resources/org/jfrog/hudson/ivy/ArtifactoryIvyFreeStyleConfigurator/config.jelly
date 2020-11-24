@@ -36,7 +36,7 @@
                        elementId="overridingDeployerCredentials-ivy-${uniqueId}"/>
 
         <f:block>
-            <table style="width:100%">
+            <r:blockWrapper style="width:100%">
                 <f:optionalBlock name="deployBuildInfo" checked="${h.defaultToTrue(instance.deployBuildInfo)}"
                                  title="Capture and publish build info"
                                  help="/plugin/artifactory/help/common/help-deployBuildInfo.html"
@@ -46,7 +46,7 @@
                                      help="/plugin/artifactory/help/common/help-includeEnvVars.html"
                                      inline="true">
                         <f:block>
-                            <table style="width:100%">
+                            <r:blockWrapper style="width:100%">
                                 <j:set var="envVarsPatterns" value="${instance.envVarsPatterns}"/>
                                 <f:section name="envVarsPatterns">
                                     <input type="hidden" name="stapler-class"
@@ -62,7 +62,7 @@
                                                    default="*password*,*psw*,*secret*,*key*,*token*"/>
                                     </f:entry>
                                 </f:section>
-                            </table>
+                            </r:blockWrapper>
                         </f:block>
                     </f:optionalBlock>
                     <f:optionalBlock name="discardOldBuilds"
@@ -82,10 +82,10 @@
                         </f:entry>
                     </f:optionalBlock>
                 </f:optionalBlock>
-            </table>
+            </r:blockWrapper>
         </f:block>
         <f:block>
-            <table style="width:100%">
+            <r:blockWrapper style="width:100%">
                 <f:optionalBlock field="overrideBuildName"
                                  help="/plugin/artifactory/help/common/help-overrideBuildName.html"
                                  title="Override build name" inline="true"
@@ -97,10 +97,10 @@
                         </f:entry>
                     </f:block>
                 </f:optionalBlock>
-            </table>
+            </r:blockWrapper>
         </f:block>
         <f:block>
-            <table style="width:100%">
+            <r:blockWrapper style="width:100%">
                 <f:optionalBlock field="deployArtifacts"
                                  help="/plugin/artifactory/help/common/help-deployArtifacts.html"
                                  inline="true"
@@ -110,25 +110,25 @@
                     <f:block>
                         <j:if test="${descriptor.isMultiConfProject()}">
                             <f:block>
-                                <table style="width:100%">
+                                <r:blockWrapper style="width:100%">
                                     <f:entry field="artifactoryCombinationFilter" title="${%Combination Matches}"
                                              description="Groovy expression"
                                              help="/plugin/artifactory/help/common/help-combinationFilter.html">
                                         <f:textbox value="${instance.artifactoryCombinationFilter}"
                                                    field="artifactoryCombinationFilter"/>
                                     </f:entry>
-                                </table>
+                                </r:blockWrapper>
                             </f:block>
                         </j:if>
                     </f:block>
                     <f:block>
-                        <table style="width:100%">
+                        <r:blockWrapper style="width:100%">
                             <f:optionalBlock field="useMavenPatterns"
                                              help="/plugin/artifactory/help/common/help-useMavenPatterns.html"
                                              inline="true" checked="${instance.useMavenPatterns}"
                                              title="Use Maven compatible patterns">
                             </f:optionalBlock>
-                        </table>
+                        </r:blockWrapper>
                     </f:block>
                     <f:entry title="Ivy pattern" field="ivyPattern"
                              help="/plugin/artifactory/help/common/help-ivyPattern.html">
@@ -141,7 +141,7 @@
                                    default="[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"/>
                     </f:entry>
                     <f:block>
-                        <table style="width:100%">
+                        <r:blockWrapper style="width:100%">
                             <j:set var="artifactDeploymentPatterns" value="${instance.artifactDeploymentPatterns}"/>
                             <f:section name="artifactDeploymentPatterns">
                                 <input type="hidden" name="stapler-class"
@@ -156,40 +156,40 @@
                                     <f:textbox value="${artifactDeploymentPatterns.excludePatterns}"/>
                                 </f:entry>
                             </f:section>
-                        </table>
+                        </r:blockWrapper>
                     </f:block>
                     <f:block>
-                        <table style="width:100%">
+                        <r:blockWrapper style="width:100%">
                             <f:optionalBlock field="filterExcludedArtifactsFromBuild"
                                              help="/plugin/artifactory/help/common/help-filterExcludedArtifactsFromBuild.html"
                                              title="Filter excluded artifacts from build Info"
                                              checked="${h.defaultToTrue(instance.filterExcludedArtifactsFromBuild)}"
                                              inline="true">
                             </f:optionalBlock>
-                        </table>
+                        </r:blockWrapper>
                     </f:block>
                     <f:block>
-                        <table style="width:100%">
+                        <r:blockWrapper style="width:100%">
                             <f:entry title="Deployment properties" field="deploymentProperties"
                                      help="/plugin/artifactory/help/common/help-deploymentProperties.html">
                                 <f:textbox value="${instance.deploymentProperties}"/>
                             </f:entry>
-                        </table>
+                        </r:blockWrapper>
                     </f:block>
                 </f:optionalBlock>
-            </table>
+            </r:blockWrapper>
         </f:block>
         <f:block>
-            <table style="width:100%">
+            <r:blockWrapper style="width:100%">
                 <f:optionalBlock field="passIdentifiedDownstream"
                                  help="/plugin/artifactory/help/common/help-passIdentifiedDownstream.html"
                                  title="Enable isolated resolution for downstream builds (requires Artifactory Pro)"
                                  inline="true">
                 </f:optionalBlock>
-            </table>
+            </r:blockWrapper>
         </f:block>
         <f:block>
-            <table style="width:100%">
+            <r:blockWrapper style="width:100%">
                 <j:if test="${descriptor.jiraPluginEnabled}">
                     <f:optionalBlock name="enableIssueTrackerIntegration"
                                      checked="${instance.enableIssueTrackerIntegration}"
@@ -209,7 +209,7 @@
                         </f:optionalBlock>
                     </f:optionalBlock>
                 </j:if>
-            </table>
+            </r:blockWrapper>
         </f:block>
     </f:section>
     <f:block>

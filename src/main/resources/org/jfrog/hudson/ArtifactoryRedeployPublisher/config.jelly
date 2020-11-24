@@ -75,16 +75,16 @@
                    elementId="overridingDeployerCredentials-${uniqueId}"/>
 
     <f:block>
-        <table style="width:100%">
+        <r:blockWrapper style="width:100%">
             <f:optionalBlock field="evenIfUnstable"
                              help="/plugin/artifactory/help/ArtifactoryRedeployPublisher/help-evenIfUnstable.html"
                              title="Deploy even if the build is unstable"
                              inline="true">
             </f:optionalBlock>
-        </table>
+        </r:blockWrapper>
     </f:block>
     <f:block>
-        <table style="width:100%">
+        <r:blockWrapper style="width:100%">
             <f:optionalBlock field="overrideBuildName"
                              help="/plugin/artifactory/help/common/help-overrideBuildName.html"
                              title="Override build name" inline="true"
@@ -96,17 +96,17 @@
                     </f:entry>
                 </f:block>
             </f:optionalBlock>
-        </table>
+        </r:blockWrapper>
     </f:block>
     <f:block>
-        <table style="width:100%">
+        <r:blockWrapper style="width:100%">
             <f:optionalBlock field="deployArtifacts"
                              help="/plugin/artifactory/help/common/help-deployArtifacts.html"
                              title="Deploy maven artifacts"
                              checked="${h.defaultToTrue(instance.deployArtifacts)}"
                              inline="true">
                 <f:block>
-                    <table style="width:100%">
+                    <r:blockWrapper style="width:100%">
                         <j:set var="artifactDeploymentPatterns" value="${instance.artifactDeploymentPatterns}"/>
                         <f:section name="artifactDeploymentPatterns">
                             <input type="hidden" name="stapler-class"
@@ -121,31 +121,31 @@
                                 <f:textbox value="${artifactDeploymentPatterns.excludePatterns}"/>
                             </f:entry>
                         </f:section>
-                    </table>
+                    </r:blockWrapper>
                 </f:block>
                 <f:block>
-                    <table style="width:100%">
+                    <r:blockWrapper style="width:100%">
                         <f:optionalBlock field="filterExcludedArtifactsFromBuild"
                                          help="/plugin/artifactory/help/common/help-filterExcludedArtifactsFromBuild.html"
                                          title="Filter excluded artifacts from build Info"
                                          checked="${h.defaultToTrue(instance.filterExcludedArtifactsFromBuild)}"
                                          inline="true">
                         </f:optionalBlock>
-                    </table>
+                    </r:blockWrapper>
                 </f:block>
                 <f:block>
-                    <table style="width:100%">
+                    <r:blockWrapper style="width:100%">
                         <f:entry title="Deployment properties" field="deploymentProperties"
                                  help="/plugin/artifactory/help/common/help-deploymentProperties.html">
                             <f:textbox value="${instance.deploymentProperties}"/>
                         </f:entry>
-                    </table>
+                    </r:blockWrapper>
                 </f:block>
             </f:optionalBlock>
-        </table>
+        </r:blockWrapper>
     </f:block>
     <f:block>
-        <table style="width:100%">
+        <r:blockWrapper style="width:100%">
             <f:optionalBlock name="deployBuildInfo" checked="${h.defaultToTrue(instance.deployBuildInfo)}"
                              title="Capture and publish build info"
                              help="/plugin/artifactory/help/common/help-deployBuildInfo.html"
@@ -156,7 +156,7 @@
                                  help="/plugin/artifactory/help/common/help-includeEnvVars.html"
                                  inline="true">
                     <f:block>
-                        <table style="width:100%">
+                        <r:blockWrapper style="width:100%">
                             <j:set var="envVarsPatterns" value="${instance.envVarsPatterns}"/>
                             <f:section name="envVarsPatterns">
                                 <input type="hidden" name="stapler-class"
@@ -172,20 +172,20 @@
                                                default="*password*,*psw*,*secret*,*key*,*token*"/>
                                 </f:entry>
                             </f:section>
-                        </table>
+                        </r:blockWrapper>
                     </f:block>
                 </f:optionalBlock>
                 <f:block>
-                    <table style="width:100%">
+                    <r:blockWrapper style="width:100%">
                         <f:optionalBlock field="recordAllDependencies"
                                          help="/plugin/artifactory/help/common/help-recordAllDependencies.html"
                                          title="Record implicit project dependencies and build-time dependencies"
                                          inline="true">
                         </f:optionalBlock>
-                    </table>
+                    </r:blockWrapper>
                 </f:block>
                 <f:block>
-                    <table style="width:100%">
+                    <r:blockWrapper style="width:100%">
                         <f:optionalBlock field="allowPromotionOfNonStagedBuilds"
                                          help="/plugin/artifactory/help/common/help-allowPromotionOfNonStagedBuilds.html"
                                          title="Allow promotion of non-staged builds"
@@ -195,10 +195,10 @@
                                  help="/plugin/artifactory/help/release/PromoteBuildAction/help-defaultPromotionTargetRepository.html">
                             <f:textbox value="${instance.defaultPromotionTargetRepository}"/>
                         </f:entry>
-                    </table>
+                    </r:blockWrapper>
                 </f:block>
                 <f:block>
-                    <table style="width:100%">
+                    <r:blockWrapper style="width:100%">
                         <f:optionalBlock name="discardOldBuilds"
                                          checked="${instance.discardOldBuilds}"
                                          title="Discard old builds from Artifactory (requires Artifactory Pro)"
@@ -215,22 +215,22 @@
                                 <label class="attach-previous">${%Async}</label>
                             </f:entry>
                         </f:optionalBlock>
-                    </table>
+                    </r:blockWrapper>
                 </f:block>
             </f:optionalBlock>
-        </table>
+        </r:blockWrapper>
     </f:block>
     <f:block>
-        <table style="width:100%">
+        <r:blockWrapper style="width:100%">
             <f:optionalBlock field="passIdentifiedDownstream"
                              help="/plugin/artifactory/help/common/help-passIdentifiedDownstream.html"
                              title="Enable isolated resolution for downstream builds (requires Artifactory Pro)"
                              inline="true">
             </f:optionalBlock>
-        </table>
+        </r:blockWrapper>
     </f:block>
     <f:block>
-        <table style="width:100%">
+        <r:blockWrapper style="width:100%">
             <j:if test="${descriptor.jiraPluginEnabled}">
                 <f:optionalBlock name="enableIssueTrackerIntegration"
                                  checked="${instance.enableIssueTrackerIntegration}"
@@ -250,7 +250,7 @@
                     </f:optionalBlock>
                 </f:optionalBlock>
             </j:if>
-        </table>
+        </r:blockWrapper>
     </f:block>
     <f:block>
         <hr/>

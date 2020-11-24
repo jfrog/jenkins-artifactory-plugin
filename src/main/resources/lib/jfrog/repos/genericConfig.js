@@ -21,30 +21,33 @@ function updateViewBySpecsParam(isUsesSpec, uniqueId) {
     let deployLegacyPatternArea = getElementByUniqueId("deployPatternArea", uniqueId);
     let deployerSpec = getElementByUniqueId("artifactory-deployer-spec-dd", uniqueId);
     let deployerLegacy = getElementByUniqueId("artifactory-deployer-generic-dd", uniqueId);
+    
+    // Jenkins Core 2.264 and above uses div for layout rather than tables.
+    const tagName = resolverSpec.tagName.toLowerCase() === 'div' ? 'div' : 'table'
 
     let specView = "none", legacyView = "none";
     if (isUsesSpec === "true") {
         // Resolution section
         // By changing the name the configuration will decide which server to use
-        resolverSpec.getElementsByTagName("table")[0].setAttribute("name", "resolverDetails");
-        resolverLegacy.getElementsByTagName("table")[0].setAttribute("name", "artifactory-resolver-generic-dd");
+        resolverSpec.getElementsByTagName(tagName)[0].setAttribute("name", "resolverDetails");
+        resolverLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "artifactory-resolver-generic-dd");
 
         // Deployment section
         // By changing the name the configuration will decide which server to use
-        deployerSpec.getElementsByTagName("table")[0].setAttribute("name", "deployerDetails");
-        deployerLegacy.getElementsByTagName("table")[0].setAttribute("name", "artifactory-deployer-generic-dd");
+        deployerSpec.getElementsByTagName(tagName)[0].setAttribute("name", "deployerDetails");
+        deployerLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "artifactory-deployer-generic-dd");
 
         specView = "";
     } else {
         // Resolution section
         // By changing the name the configuration will decide which server to use
-        resolverSpec.getElementsByTagName("table")[0].setAttribute("name", "artifactory-resolver-spec-dd");
-        resolverLegacy.getElementsByTagName("table")[0].setAttribute("name", "resolverDetails");
+        resolverSpec.getElementsByTagName(tagName)[0].setAttribute("name", "artifactory-resolver-spec-dd");
+        resolverLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "resolverDetails");
 
         // Deployment section
         // By changing the name the configuration will decide which server to use
-        deployerSpec.getElementsByTagName("table")[0].setAttribute("name", "artifactory-deployer-spec-dd");
-        deployerLegacy.getElementsByTagName("table")[0].setAttribute("name", "deployerDetails");
+        deployerSpec.getElementsByTagName(tagName)[0].setAttribute("name", "artifactory-deployer-spec-dd");
+        deployerLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "deployerDetails");
 
         legacyView = "";
     }

@@ -23,7 +23,7 @@
                 Upload Details
             </lable>
 
-            <table style="width:100%" id="artifactory-deployer-generic-dd-${uniqueId}">
+            <r:blockWrapper style="width:100%" id="artifactory-deployer-generic-dd-${uniqueId}">
 
                 <f:dropdownList name="artifactory-deployer-generic-dd-${uniqueId}"
                                 title="${%Artifactory upload server}">
@@ -56,9 +56,9 @@
                         </f:dropdownListBlock>
                     </j:forEach>
                 </f:dropdownList>
-            </table>
+            </r:blockWrapper>
 
-            <table style="width:100%" id="artifactory-deployer-spec-dd-${uniqueId}">
+            <r:blockWrapper style="width:100%" id="artifactory-deployer-spec-dd-${uniqueId}">
                 <f:dropdownList name="artifactory-deployer-spec-dd-${uniqueId}" title="${%Artifactory upload server}">
                     <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
                         <f:dropdownListBlock value="${s.serverId}" title="${s.artifactoryUrl}"
@@ -72,7 +72,7 @@
                         </f:dropdownListBlock>
                     </j:forEach>
                 </f:dropdownList>
-            </table>
+            </r:blockWrapper>
 
             <r:credentials configurationFieldName="deployerCredentialsConfig"
                            configurationObject="${instance.deployerCredentialsConfig}"
@@ -81,7 +81,7 @@
         </f:block>
 
         <f:block>
-            <table style="width:100%" id="deployPatternArea-${uniqueId}">
+            <r:blockWrapper style="width:100%" id="deployPatternArea-${uniqueId}">
                 <f:entry title="Published Artifacts" field="deployPattern"
                          help="/plugin/artifactory/help/common/help-deployPattern.html">
                     <f:textarea value="${instance.deployPattern}"/>
@@ -90,11 +90,11 @@
                          help="/plugin/artifactory/help/common/help-deploymentProperties.html">
                     <f:textbox value="${instance.deploymentProperties}"/>
                 </f:entry>
-            </table>
+            </r:blockWrapper>
         </f:block>
 
         <f:block>
-            <table style="width:100%; " id="uploadSpecArea-${uniqueId}">
+            <r:blockWrapper style="width:100%; " id="uploadSpecArea-${uniqueId}">
                 <f:dropdownList name="uploadSpec" title="${%Upload spec source}"
                                 help="/plugin/artifactory/help/common/help-UploadSpec.html">
 
@@ -103,11 +103,11 @@
                                          selected="${instance.uploadSpec.filePath == null}">
                         <tr>
                             <td>
-                                <table style="width:100%" id="uploadSpecArea-${uniqueId}">
+                                <r:blockWrapper style="width:100%" id="uploadSpecArea-${uniqueId}">
                                     <f:entry title="Spec" field="spec">
                                         <f:textarea value="${instance.uploadSpec.spec}"/>
                                     </f:entry>
-                                </table>
+                                </r:blockWrapper>
                             </td>
                         </tr>
                     </f:dropdownListBlock>
@@ -116,17 +116,17 @@
                                          selected="${instance.uploadSpec.filePath != null}">
                         <tr>
                             <td>
-                                <table style="width:100%">
+                                <r:blockWrapper style="width:100%">
                                     <f:entry title="File Path" field="filePath">
                                         <f:textbox value="${instance.uploadSpec.filePath}"/>
                                     </f:entry>
-                                </table>
+                                </r:blockWrapper>
                             </td>
                         </tr>
                     </f:dropdownListBlock>
 
                 </f:dropdownList>
-            </table>
+            </r:blockWrapper>
         </f:block>
 
         <f:block>
@@ -134,7 +134,7 @@
                               font-weight: bold; box-sizing: border-box;">
                 Download Details
             </lable>
-            <table style="width:100%" id="artifactory-resolver-generic-dd-${uniqueId}">
+            <r:blockWrapper style="width:100%" id="artifactory-resolver-generic-dd-${uniqueId}">
                 <f:dropdownList name="artifactory-resolver-generic-dd-${uniqueId}"
                                 title="${%Artifactory download server}">
                     <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
@@ -150,11 +150,11 @@
                         </f:dropdownListBlock>
                     </j:forEach>
                 </f:dropdownList>
-            </table>
+            </r:blockWrapper>
         </f:block>
 
         <f:block>
-            <table style="width:100%" id="artifactory-resolver-spec-dd-${uniqueId}">
+            <r:blockWrapper style="width:100%" id="artifactory-resolver-spec-dd-${uniqueId}">
                 <f:dropdownList name="artifactory-resolver-spec-dd-${uniqueId}" title="${%Artifactory download server}">
                     <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
                         <f:dropdownListBlock value="${s.serverId}" title="${s.artifactoryUrl}"
@@ -169,7 +169,7 @@
                         </f:dropdownListBlock>
                     </j:forEach>
                 </f:dropdownList>
-            </table>
+            </r:blockWrapper>
         </f:block>
 
         <r:credentials configurationFieldName="resolverCredentialsConfig"
@@ -178,17 +178,18 @@
                        elementId="overridingResolverCredentials-generic-${uniqueId}"/>
 
         <f:block>
-            <table style="width:100%" id="resolvePatternArea-${uniqueId}">
+            <r:blockWrapper style="width:100%" id="resolvePatternArea-${uniqueId}">
                 <f:entry title="Download Artifacts" field="resolvePattern"
                          help="/plugin/artifactory/help/common/help-resolvePattern.html">
                     <f:textarea value="${instance.resolvePattern}"/>
                 </f:entry>
-            </table>
+            </r:blockWrapper>
+            <st:adjunct includes="lib.jfrog.repos.repos"/>
             <st:adjunct includes="lib.jfrog.repos.genericConfig"/>
         </f:block>
 
         <f:block>
-            <table style="width:100%" id="downloadSpecArea-${uniqueId}">
+            <r:blockWrapper style="width:100%" id="downloadSpecArea-${uniqueId}">
                 <f:dropdownList name="downloadSpec" title="${%Download spec source}"
                                 help="/plugin/artifactory/help/common/help-DownloadSpec.html">
 
@@ -197,11 +198,11 @@
                                          selected="${instance.downloadSpec.filePath == null}">
                         <tr>
                             <td>
-                                <table style="width:100%" id="downloadSpecArea">
+                                <r:blockWrapper style="width:100%" id="downloadSpecArea">
                                     <f:entry title="Spec" field="spec">
                                         <f:textarea value="${instance.downloadSpec.spec}"/>
                                     </f:entry>
-                                </table>
+                                </r:blockWrapper>
                             </td>
                         </tr>
                     </f:dropdownListBlock>
@@ -210,22 +211,22 @@
                                          selected="${instance.downloadSpec.filePath != null}">
                         <tr>
                             <td>
-                                <table style="width:100%" id="DownloadFilePathArea">
+                                <r:blockWrapper style="width:100%" id="DownloadFilePathArea">
                                     <f:entry title="File Path" field="filePath">
                                         <f:textbox value="${instance.downloadSpec.filePath}"/>
                                     </f:entry>
-                                </table>
+                                </r:blockWrapper>
                             </td>
                         </tr>
                     </f:dropdownListBlock>
 
                 </f:dropdownList>
-            </table>
+            </r:blockWrapper>
         </f:block>
 
         <f:section title="More Details">
             <f:block>
-                <table style="width:100%">
+                <r:blockWrapper style="width:100%">
                     <f:optionalBlock field="overrideBuildName"
                                      help="/plugin/artifactory/help/common/help-overrideBuildName.html"
                                      title="Override build name" inline="true"
@@ -237,10 +238,10 @@
                             </f:entry>
                         </f:block>
                     </f:optionalBlock>
-                </table>
+                </r:blockWrapper>
             </f:block>
             <f:block>
-                <table style="width:100%">
+                <r:blockWrapper style="width:100%">
                     <f:optionalBlock name="deployBuildInfo" checked="${h.defaultToTrue(instance.deployBuildInfo)}"
                                      title="Capture and publish build info"
                                      help="/plugin/artifactory/help/common/help-deployBuildInfo.html"
@@ -251,7 +252,7 @@
                                          help="/plugin/artifactory/help/common/help-includeEnvVars.html"
                                          inline="true">
                             <f:block>
-                                <table style="width:100%">
+                                <r:blockWrapper style="width:100%">
                                     <j:set var="envVarsPatterns" value="${instance.envVarsPatterns}"/>
                                     <f:section name="envVarsPatterns">
                                         <input type="hidden" name="stapler-class"
@@ -267,7 +268,7 @@
                                                        default="*password*,*psw*,*secret*,*key*,*token*"/>
                                         </f:entry>
                                     </f:section>
-                                </table>
+                                </r:blockWrapper>
                             </f:block>
                         </f:optionalBlock>
 
@@ -289,13 +290,13 @@
                         </f:optionalBlock>
 
                     </f:optionalBlock>
-                </table>
+                </r:blockWrapper>
             </f:block>
 
             <f:block>
                 <j:if test="${descriptor.isMultiConfProject()}">
                     <f:block>
-                        <table style="width:100%">
+                        <r:blockWrapper style="width:100%">
                             <f:optionalBlock name="multiConfProject"
                                              checked="${instance.multiConfProject == null || instance.multiConfProject}"
                                              title="${%Multi Configuration Upload Matcher}"
@@ -307,7 +308,7 @@
                                                field="artifactoryCombinationFilter"/>
                                 </f:entry>
                             </f:optionalBlock>
-                        </table>
+                        </r:blockWrapper>
                     </f:block>
                 </j:if>
             </f:block>

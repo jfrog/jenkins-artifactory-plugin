@@ -22,7 +22,7 @@
                           header="Artifactory" add="${%Add Artifactory Server}">
                 <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ArtifactoryServer"/>
 
-                <table width="100%">
+                <r:blockWrapper style="width:100%">
                     <f:entry title="Server ID" help="/plugin/artifactory/help/ArtifactoryBuilder/help-serverId.html">
                         <f:textbox field="serverId" value="${server.serverId}"/>
                     </f:entry>
@@ -66,13 +66,13 @@
                                name="deployerCredentialsConfig">
                         <f:block>
                             <input type="hidden" name="stapler-class" value="org.jfrog.hudson.CredentialsConfig"/>
-                            <r:blockWrapper id="deployerCredentialsId${server.artifactoryUrl}">
+                            <r:blockWrapper style="width:100%" id="deployerCredentialsId${server.artifactoryUrl}">
                                 <f:entry title="${%Credentials}" name="credentialsId" field="credentialsId">
                                     <c:select default="${server.deployerCredentialsConfig.credentialsId}"/>
                                 </f:entry>
                             </r:blockWrapper>
 
-                            <r:blockWrapper id="legacyDeployerCredentials${server.artifactoryUrl}">
+                            <r:blockWrapper style="width:100%" id="legacyDeployerCredentials${server.artifactoryUrl}">
                                 <f:entry title="Username"
                                          help="/plugin/artifactory/help/common/help-deployerUserName.html">
                                     <f:textbox name="username" field="username"
@@ -100,13 +100,13 @@
                                 <input type="hidden" name="overridingCredentials" value="true"/>
                                 <input type="hidden" name="stapler-class"
                                        value="org.jfrog.hudson.CredentialsConfig"/>
-                                <r:blockWrapper id="resolverCredentialsId${server.artifactoryUrl}">
+                                <r:blockWrapper style="width:100%" id="resolverCredentialsId${server.artifactoryUrl}">
                                     <f:entry title="${%Credentials}" field="credentialsId">
                                         <c:select default="${server.resolverCredentialsConfig.credentialsId}"/>
                                     </f:entry>
                                 </r:blockWrapper>
 
-                                <r:blockWrapper id="legacyResolverCredentials${server.artifactoryUrl}">
+                                <r:blockWrapper style="width:100%" id="legacyResolverCredentials${server.artifactoryUrl}">
                                     <f:entry title="Username"
                                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-resolverUserName.html">
                                         <f:textbox field="username"
@@ -128,14 +128,14 @@
                         </div>
                     </f:block>
 
-                </table>
+                </r:blockWrapper>
             </f:repeatable>
         </f:entry>
         <f:block>
             <br/>
         </f:block>
         <f:entry title="JFrog Pipelines server" description="Report job results to JFrog Pipelines">
-            <table width="100%">
+            <r:blockWrapper style="width:100%">
                 <f:entry title="Integration URL"
                          help="/plugin/artifactory/help/ArtifactoryBuilder/help-pipelinesIntegrationUrl.html">
                     <f:textbox field="pipelinesIntegrationUrl" value="${descriptor.jfrogPipelinesServer.integrationUrl}"/>
@@ -174,7 +174,7 @@
                         title="${%Test Connection}" progress="${%Testing...}"
                         method="testJFrogPipelinesConnection"
                         with="pipelinesIntegrationUrl,pipelinesTimeout,pipelinesBypassProxy,credentialsId,pipelinesConnectionRetries"/>
-            </table>
+            </r:blockWrapper>
         </f:entry>
 
     </f:section>

@@ -1,5 +1,5 @@
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form" xmlns:r="/lib/jfrog">
     <f:entry title="${%Promotion plugin}" field="promotionPlugin"
              help="/plugin/artifactory/help/release/ReleaseAction/help-promotionPlugin.html">
         <select class="setting-input" id="pluginList">
@@ -9,7 +9,7 @@
     <tr>
         <td colspan="2"/>
         <td colspan="2">
-            <table width="100%" name="promotionPlugin" id="pluginList-container">
+            <r:blockWrapper style="width:100%" id="pluginList-container">
                 <tbody id="None">
                     <f:entry title="${%Target status}" field="targetStatus"
                              help="/plugin/artifactory/help/release/PromoteBuildAction/help-targetStatus.html">
@@ -48,7 +48,7 @@
                         <label class="attach-previous">${%Fail Fast}</label>
                     </f:entry>
                 </tbody>
-            </table>
+            </r:blockWrapper>
         </td>
     </tr>
 </j:jelly>

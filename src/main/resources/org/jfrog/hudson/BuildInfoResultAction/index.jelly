@@ -1,12 +1,13 @@
 <!-- displays a form to choose the next release and development version and re-schedules a build -->
 <!--suppress XmlUnusedNamespaceDeclaration -->
 <?jelly escape-by-default='true'?>
-<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout" xmlns:f="/lib/form">
+<j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:l="/lib/layout" xmlns:f="/lib/form"
+         xmlns:r="/lib/jfrog">
     <l:layout norefresh="true" title="">
         <st:include it="${it.build}" page="sidepanel.jelly"/>
         <l:main-panel>
             <h1> Artifactory Build Infos </h1>
-            <table style="margin-top: 1em; margin-left:1em;">
+            <r:blockWrapper style="margin-top: 1em; margin-left:1em;">
                 <j:forEach var="publishedBuildDetails" items="${it.publishedBuildsDetails}" varStatus="loop">
                     <tr>
                         <td>
@@ -21,7 +22,7 @@
                         </td>
                     </tr>
                 </j:forEach>
-            </table>
+            </r:blockWrapper>
         </l:main-panel>
     </l:layout>
 </j:jelly>

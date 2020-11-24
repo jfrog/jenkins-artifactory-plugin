@@ -23,7 +23,6 @@ import hudson.model.BuildListener;
 import hudson.scm.SCM;
 import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.release.scm.git.GitCoordinator;
-import org.jfrog.hudson.release.scm.perforce.LegacyPerforceManager;
 import org.jfrog.hudson.release.scm.perforce.P4Manager;
 import org.jfrog.hudson.release.scm.perforce.PerforceCoordinator;
 import org.jfrog.hudson.release.scm.svn.SubversionCoordinator;
@@ -58,9 +57,6 @@ public abstract class AbstractScmCoordinator implements ScmCoordinator {
             return new GitCoordinator(build, listener, releaseAction);
         }
         // Perforce is optional SCM so we cannot use the class here
-        if (isPerforceScm(build.getProject())) {
-            return new PerforceCoordinator(build, listener, releaseAction, new LegacyPerforceManager(build, listener));
-        }
         if (isP4SCM(build.getProject())){
             return new PerforceCoordinator(build, listener, releaseAction, new P4Manager(build, listener));
         }
@@ -85,14 +81,6 @@ public abstract class AbstractScmCoordinator implements ScmCoordinator {
         SCM scm = project.getScm();
         if (scm != null) {
             return scm.getClass().getName().equals("hudson.plugins.git.GitSCM");
-        }
-        return false;
-    }
-
-    public static boolean isPerforceScm(AbstractProject project) {
-        SCM scm = project.getScm();
-        if (scm != null) {
-            return scm.getClass().getName().equals("hudson.plugins.perforce.PerforceSCM");
         }
         return false;
     }
