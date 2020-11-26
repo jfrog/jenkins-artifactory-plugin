@@ -230,6 +230,18 @@ public class ArtifactoryServer implements Serializable {
     }
 
     @Whitelisted
+    public void buildAppend(BuildInfo buildInfo, String buildName, String buildNumber) {
+        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        stepVariables.put(BUILD_INFO, buildInfo);
+        stepVariables.put(BUILD_NAME, buildName);
+        stepVariables.put(BUILD_NUMBER, buildNumber);
+        stepVariables.put(SERVER, this);
+
+        // Throws CpsCallableInvocation - Must be the last line in this method
+        cpsScript.invokeMethod("buildAppend", stepVariables);
+    }
+
+    @Whitelisted
     public void promote(Map<String, Object> promotionParams) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("promotionConfig", Utils.createPromotionConfig(promotionParams, true));

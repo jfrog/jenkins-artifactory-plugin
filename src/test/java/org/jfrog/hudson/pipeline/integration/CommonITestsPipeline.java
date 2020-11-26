@@ -722,4 +722,23 @@ public class CommonITestsPipeline extends PipelineTestBase {
         // Check trigger
         checkArtifactoryTrigger(run);
     }
+
+    void buildAppendTest(String buildName) throws Exception {
+        String buildName1 = buildName + "-1";
+        String buildNumber1 = "1";
+        String buildName2 = buildName + "-2";
+        String buildNumber2 = "2";
+
+        // Clear older builds if exist
+        deleteBuild(artifactoryClient, buildName1);
+        deleteBuild(artifactoryClient, buildName2);
+        runPipeline("buildAppend", false);
+        try {
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName2, buildNumber2);
+            getAndAssertModule(buildInfo, buildName1 + "/" + buildNumber1);
+        } finally {
+            deleteBuild(artifactoryClient, buildName1);
+            deleteBuild(artifactoryClient, buildName2);
+        }
+    }
 }

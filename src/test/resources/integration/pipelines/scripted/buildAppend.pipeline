@@ -1,0 +1,25 @@
+package integration.pipelines.scripted
+
+node("TestSlave") {
+    stage "Configuration"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+
+    stage "Create 1st Build Info"
+    def buildInfo1 = Artifactory.newBuildInfo()
+    buildInfo1.name = "scripted:buildAppend test-1"
+    buildInfo1.number = "1"
+
+    stage "Publish 1st Build Info"
+    rtServer.publishBuildInfo buildInfo1
+
+    stage "Create 2nd Build Info"
+    def buildInfo2 = Artifactory.newBuildInfo()
+    buildInfo2.name = "scripted:buildAppend test-2"
+    buildInfo2.number = "2"
+
+    stage "Append build 1 to build 2"
+    rtServer.buildAppend(buildInfo2, buildInfo1.name, buildInfo1.number)
+
+    stage "Publish 2nd Build Info"
+    rtServer.publishBuildInfo buildInfo2
+}

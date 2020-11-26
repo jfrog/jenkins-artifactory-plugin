@@ -175,4 +175,9 @@ public class DeclarativeITest extends CommonITestsPipeline {
     public void buildTriggerNewServerTest() throws Exception {
         super.buildTriggerNewServerTest();
     }
+
+    @Test
+    public void buildAppendTest() throws Exception {
+        super.buildAppendTest("declarative:buildAppend test");
+    }
 }
