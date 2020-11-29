@@ -52,5 +52,4 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
             return npmInstallCiExecutor.getBuildInfo();
         }
     }
-
 }
