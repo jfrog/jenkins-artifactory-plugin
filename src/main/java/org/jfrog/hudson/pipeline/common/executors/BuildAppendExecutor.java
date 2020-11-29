@@ -22,15 +22,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import static org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBaseClient.MD5_HEADER_NAME;
+import static org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBaseClient.SHA1_HEADER_NAME;
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**
  * @author yahavi
  **/
 public class BuildAppendExecutor implements Executor {
-
-    private static final String SHA1_HEADER_NAME = "X-Checksum-Sha1";
-    private static final String MD5_HEADER_NAME = "X-Checksum-Md5";
 
     private final ArtifactoryServer pipelineServer;
     private final TaskListener listener;
@@ -72,7 +71,7 @@ public class BuildAppendExecutor implements Executor {
     }
 
     /**
-     * Get build timestamp of the build to append. The build timestamp have to be converted to seconds from epoch.
+     * Get build timestamp of the build to append. The build timestamp has to be converted to seconds from epoch.
      * For example, start time of: 2020-11-27T14:33:38.538+0200 should be converted to 1606480418538.
      *
      * @param server      - The Artifactory server
