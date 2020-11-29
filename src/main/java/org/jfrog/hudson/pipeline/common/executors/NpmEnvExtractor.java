@@ -34,6 +34,6 @@ public class NpmEnvExtractor extends EnvExtractor {
         configuration.packageManagerHandler.setArgs(args);
         configuration.packageManagerHandler.setPath(path);
         configuration.packageManagerHandler.setModule(module);
-        configuration.npmHandler.setIsCiCommand(isCiCommand);
+        configuration.npmHandler.setCiCommand(isCiCommand);
     }
 }
