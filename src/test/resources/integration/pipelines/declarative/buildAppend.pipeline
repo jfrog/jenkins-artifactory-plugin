@@ -39,8 +39,8 @@ node("TestSlave") {
             serverId: serverId,
             buildName: buildName2,
             buildNumber: buildNumber2,
-            buildNameToAppend: buildName1,
-            buildNumberToAppend: buildNumber1
+            appendBuildName: buildName1,
+            appendBuildNumber: buildNumber1
     )
 
     stage "Publish 2nd Build Info"

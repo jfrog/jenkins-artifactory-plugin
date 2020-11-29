@@ -20,17 +20,17 @@ import java.io.IOException;
 public class BuildAppendStep extends AbstractStepImpl {
 
     public static final String STEP_NAME = "rtBuildAppend";
-    private final String buildNumberToAppend;
-    private final String buildNameToAppend;
+    private final String appendBuildNumber;
+    private final String appendBuildName;
     private final String serverId;
     private String buildNumber;
     private String buildName;
 
     @DataBoundConstructor
-    public BuildAppendStep(String serverId, String buildNameToAppend, String buildNumberToAppend) {
+    public BuildAppendStep(String serverId, String appendBuildName, String appendBuildNumber) {
         this.serverId = serverId;
-        this.buildNameToAppend = buildNameToAppend;
-        this.buildNumberToAppend = buildNumberToAppend;
+        this.appendBuildName = appendBuildName;
+        this.appendBuildNumber = appendBuildNumber;
     }
 
     @DataBoundSetter
@@ -61,7 +61,7 @@ public class BuildAppendStep extends AbstractStepImpl {
                 throw new RuntimeException("Build " + DeclarativePipelineUtils.createBuildInfoId(build, step.buildName, step.buildNumber) + " does not exist!");
             }
 
-            new BuildAppendExecutor(server, buildInfo, step.buildNameToAppend, step.buildNumberToAppend, build, listener).execute();
+            new BuildAppendExecutor(server, buildInfo, step.appendBuildName, step.appendBuildNumber, build, listener).execute();
             DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
