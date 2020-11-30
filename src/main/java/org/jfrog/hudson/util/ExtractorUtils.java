@@ -192,13 +192,9 @@ public class ExtractorUtils {
 
     private static void setPublisherResolverInfo(Map<String, String> env, Run build, ArtifactoryClientConfiguration configuration,
                                                  PublisherContext publisherContext, ResolverContext resolverContext, BuildInfo pipelineBuildInfo) throws IOException {
-        String buildName = BuildUniqueIdentifierHelper.getBuildName(build);
-        String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        if (pipelineBuildInfo != null) {
-            buildName = pipelineBuildInfo.getName();
-            buildNumber = pipelineBuildInfo.getNumber();
-        }
+        String buildName = pipelineBuildInfo != null ? pipelineBuildInfo.getName() : BuildUniqueIdentifierHelper.getBuildName(build);
         configuration.info.setBuildName(buildName);
+        String buildNumber = pipelineBuildInfo != null ? pipelineBuildInfo.getNumber() : BuildUniqueIdentifierHelper.getBuildNumber(build);
         configuration.info.setBuildNumber(buildNumber);
 
         if (publisherContext != null) {
