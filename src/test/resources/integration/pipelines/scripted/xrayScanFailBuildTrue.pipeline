@@ -30,7 +30,8 @@ node("TestSlave") {
     def scanConfig = [
             'buildName'      : buildInfo.name,
             'buildNumber'    : buildInfo.number,
-            'failBuild'      : true
+            'failBuild'      : true,
+            'printTable'      : false
     ]
     def scanResult = rtServer.xrayScan scanConfig
     echo scanResult as String

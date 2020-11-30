@@ -47,6 +47,11 @@ public class XrayScanStep extends AbstractStepImpl {
         xrayScanConfig.setFailBuild(failBuild);
     }
 
+    @DataBoundSetter
+    public void setPrintTable(boolean printTable) {
+        xrayScanConfig.setPrintTable(printTable);
+    }
+
     private XrayScanConfig prepareXrayScanConfig(Run build) {
         if (StringUtils.isBlank(xrayScanConfig.getBuildName())) {
             xrayScanConfig.setBuildName(BuildUniqueIdentifierHelper.getBuildName(build));

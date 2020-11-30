@@ -56,6 +56,7 @@ node("TestSlave") {
             serverId: serverId,
             buildName  : buildName,
             buildNumber: buildNumber,
-            failBuild: true
+            failBuild: true,
+            printTable: false
     )
 }

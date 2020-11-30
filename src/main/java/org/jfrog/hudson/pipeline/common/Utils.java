@@ -448,6 +448,7 @@ public class Utils {
 
     public static XrayScanConfig createXrayScanConfig(Map<String, Object> xrayScanParams) {
         final String failBuild = "failBuild";
+        final String printTable = "printTable";
 
         List<String> mandatoryArgumentsAsList = Arrays.asList(BUILD_NAME, BUILD_NUMBER);
         if (!xrayScanParams.keySet().containsAll(mandatoryArgumentsAsList)) {
@@ -455,13 +456,14 @@ public class Utils {
         }
 
         Set<String> xrayScanParamsSet = xrayScanParams.keySet();
-        List<String> keysAsList = Arrays.asList(BUILD_NAME, BUILD_NUMBER, failBuild);
+        List<String> keysAsList = Arrays.asList(BUILD_NAME, BUILD_NUMBER, failBuild, printTable);
         if (!keysAsList.containsAll(xrayScanParamsSet)) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
         }
 
         return new XrayScanConfig((String) xrayScanParams.get(BUILD_NAME),
-                (String) xrayScanParams.get(BUILD_NUMBER), (Boolean) xrayScanParams.get(failBuild));
+                (String) xrayScanParams.get(BUILD_NUMBER), (Boolean) xrayScanParams.get(failBuild),
+                (Boolean) xrayScanParams.get(printTable));
     }
 
     public static FilePath createConanTempHome(FilePath ws) throws Exception {

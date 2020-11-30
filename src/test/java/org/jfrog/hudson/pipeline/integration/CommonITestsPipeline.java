@@ -550,15 +550,15 @@ public class CommonITestsPipeline extends PipelineTestBase {
         assertTrue(deps.stream().anyMatch(dep -> dep.getId().equals(imageId)));
     }
 
-    void xrayScanTest(String buildName, boolean failBuild) throws Exception {
+    void xrayScanTest(String buildName, boolean failBuild, boolean printTable) throws Exception {
         Assume.assumeTrue("Skipping Xray tests", JENKINS_XRAY_TEST_ENABLE == null || Boolean.parseBoolean(JENKINS_XRAY_TEST_ENABLE));
-        String str = String.valueOf(failBuild);
-        xrayScanTest(buildName, "xrayScanFailBuild" + str.substring(0, 1).toUpperCase() + str.substring(1), failBuild);
+        String failStr = String.valueOf(failBuild);
+        xrayScanTest(buildName, "xrayScanFailBuild" + StringUtils.capitalize(failStr), failBuild, printTable);
     }
 
-    private void xrayScanTest(String buildName, String pipelineJobName, boolean failBuild) throws Exception {
+    private void xrayScanTest(String buildName, String pipelineJobName, boolean failBuild, boolean printTable) throws Exception {
+        WorkflowRun build = runPipeline(pipelineJobName, false);
         try {
-            runPipeline(pipelineJobName, false);
             if (failBuild) {
                 fail("Job expected to fail");
             }
@@ -572,6 +572,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertTrue("Expecting message to include: " + expecting + ". Found: " + t.getMessage(),
                     t.getMessage().contains(expecting));
         } finally {
+            String expecting = "Xray Scan Results - Violations Summary:";
+            assertEquals(printTable, build.getLog().contains(expecting));
+
             deleteBuild(artifactoryClient, buildName);
         }
     }

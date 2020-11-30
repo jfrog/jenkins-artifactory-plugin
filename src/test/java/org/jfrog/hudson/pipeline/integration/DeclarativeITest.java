@@ -148,12 +148,12 @@ public class DeclarativeITest extends CommonITestsPipeline {
 
     @Test
     public void xrayScanFailTrueTest() throws Exception {
-        super.xrayScanTest("declarative:xrayScanFailBuildTrue test", true);
+        super.xrayScanTest("declarative:xrayScanFailBuildTrue test", true, false);
     }
 
     @Test
     public void xrayScanFailFalseTest() throws Exception {
-        super.xrayScanTest("declarative:xrayScanFailBuildFalse test", false);
+        super.xrayScanTest("declarative:xrayScanFailBuildFalse test", false, true);
     }
 
     @Test
