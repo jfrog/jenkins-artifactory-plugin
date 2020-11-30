@@ -168,13 +168,8 @@ public class ExtractorUtils {
             addBuildRootIfNeeded((AbstractBuild) build, configuration);
         }
 
-        if (publisherContext != null) {
-            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration);
-            publisherContext.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
-        }
-
-        if (resolverContext != null) {
-            setResolverInfo(configuration, build, resolverContext, env);
+        if (publisherContext != null || resolverContext != null) {
+            setPublisherResolverInfo(env, build, configuration, publisherContext, resolverContext, pipelineBuildInfo);
         }
 
         if (!shouldBypassProxy(resolverContext, publisherContext)) {
@@ -193,6 +188,27 @@ public class ExtractorUtils {
         }
         addEnvVars(env, build, configuration, envVarsPatterns, listener);
         return configuration;
+    }
+
+    private static void setPublisherResolverInfo(Map<String, String> env, Run build, ArtifactoryClientConfiguration configuration,
+                                                 PublisherContext publisherContext, ResolverContext resolverContext, BuildInfo pipelineBuildInfo) throws IOException {
+        String buildName = BuildUniqueIdentifierHelper.getBuildName(build);
+        String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
+        if (pipelineBuildInfo != null) {
+            buildName = pipelineBuildInfo.getName();
+            buildNumber = pipelineBuildInfo.getNumber();
+        }
+        configuration.info.setBuildName(buildName);
+        configuration.info.setBuildNumber(buildNumber);
+
+        if (publisherContext != null) {
+            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration, buildName, buildNumber);
+            publisherContext.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
+        }
+
+        if (resolverContext != null) {
+            setResolverInfo(configuration, build, resolverContext, env);
+        }
     }
 
     private static boolean shouldBypassProxy(ResolverContext resolverContext, PublisherContext publisherContext) {
@@ -258,21 +274,14 @@ public class ExtractorUtils {
      * Set all the parameters relevant for publishing artifacts and build info
      */
     private static void setPublisherInfo(Map<String, String> env, Run build, BuildInfo pipelineBuildInfo, PublisherContext context,
-                                         ArtifactoryClientConfiguration configuration) throws IOException {
+                                         ArtifactoryClientConfiguration configuration, String buildName, String buildNumber) throws IOException {
         configuration.setActivateRecorder(Boolean.TRUE);
-        String buildName;
-        String buildNumber;
-        if (pipelineBuildInfo != null) {
-            buildName = pipelineBuildInfo.getName();
-            buildNumber = pipelineBuildInfo.getNumber();
-        } else {
-            buildName = context.isOverrideBuildName() ? context.getCustomBuildName() : BuildUniqueIdentifierHelper.getBuildName(build);
-            buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        }
 
-        configuration.info.setBuildName(buildName);
+        if (pipelineBuildInfo == null && context.isOverrideBuildName()) {
+            buildName = context.getCustomBuildName();
+            configuration.info.setBuildName(buildName);
+        }
         configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_NAME, buildName);
-        configuration.info.setBuildNumber(buildNumber);
         configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_NUMBER, buildNumber);
         configuration.info.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
 
