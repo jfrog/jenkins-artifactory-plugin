@@ -15,6 +15,7 @@ import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
+import org.jfrog.build.extractor.buildScanTable.BuildScanTableHelper;
 import org.jfrog.build.extractor.docker.DockerJavaWrapper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
@@ -572,7 +573,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertTrue("Expecting message to include: " + expecting + ". Found: " + t.getMessage(),
                     t.getMessage().contains(expecting));
         } finally {
-            String expecting = "Xray Scan Results - Violations Summary:";
+            String expecting = new BuildScanTableHelper().TABLE_HEADLINE;
             assertEquals(printTable, build.getLog().contains(expecting));
 
             deleteBuild(artifactoryClient, buildName);
