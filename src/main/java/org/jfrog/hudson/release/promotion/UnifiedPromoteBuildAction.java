@@ -297,34 +297,13 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
     @RequirePOST
     public void doSubmit(StaplerRequest req, StaplerResponse resp) throws IOException, ServletException {
         getACL().checkPermission(getPermission());
-
-        bindParameters(req);
-        // current user is bound to the thread and will be lost in the perform method
+        req.bindParameters(this);        // current user is bound to the thread and will be lost in the perform method
         User user = User.current();
         String ciUser = (user == null) ? "anonymous" : user.getId();
 
         JSONObject formData = req.getSubmittedForm();
         if (formData.has("promotionPlugin")) {
-            JSONObject pluginSettings = formData.getJSONObject("promotionPlugin");
-            if (pluginSettings.has("pluginName")) {
-                String pluginName = pluginSettings.getString("pluginName");
-                if (!UserPluginInfo.NO_PLUGIN_KEY.equals(pluginName)) {
-                    PluginSettings settings = new PluginSettings();
-                    Map<String, String> paramMap = Maps.newHashMap();
-                    settings.setPluginName(pluginName);
-                    Map<String, Object> filteredPluginSettings = Maps.filterKeys(pluginSettings,
-                            input -> StringUtils.isNotBlank(input) && !"pluginName".equals(input));
-                    for (Map.Entry<String, Object> settingsEntry : filteredPluginSettings.entrySet()) {
-                        String key = settingsEntry.getKey();
-                        paramMap.put(key, pluginSettings.getString(key));
-                    }
-                    paramMap.put("ciUser", ciUser);
-                    if (!paramMap.isEmpty()) {
-                        settings.setParamMap(paramMap);
-                    }
-                    setPromotionPlugin(settings);
-                }
-            }
+            configurePromotionPlugin(formData, ciUser);
         }
 
         String configuratorId = (String) formData.getOrDefault("promotionCandidates", "0");
@@ -337,22 +316,35 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         resp.sendRedirect(".");
     }
 
-    private void bindParameters(StaplerRequest req) throws ServletException {
-        req.bindParameters(this);
-        JSONObject formData = req.getSubmittedForm();
+    private void configurePromotionPlugin(JSONObject formData, String ciUser) {
         JSONObject pluginSettings = formData.getJSONObject("promotionPlugin");
-
-        // StaplerRequest.bindParameters doesn't work well with jelly <f:checkbox> element,
-        // so we set the "boolean" fields manually
         if (pluginSettings.get("includeDependencies") != null) {
             this.setIncludeDependencies(pluginSettings.getBoolean("includeDependencies"));
         }
         if (pluginSettings.get("useCopy") != null) {
             this.setUseCopy(pluginSettings.getBoolean("useCopy"));
         }
-
         if (pluginSettings.get("failFast") != null) {
             this.setFailFast(pluginSettings.getBoolean("failFast"));
+        }
+        if (pluginSettings.has("pluginName")) {
+            String pluginName = pluginSettings.getString("pluginName");
+            if (!UserPluginInfo.NO_PLUGIN_KEY.equals(pluginName)) {
+                PluginSettings settings = new PluginSettings();
+                Map<String, String> paramMap = Maps.newHashMap();
+                settings.setPluginName(pluginName);
+                Map<String, Object> filteredPluginSettings = Maps.filterKeys(pluginSettings,
+                        input -> StringUtils.isNotBlank(input) && !"pluginName".equals(input));
+                for (Map.Entry<String, Object> settingsEntry : filteredPluginSettings.entrySet()) {
+                    String key = settingsEntry.getKey();
+                    paramMap.put(key, pluginSettings.getString(key));
+                }
+                paramMap.put("ciUser", ciUser);
+                if (!paramMap.isEmpty()) {
+                    settings.setParamMap(paramMap);
+                }
+                setPromotionPlugin(settings);
+            }
         }
     }
 
