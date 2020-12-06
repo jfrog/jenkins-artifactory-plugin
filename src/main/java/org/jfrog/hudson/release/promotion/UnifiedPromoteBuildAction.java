@@ -297,7 +297,8 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
     @RequirePOST
     public void doSubmit(StaplerRequest req, StaplerResponse resp) throws IOException, ServletException {
         getACL().checkPermission(getPermission());
-        req.bindParameters(this);        // current user is bound to the thread and will be lost in the perform method
+        req.bindParameters(this);
+        // Current user is bound to the thread and will be lost in the perform method
         User user = User.current();
         String ciUser = (user == null) ? "anonymous" : user.getId();
 
