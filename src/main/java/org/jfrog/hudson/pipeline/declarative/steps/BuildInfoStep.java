@@ -3,7 +3,9 @@ package org.jfrog.hudson.pipeline.declarative.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -23,7 +25,7 @@ import java.util.List;
 public class BuildInfoStep extends AbstractStepImpl {
 
     public static final String STEP_NAME = "rtBuildInfo";
-    private BuildInfo buildInfo;
+    private final BuildInfo buildInfo;
 
     @DataBoundConstructor
     public BuildInfoStep() {
@@ -87,7 +89,7 @@ public class BuildInfoStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
 
-        private transient BuildInfoStep step;
+        private transient final BuildInfoStep step;
 
         @Inject
         public Execution(BuildInfoStep step, StepContext context) throws IOException, InterruptedException {
@@ -101,7 +103,7 @@ public class BuildInfoStep extends AbstractStepImpl {
             String buildNumber = StringUtils.isBlank(step.buildInfo.getNumber()) ? BuildUniqueIdentifierHelper.getBuildNumber(build) : step.buildInfo.getNumber();
             step.buildInfo.setName(buildName);
             step.buildInfo.setNumber(buildNumber);
-            DeclarativePipelineUtils.saveBuildInfo(step.buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(step.buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }

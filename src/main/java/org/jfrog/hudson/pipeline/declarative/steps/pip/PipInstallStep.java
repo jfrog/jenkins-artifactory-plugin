@@ -28,7 +28,7 @@ import java.io.IOException;
  */
 public class PipInstallStep extends AbstractStepImpl {
 
-    private PipBuild pipBuild;
+    private final PipBuild pipBuild;
     private String customBuildNumber;
     private String customBuildName;
     private String resolverId;
@@ -79,7 +79,7 @@ public class PipInstallStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient PipInstallStep step;
+        private transient final PipInstallStep step;
 
         @Inject
         public Execution(PipInstallStep step, StepContext context) throws IOException, InterruptedException {
@@ -89,11 +89,11 @@ public class PipInstallStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             PipInstallExecutor pipInstallExecutor = new PipInstallExecutor(buildInfo, launcher, step.pipBuild, step.javaArgs, step.args, ws, step.envActivation, step.module, env, listener, build);
             pipInstallExecutor.execute();
-            DeclarativePipelineUtils.saveBuildInfo(pipInstallExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(pipInstallExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 
@@ -101,7 +101,7 @@ public class PipInstallStep extends AbstractStepImpl {
             if (StringUtils.isBlank(step.resolverId)) {
                 return;
             }
-            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, PipResolverStep.STEP_NAME, step.resolverId);
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, PipResolverStep.STEP_NAME, step.resolverId);
             if (buildDataFile == null) {
                 throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
             }
@@ -115,7 +115,7 @@ public class PipInstallStep extends AbstractStepImpl {
             if (serverId.isNull()) {
                 throw new IllegalArgumentException("server ID is missing");
             }
-            return DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), serverId.asText());
+            return DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), serverId.asText());
         }
     }
 

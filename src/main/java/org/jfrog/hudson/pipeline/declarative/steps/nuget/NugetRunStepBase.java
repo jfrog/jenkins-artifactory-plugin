@@ -68,7 +68,7 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient NugetRunStepBase step;
+        private transient final NugetRunStepBase step;
 
         @Inject
         public Execution(NugetRunStepBase step, StepContext context) throws IOException, InterruptedException {
@@ -78,11 +78,11 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             NugetRunExecutor nugetRunExecutor = new NugetRunExecutor(buildInfo, launcher, step.nugetBuild, step.javaArgs, step.args, ws, step.module, env, listener, build);
             nugetRunExecutor.execute();
-            DeclarativePipelineUtils.saveBuildInfo(nugetRunExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(nugetRunExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 
@@ -90,7 +90,7 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
             if (StringUtils.isBlank(step.resolverId)) {
                 return;
             }
-            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, step.getResolverStepName(), step.resolverId);
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, step.getResolverStepName(), step.resolverId);
             if (buildDataFile == null) {
                 throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
             }
@@ -104,7 +104,7 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
             if (serverId.isNull()) {
                 throw new IllegalArgumentException("server ID is missing");
             }
-            return DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), serverId.asText());
+            return DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), serverId.asText());
         }
     }
 }

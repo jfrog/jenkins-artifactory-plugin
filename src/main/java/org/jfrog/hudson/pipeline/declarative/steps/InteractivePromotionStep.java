@@ -4,10 +4,10 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
@@ -39,7 +39,7 @@ public class InteractivePromotionStep extends PromoteBuildStep {
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Boolean> {
 
-        private transient InteractivePromotionStep step;
+        private transient final InteractivePromotionStep step;
 
         @Inject
         public Execution(InteractivePromotionStep step, StepContext context) throws IOException, InterruptedException {
@@ -49,7 +49,7 @@ public class InteractivePromotionStep extends PromoteBuildStep {
 
         @Override
         protected Boolean run() throws Exception {
-            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), step.serverId);
             ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(Utils.prepareArtifactoryServer(null, server));
             addPromotionAction(configurator);
             return true;

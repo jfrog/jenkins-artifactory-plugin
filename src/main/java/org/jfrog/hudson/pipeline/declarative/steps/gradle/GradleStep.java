@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.GradleExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GradleBuild;
 import org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer;
@@ -30,7 +32,7 @@ import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 @SuppressWarnings("unused")
 public class GradleStep extends AbstractStepImpl {
 
-    private GradleBuild gradleBuild;
+    private final GradleBuild gradleBuild;
     private String customBuildNumber;
     private String customBuildName;
     private String deployerId;
@@ -112,12 +114,12 @@ public class GradleStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
             setGradleBuild();
             GradleExecutor gradleExecutor = new GradleExecutor(build, step.gradleBuild, step.tasks, step.buildFile, step.rootDir, step.switches, buildInfo, env, ws, listener, launcher);
             gradleExecutor.execute();
             buildInfo = gradleExecutor.getBuildInfo();
-            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 
@@ -131,7 +133,7 @@ public class GradleStep extends AbstractStepImpl {
             if (StringUtils.isBlank(step.deployerId)) {
                 return;
             }
-            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, GradleDeployerStep.STEP_NAME, step.deployerId);
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, GradleDeployerStep.STEP_NAME, step.deployerId);
             if (buildDataFile == null) {
                 throw new IOException("Deployer " + step.deployerId + " doesn't exist!");
             }
@@ -152,7 +154,7 @@ public class GradleStep extends AbstractStepImpl {
             if (StringUtils.isBlank(step.resolverId)) {
                 return;
             }
-            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, GradleResolverStep.STEP_NAME, step.resolverId);
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, GradleResolverStep.STEP_NAME, step.resolverId);
             if (buildDataFile == null) {
                 throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
             }
@@ -166,7 +168,7 @@ public class GradleStep extends AbstractStepImpl {
             if (serverId.isNull()) {
                 throw new IllegalArgumentException("server ID is missing");
             }
-            return DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), serverId.asText());
+            return DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), serverId.asText());
         }
     }
 

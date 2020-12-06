@@ -30,7 +30,7 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class GoPublishStep extends AbstractStepImpl {
 
-    private GoBuild goBuild;
+    private final GoBuild goBuild;
     private String customBuildNumber;
     private String customBuildName;
     private String deployerId;
@@ -75,7 +75,7 @@ public class GoPublishStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient GoPublishStep step;
+        private transient final GoPublishStep step;
 
         @Inject
         public Execution(GoPublishStep step, StepContext context) throws IOException, InterruptedException {
@@ -85,11 +85,11 @@ public class GoPublishStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
             GoPublishExecutor goPublishExecutor = new GoPublishExecutor(getContext(), buildInfo, step.goBuild, step.path, step.version, step.module, ws, listener, build);
             goPublishExecutor.execute();
-            DeclarativePipelineUtils.saveBuildInfo(goPublishExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(goPublishExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 
@@ -97,7 +97,7 @@ public class GoPublishStep extends AbstractStepImpl {
             if (StringUtils.isBlank(step.deployerId)) {
                 return;
             }
-            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, GoDeployerStep.STEP_NAME, step.deployerId);
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, GoDeployerStep.STEP_NAME, step.deployerId);
             if (buildDataFile == null) {
                 throw new IOException("Deployer " + step.deployerId + " doesn't exist!");
             }
@@ -119,7 +119,7 @@ public class GoPublishStep extends AbstractStepImpl {
             if (serverId.isNull()) {
                 throw new IllegalArgumentException("server ID is missing");
             }
-            return DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), serverId.asText());
+            return DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), serverId.asText());
         }
     }
 

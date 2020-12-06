@@ -34,7 +34,7 @@ public class GradleDeployerResolver extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient GradleDeployerResolver step;
+        private transient final GradleDeployerResolver step;
 
         @Inject
         public Execution(GradleDeployerResolver step, StepContext context) throws IOException, InterruptedException {
@@ -46,7 +46,7 @@ public class GradleDeployerResolver extends AbstractStepImpl {
         protected Void run() throws Exception {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             BuildDataFile buildDataFile = step.buildDataFile;
-            writeBuildDataFile(ws, buildNumber, buildDataFile, new JenkinsBuildInfoLog(listener));
+            writeBuildDataFile(rootWs, buildNumber, buildDataFile, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }

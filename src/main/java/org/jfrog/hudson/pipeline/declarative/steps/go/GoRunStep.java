@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.GoRunExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
 import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
@@ -28,7 +30,7 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class GoRunStep extends AbstractStepImpl {
 
-    private GoBuild goBuild;
+    private final GoBuild goBuild;
     private String customBuildNumber;
     private String customBuildName;
     private String resolverId;
@@ -73,7 +75,7 @@ public class GoRunStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient GoRunStep step;
+        private transient final GoRunStep step;
 
         @Inject
         public Execution(GoRunStep step, StepContext context) throws IOException, InterruptedException {
@@ -83,11 +85,11 @@ public class GoRunStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             GoRunExecutor goRunExecutor = new GoRunExecutor(getContext(), buildInfo, step.goBuild, step.path, step.args, step.module, ws, listener, env, build);
             goRunExecutor.execute();
-            DeclarativePipelineUtils.saveBuildInfo(goRunExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(goRunExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 
@@ -95,12 +97,12 @@ public class GoRunStep extends AbstractStepImpl {
             if (StringUtils.isBlank(step.resolverId)) {
                 return;
             }
-            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, GoResolverStep.STEP_NAME, step.resolverId);
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, GoResolverStep.STEP_NAME, step.resolverId);
             if (buildDataFile == null) {
                 throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
             }
             CommonResolver resolver = SerializationUtils.createMapper().treeToValue(buildDataFile.get(GoResolverStep.STEP_NAME), CommonResolver.class);
-            resolver.setServer(getArtifactoryServer(buildNumber, buildDataFile));
+            resolver.setServer(getArtifactoryServer(buildDataFile));
             step.goBuild.setResolver(resolver);
             addProperties(buildDataFile);
         }
@@ -112,12 +114,12 @@ public class GoRunStep extends AbstractStepImpl {
             }
         }
 
-        private ArtifactoryServer getArtifactoryServer(String buildNumber, BuildDataFile buildDataFile) throws IOException, InterruptedException {
+        private ArtifactoryServer getArtifactoryServer(BuildDataFile buildDataFile) throws IOException, InterruptedException {
             JsonNode serverId = buildDataFile.get("serverId");
             if (serverId.isNull()) {
                 throw new IllegalArgumentException("server ID is missing");
             }
-            return DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), serverId.asText());
+            return DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), serverId.asText());
         }
     }
 

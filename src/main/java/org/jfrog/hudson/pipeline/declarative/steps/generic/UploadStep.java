@@ -30,12 +30,12 @@ public class UploadStep extends GenericStep {
 
         @Override
         protected Void run() throws Exception {
-            setGenericParameters(listener, build, ws, env, step, getContext());
+            setGenericParameters(step, getContext());
             GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(artifactoryServer, listener, build, ws, buildInfo, getContext(), spec, step.failNoOp, step.module);
             genericUploadExecutor.execute();
             BuildInfo buildInfo = genericUploadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
-            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }

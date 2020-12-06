@@ -23,13 +23,13 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class DockerPushStep extends AbstractStepImpl {
 
-    private String serverId;
-    private String image;
+    private final ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+    private final String serverId;
+    private final String image;
+    private final String targetRepo;
     private String host;
     private String buildNumber;
     private String buildName;
-    private String targetRepo;
-    private ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
     private String javaArgs;
 
     @DataBoundConstructor
@@ -74,7 +74,7 @@ public class DockerPushStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient DockerPushStep step;
+        private transient final DockerPushStep step;
 
         @Inject
         public Execution(DockerPushStep step, StepContext context) throws IOException, InterruptedException {
@@ -84,11 +84,11 @@ public class DockerPushStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.buildName, step.buildNumber);
-            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber);
+            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), step.serverId);
             DockerPushExecutor dockerExecutor = new DockerPushExecutor(pipelineServer, buildInfo, build, step.image, step.targetRepo, step.host, step.javaArgs, launcher, step.properties, listener, ws, env);
             dockerExecutor.execute();
-            DeclarativePipelineUtils.saveBuildInfo(dockerExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(dockerExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }

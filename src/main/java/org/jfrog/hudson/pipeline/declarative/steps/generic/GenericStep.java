@@ -1,16 +1,12 @@
 package org.jfrog.hudson.pipeline.declarative.steps.generic;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
-import hudson.FilePath;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.SpecConfiguration;
-import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -81,7 +77,7 @@ public class GenericStep extends AbstractStepImpl {
             this.step = step;
         }
 
-        void setGenericParameters(TaskListener listener, Run build, FilePath ws, EnvVars env, GenericStep step, StepContext context) throws IOException, InterruptedException {
+        void setGenericParameters(GenericStep step, StepContext context) throws IOException, InterruptedException {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
 
             // Set spec
@@ -89,10 +85,10 @@ public class GenericStep extends AbstractStepImpl {
             spec = SpecUtils.getSpecStringFromSpecConf(specConfiguration, env, ws, listener.getLogger());
 
             // Set Build Info
-            buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
+            buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
 
             // Set Artifactory server
-            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, ws, context, step.serverId);
+            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, context, step.serverId);
             artifactoryServer = Utils.prepareArtifactoryServer(null, pipelineServer);
         }
     }

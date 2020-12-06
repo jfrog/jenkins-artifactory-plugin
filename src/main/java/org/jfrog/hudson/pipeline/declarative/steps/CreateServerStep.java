@@ -2,9 +2,11 @@ package org.jfrog.hudson.pipeline.declarative.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import org.jenkinsci.plugins.workflow.steps.*;
-import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -18,8 +20,8 @@ import java.io.IOException;
 public class CreateServerStep extends AbstractStepImpl {
 
     public static final String STEP_NAME = "rtServer";
-    private BuildDataFile buildDataFile;
-    private ArtifactoryServer server;
+    private final BuildDataFile buildDataFile;
+    private final ArtifactoryServer server;
 
     @DataBoundConstructor
     public CreateServerStep(String id) {
@@ -65,7 +67,7 @@ public class CreateServerStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
 
-        private transient CreateServerStep step;
+        private transient final CreateServerStep step;
 
         @Inject
         public Execution(CreateServerStep step, StepContext context) throws IOException, InterruptedException {
@@ -76,7 +78,7 @@ public class CreateServerStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-            DeclarativePipelineUtils.writeBuildDataFile(ws, buildNumber, step.buildDataFile, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.writeBuildDataFile(rootWs, buildNumber, step.buildDataFile, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }

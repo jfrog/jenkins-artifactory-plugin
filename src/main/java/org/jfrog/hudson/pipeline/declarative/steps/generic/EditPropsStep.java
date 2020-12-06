@@ -22,12 +22,12 @@ import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesH
 
 @SuppressWarnings("unused")
 public class EditPropsStep extends AbstractStepImpl {
+    private final EditPropertiesActionType editType;
     protected String serverId;
     protected String spec;
     private String props;
     private String specPath;
     private boolean failNoOp;
-    private EditPropertiesActionType editType;
 
     EditPropsStep(String serverId, EditPropertiesActionType editType) {
         this.serverId = serverId;
@@ -66,10 +66,10 @@ public class EditPropsStep extends AbstractStepImpl {
             this.step = step;
         }
 
-        void editPropsRun(Run build, TaskListener listener, EditPropsStep step, FilePath ws, EnvVars env) throws IOException, InterruptedException {
+        void editPropsRun() throws IOException, InterruptedException {
             // Set Artifactory server
             org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils
-                    .getArtifactoryServer(build, ws, getContext(), step.serverId);
+                    .getArtifactoryServer(build, rootWs, getContext(), step.serverId);
             artifactoryServer = Utils.prepareArtifactoryServer(null, pipelineServer);
 
             // Set spec

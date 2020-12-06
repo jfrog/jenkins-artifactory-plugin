@@ -37,26 +37,27 @@ public class DeclarativePipelineUtils {
      * Create pipeline build data in @tmp/artifactory-pipeline-cache/build-number directory.
      * Used to transfer data between different steps in declarative pipelines.
      *
-     * @param ws            - The agent workspace.
+     * @param rootWs        - Step's root workspace.
      * @param buildNumber   - The build number.
      * @param buildDataFile - The build data file to save.
      * @throws Exception - In case of no write permissions.
      */
-    public static void writeBuildDataFile(FilePath ws, String buildNumber, BuildDataFile buildDataFile, Log logger) throws Exception {
-        createAndGetTempDir(ws).act(new CreateBuildDataFileCallable(buildNumber, buildDataFile, logger));
+    public static void writeBuildDataFile(FilePath rootWs, String buildNumber, BuildDataFile buildDataFile, Log logger) throws Exception {
+        createAndGetTempDir(rootWs).act(new CreateBuildDataFileCallable(buildNumber, buildDataFile, logger));
     }
 
     /**
      * Read pipeline build data from @tmp/artifactory-pipeline-cache/build-number directory.
      * Used to transfer data between different steps in declarative pipelines.
      *
+     * @param rootWs      - Step's root workspace.
      * @param buildNumber - The build number.
      * @param stepName    - The step name - One of 'artifactoryMaven', 'mavenDeploy', 'mavenResolve', 'buildInfo' and other declarative pipeline steps.
      * @param stepId      - The step id specified in the pipeline.
      * @throws IOException - In case of no read permissions.
      */
-    public static BuildDataFile readBuildDataFile(FilePath ws, final String buildNumber, final String stepName, final String stepId) throws IOException, InterruptedException {
-        return createAndGetTempDir(ws).act(new ReadBuildDataFileCallable(buildNumber, stepName, stepId));
+    public static BuildDataFile readBuildDataFile(FilePath rootWs, final String buildNumber, final String stepName, final String stepId) throws IOException, InterruptedException {
+        return createAndGetTempDir(rootWs).act(new ReadBuildDataFileCallable(buildNumber, stepName, stepId));
     }
 
     static String getBuildDataFileName(String stepName, String stepId) {
@@ -67,14 +68,14 @@ public class DeclarativePipelineUtils {
      * Get Artifactory server from global server configuration or from previous rtServer{...} scope.
      *
      * @param build    - Step's build.
-     * @param ws       - Step's workspace.
+     * @param rootWs   - Step's root workspace.
      * @param context  - Step's context.
      * @param serverId - The server id. Can be defined from global server configuration or from previous rtServer{...} scope.
      * @return Artifactory server.
      */
-    public static ArtifactoryServer getArtifactoryServer(Run build, FilePath ws, StepContext context, String serverId) throws IOException, InterruptedException {
+    public static ArtifactoryServer getArtifactoryServer(Run<?, ?> build, FilePath rootWs, StepContext context, String serverId) throws IOException, InterruptedException {
         String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        BuildDataFile buildDataFile = readBuildDataFile(ws, buildNumber, CreateServerStep.STEP_NAME, serverId);
+        BuildDataFile buildDataFile = readBuildDataFile(rootWs, buildNumber, CreateServerStep.STEP_NAME, serverId);
         // If the server has not been configured as part of the declarative pipeline script, get its details from it.
         if (buildDataFile == null) {
             // This server ID has not been configured as part of the declarative pipeline script.
@@ -110,7 +111,7 @@ public class DeclarativePipelineUtils {
      * @param customBuildNumber - Step's custom build number if exist.
      * @return build info id: <buildname>_<buildnumber>.
      */
-    public static String createBuildInfoId(Run build, String customBuildName, String customBuildNumber) {
+    public static String createBuildInfoId(Run<?, ?> build, String customBuildName, String customBuildNumber) {
         return StringUtils.defaultIfEmpty(customBuildName, BuildUniqueIdentifierHelper.getBuildName(build)) + "_" +
                 StringUtils.defaultIfEmpty(customBuildNumber, BuildUniqueIdentifierHelper.getBuildNumber(build));
     }
@@ -118,17 +119,17 @@ public class DeclarativePipelineUtils {
     /**
      * Get build info as defined in previous rtBuildInfo{...} scope.
      *
-     * @param ws                - Step's workspace.
+     * @param rootWs            - Step's root workspace.
      * @param build             - Step's build.
      * @param customBuildName   - Step's custom build name if exist.
      * @param customBuildNumber - Step's custom build number if exist.
      * @return build info object as defined in previous rtBuildInfo{...} scope or a new build info.
      */
-    public static BuildInfo getBuildInfo(FilePath ws, Run build, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {
+    public static BuildInfo getBuildInfo(FilePath rootWs, Run<?, ?> build, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {
         String jobBuildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         String buildInfoId = createBuildInfoId(build, customBuildName, customBuildNumber);
 
-        BuildDataFile buildDataFile = readBuildDataFile(ws, jobBuildNumber, BuildInfoStep.STEP_NAME, buildInfoId);
+        BuildDataFile buildDataFile = readBuildDataFile(rootWs, jobBuildNumber, BuildInfoStep.STEP_NAME, buildInfoId);
         if (buildDataFile == null) {
             BuildInfo buildInfo = new BuildInfo(build);
             if (StringUtils.isNotBlank(customBuildName)) {
@@ -146,16 +147,16 @@ public class DeclarativePipelineUtils {
      * Save build info in @tmp/artifactory-pipeline-cache/build-number folder.
      *
      * @param buildInfo - The build info object to save.
-     * @param ws        - Step's workspace.
+     * @param rootWs    - Step's root workspace.
      * @param build     - Step's build.
      */
-    public static void saveBuildInfo(BuildInfo buildInfo, FilePath ws, Run build, Log logger) throws Exception {
+    public static void saveBuildInfo(BuildInfo buildInfo, FilePath rootWs, Run<?, ?> build, Log logger) throws Exception {
         String jobBuildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         String buildInfoId = createBuildInfoId(build, buildInfo.getName(), buildInfo.getNumber());
 
         BuildDataFile buildDataFile = new BuildDataFile(BuildInfoStep.STEP_NAME, buildInfoId);
         buildDataFile.putPOJO(buildInfo);
-        writeBuildDataFile(ws, jobBuildNumber, buildDataFile, logger);
+        writeBuildDataFile(rootWs, jobBuildNumber, buildDataFile, logger);
     }
 
     /**
@@ -196,8 +197,9 @@ public class DeclarativePipelineUtils {
     /**
      * Delete build data dir associated with the build number.
      *
-     * @param ws     - The workspace
-     * @param logger - The logger
+     * @param ws          - The workspace
+     * @param buildNumber - The build number
+     * @param logger      - The logger
      */
     public static void deleteBuildDataDir(FilePath ws, String buildNumber, Log logger) {
         try {
@@ -209,10 +211,10 @@ public class DeclarativePipelineUtils {
         }
     }
 
-    public static ConanClient buildConanClient(String clientId, String buildNumber, String stepName, Launcher launcher, FilePath ws, EnvVars env) throws Exception {
+    public static ConanClient buildConanClient(String clientId, String buildNumber, String stepName, Launcher launcher, FilePath ws, FilePath rootWs, EnvVars env) throws Exception {
         ConanClient conanClient = new ConanClient();
         conanClient.setUnixAgent(launcher.isUnix());
-        BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, stepName, clientId);
+        BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, stepName, clientId);
         if (buildDataFile == null) {
             throw new IOException("Conan client " + clientId + " doesn't exist.");
         }

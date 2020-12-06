@@ -1,14 +1,9 @@
 package org.jfrog.hudson.pipeline.declarative.steps.generic;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
 import hudson.Extension;
-import hudson.FilePath;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jenkinsci.plugins.workflow.steps.StepContextParameter;
 import org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
@@ -35,12 +30,12 @@ public class DownloadStep extends GenericStep {
 
         @Override
         protected Void run() throws Exception {
-            setGenericParameters(listener, build, ws, env, step, getContext());
+            setGenericParameters(step, getContext());
             GenericDownloadExecutor genericDownloadExecutor = new GenericDownloadExecutor(artifactoryServer, listener, build, ws, buildInfo, spec, step.failNoOp, step.module);
             genericDownloadExecutor.execute();
             BuildInfo buildInfo = genericDownloadExecutor.getBuildInfo();
             new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
-            DeclarativePipelineUtils.saveBuildInfo(buildInfo, ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }

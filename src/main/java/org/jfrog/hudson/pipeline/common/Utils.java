@@ -19,8 +19,10 @@ import jenkins.plugins.nodejs.tools.NodeJSInstallation;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.Vcs;
@@ -52,6 +54,26 @@ public class Utils {
     public static final String CONAN_USER_HOME = "CONAN_USER_HOME"; // Conan user home environment variable name
     public static final String BUILD_INFO = "buildInfo"; // The build info argument used in pipeline
     private static final String UNIX_SPECIAL_CHARS = "`^<>| ,;!?'\"()[]{}$*\\&#"; // Unix special characters to escape in '/bin/sh' execution
+
+    /**
+     * Extract workspace FilePath from step context.
+     * This is necessary to get the actual subdirectory, which runs the pipeline.
+     *
+     * @param context - The step context
+     * @param build   - The workflow build
+     * @param cwd     - The current working directory
+     * @return the workspace base FilePath.
+     * @throws IOException          if context.get fails.
+     * @throws InterruptedException if context.get fails.
+     */
+    public static FilePath extractRootWorkspace(StepContext context, WorkflowRun build, FilePath cwd) throws IOException, InterruptedException {
+        Node node = context.get(Node.class);
+        if (node == null) {
+            return cwd;
+        }
+        FilePath ws = node.getWorkspaceFor(build.getParent());
+        return ObjectUtils.defaultIfNull(ws, cwd);
+    }
 
     /**
      * Prepares Artifactory server either from serverID or from ArtifactoryServer.

@@ -2,10 +2,12 @@ package org.jfrog.hudson.pipeline.declarative.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.PublishBuildInfoExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -17,9 +19,9 @@ import java.io.IOException;
 public class PublishBuildInfoStep extends AbstractStepImpl {
 
     public static final String STEP_NAME = "rtPublishBuildInfo";
+    private final String serverId;
     private String buildNumber;
     private String buildName;
-    private String serverId;
 
     @DataBoundConstructor
     public PublishBuildInfoStep(String serverId) {
@@ -38,7 +40,7 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
 
-        private transient PublishBuildInfoStep step;
+        private transient final PublishBuildInfoStep step;
 
         @Inject
         public Execution(PublishBuildInfoStep step, StepContext context) throws IOException, InterruptedException {
@@ -48,11 +50,11 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.buildName, step.buildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber);
             if (buildInfo == null) {
                 throw new RuntimeException("Build " + DeclarativePipelineUtils.createBuildInfoId(build, step.buildName, step.buildNumber) + " does not exist!");
             }
-            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), step.serverId);
             new PublishBuildInfoExecutor(build, listener, buildInfo, server, ws).execute();
             return null;
         }

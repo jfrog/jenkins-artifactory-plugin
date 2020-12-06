@@ -27,7 +27,7 @@ public class MavenDeployerResolver extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient MavenDeployerResolver step;
+        private transient final MavenDeployerResolver step;
 
         @Inject
         public Execution(MavenDeployerResolver step, StepContext context) throws IOException, InterruptedException {
@@ -39,7 +39,7 @@ public class MavenDeployerResolver extends AbstractStepImpl {
         protected Void run() throws Exception {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             BuildDataFile buildDataFile = step.buildDataFile;
-            DeclarativePipelineUtils.writeBuildDataFile(ws, buildNumber, buildDataFile, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.writeBuildDataFile(rootWs, buildNumber, buildDataFile, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }

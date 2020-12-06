@@ -2,9 +2,11 @@ package org.jfrog.hudson.pipeline.declarative.steps.conan;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import org.jenkinsci.plugins.workflow.steps.*;
-import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
 import org.jfrog.hudson.pipeline.common.types.ConanClient;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -17,8 +19,8 @@ import java.io.IOException;
 
 public class ConanRunStep extends AbstractStepImpl {
 
-    private String clientId;
-    private String command;
+    private final String clientId;
+    private final String command;
     private String customBuildNumber;
     private String customBuildName;
 
@@ -48,7 +50,7 @@ public class ConanRunStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient ConanRunStep step;
+        private transient final ConanRunStep step;
 
         @Inject
         public Execution(ConanRunStep step, StepContext context) throws IOException, InterruptedException {
@@ -59,11 +61,11 @@ public class ConanRunStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-            ConanClient conanClient = DeclarativePipelineUtils.buildConanClient(step.getClientId(), buildNumber, ConanClientStep.STEP_NAME, launcher, ws, env);
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
+            ConanClient conanClient = DeclarativePipelineUtils.buildConanClient(step.getClientId(), buildNumber, ConanClientStep.STEP_NAME, launcher, ws, rootWs, env);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
             ConanExecutor conanExecutor = new ConanExecutor(buildInfo, conanClient.getUserPath(), ws, launcher, listener, env, build);
             conanExecutor.execCommand(step.getCommand());
-            DeclarativePipelineUtils.saveBuildInfo(conanExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(conanExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 

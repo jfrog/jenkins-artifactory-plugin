@@ -26,6 +26,7 @@ import java.io.IOException;
  */
 abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
 
+    private final NpmBuild npmBuild;
     private String customBuildNumber;
     private String customBuildName;
     private String resolverId;
@@ -33,7 +34,6 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
     private String path;
     private String args;
     private String module;
-    private NpmBuild npmBuild;
     protected boolean ciCommand;
 
     public NpmInstallCiStepBase() {
@@ -92,12 +92,12 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             Utils.addNpmToPath(ws, listener, env, launcher, step.npmBuild.getTool());
             NpmInstallCiExecutor npmInstallCiExecutor = new NpmInstallCiExecutor(buildInfo, launcher, step.npmBuild, step.javaArgs, step.args, ws, step.path, step.module, env, listener, build, step.ciCommand);
             npmInstallCiExecutor.execute();
-            DeclarativePipelineUtils.saveBuildInfo(npmInstallCiExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(npmInstallCiExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 
@@ -105,21 +105,21 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
             if (StringUtils.isBlank(step.resolverId)) {
                 return;
             }
-            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, NpmResolverStep.STEP_NAME, step.resolverId);
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, NpmResolverStep.STEP_NAME, step.resolverId);
             if (buildDataFile == null) {
                 throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
             }
             CommonResolver resolver = SerializationUtils.createMapper().treeToValue(buildDataFile.get(NpmResolverStep.STEP_NAME), CommonResolver.class);
-            resolver.setServer(getArtifactoryServer(buildNumber, buildDataFile));
+            resolver.setServer(getArtifactoryServer(buildDataFile));
             step.npmBuild.setResolver(resolver);
         }
 
-        private ArtifactoryServer getArtifactoryServer(String buildNumber, BuildDataFile buildDataFile) throws IOException, InterruptedException {
+        private ArtifactoryServer getArtifactoryServer(BuildDataFile buildDataFile) throws IOException, InterruptedException {
             JsonNode serverId = buildDataFile.get("serverId");
             if (serverId.isNull()) {
                 throw new IllegalArgumentException("server ID is missing");
             }
-            return DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), serverId.asText());
+            return DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), serverId.asText());
         }
     }
 }

@@ -33,7 +33,7 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class NpmPublishStep extends AbstractStepImpl {
 
-    private NpmBuild npmBuild;
+    private final NpmBuild npmBuild;
     private String customBuildNumber;
     private String customBuildName;
     private String deployerId;
@@ -83,7 +83,7 @@ public class NpmPublishStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient NpmPublishStep step;
+        private transient final NpmPublishStep step;
 
         @Inject
         public Execution(NpmPublishStep step, StepContext context) throws IOException, InterruptedException {
@@ -93,12 +93,12 @@ public class NpmPublishStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
             Utils.addNpmToPath(ws, listener, env, launcher, step.npmBuild.getTool());
             NpmPublishExecutor npmPublishExecutor = new NpmPublishExecutor(listener, buildInfo, launcher, step.npmBuild, step.javaArgs, step.path, step.module, ws, env, build);
             npmPublishExecutor.execute();
-            DeclarativePipelineUtils.saveBuildInfo(npmPublishExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(npmPublishExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 
@@ -106,7 +106,7 @@ public class NpmPublishStep extends AbstractStepImpl {
             if (StringUtils.isBlank(step.deployerId)) {
                 return;
             }
-            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(ws, buildNumber, NpmDeployerStep.STEP_NAME, step.deployerId);
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, NpmDeployerStep.STEP_NAME, step.deployerId);
             if (buildDataFile == null) {
                 throw new IOException("Deployer " + step.deployerId + " doesn't exist!");
             }
@@ -128,7 +128,7 @@ public class NpmPublishStep extends AbstractStepImpl {
             if (serverId.isNull()) {
                 throw new IllegalArgumentException("server ID is missing");
             }
-            return DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), serverId.asText());
+            return DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), serverId.asText());
         }
     }
 

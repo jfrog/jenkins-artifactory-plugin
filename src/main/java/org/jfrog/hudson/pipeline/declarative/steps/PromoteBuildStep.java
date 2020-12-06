@@ -4,11 +4,13 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.PromotionExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -73,7 +75,7 @@ public class PromoteBuildStep extends AbstractStepImpl {
         promotionConfig.setFailFast(failFast);
     }
 
-    PromotionConfig preparePromotionConfig(Run build) {
+    PromotionConfig preparePromotionConfig(Run<?, ?> build) {
         if (StringUtils.isBlank(promotionConfig.getBuildName())) {
             promotionConfig.setBuildName(BuildUniqueIdentifierHelper.getBuildName(build));
         }
@@ -85,7 +87,7 @@ public class PromoteBuildStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient PromoteBuildStep step;
+        private transient final PromoteBuildStep step;
 
         @Inject
         public Execution(PromoteBuildStep step, StepContext context) throws IOException, InterruptedException {
@@ -96,7 +98,7 @@ public class PromoteBuildStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             PromotionConfig promotionConfig = step.preparePromotionConfig(build);
-            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), step.serverId);
             new PromotionExecutor(Utils.prepareArtifactoryServer(null, server), build, listener, getContext(), promotionConfig).execute();
             return null;
         }

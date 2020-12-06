@@ -55,7 +55,7 @@ public class DockerPullStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient DockerPullStep step;
+        private transient final DockerPullStep step;
 
         @Inject
         public Execution(DockerPullStep step, StepContext context) throws IOException, InterruptedException {
@@ -65,11 +65,11 @@ public class DockerPullStep extends AbstractStepImpl {
 
         @Override
         protected Void run() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(ws, build, step.buildName, step.buildNumber);
-            ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, ws, getContext(), step.serverId);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber);
+            ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), step.serverId);
             DockerPullExecutor dockerExecutor = new DockerPullExecutor(pipelineServer, buildInfo, build, step.image, step.sourceRepo, step.host, step.javaArgs, launcher, listener, ws, env);
             dockerExecutor.execute();
-            DeclarativePipelineUtils.saveBuildInfo(dockerExecutor.getBuildInfo(), ws, build, new JenkinsBuildInfoLog(listener));
+            DeclarativePipelineUtils.saveBuildInfo(dockerExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
     }
