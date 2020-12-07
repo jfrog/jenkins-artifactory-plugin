@@ -82,7 +82,7 @@ public class ConanRemoteStep extends AbstractStepImpl {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             ConanClient conanClient = DeclarativePipelineUtils.buildConanClient(step.getClientId(), buildNumber, ConanClientStep.STEP_NAME, launcher, ws, rootWs, env);
             ConanExecutor conanExecutor = new ConanExecutor(conanClient.getUserPath(), ws, launcher, listener, env, build);
-            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), step.serverId);
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
             // Run conan add remote
             String serverUrl = Utils.buildConanRemoteUrl(server, step.getRepo());
             conanExecutor.execRemoteAdd(step.getName(), serverUrl, step.getForce(), step.getVerifySSL());

@@ -88,7 +88,7 @@ public class GenericStep extends AbstractStepImpl {
             buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
 
             // Set Artifactory server
-            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, context, step.serverId);
+            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
             artifactoryServer = Utils.prepareArtifactoryServer(null, pipelineServer);
         }
     }

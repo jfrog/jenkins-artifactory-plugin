@@ -8,7 +8,6 @@ import hudson.model.Run;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.GetArtifactoryServerExecutor;
@@ -67,21 +66,27 @@ public class DeclarativePipelineUtils {
     /**
      * Get Artifactory server from global server configuration or from previous rtServer{...} scope.
      *
-     * @param build    - Step's build.
-     * @param rootWs   - Step's root workspace.
-     * @param context  - Step's context.
-     * @param serverId - The server id. Can be defined from global server configuration or from previous rtServer{...} scope.
+     * @param build          - Step's build.
+     * @param rootWs         - Step's root workspace.
+     * @param serverId       - The server id. Can be defined from global server configuration or from previous rtServer{...} scope.
+     * @param throwIfMissing - Throw exception if server is missing.
      * @return Artifactory server.
      */
-    public static ArtifactoryServer getArtifactoryServer(Run<?, ?> build, FilePath rootWs, StepContext context, String serverId) throws IOException, InterruptedException {
+    public static ArtifactoryServer getArtifactoryServer(Run<?, ?> build, FilePath rootWs, String serverId, boolean throwIfMissing) throws IOException, InterruptedException {
         String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         BuildDataFile buildDataFile = readBuildDataFile(rootWs, buildNumber, CreateServerStep.STEP_NAME, serverId);
         // If the server has not been configured as part of the declarative pipeline script, get its details from it.
         if (buildDataFile == null) {
             // This server ID has not been configured as part of the declarative pipeline script.
             // Let's get it from the Jenkins configuration.
-            GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, context, serverId);
-            getArtifactoryServerExecutor.execute();
+            GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, serverId);
+            try {
+                getArtifactoryServerExecutor.execute();
+            } catch (GetArtifactoryServerExecutor.ServerNotFoundException serverNotFound) {
+                if (throwIfMissing) {
+                    throw serverNotFound;
+                }
+            }
             return getArtifactoryServerExecutor.getArtifactoryServer();
         }
         JsonNode jsonNode = buildDataFile.get(CreateServerStep.STEP_NAME);

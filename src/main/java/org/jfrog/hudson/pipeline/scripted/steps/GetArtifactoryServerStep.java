@@ -2,10 +2,12 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.GetArtifactoryServerExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -14,7 +16,7 @@ import java.io.IOException;
  * Created by romang on 4/21/16.
  */
 public class GetArtifactoryServerStep extends AbstractStepImpl {
-    private String artifactoryServerID;
+    private final String artifactoryServerID;
 
     @DataBoundConstructor
     public GetArtifactoryServerStep(String artifactoryServerID) {
@@ -27,7 +29,7 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousStepExecution<ArtifactoryServer> {
 
-        private transient GetArtifactoryServerStep step;
+        private transient final GetArtifactoryServerStep step;
 
         @Inject
         public Execution(GetArtifactoryServerStep step, StepContext context) throws IOException, InterruptedException {
@@ -38,7 +40,7 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
         @Override
         protected org.jfrog.hudson.pipeline.common.types.ArtifactoryServer run() throws Exception {
             String artifactoryServerID = step.getArtifactoryServerID();
-            GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, getContext(), artifactoryServerID);
+            GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, artifactoryServerID);
             getArtifactoryServerExecutor.execute();
             return getArtifactoryServerExecutor.getArtifactoryServer();
         }

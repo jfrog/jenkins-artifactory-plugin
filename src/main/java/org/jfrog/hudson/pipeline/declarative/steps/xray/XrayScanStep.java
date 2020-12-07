@@ -77,7 +77,7 @@ public class XrayScanStep extends AbstractStepImpl {
         @Override
         protected Void run() throws Exception {
             XrayScanConfig xrayScanConfig = step.prepareXrayScanConfig(build);
-            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), step.serverId);
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
             XrayExecutor xrayExecutor = new XrayExecutor(xrayScanConfig, listener, server, build);
             xrayExecutor.execute();
             return null;
