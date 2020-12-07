@@ -48,7 +48,7 @@ public class DistributeBuildStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             DistributionConfig distributionConfig = step.getDistributionConfig();
 
             if (StringUtils.isEmpty(distributionConfig.getBuildName())) {

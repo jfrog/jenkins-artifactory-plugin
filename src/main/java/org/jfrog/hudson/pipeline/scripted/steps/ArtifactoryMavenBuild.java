@@ -56,7 +56,7 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
         }
 
         @Override
-        protected BuildInfo run() throws Exception {
+        protected BuildInfo runStep() throws Exception {
             MavenBuild mavenBuild = step.getMavenBuild();
             MavenExecutor mavenExecutor = new MavenExecutor(listener, launcher, build, ws, env, mavenBuild, step.getPom(), step.getGoals(), step.getBuildInfo());
             mavenExecutor.execute();

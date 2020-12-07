@@ -54,7 +54,7 @@ public class BuildAppendStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), step.serverId);
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber);
             if (buildInfo == null) {

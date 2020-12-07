@@ -29,7 +29,7 @@ public class UploadStep extends GenericStep {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             setGenericParameters(step, getContext());
             GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(artifactoryServer, listener, build, ws, buildInfo, getContext(), spec, step.failNoOp, step.module);
             genericUploadExecutor.execute();

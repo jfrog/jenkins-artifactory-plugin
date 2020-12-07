@@ -48,7 +48,7 @@ public class InteractivePromotionStep extends PromoteBuildStep {
         }
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), step.serverId);
             ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(Utils.prepareArtifactoryServer(null, server));
             addPromotionAction(configurator);

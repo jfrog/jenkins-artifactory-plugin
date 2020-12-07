@@ -74,7 +74,7 @@ public class DockerPullStep extends AbstractStepImpl {
         }
 
         @Override
-        protected BuildInfo run() throws Exception {
+        protected BuildInfo runStep() throws Exception {
             if (step.getImage() == null) {
                 getContext().onFailure(new AbortException("Missing 'image' parameter"));
                 return null;

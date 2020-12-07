@@ -92,7 +92,7 @@ public class NpmPublishStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
             Utils.addNpmToPath(ws, listener, env, launcher, step.npmBuild.getTool());

@@ -29,7 +29,7 @@ public class DownloadStep extends GenericStep {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             setGenericParameters(step, getContext());
             GenericDownloadExecutor genericDownloadExecutor = new GenericDownloadExecutor(artifactoryServer, listener, build, ws, buildInfo, spec, step.failNoOp, step.module);
             genericDownloadExecutor.execute();

@@ -77,7 +77,7 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             NugetRunExecutor nugetRunExecutor = new NugetRunExecutor(buildInfo, launcher, step.nugetBuild, step.javaArgs, step.args, ws, step.module, env, listener, build);

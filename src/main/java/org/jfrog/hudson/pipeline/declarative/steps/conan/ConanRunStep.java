@@ -59,7 +59,7 @@ public class ConanRunStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             ConanClient conanClient = DeclarativePipelineUtils.buildConanClient(step.getClientId(), buildNumber, ConanClientStep.STEP_NAME, launcher, ws, rootWs, env);
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);

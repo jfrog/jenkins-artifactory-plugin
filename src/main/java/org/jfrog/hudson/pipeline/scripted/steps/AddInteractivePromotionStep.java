@@ -52,7 +52,7 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(Utils.prepareArtifactoryServer(null, step.getServer()));
             addPromotionAction(configurator);
             return true;

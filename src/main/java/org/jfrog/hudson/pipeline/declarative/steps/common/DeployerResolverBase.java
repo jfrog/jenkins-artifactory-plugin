@@ -44,7 +44,7 @@ public class DeployerResolverBase extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             writeBuildDataFile(rootWs, buildNumber, step.buildDataFile, new JenkinsBuildInfoLog(listener));
             return null;

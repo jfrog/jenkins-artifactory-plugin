@@ -51,7 +51,7 @@ public class CollectIssuesStep extends AbstractStepImpl {
 
         @Whitelisted
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             CollectIssuesExecutor collectIssuesExecutor = new CollectIssuesExecutor(build, listener, ws,
                     step.getIssues().getBuildName(), step.getConfig(), step.getIssues(), step.getServer());
             collectIssuesExecutor.execute();

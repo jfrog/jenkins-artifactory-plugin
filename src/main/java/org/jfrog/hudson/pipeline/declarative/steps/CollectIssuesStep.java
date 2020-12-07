@@ -63,7 +63,7 @@ public class CollectIssuesStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             // Set spec
             SpecConfiguration specConfiguration = new SpecConfiguration(step.config, step.configPath);
             String config = SpecUtils.getSpecStringFromSpecConf(specConfiguration, env, ws, listener.getLogger());

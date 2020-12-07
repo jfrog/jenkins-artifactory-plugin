@@ -35,7 +35,7 @@ public class DeployStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             step.deployer.deployArtifacts(step.buildInfo, listener, ws, build);
             return true;
         }

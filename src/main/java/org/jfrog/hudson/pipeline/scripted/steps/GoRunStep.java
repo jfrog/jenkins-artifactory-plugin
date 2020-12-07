@@ -40,7 +40,7 @@ public class GoRunStep extends AbstractStepImpl {
         }
 
         @Override
-        protected BuildInfo run() throws Exception {
+        protected BuildInfo runStep() throws Exception {
             GoRunExecutor goRunExecutor = new GoRunExecutor(getContext(), step.buildInfo, step.goBuild, step.path, step.goCmdArgs, step.module, ws, listener, env, build);
             goRunExecutor.execute();
             return goRunExecutor.getBuildInfo();

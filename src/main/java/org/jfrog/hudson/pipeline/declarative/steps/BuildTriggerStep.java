@@ -42,7 +42,7 @@ public class BuildTriggerStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, getContext(), step.serverId);
             new BuildTriggerExecutor(build, listener, server, step.paths, step.spec).execute();
             return null;

@@ -46,7 +46,7 @@ public class ConanClientStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             FilePath conanHomeDirectory = Utils.getConanHomeDirectory(step.userHome, env, launcher, ws);
             step.setUserHome(conanHomeDirectory.getRemote());
             ConanExecutor conanExecutor = new ConanExecutor(conanHomeDirectory.getRemote(), ws, launcher, listener, env, build);

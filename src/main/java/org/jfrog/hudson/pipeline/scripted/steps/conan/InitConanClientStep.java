@@ -37,7 +37,7 @@ public class InitConanClientStep extends AbstractStepImpl {
 
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             ConanClient conanClient = getConanClient();
             ConanExecutor conanExecutor = new ConanExecutor(conanClient.getUserPath(), ws, launcher, listener, env, build);
             conanExecutor.execClientInit();

@@ -36,7 +36,7 @@ public class MavenDeployerResolver extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             BuildDataFile buildDataFile = step.buildDataFile;
             DeclarativePipelineUtils.writeBuildDataFile(rootWs, buildNumber, buildDataFile, new JenkinsBuildInfoLog(listener));

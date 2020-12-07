@@ -14,7 +14,7 @@ import java.util.logging.Logger;
 public class JenkinsBuildInfoLog implements Log {
     private static final Logger logger = Logger.getLogger(JenkinsBuildInfoLog.class.getName());
 
-    private TaskListener listener;
+    private final TaskListener listener;
 
     public JenkinsBuildInfoLog(TaskListener listener) {
         this.listener = listener;
@@ -37,12 +37,10 @@ public class JenkinsBuildInfoLog implements Log {
     public void error(String message) {
         listener.getLogger().println(message);
         logger.severe(message);
-        listener.getLogger().flush();
     }
 
     public void error(String message, Throwable e) {
         listener.getLogger().println(message);
         logger.log(Level.SEVERE, message, e);
-        listener.getLogger().flush();
     }
 }

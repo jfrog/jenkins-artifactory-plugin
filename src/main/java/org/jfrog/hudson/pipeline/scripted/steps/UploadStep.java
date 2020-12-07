@@ -62,7 +62,7 @@ public class UploadStep extends AbstractStepImpl {
         }
 
         @Override
-        protected BuildInfo run() throws Exception {
+        protected BuildInfo runStep() throws Exception {
             GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), getContext(), Util.replaceMacro(step.getSpec(), env), step.getFailNoOp(), step.module);
             genericUploadExecutor.execute();
             BuildInfo buildInfo = genericUploadExecutor.getBuildInfo();

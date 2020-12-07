@@ -43,7 +43,7 @@ public class XrayScanBuildStep extends AbstractStepImpl {
         }
 
         @Override
-        protected XrayScanResult run() throws Exception {
+        protected XrayScanResult runStep() throws Exception {
             XrayScanConfig xrayScanConfig = step.getXrayScanConfig();
             ArtifactoryServer server = step.getServer();
             XrayExecutor xrayExecutor = new XrayExecutor(xrayScanConfig, listener, server, build);

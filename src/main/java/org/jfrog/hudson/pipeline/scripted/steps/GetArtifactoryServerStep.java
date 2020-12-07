@@ -36,7 +36,7 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
         }
 
         @Override
-        protected org.jfrog.hudson.pipeline.common.types.ArtifactoryServer run() throws Exception {
+        protected org.jfrog.hudson.pipeline.common.types.ArtifactoryServer runStep() throws Exception {
             String artifactoryServerID = step.getArtifactoryServerID();
             GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, getContext(), artifactoryServerID);
             getArtifactoryServerExecutor.execute();

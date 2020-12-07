@@ -62,7 +62,7 @@ public class EditPropsStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             new EditPropsExecutor(Utils.prepareArtifactoryServer(null, step.getServer()),
                     this.listener, this.build, this.ws, Util.replaceMacro(step.getSpec(), env), step.getEditType(),
                     step.getProps(), step.getFailNoOp()).execute();
