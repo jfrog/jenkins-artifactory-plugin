@@ -2,7 +2,6 @@ package org.jfrog.hudson.pipeline.action;
 
 import hudson.model.Run;
 import jenkins.model.RunAction2;
-import org.jfrog.build.api.Artifact;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -11,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Adds a list of the deployed maven artifacts in the summary of a pipeline job.
- * */
+ */
 public class DeployedMavenArtifactsAction implements RunAction2 {
     private Run build;
     private final List<DeployedMavenArtifact> deployedMavenArtifacts = new CopyOnWriteArrayList<>();
@@ -54,8 +53,7 @@ public class DeployedMavenArtifactsAction implements RunAction2 {
         return this.deployedMavenArtifacts;
     }
 
-    public void addDeployedMavenArtifacts(String artifactoryUrl, List<Artifact> deployed) {
-       deployed.forEach(artifact ->
-           deployedMavenArtifacts.add(new DeployedMavenArtifact(artifactoryUrl, artifact.getRemotePath(), artifact.getName())));
+    public void appendDeployedMavenArtifacts(List<DeployedMavenArtifact> deployed) {
+        deployedMavenArtifacts.addAll(deployed);
     }
 }
