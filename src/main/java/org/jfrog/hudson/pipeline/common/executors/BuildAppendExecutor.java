@@ -4,6 +4,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.builder.ModuleType;
@@ -107,10 +108,11 @@ public class BuildAppendExecutor implements Executor {
         String buildInfoPath = server.getArtifactoryUrl() + "/artifactory-build-info/" + encodedBuildName + "/" + encodedBuildNumber + "-" + timestamp + ".json";
         try (ArtifactoryDependenciesClient client = server.createArtifactoryDependenciesClient(credentials, createProxyConfiguration(), listener)) {
             // getArtifactMetadata return null response entity - there's no need to consume it
-            HttpResponse response = client.getArtifactMetadata(buildInfoPath);
-            moduleBuilder
-                    .sha1(readHeader(response, buildInfoPath, SHA1_HEADER_NAME))
-                    .md5(readHeader(response, buildInfoPath, MD5_HEADER_NAME));
+            try (CloseableHttpResponse response = client.getArtifactMetadata(buildInfoPath)) {
+                moduleBuilder
+                        .sha1(readHeader(response, buildInfoPath, SHA1_HEADER_NAME))
+                        .md5(readHeader(response, buildInfoPath, MD5_HEADER_NAME));
+            }
         }
     }
 

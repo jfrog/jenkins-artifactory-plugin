@@ -3,8 +3,11 @@ package org.jfrog.hudson.release;
 import hudson.model.TaskListener;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.jfrog.build.api.builder.DistributionBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.util.ExtractorUtils;
@@ -46,8 +49,13 @@ public class DistributionUtils {
 
     private static boolean distribute(DistributionBuilder distributionBuilder, ArtifactoryBuildInfoClient client, TaskListener listener,
                                       String buildName, String buildNumber, boolean dryRun) throws IOException {
-        HttpResponse response = client.distributeBuild(buildName, buildNumber, distributionBuilder.dryRun(dryRun).build());
-        return checkSuccess(response, dryRun, listener);
+        HttpEntity entity = null;
+        try (CloseableHttpResponse response = client.distributeBuild(buildName, buildNumber, distributionBuilder.dryRun(dryRun).build())) {
+            entity = response.getEntity();
+            return checkSuccess(response, dryRun, listener);
+        } finally {
+            EntityUtils.consumeQuietly(entity);
+        }
     }
 
     /**

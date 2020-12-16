@@ -1,8 +1,11 @@
 package org.jfrog.hudson.release;
 
 import hudson.model.TaskListener;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.util.EntityUtils;
 import org.jfrog.build.api.release.Promotion;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.util.ExtractorUtils;
@@ -27,27 +30,32 @@ public class PromotionUtils {
     public static boolean promoteAndCheckResponse(Promotion promotion, ArtifactoryBuildInfoClient client, TaskListener listener,
                                                   String buildName, String buildNumber) throws IOException {
         // If failFast is true, perform dry run first
+        HttpEntity entity = null;
         if (promotion.isFailFast()) {
             promotion.setDryRun(true);
             listener.getLogger().println("Performing dry run promotion (no changes are made during dry run) ...");
-            HttpResponse dryResponse = client.stageBuild(buildName, buildNumber, promotion);
-            try {
+            try (CloseableHttpResponse dryResponse = client.stageBuild(buildName, buildNumber, promotion)) {
+                entity = dryResponse.getEntity();
                 validatePromotionSuccessful(dryResponse, true, promotion.isFailFast(), listener);
             } catch (IOException e) {
                 listener.error(e.getMessage());
                 return false;
+            } finally {
+                EntityUtils.consumeQuietly(entity);
             }
             listener.getLogger().println("Dry run finished successfully.\nPerforming promotion ...");
         }
 
         // Perform promotion
         promotion.setDryRun(false);
-        HttpResponse response = client.stageBuild(buildName, buildNumber, promotion);
-        try {
+        try (CloseableHttpResponse response = client.stageBuild(buildName, buildNumber, promotion)) {
+            entity = response.getEntity();
             validatePromotionSuccessful(response, false, promotion.isFailFast(), listener);
         } catch (IOException e) {
             listener.error(e.getMessage());
             return false;
+        } finally {
+            EntityUtils.consumeQuietly(entity);
         }
         listener.getLogger().println("Promotion completed successfully!");
 

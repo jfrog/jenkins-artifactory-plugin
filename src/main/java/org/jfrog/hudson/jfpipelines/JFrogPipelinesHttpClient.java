@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
@@ -109,18 +109,16 @@ public class JFrogPipelinesHttpClient implements AutoCloseable {
         String text = createMapper().writeValueAsString(new VersionPayload());
         log.debug("Sending version request to JFrog Pipelines with payload: " + text);
         HttpEntity requestEntity = new StringEntity(text, ContentType.APPLICATION_JSON);
-        HttpResponse response = executePostRequest(requestEntity);
-        try {
+        try (CloseableHttpResponse response = executePostRequest(requestEntity)) {
+            HttpEntity httpEntity = response.getEntity();
             int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode == HttpStatus.SC_NOT_FOUND) {
+            if (statusCode == HttpStatus.SC_NOT_FOUND || httpEntity == null) {
+                EntityUtils.consumeQuietly(httpEntity);
                 return Version.NOT_FOUND;
             }
             if (statusCode != HttpStatus.SC_OK) {
+                EntityUtils.consumeQuietly(httpEntity);
                 throw new IOException(getMessageFromEntity(response.getEntity()));
-            }
-            HttpEntity httpEntity = response.getEntity();
-            if (httpEntity == null) {
-                return Version.NOT_FOUND;
             }
             try (InputStream content = httpEntity.getContent()) {
                 JsonNode result = createMapper().readTree(content);
@@ -128,8 +126,6 @@ public class JFrogPipelinesHttpClient implements AutoCloseable {
                 String version = result.get("version").asText();
                 return new Version(version);
             }
-        } finally {
-            EntityUtils.consume(response.getEntity());
         }
     }
 
@@ -160,14 +156,14 @@ public class JFrogPipelinesHttpClient implements AutoCloseable {
         return version;
     }
 
-    public HttpResponse sendStatus(JobStatusPayload payload) throws IOException {
+    public CloseableHttpResponse sendStatus(JobStatusPayload payload) throws IOException {
         String text = createMapper().writeValueAsString(payload);
         log.debug("Sending status to JFrog Pipelines with payload: " + text);
         StringEntity body = new StringEntity(text, ContentType.APPLICATION_JSON);
         return executePostRequest(body);
     }
 
-    private HttpResponse executePostRequest(HttpEntity body) throws IOException {
+    private CloseableHttpResponse executePostRequest(HttpEntity body) throws IOException {
         HttpPost httpPost = new HttpPost(pipelinesIntegrationUrl);
         httpPost.setEntity(body);
         return getHttpClient().execute(httpPost);
