@@ -139,16 +139,15 @@ public class MavenDeployer extends Deployer {
     public static void addDeployedArtifactsActionFromDetails(Run build, String artifactoryUrl, Map<String, Set<DeployDetails>> deployableArtifactsByModule) {
         deployableArtifactsByModule.forEach((module, detailsSet) -> {
             // Add only if whole module contains maven artifacts.
-            boolean isMaven = true;
             List<DeployedMavenArtifact> curArtifacts = Lists.newArrayList();
             for (DeployDetails curDetails : detailsSet) {
-                isMaven = (curDetails.getPackageType() == DeployDetails.PackageType.MAVEN) && isMaven;
+                if (curDetails.getPackageType() != DeployDetails.PackageType.MAVEN) {
+                    return;
+                }
                 curArtifacts.add(new DeployedMavenArtifact(artifactoryUrl, curDetails.getTargetRepository(),
                         curDetails.getArtifactPath(), FilenameUtils.getName(curDetails.getArtifactPath())));
             }
-            if (isMaven) {
-                addDeployedArtifactsToAction(build, curArtifacts);
-            }
+            addDeployedArtifactsToAction(build, curArtifacts);
         });
     }
 
