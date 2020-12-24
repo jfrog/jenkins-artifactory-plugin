@@ -34,7 +34,7 @@ pipelines:
 
             # Set env
             - export CI=true
-            - export M2_HOME=/usr/local/apache-maven-3.6.3
+            - MVN_PATH=`which mvn` && export M2_HOME=`readlink -f $MVN_PATH | xargs dirname | xargs dirname`
             - export JFROG_CLI_BUILD_NAME=artifactory-jenkins-plugin
             - export JFROG_CLI_BUILD_NUMBER=$run_number
 
@@ -63,19 +63,19 @@ pipelines:
             - git pull upstream master
 
             # Update version
-            - ./jfrog rt mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
+            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
             - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
             - git tag artifactory-${NEXT_VERSION}
             - git push
             - git push --tags
 
             # Run install and publish
-            - ./jfrog rt bc
             - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jfrog rt mvn clean install -U -B
+            - ./jfrog rt bag
             - ./jfrog rt bp
 
             # Update next development version
-            - ./jfrog rt mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -B
+            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -B
             - git commit -am "[artifactory-release] Next development version [skipRun]"
 
             # Push changes to Jenkins Git

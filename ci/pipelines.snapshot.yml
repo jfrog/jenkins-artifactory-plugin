@@ -28,7 +28,7 @@ pipelines:
 
             # Set env
             - export CI=true
-            - export M2_HOME=/usr/local/apache-maven-3.6.3
+            - MVN_PATH=`which mvn` && export M2_HOME=`readlink -f $MVN_PATH | xargs dirname | xargs dirname`
             - export JFROG_CLI_BUILD_NAME=jenkins-plugin-dev
             - export JFROG_CLI_BUILD_NUMBER=$run_number
 
