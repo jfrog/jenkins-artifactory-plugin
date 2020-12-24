@@ -42,7 +42,11 @@ pipelines:
               --server-id-deploy ojo --repo-deploy-releases libs-release-local --repo-deploy-snapshots libs-snapshot-local
 
             # Run install and publish
-            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jfrog rt mvn clean install -U -B javadoc:jar source:jar
+            - >
+              env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME
+              JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
+              JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
+              ./jfrog rt mvn clean install -U -B javadoc:jar source:jar
             - ./jfrog rt bag
             - ./jfrog rt bp
 
