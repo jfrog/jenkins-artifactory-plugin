@@ -117,9 +117,9 @@ public class CreateServerStep extends AbstractStepImpl {
         private void overrideServerParameters(ArtifactoryServer server) throws IOException {
             if (isNotBlank(step.url)) {
                 server.setUrl(step.url);
-                if (isBlank(server.getUrl())) {
-                    throw new IOException("Server URL is missing");
-                }
+            }
+            if (isBlank(server.getUrl())) {
+                throw new IOException("Server URL is missing");
             }
             if (PluginsUtils.isCredentialsPluginEnabled()) {
                 if (isNotBlank(step.credentialsId)) {
