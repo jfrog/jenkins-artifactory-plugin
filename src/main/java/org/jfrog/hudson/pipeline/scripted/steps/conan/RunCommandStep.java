@@ -45,7 +45,7 @@ public class RunCommandStep extends AbstractStepImpl {
         }
 
         @Override
-        protected BuildInfo run() throws Exception {
+        protected BuildInfo runStep() throws Exception {
             ConanExecutor conanExecutor = new ConanExecutor(step.getBuildInfo(), step.getConanHome(), ws, launcher, listener, env, build);
             conanExecutor.execCommand(step.getCommand());
             return conanExecutor.getBuildInfo();

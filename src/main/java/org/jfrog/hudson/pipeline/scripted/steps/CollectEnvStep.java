@@ -39,7 +39,7 @@ public class CollectEnvStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             CollectEnvExecutor collectEnvExecutor = new CollectEnvExecutor(build, listener, ws, step.getEnv(), env);
             collectEnvExecutor.execute();
             return null;

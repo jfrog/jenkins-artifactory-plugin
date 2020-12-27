@@ -44,7 +44,7 @@ public class PromoteBuildStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             PromotionConfig promotionConfig = step.getPromotionConfig();
 
             if (StringUtils.isEmpty(promotionConfig.getBuildName())) {

@@ -41,7 +41,7 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             new PublishBuildInfoExecutor(build, listener, step.getBuildInfo(), step.getServer(), ws).execute();
             return true;
         }

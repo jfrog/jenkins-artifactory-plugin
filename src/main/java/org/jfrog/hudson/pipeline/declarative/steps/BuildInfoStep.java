@@ -98,7 +98,7 @@ public class BuildInfoStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             String buildName = StringUtils.isBlank(step.buildInfo.getName()) ? BuildUniqueIdentifierHelper.getBuildName(build) : step.buildInfo.getName();
             String buildNumber = StringUtils.isBlank(step.buildInfo.getNumber()) ? BuildUniqueIdentifierHelper.getBuildNumber(build) : step.buildInfo.getNumber();
             step.buildInfo.setName(buildName);

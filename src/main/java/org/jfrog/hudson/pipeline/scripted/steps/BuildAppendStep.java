@@ -47,7 +47,7 @@ public class BuildAppendStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             new BuildAppendExecutor(step.server, step.buildInfo, step.buildName, step.buildNumber, build, listener).execute();
             return null;
         }

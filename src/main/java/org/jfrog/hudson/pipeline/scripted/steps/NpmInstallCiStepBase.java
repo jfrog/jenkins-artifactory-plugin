@@ -45,7 +45,7 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
         }
 
         @Override
-        protected BuildInfo run() throws Exception {
+        protected BuildInfo runStep() throws Exception {
             Utils.addNpmToPath(ws, listener, env, launcher, step.npmBuild.getTool());
             NpmInstallCiExecutor npmInstallCiExecutor = new NpmInstallCiExecutor(step.buildInfo, launcher, step.npmBuild, step.javaArgs, step.args, ws, step.path, step.module, env, listener, build, step.isCiCommand);
             npmInstallCiExecutor.execute();

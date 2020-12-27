@@ -43,8 +43,15 @@ import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 public class ArtifactoryGenericConfigurator extends BuildWrapper implements DeployerOverrider, ResolverOverrider,
         BuildInfoAwareConfigurator, MultiConfigurationAware {
 
-    private final ServerDetails deployerDetails;
-    private final ServerDetails resolverDetails;
+    // Artifactory deployer server configured to be used by the provided upload spec
+    private final ServerDetails specsDeployerDetails;
+    // Artifactory resolver server configured to be used by the provided download spec
+    private final ServerDetails specsResolverDetails;
+    // Artifactory deployer server configured to be used by the provided legacy published artifacts
+    private final ServerDetails legacyDeployerDetails;
+    // Artifactory resolver server configured to be used by the provided legacy download artifacts
+    private final ServerDetails legacyResolverDetails;
+
     private final CredentialsConfig deployerCredentialsConfig;
     private final CredentialsConfig resolverCredentialsConfig;
     private final Boolean useSpecs;
@@ -89,7 +96,8 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     private final String matrixParams = null;
 
     @DataBoundConstructor
-    public ArtifactoryGenericConfigurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
+    public ArtifactoryGenericConfigurator(ServerDetails details, ServerDetails specsDeployerDetails, ServerDetails specsResolverDetails,
+                                          ServerDetails legacyDeployerDetails, ServerDetails legacyResolverDetails,
                                           CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                           String deployPattern, String resolvePattern, String matrixParams, String deploymentProperties,
                                           boolean useSpecs, SpecConfiguration uploadSpec, SpecConfiguration downloadSpec,
@@ -102,8 +110,10 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                                           String artifactoryCombinationFilter,
                                           String customBuildName,
                                           boolean overrideBuildName) {
-        this.deployerDetails = deployerDetails;
-        this.resolverDetails = resolverDetails;
+        this.specsDeployerDetails = specsDeployerDetails;
+        this.specsResolverDetails = specsResolverDetails;
+        this.legacyDeployerDetails = legacyDeployerDetails;
+        this.legacyResolverDetails = legacyResolverDetails;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
         this.deployPattern = deployPattern;
@@ -125,11 +135,13 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public String getArtifactoryName() {
-        return getDeployerDetails() != null ? getDeployerDetails().artifactoryName : null;
+        ServerDetails deployerDetails = isUseSpecs() ? specsDeployerDetails : legacyDeployerDetails;
+        return deployerDetails != null ? deployerDetails.getArtifactoryName() : null;
     }
 
     public String getArtifactoryResolverName() {
-        return resolverDetails != null ? resolverDetails.artifactoryName : null;
+        ServerDetails resolverDetails = isUseSpecs() ? specsResolverDetails : legacyResolverDetails;
+        return resolverDetails != null ? resolverDetails.getArtifactoryName() : null;
     }
 
     public String getArtifactoryUrl() {
@@ -137,27 +149,23 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         return server != null ? server.getArtifactoryUrl() : null;
     }
 
+    @Override
     public boolean isOverridingDefaultDeployer() {
         return deployerCredentialsConfig != null && deployerCredentialsConfig.isCredentialsProvided();
     }
 
+    @Override
     public String getRepositoryKey() {
-        return getDeployerDetails().getDeployReleaseRepository().getRepoKey();
+        return legacyDeployerDetails.getDeployReleaseRepository().getRepoKey();
     }
 
+    @Override
     public String getDefaultPromotionTargetRepository() {
         //Not implemented
         return null;
     }
 
-    public ServerDetails getDeployerDetails() {
-        return deployerDetails;
-    }
-
-    public ServerDetails getResolverDetails() {
-        return resolverDetails;
-    }
-
+    @Override
     public Credentials getOverridingDeployerCredentials() {
         return overridingDeployerCredentials;
     }
@@ -243,6 +251,46 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         return overrideBuildName;
     }
 
+    /**
+     * Get specs deployer details. Used by the Jelly.
+     *
+     * @return deployer details
+     */
+    @SuppressWarnings("unused")
+    public ServerDetails getSpecsDeployerDetails() {
+        return specsDeployerDetails;
+    }
+
+    /**
+     * Get specs resolver details. Used by the Jelly.
+     *
+     * @return resolver details
+     */
+    @SuppressWarnings("unused")
+    public ServerDetails getSpecsResolverDetails() {
+        return specsResolverDetails;
+    }
+
+    /**
+     * Get legacy patterns deployer details. Used by the Jelly.
+     *
+     * @return deployer details
+     */
+    @SuppressWarnings("unused")
+    public ServerDetails getLegacyDeployerDetails() {
+        return legacyDeployerDetails;
+    }
+
+    /**
+     * Get legacy patterns resolver details. Used by the Jelly.
+     *
+     * @return deployer details
+     */
+    @SuppressWarnings("unused")
+    public ServerDetails getLegacyResolverDetails() {
+        return legacyResolverDetails;
+    }
+
     public ArtifactoryServer getArtifactoryServer() {
         return RepositoriesUtils.getArtifactoryServer(getArtifactoryName(), getDescriptor().getArtifactoryServers());
     }
@@ -263,10 +311,10 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public List<Repository> getReleaseRepositoryList() {
-        if (getDeployerDetails().getDeploySnapshotRepository() == null) {
+        if (legacyDeployerDetails.getDeploySnapshotRepository() == null) {
             return Lists.newArrayList();
         }
-        return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeploySnapshotRepository().getKeyFromSelect());
+        return RepositoriesUtils.collectRepositories(legacyDeployerDetails.getDeploySnapshotRepository().getKeyFromSelect());
     }
 
     @Override

@@ -26,7 +26,7 @@ public class DeletePropsStep extends EditPropsStep {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             super.editPropsRun();
             return null;
         }

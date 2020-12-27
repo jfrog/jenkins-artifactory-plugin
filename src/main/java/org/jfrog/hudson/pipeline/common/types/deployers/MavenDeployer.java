@@ -8,15 +8,14 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Module;
-import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.util.DeploymentUrlUtils;
 import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.pipeline.action.DeployedMavenArtifact;
 import org.jfrog.hudson.pipeline.action.DeployedMavenArtifactsAction;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
 import java.io.UnsupportedEncodingException;
@@ -31,7 +30,7 @@ public class MavenDeployer extends Deployer {
     private String snapshotRepo;
     private String releaseRepo;
     private boolean deployEvenIfUnstable = false;
-    public final static MavenDeployer EMPTY_DEPLOYER;
+    public static final MavenDeployer EMPTY_DEPLOYER;
 
     static {
         EMPTY_DEPLOYER = createEmptyDeployer();
@@ -121,11 +120,17 @@ public class MavenDeployer extends Deployer {
      * Adds artifacts from the provided modules to the Deployed Maven Artifacts Summary Action.
      */
     public static void addDeployedArtifactsActionFromModules(Run build, String artifactoryUrl, List<Module> modules) {
+        List<DeployedMavenArtifact> curArtifacts = Lists.newArrayList();
         for (Module module : modules) {
-            if (module.getArtifacts() != null) {
-                addDeployedArtifactsAction(build, artifactoryUrl, module.getArtifacts());
+            if (module.getArtifacts() == null) {
+                continue;
+            }
+            for (Artifact artifact : module.getArtifacts()) {
+                curArtifacts.add(new DeployedMavenArtifact(artifactoryUrl, module.getRepository(),
+                        artifact.getRemotePath(), artifact.getName()));
             }
         }
+        addDeployedArtifactsToAction(build, curArtifacts);
     }
 
     /**
@@ -133,21 +138,16 @@ public class MavenDeployer extends Deployer {
      */
     public static void addDeployedArtifactsActionFromDetails(Run build, String artifactoryUrl, Map<String, Set<DeployDetails>> deployableArtifactsByModule) {
         deployableArtifactsByModule.forEach((module, detailsSet) -> {
-            boolean isMaven = true;
-            List<Artifact> curArtifacts = Lists.newArrayList();
+            // Add only if whole module contains maven artifacts.
+            List<DeployedMavenArtifact> curArtifacts = Lists.newArrayList();
             for (DeployDetails curDetails : detailsSet) {
-                isMaven = (curDetails.getPackageType() == DeployDetails.PackageType.MAVEN) && isMaven;
-                Artifact artifact = new ArtifactBuilder(FilenameUtils.getName(curDetails.getArtifactPath()))
-                        .md5(curDetails.getMd5())
-                        .sha1(curDetails.getSha1())
-                        .type(FilenameUtils.getExtension(curDetails.getArtifactPath()))
-                        .remotePath(curDetails.getTargetRepository() + "/" + curDetails.getArtifactPath())
-                        .build();
-                curArtifacts.add(artifact);
+                if (curDetails.getPackageType() != DeployDetails.PackageType.MAVEN) {
+                    return;
+                }
+                curArtifacts.add(new DeployedMavenArtifact(artifactoryUrl, curDetails.getTargetRepository(),
+                        curDetails.getArtifactPath(), FilenameUtils.getName(curDetails.getArtifactPath())));
             }
-            if (isMaven) {
-                addDeployedArtifactsAction(build, artifactoryUrl, curArtifacts);
-            }
+            addDeployedArtifactsToAction(build, curArtifacts);
         });
     }
 
@@ -155,7 +155,10 @@ public class MavenDeployer extends Deployer {
      * Adds the provided artifacts to the Deployed Maven Artifacts Summary Action.
      * If such action was not initialized yet, initialize a new one.
      */
-    public static void addDeployedArtifactsAction(Run build, String artifactoryUrl, List<Artifact> mavenArtifacts) {
+    public static void addDeployedArtifactsToAction(Run build, List<DeployedMavenArtifact> mavenArtifacts) {
+        if (mavenArtifacts.isEmpty()) {
+            return;
+        }
         synchronized (build.getAllActions()) {
             DeployedMavenArtifactsAction action = build.getAction(DeployedMavenArtifactsAction.class);
             // Initialize action if haven't done so yet.
@@ -163,7 +166,7 @@ public class MavenDeployer extends Deployer {
                 action = new DeployedMavenArtifactsAction(build);
                 build.addAction(action);
             }
-            action.addDeployedMavenArtifacts(artifactoryUrl, mavenArtifacts);
+            action.appendDeployedMavenArtifacts(mavenArtifacts);
         }
     }
 }

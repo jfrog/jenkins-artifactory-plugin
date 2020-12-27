@@ -40,7 +40,7 @@ public class GoPublishStep extends AbstractStepImpl {
         }
 
         @Override
-        protected BuildInfo run() throws Exception {
+        protected BuildInfo runStep() throws Exception {
             GoPublishExecutor goPublishExecutor = new GoPublishExecutor(getContext(), step.buildInfo, step.goBuild, step.path, step.version, step.module, ws, listener, build);
             goPublishExecutor.execute();
             return goPublishExecutor.getBuildInfo();

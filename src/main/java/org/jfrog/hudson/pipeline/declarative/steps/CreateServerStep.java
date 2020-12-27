@@ -92,7 +92,7 @@ public class CreateServerStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             // Prepare Artifactory server
             ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, ws, step.id, false);
             if (server == null) {

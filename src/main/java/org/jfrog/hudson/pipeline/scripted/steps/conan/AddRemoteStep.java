@@ -56,7 +56,7 @@ public class AddRemoteStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             ConanExecutor conanExecutor = new ConanExecutor(step.getConanHome(), ws, launcher, listener, env, build);
             conanExecutor.execRemoteAdd(step.getServerName(), step.getServerUrl(), step.getForce(), step.getVerifySSL());
             return true;

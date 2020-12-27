@@ -1,0 +1,60 @@
+updateCommitStatus: &UPDATE_COMMIT_STATUS update_commit_status jenkinsSnapshotGit --context "$step_name"
+
+pipelines:
+  - name: build_jenkins_snapshot
+    configuration:
+      runtime:
+        type: image
+        image:
+          auto:
+            language: java
+            versions:
+              - "8.0.0"
+
+    steps:
+      - name: Snapshot
+        type: Bash
+        configuration:
+          inputResources:
+            - name: jenkinsSnapshotGit
+          integrations:
+            - name: ojo
+        execution:
+          onStart:
+            - *UPDATE_COMMIT_STATUS
+            - restore_cache_files m2_home ${HOME}/.m2
+          onExecute:
+            - cd $res_jenkinsSnapshotGit_resourcePath
+
+            # Set env
+            - export CI=true
+            - MVN_PATH=`which mvn` && export M2_HOME=`readlink -f $MVN_PATH | xargs dirname | xargs dirname`
+            - export JFROG_CLI_BUILD_NAME=jenkins-plugin-dev
+            - export JFROG_CLI_BUILD_NUMBER=$run_number
+
+            # Download JFrog CLI
+            - curl -fL https://getcli.jfrog.io | sh && chmod +x jfrog
+
+            # Configure JFrog CLI
+            - ./jfrog rt c ojo --url $int_ojo_rt_url --access-token=$int_ojo_rt_token
+            - ./jfrog rt mvnc
+              --server-id-resolve ojo --repo-resolve-releases libs-release --repo-resolve-snapshots libs-snapshot
+              --server-id-deploy ojo --repo-deploy-releases libs-release-local --repo-deploy-snapshots libs-snapshot-local
+
+            # Run install and publish
+            - >
+              env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME
+              JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
+              JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
+              ./jfrog rt mvn clean install -U -B javadoc:jar source:jar
+            - ./jfrog rt bag
+            - ./jfrog rt bp
+
+          onComplete:
+            - *UPDATE_COMMIT_STATUS
+
+            # Show tests in the *Tests* tab
+            - save_tests $res_jenkinsSnapshotGit_resourcePath/target/surefire-reports/
+
+            # Save .m2 cache
+            - add_cache_files ${HOME}/.m2 m2_home

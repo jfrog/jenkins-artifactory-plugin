@@ -33,4 +33,15 @@ public abstract class ArtifactorySynchronousNonBlockingStepExecution<T> extends 
         this.rootWs = extractRootWorkspace(context, this.build, this.ws);
         this.env = context.get(EnvVars.class);
     }
+
+    protected abstract T runStep() throws Exception;
+
+    @Override
+    protected T run() throws Exception {
+        try {
+            return runStep();
+        } finally {
+            listener.getLogger().flush();
+        }
+    }
 }

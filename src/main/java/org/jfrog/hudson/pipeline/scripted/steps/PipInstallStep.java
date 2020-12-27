@@ -46,7 +46,7 @@ public class PipInstallStep extends AbstractStepImpl {
         }
 
         @Override
-        protected BuildInfo run() throws Exception {
+        protected BuildInfo runStep() throws Exception {
             PipInstallExecutor pipInstallExecutor = new PipInstallExecutor(step.buildInfo, launcher, step.pipBuild, step.javaArgs, step.args, ws, step.envActivation, step.module, env, listener, build);
             pipInstallExecutor.execute();
             return pipInstallExecutor.getBuildInfo();

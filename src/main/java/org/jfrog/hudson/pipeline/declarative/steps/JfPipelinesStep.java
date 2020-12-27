@@ -65,7 +65,7 @@ public class JfPipelinesStep extends AbstractStepImpl {
         }
 
         @Override
-        protected Void run() throws Exception {
+        protected Void runStep() throws Exception {
             JenkinsBuildInfoLog logger = new JenkinsBuildInfoLog(listener);
             JobStartedPayload payload = getJobStartedPayload(build, listener);
             if (payload == null || StringUtils.isBlank(payload.getStepId())) {

@@ -78,7 +78,7 @@ public class MavenDescriptorStep extends AbstractStepImpl {
 
 
         @Override
-        protected Boolean run() throws Exception {
+        protected Boolean runStep() throws Exception {
             pomFile = new FilePath(ws, step.getPomFile()).getRemote();
             failOnSnapshot = step.isFailOnSnapshot();
             dryRun = step.isDryRun();

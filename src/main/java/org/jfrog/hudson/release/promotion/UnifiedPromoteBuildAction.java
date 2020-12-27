@@ -22,7 +22,8 @@ import hudson.security.ACL;
 import hudson.security.Permission;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpResponse;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 import org.jfrog.build.api.builder.PromotionBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
@@ -426,17 +427,15 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         }
 
         private void handlePluginPromotion(TaskListener listener, ArtifactoryBuildInfoClient client, String buildName, String buildNumber) throws IOException {
-            HttpResponse response = null;
-            try {
-                response = client.executePromotionUserPlugin(promotionPlugin.getPluginName(), buildName, buildNumber, promotionPlugin.getParamMap());
+            HttpEntity entity = null;
+            try (CloseableHttpResponse response = client.executePromotionUserPlugin(promotionPlugin.getPluginName(), buildName, buildNumber, promotionPlugin.getParamMap())) {
+                entity = response.getEntity();
                 PromotionUtils.validatePromotionSuccessful(response, false, failFast, listener);
                 listener.getLogger().println("Promotion completed successfully!");
             } catch (IOException e) {
                 listener.error(e.getMessage());
             } finally {
-                if (response != null) {
-                    EntityUtils.consume(response.getEntity());
-                }
+                EntityUtils.consumeQuietly(entity);
             }
         }
     }

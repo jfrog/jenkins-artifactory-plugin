@@ -29,7 +29,7 @@ public class CreateBuildInfoStep extends AbstractStepImpl {
         }
 
         @Override
-        protected BuildInfo run() throws Exception {
+        protected BuildInfo runStep() throws Exception {
             return new BuildInfo(build);
         }
     }

@@ -71,8 +71,6 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
             return child.act(new DownloadFileCallable(log));
         } catch (InterruptedException e) {
             log.warn("Caught interrupted exception: " + e.getLocalizedMessage());
-        } finally {
-            IOUtils.closeQuietly(is);
         }
 
         return null;
@@ -90,7 +88,7 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
             }
 
             Map<String, String> checksumsMap = child.act(new DownloadFileCallable(log));
-            boolean isExists =  checksumsMap != null &&
+            boolean isExists = checksumsMap != null &&
                     StringUtils.isNotBlank(md5) && StringUtils.equals(md5, checksumsMap.get("md5")) &&
                     StringUtils.isNotBlank(sha1) && StringUtils.equals(sha1, checksumsMap.get("sha1"));
             if (isExists) {
@@ -133,7 +131,7 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
         }
     }
 
-    public void setFlatDownload(boolean flat){
+    public void setFlatDownload(boolean flat) {
         this.flatDownload = flat;
     }
 

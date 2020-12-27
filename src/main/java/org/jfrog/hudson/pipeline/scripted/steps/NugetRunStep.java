@@ -41,7 +41,7 @@ public class NugetRunStep extends AbstractStepImpl {
         }
 
         @Override
-        protected BuildInfo run() throws Exception {
+        protected BuildInfo runStep() throws Exception {
             NugetRunExecutor nugetRunExecutor = new NugetRunExecutor(step.buildInfo, launcher, step.nugetBuild, step.javaArgs, step.args, ws, step.module, env, listener, build);
             nugetRunExecutor.execute();
             return nugetRunExecutor.getBuildInfo();

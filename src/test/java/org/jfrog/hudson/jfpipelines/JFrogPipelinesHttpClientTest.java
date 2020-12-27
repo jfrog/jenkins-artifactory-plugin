@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Result;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.jfrog.build.client.Version;
 import org.jfrog.build.util.VersionCompatibilityType;
 import org.jfrog.build.util.VersionException;
@@ -131,8 +131,8 @@ public class JFrogPipelinesHttpClientTest {
         Map<String, String> jobInfo = new HashMap<String, String>() {{
             put("a", "b");
         }};
-        try (JFrogPipelinesHttpClient client = createClient("http://httpbin.org/post")) {
-            HttpResponse response = client.sendStatus(new JobStatusPayload(Result.SUCCESS.toExportedObject(), "5", jobInfo, null));
+        try (JFrogPipelinesHttpClient client = createClient("http://httpbin.org/post");
+             CloseableHttpResponse response = client.sendStatus(new JobStatusPayload(Result.SUCCESS.toExportedObject(), "5", jobInfo, null))) {
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             try (InputStream content = response.getEntity().getContent()) {
                 JsonNode requestTree = createMapper().readTree(content);
@@ -165,8 +165,8 @@ public class JFrogPipelinesHttpClientTest {
     @Test
     public void sendStatusOutputResourcesTest() {
         String outputResources = "[{\"content\":{\"a\":\"b\"},\"name\":\"resource1\"},{\"content\":{\"c\":\"d\"},\"name\":\"resource2\"}]";
-        try (JFrogPipelinesHttpClient client = createClient("http://httpbin.org/post")) {
-            HttpResponse response = client.sendStatus(new JobStatusPayload(Result.SUCCESS.toExportedObject(), "5", new HashMap<>(), OutputResource.fromString(outputResources)));
+        try (JFrogPipelinesHttpClient client = createClient("http://httpbin.org/post");
+             CloseableHttpResponse response = client.sendStatus(new JobStatusPayload(Result.SUCCESS.toExportedObject(), "5", new HashMap<>(), OutputResource.fromString(outputResources)))) {
             assertEquals(HttpStatus.SC_OK, response.getStatusLine().getStatusCode());
             try (InputStream content = response.getEntity().getContent()) {
                 JsonNode requestTree = createMapper().readTree(content);
