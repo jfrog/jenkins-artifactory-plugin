@@ -11,14 +11,12 @@ import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
-import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.*;
 
 @SuppressWarnings("unused")
 public class CreateServerStep extends AbstractStepImpl {
@@ -98,6 +96,7 @@ public class CreateServerStep extends AbstractStepImpl {
             if (server == null) {
                 server = new ArtifactoryServer();
             }
+            checkInputs(server);
             overrideServerParameters(server);
 
             // Store Artifactory server in the BuildDataFile
@@ -109,29 +108,42 @@ public class CreateServerStep extends AbstractStepImpl {
         }
 
         /**
+         * Validate step's inputs.
+         *
+         * @param server - The server to check
+         * @throws IOException if there is an illegal step configuration.
+         */
+        private void checkInputs(ArtifactoryServer server) throws IOException {
+            if (isAllBlank(server.getUrl(), step.url)) {
+                throw new IOException("Server URL is missing");
+            }
+            if (isNotBlank(step.credentialsId)) {
+                if (isNotBlank(step.username)) {
+                    throw new IOException("'rtServer' step can't include both credentialsId and username");
+                }
+                if (isNotBlank(step.password)) {
+                    throw new IOException("'rtServer' step can't include both credentialsId and password");
+                }
+            }
+        }
+
+        /**
          * Override Artifactory pipeline server parameter with parameters configured in this step.
          *
          * @param server - The server to update
-         * @throws IOException if URL is missing
          */
-        private void overrideServerParameters(ArtifactoryServer server) throws IOException {
+        private void overrideServerParameters(ArtifactoryServer server) {
             if (isNotBlank(step.url)) {
                 server.setUrl(step.url);
             }
-            if (isBlank(server.getUrl())) {
-                throw new IOException("Server URL is missing");
+            if (isNotBlank(step.credentialsId)) {
+                server.setCredentialsId(step.credentialsId);
             }
-            if (PluginsUtils.isCredentialsPluginEnabled()) {
-                if (isNotBlank(step.credentialsId)) {
-                    server.setCredentialsId(step.credentialsId);
-                }
-            } else {
-                if (isNotBlank(step.username)) {
-                    server.setUsername(step.username);
-                }
-                if (isNotBlank(step.password)) {
-                    server.setPassword(step.password);
-                }
+            if (isNotBlank(step.username)) {
+                server.setUsername(step.username);
+            }
+            if (isNotBlank(step.password)) {
+                server.setPassword(step.password);
             }
             if (step.deploymentThreads != null) {
                 server.setDeploymentThreads(step.deploymentThreads);
