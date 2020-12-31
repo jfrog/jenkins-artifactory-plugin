@@ -21,7 +21,7 @@ import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.jfrog.hudson.util.*;
-import org.jfrog.hudson.util.converters.DeployerResolverOverriderConverter;
+import org.jfrog.hudson.util.converters.GenericDeployerResolverOverriderConverter;
 import org.jfrog.hudson.util.plugins.MultiConfigurationUtils;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.AncestorInPath;
@@ -52,23 +52,23 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     // Artifactory resolver server configured to be used by the provided legacy download artifacts
     private final ServerDetails legacyResolverDetails;
 
-    private final CredentialsConfig deployerCredentialsConfig;
-    private final CredentialsConfig resolverCredentialsConfig;
-    private final Boolean useSpecs;
-    private final SpecConfiguration uploadSpec;
-    private final SpecConfiguration downloadSpec;
-    private final String deployPattern;
-    private final String resolvePattern;
-    private final String deploymentProperties;
-    private final boolean deployBuildInfo;
+    private CredentialsConfig deployerCredentialsConfig;
+    private CredentialsConfig resolverCredentialsConfig;
+    private Boolean useSpecs;
+    private SpecConfiguration uploadSpec;
+    private SpecConfiguration downloadSpec;
+    private String deployPattern;
+    private String resolvePattern;
+    private String deploymentProperties;
+    private boolean deployBuildInfo;
     /**
      * Include environment variables in the generated build info
      */
-    private final boolean includeEnvVars;
-    private final IncludesExcludes envVarsPatterns;
-    private final boolean discardOldBuilds;
-    private final boolean discardBuildArtifacts;
-    private final boolean asyncBuildRetention;
+    private boolean includeEnvVars;
+    private IncludesExcludes envVarsPatterns;
+    private boolean discardOldBuilds;
+    private boolean discardBuildArtifacts;
+    private boolean asyncBuildRetention;
     private transient List<Dependency> publishedDependencies;
     private transient List<BuildDependency> buildDependencies;
     private String artifactoryCombinationFilter;
@@ -91,12 +91,16 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
      * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
      */
     @Deprecated
-    private final ServerDetails details = null;
+    private ServerDetails details;
+    @Deprecated
+    private ServerDetails deployerDetails;
+    @Deprecated
+    private ServerDetails resolverDetails;
     @Deprecated
     private final String matrixParams = null;
 
     @DataBoundConstructor
-    public ArtifactoryGenericConfigurator(ServerDetails details, ServerDetails specsDeployerDetails, ServerDetails specsResolverDetails,
+    public ArtifactoryGenericConfigurator(ServerDetails specsDeployerDetails, ServerDetails specsResolverDetails,
                                           ServerDetails legacyDeployerDetails, ServerDetails legacyResolverDetails,
                                           CredentialsConfig deployerCredentialsConfig, CredentialsConfig resolverCredentialsConfig,
                                           String deployPattern, String resolvePattern, String matrixParams, String deploymentProperties,
@@ -132,6 +136,29 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         this.artifactoryCombinationFilter = artifactoryCombinationFilter;
         this.customBuildName = customBuildName;
         this.overrideBuildName = overrideBuildName;
+    }
+
+    /**
+     * Constructor for the DeployerResolverOverriderConverterTest
+     *
+     * @param details               - Old server details
+     * @param deployerDetails       - Old deployer details
+     * @param resolverDetails       - Old resolver details
+     * @param specsDeployerDetails  - New file spec deployer details
+     * @param specsResolverDetails  - New file spec resolver details
+     * @param legacyDeployerDetails - New legacy patterns deployer details
+     * @param legacyResolverDetails - New legacy patterns resolver details
+     */
+    public ArtifactoryGenericConfigurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
+                                          ServerDetails specsDeployerDetails, ServerDetails specsResolverDetails,
+                                          ServerDetails legacyDeployerDetails, ServerDetails legacyResolverDetails) {
+        this.details = details;
+        this.deployerDetails = deployerDetails;
+        this.resolverDetails = resolverDetails;
+        this.specsDeployerDetails = specsDeployerDetails;
+        this.specsResolverDetails = specsResolverDetails;
+        this.legacyDeployerDetails = legacyDeployerDetails;
+        this.legacyResolverDetails = legacyResolverDetails;
     }
 
     public String getArtifactoryName() {
@@ -470,7 +497,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     /**
      * Page Converter
      */
-    public static final class ConverterImpl extends DeployerResolverOverriderConverter {
+    public static final class ConverterImpl extends GenericDeployerResolverOverriderConverter {
         public ConverterImpl(XStream2 xstream) {
             super(xstream);
         }

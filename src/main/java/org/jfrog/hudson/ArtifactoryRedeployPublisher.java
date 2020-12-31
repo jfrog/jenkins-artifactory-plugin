@@ -67,7 +67,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     /**
      * Deploy even if the build is unstable (failed tests)
      */
-    public final boolean evenIfUnstable;
+    public boolean evenIfUnstable;
     /**
      * Repository URL and repository to deploy artifacts to.
      */
@@ -75,23 +75,23 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     /**
      * If checked (default) deploy maven artifacts
      */
-    private final boolean deployArtifacts;
-    private final IncludesExcludes artifactDeploymentPatterns;
-    private final CredentialsConfig deployerCredentialsConfig;
+    private boolean deployArtifacts;
+    private IncludesExcludes artifactDeploymentPatterns;
+    private CredentialsConfig deployerCredentialsConfig;
     /**
      * Include environment variables in the generated build info
      */
-    private final boolean includeEnvVars;
-    private final IncludesExcludes envVarsPatterns;
-    private final boolean passIdentifiedDownstream;
-    private final boolean discardOldBuilds;
-    private final boolean discardBuildArtifacts;
-    private final boolean asyncBuildRetention;
-    private final String deploymentProperties;
-    private final boolean enableIssueTrackerIntegration;
-    private final boolean allowPromotionOfNonStagedBuilds;
-    private final boolean filterExcludedArtifactsFromBuild;
-    private final boolean recordAllDependencies;
+    private boolean includeEnvVars;
+    private IncludesExcludes envVarsPatterns;
+    private boolean passIdentifiedDownstream;
+    private boolean discardOldBuilds;
+    private boolean discardBuildArtifacts;
+    private boolean asyncBuildRetention;
+    private String deploymentProperties;
+    private boolean enableIssueTrackerIntegration;
+    private boolean allowPromotionOfNonStagedBuilds;
+    private boolean filterExcludedArtifactsFromBuild;
+    private boolean recordAllDependencies;
     private String defaultPromotionTargetRepository;
     private boolean deployBuildInfo;
     private String aggregationBuildStatus;
@@ -145,6 +145,17 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
         this.customBuildName = customBuildName;
         this.overrideBuildName = overrideBuildName;
+    }
+
+    /**
+     * Constructor for the DeployerResolverOverriderConverterTest
+     *
+     * @param details - Old server details
+     * @param deployerDetails - New deployer details
+     */
+    public ArtifactoryRedeployPublisher(ServerDetails details, ServerDetails deployerDetails) {
+        this.details = details;
+        this.deployerDetails = deployerDetails;
     }
 
     @SuppressWarnings({"UnusedDeclaration"})

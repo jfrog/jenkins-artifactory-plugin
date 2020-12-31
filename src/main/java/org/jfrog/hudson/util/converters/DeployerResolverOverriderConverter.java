@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.util.XStream2;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.gradle.ArtifactoryGradleConfigurator;
 import org.jfrog.hudson.ivy.ArtifactoryIvyConfigurator;
@@ -27,7 +28,6 @@ import org.jfrog.hudson.ivy.ArtifactoryIvyFreeStyleConfigurator;
 import org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator;
 import org.jfrog.hudson.util.Credentials;
 
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
@@ -39,10 +39,11 @@ import java.util.logging.Logger;
  * @author Noam Y. Tenne
  * @author Lior Hasson
  */
+@SuppressWarnings("deprecation")
 public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConverter<T> {
     Logger logger = Logger.getLogger(DeployerResolverOverriderConverter.class.getName());
     List<String> converterErrors = Lists.newArrayList();
-    // List of configurators that contain the useMavenPatterns parameter to be overrided
+    // List of configurators that contain the useMavenPatterns parameter to be overridden
     List<String> useMavenPatternsOverrideList = Arrays.asList(ArtifactoryGradleConfigurator.class.getSimpleName(),
             ArtifactoryIvyConfigurator.class.getSimpleName(), ArtifactoryIvyFreeStyleConfigurator.class.getSimpleName());
 
@@ -51,12 +52,16 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
     }
 
     @Override
-    protected void callback(T overrider, UnmarshallingContext context) {
-        Class overriderClass = overrider.getClass();
-        overrideResolverDetails(overrider, overriderClass);
+    public void callback(T overrider, UnmarshallingContext context) {
+        Class<?> overriderClass = overrider.getClass();
+        if (overrider instanceof ResolverOverrider) {
+            overrideResolverDetails((ResolverOverrider) overrider, overriderClass);
+        }
         credentialsMigration(overrider, overriderClass);
         // Override after name change:
-        overrideDeployerDetails(overrider, overriderClass);
+        if (overrider instanceof DeployerOverrider) {
+            overrideDeployerDetails((DeployerOverrider) overrider, overriderClass);
+        }
         overrideDeploymentProperties(overrider, overriderClass);
         overrideUseMavenPatterns(overrider, overriderClass);
         overrideUseArtifactoryGradlePlugin(overrider, overriderClass);
@@ -69,119 +74,116 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
     /**
      * Migrate to Jenkins "Credentials" plugin from the old credential implementation
      */
-    public void credentialsMigration(T overrider, Class overriderClass) {
+    public void credentialsMigration(T overrider, Class<?> overriderClass) {
         try {
-            deployerMigration(overrider, overriderClass);
-            resolverMigration(overrider, overriderClass);
-        } catch (NoSuchFieldException | IllegalAccessException | IOException e) {
+            if (overrider instanceof DeployerOverrider) {
+                deployerMigration(overrider, overriderClass);
+            }
+            if (overrider instanceof ResolverOverrider) {
+                resolverMigration(overrider, overriderClass);
+            }
+        } catch (ReflectiveOperationException e) {
             converterErrors.add(getConversionErrorMessage(overrider, e));
         }
     }
 
-    private void deployerMigration(T overrider, Class overriderClass)
-            throws NoSuchFieldException, IllegalAccessException, IOException {
-        if (overrider instanceof DeployerOverrider) {
-            Field overridingDeployerCredentialsField = overriderClass.getDeclaredField("overridingDeployerCredentials");
-            overridingDeployerCredentialsField.setAccessible(true);
-            Object overridingDeployerCredentialsObj = overridingDeployerCredentialsField.get(overrider);
+    private void deployerMigration(T overrider, Class<?> overriderClass) throws ReflectiveOperationException {
+        Field overridingDeployerCredentialsField = overriderClass.getDeclaredField("overridingDeployerCredentials");
+        overridingDeployerCredentialsField.setAccessible(true);
+        Object overridingDeployerCredentialsObj = overridingDeployerCredentialsField.get(overrider);
 
-            Field deployerCredentialsConfigField = overriderClass.getDeclaredField("deployerCredentialsConfig");
-            deployerCredentialsConfigField.setAccessible(true);
+        Field deployerCredentialsConfigField = overriderClass.getDeclaredField("deployerCredentialsConfig");
+        deployerCredentialsConfigField.setAccessible(true);
 
-            if (overridingDeployerCredentialsObj != null) {
-                Credentials overridingDeployerCredentials = (Credentials) overridingDeployerCredentialsObj;
-                boolean shouldOverride = ((DeployerOverrider)overrider).getOverridingDeployerCredentials() != null;
-                deployerCredentialsConfigField.set(overrider, new CredentialsConfig(overridingDeployerCredentials.getUsername(),
-                        overridingDeployerCredentials.getPassword(), StringUtils.EMPTY, shouldOverride));
-            } else {
-                if (deployerCredentialsConfigField.get(overrider) == null) {
-                    deployerCredentialsConfigField.set(overrider, CredentialsConfig.EMPTY_CREDENTIALS_CONFIG);
-                }
+        if (overridingDeployerCredentialsObj != null) {
+            Credentials overridingDeployerCredentials = (Credentials) overridingDeployerCredentialsObj;
+            boolean shouldOverride = ((DeployerOverrider) overrider).getOverridingDeployerCredentials() != null;
+            deployerCredentialsConfigField.set(overrider, new CredentialsConfig(overridingDeployerCredentials.getUsername(),
+                    overridingDeployerCredentials.getPassword(), StringUtils.EMPTY, shouldOverride));
+        } else {
+            if (deployerCredentialsConfigField.get(overrider) == null) {
+                deployerCredentialsConfigField.set(overrider, CredentialsConfig.EMPTY_CREDENTIALS_CONFIG);
             }
         }
     }
 
-    private void resolverMigration(T overrider, Class overriderClass)
-            throws NoSuchFieldException, IllegalAccessException, IOException {
-        if (overrider instanceof ResolverOverrider) {
-            Field resolverCredentialsField = overriderClass.getDeclaredField("overridingResolverCredentials");
-            resolverCredentialsField.setAccessible(true);
-            Object resolverCredentialsObj = resolverCredentialsField.get(overrider);
+    private void resolverMigration(T overrider, Class<?> overriderClass) throws ReflectiveOperationException {
+        Field resolverCredentialsField = overriderClass.getDeclaredField("overridingResolverCredentials");
+        resolverCredentialsField.setAccessible(true);
+        Object resolverCredentialsObj = resolverCredentialsField.get(overrider);
 
-            Field resolverCredentialsConfigField = overriderClass.getDeclaredField("resolverCredentialsConfig");
-            resolverCredentialsConfigField.setAccessible(true);
-            if (resolverCredentialsObj != null) {
-                Credentials resolverCredentials = (Credentials) resolverCredentialsObj;
-                boolean shouldOverride = ((ResolverOverrider)overrider).getOverridingResolverCredentials() != null;
-                CredentialsConfig credentialsConfig = new CredentialsConfig(resolverCredentials.getUsername(),
-                        resolverCredentials.getPassword(), StringUtils.EMPTY, shouldOverride);
-                resolverCredentialsConfigField.set(overrider, credentialsConfig);
-            } else {
-                if (resolverCredentialsConfigField.get(overrider) == null) {
-                    resolverCredentialsConfigField.set(overrider, CredentialsConfig.EMPTY_CREDENTIALS_CONFIG);
-                }
+        Field resolverCredentialsConfigField = overriderClass.getDeclaredField("resolverCredentialsConfig");
+        resolverCredentialsConfigField.setAccessible(true);
+        if (resolverCredentialsObj != null) {
+            Credentials resolverCredentials = (Credentials) resolverCredentialsObj;
+            boolean shouldOverride = ((ResolverOverrider) overrider).getOverridingResolverCredentials() != null;
+            CredentialsConfig credentialsConfig = new CredentialsConfig(resolverCredentials.getUsername(),
+                    resolverCredentials.getPassword(), StringUtils.EMPTY, shouldOverride);
+            resolverCredentialsConfigField.set(overrider, credentialsConfig);
+        } else {
+            if (resolverCredentialsConfigField.get(overrider) == null) {
+                resolverCredentialsConfigField.set(overrider, CredentialsConfig.EMPTY_CREDENTIALS_CONFIG);
             }
         }
     }
 
     /**
-     * Convert the (ServerDetails)details to (ServerDetails)resolverDetails if it doesn't exists already
-     * This conversion comes after a separation to two ServerDetails (resolver and deployer).
-     * Incase the configuration has only one ServerDetails instance called "details", create a new one for resolver.
+     * Convert: details -> resolverDetails
+     * Convert the "details" to "resolverDetails" if it doesn't exists already
      * In ArtifactoryMaven3NativeConfigurator the conversion is part of a name change only.
      */
-    private void overrideResolverDetails(T overrider, Class overriderClass) {
-        if (overrider instanceof ResolverOverrider) {
-            try {
-                Field resolverDetailsField = overriderClass.getDeclaredField("resolverDetails");
-                resolverDetailsField.setAccessible(true);
-                Object resolverDetails = resolverDetailsField.get(overrider);
+    void overrideResolverDetails(ResolverOverrider overrider, Class<?> overriderClass) {
+        try {
+            Field oldDetailsField = overriderClass.getDeclaredField("details");
+            oldDetailsField.setAccessible(true);
+            Object oldResolverDetails = oldDetailsField.get(overrider);
 
-                if (resolverDetails == null) {
-                    Field oldDeployerDetailsField = overriderClass.getDeclaredField("details");
-                    oldDeployerDetailsField.setAccessible(true);
-                    Object oldDeployerDetails = oldDeployerDetailsField.get(overrider);
-                    if (oldDeployerDetails != null) {
-                        ServerDetails resolverServerDetails = createInitialResolveDetailsFromDeployDetails((ServerDetails) oldDeployerDetails);
-                        resolverDetailsField.set(overrider, resolverServerDetails);
-                    }
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                converterErrors.add(getConversionErrorMessage(overrider, e));
+            if (oldResolverDetails == null || oldDetailsField.get(overrider) == null) {
+                return;
             }
+
+            Field resolverDetailsField = overriderClass.getDeclaredField("resolverDetails");
+            resolverDetailsField.setAccessible(true);
+            if (resolverDetailsField.get(overrider) == null) {
+                ServerDetails resolverServerDetails = createInitialResolveDetailsFromDeployDetails((ServerDetails) oldResolverDetails);
+                resolverDetailsField.set(overrider, resolverServerDetails);
+            }
+
+        } catch (ReflectiveOperationException e) {
+            converterErrors.add(getConversionErrorMessage(overrider, e));
         }
     }
 
     /**
-     * Convert the (ServerDetails)details to (ServerDetails)deployerDetails if it doesn't exists already
-     * This convertion comes after a name change (details -> deployerDetails)
+     * Convert details to deployerDetails if it doesn't exists already
+     * This conversion comes after a name change (details -> deployerDetails)
      */
-    private void overrideDeployerDetails(T overrider, Class overriderClass) {
-        if (overrider instanceof DeployerOverrider) {
-            try {
-                Field deployerDetailsField = overriderClass.getDeclaredField("deployerDetails");
-                deployerDetailsField.setAccessible(true);
-                Object deployerDetails = deployerDetailsField.get(overrider);
+    void overrideDeployerDetails(DeployerOverrider overrider, Class<?> overriderClass) {
+        try {
+            Field oldDetailsField = overriderClass.getDeclaredField("details");
+            oldDetailsField.setAccessible(true);
+            Object oldDeployerDetails = oldDetailsField.get(overrider);
 
-                if (deployerDetails == null) {
-                    Field oldDeployerDetailsField = overriderClass.getDeclaredField("details");
-                    oldDeployerDetailsField.setAccessible(true);
-                    Object oldDeployerDetails = oldDeployerDetailsField.get(overrider);
-                    if (oldDeployerDetails != null) {
-                        ServerDetails deployerServerDetails = createInitialDeployDetailsFromOldDeployDetails((ServerDetails) oldDeployerDetails);
-                        deployerDetailsField.set(overrider, deployerServerDetails);
-                    }
-                }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
-                converterErrors.add(getConversionErrorMessage(overrider, e));
+            if (oldDeployerDetails == null || oldDetailsField.get(overrider) == null) {
+                return;
             }
+
+            Field deployerDetailsField = overriderClass.getDeclaredField("deployerDetails");
+            deployerDetailsField.setAccessible(true);
+            if (deployerDetailsField.get(overrider) == null) {
+                ServerDetails deployerServerDetails = createInitialDeployDetailsFromOldDeployDetails((ServerDetails) oldDeployerDetails);
+                deployerDetailsField.set(overrider, deployerServerDetails);
+            }
+
+        } catch (ReflectiveOperationException e) {
+            converterErrors.add(getConversionErrorMessage(overrider, e));
         }
     }
 
     /**
      * Creates a new ServerDetails object for resolver, this will take URL and name from the deployer ServerDetails as a default behaviour
      */
-    private ServerDetails createInitialResolveDetailsFromDeployDetails(ServerDetails deployerDetails) {
+    ServerDetails createInitialResolveDetailsFromDeployDetails(ServerDetails deployerDetails) {
         RepositoryConf oldResolveRepositoryConfig = deployerDetails.getResolveReleaseRepository();
         RepositoryConf oldSnapshotResolveRepositoryConfig = deployerDetails.getResolveSnapshotRepository();
         RepositoryConf resolverReleaseRepos = oldResolveRepositoryConfig == null ? RepositoryConf.emptyRepositoryConfig : oldResolveRepositoryConfig;
@@ -193,7 +195,7 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
     /**
      * Creates a new ServerDetails object for deployer, this will take URL and name from the oldDeployer ServerDetails
      */
-    private ServerDetails createInitialDeployDetailsFromOldDeployDetails(ServerDetails oldDeployerDetails) {
+    ServerDetails createInitialDeployDetailsFromOldDeployDetails(ServerDetails oldDeployerDetails) {
         RepositoryConf oldDeployRepositoryConfig = oldDeployerDetails.getDeployReleaseRepository();
         RepositoryConf oldSnapshotDeployRepositoryConfig = oldDeployerDetails.getDeploySnapshotRepository();
         RepositoryConf deployReleaseRepos = oldDeployRepositoryConfig == null ? RepositoryConf.emptyRepositoryConfig : oldDeployRepositoryConfig;
@@ -206,7 +208,7 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
      * Convert the String matrixParams parameter to String deploymentProperties
      * This convertion comes after a name change (matrixParams -> deploymentProperties)
      */
-    private void overrideDeploymentProperties(T overrider, Class overriderClass) {
+    private void overrideDeploymentProperties(T overrider, Class<?> overriderClass) {
         if (!overriderClass.getSimpleName().equals(ArtifactoryMaven3NativeConfigurator.class.getSimpleName())) {
             try {
                 Field deploymentPropertiesField = overriderClass.getDeclaredField("deploymentProperties");
@@ -221,7 +223,7 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
                         deploymentPropertiesField.set(overrider, matrixParams);
                     }
                 }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
+            } catch (ReflectiveOperationException e) {
                 converterErrors.add(getConversionErrorMessage(overrider, e));
             }
         }
@@ -229,9 +231,9 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
 
     /**
      * Convert the Boolean notM2Compatible parameter to Boolean useMavenPatterns (after applying !)
-     * This convertion comes after a name change (!notM2Compatible -> useMavenPatterns)
+     * This conversion comes after a name change (!notM2Compatible -> useMavenPatterns)
      */
-    private void overrideUseMavenPatterns(T overrider, Class overriderClass) {
+    private void overrideUseMavenPatterns(T overrider, Class<?> overriderClass) {
         if (useMavenPatternsOverrideList.contains(overriderClass.getSimpleName())) {
             try {
                 Field useMavenPatternsField = overriderClass.getDeclaredField("useMavenPatterns");
@@ -242,11 +244,11 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
                     Field notM2CompatibleField = overriderClass.getDeclaredField("notM2Compatible");
                     notM2CompatibleField.setAccessible(true);
                     Object notM2Compatible = notM2CompatibleField.get(overrider);
-                    if (notM2Compatible instanceof Boolean && notM2Compatible != null) {
-                        useMavenPatternsField.set(overrider, !(Boolean)notM2Compatible);
+                    if (notM2Compatible instanceof Boolean) {
+                        useMavenPatternsField.set(overrider, !(Boolean) notM2Compatible);
                     }
                 }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
+            } catch (ReflectiveOperationException e) {
                 converterErrors.add(getConversionErrorMessage(overrider, e));
             }
         }
@@ -254,9 +256,9 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
 
     /**
      * Convert the Boolean skipInjectInitScript parameter to Boolean useArtifactoryGradlePlugin
-     * This convertion comes after a name change (skipInjectInitScript -> useArtifactoryGradlePlugin)
+     * This conversion comes after a name change (skipInjectInitScript -> useArtifactoryGradlePlugin)
      */
-    private void overrideUseArtifactoryGradlePlugin(T overrider, Class overriderClass) {
+    private void overrideUseArtifactoryGradlePlugin(T overrider, Class<?> overriderClass) {
         if (overriderClass.getSimpleName().equals(ArtifactoryGradleConfigurator.class.getSimpleName())) {
             try {
                 Field useArtifactoryGradlePluginField = overriderClass.getDeclaredField("useArtifactoryGradlePlugin");
@@ -267,18 +269,18 @@ public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConv
                     Field skipInjectInitScriptField = overriderClass.getDeclaredField("skipInjectInitScript");
                     skipInjectInitScriptField.setAccessible(true);
                     Object skipInjectInitScript = skipInjectInitScriptField.get(overrider);
-                    if (skipInjectInitScript instanceof Boolean && skipInjectInitScript != null) {
+                    if (skipInjectInitScript instanceof Boolean) {
                         useArtifactoryGradlePluginField.set(overrider, skipInjectInitScript);
                     }
                 }
-            } catch (NoSuchFieldException | IllegalAccessException e) {
+            } catch (ReflectiveOperationException e) {
                 converterErrors.add(getConversionErrorMessage(overrider, e));
             }
         }
     }
 
-    private String getConversionErrorMessage(T deployerOverrider, Exception e) {
+    String getConversionErrorMessage(Object overrider, Exception e) {
         return String.format("Could not convert the class '%s' to use the new overriding" +
-                "format. Cause: %s", deployerOverrider.getClass().getName(), e.getCause());
+                "format. Cause: %s", overrider.getClass().getName(), ExceptionUtils.getRootCause(e));
     }
 }

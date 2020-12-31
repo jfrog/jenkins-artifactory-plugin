@@ -50,11 +50,11 @@ import java.util.Map;
 public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements DeployerOverrider,
         BuildInfoAwareConfigurator {
 
-    private final CredentialsConfig deployerCredentialsConfig;
-    private final IncludesExcludes artifactDeploymentPatterns;
-    private final boolean discardBuildArtifacts;
-    private final String deploymentProperties;
-    private final boolean filterExcludedArtifactsFromBuild;
+    private CredentialsConfig deployerCredentialsConfig;
+    private IncludesExcludes artifactDeploymentPatterns;
+    private boolean discardBuildArtifacts;
+    private String deploymentProperties;
+    private boolean filterExcludedArtifactsFromBuild;
     private ServerDetails deployerDetails;
     private boolean deployArtifacts;
     private boolean deployBuildInfo;
@@ -62,7 +62,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
     private IncludesExcludes envVarsPatterns;
     private boolean discardOldBuilds;
     private boolean asyncBuildRetention;
-    private final Boolean useMavenPatterns;
+    private Boolean useMavenPatterns;
     private String ivyPattern;
     private String aggregationBuildStatus;
     private String artifactPattern;
@@ -116,6 +116,17 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         this.aggregateBuildIssues = aggregateBuildIssues;
         this.customBuildName = customBuildName;
         this.overrideBuildName = overrideBuildName;
+    }
+
+    /**
+     * Constructor for the DeployerResolverOverriderConverterTest
+     *
+     * @param details - Old server details
+     * @param deployerDetails - New deployer details
+     */
+    public ArtifactoryIvyConfigurator(ServerDetails details, ServerDetails deployerDetails) {
+        this.details = details;
+        this.deployerDetails = deployerDetails;
     }
 
     /**

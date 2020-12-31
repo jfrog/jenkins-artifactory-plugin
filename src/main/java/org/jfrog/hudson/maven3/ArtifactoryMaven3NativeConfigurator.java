@@ -40,7 +40,7 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
      */
     @Deprecated
     private Credentials overridingResolverCredentials;
-    private final CredentialsConfig resolverCredentialsConfig;
+    private CredentialsConfig resolverCredentialsConfig;
 
     /**
      * @deprecated: The following deprecated variables have corresponding converters to the variables replacing them
@@ -52,6 +52,17 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
     public ArtifactoryMaven3NativeConfigurator(ServerDetails details, ServerDetails resolverDetails, CredentialsConfig resolverCredentialsConfig) {
         this.resolverDetails = resolverDetails;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
+    }
+
+    /**
+     * Constructor for the DeployerResolverOverriderConverterTest
+     *
+     * @param details         - Old server details
+     * @param resolverDetails - new resolver details
+     */
+    public ArtifactoryMaven3NativeConfigurator(ServerDetails details, ServerDetails resolverDetails) {
+        this.details = details;
+        this.resolverDetails = resolverDetails;
     }
 
     public ServerDetails getDeployerDetails() {

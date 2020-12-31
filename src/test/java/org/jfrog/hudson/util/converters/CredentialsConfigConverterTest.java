@@ -1,4 +1,4 @@
-package org.jfrog.hudson.converters;
+package org.jfrog.hudson.util.converters;
 
 import hudson.ExtensionList;
 import jenkins.model.Jenkins;
