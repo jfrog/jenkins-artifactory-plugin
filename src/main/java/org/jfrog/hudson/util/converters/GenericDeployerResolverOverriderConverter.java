@@ -98,7 +98,7 @@ public class GenericDeployerResolverOverriderConverter<T> extends DeployerResolv
     }
 
     /**
-     * Set server details if not already exist.
+     * Set the server details, if they don't exist already.
      *
      * @param serverDetailsField - The field to set
      * @param overrider          - The server overrider
