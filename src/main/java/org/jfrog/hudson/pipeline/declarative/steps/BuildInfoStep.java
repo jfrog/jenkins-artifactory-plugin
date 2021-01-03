@@ -103,6 +103,8 @@ public class BuildInfoStep extends AbstractStepImpl {
             String buildNumber = StringUtils.isBlank(step.buildInfo.getNumber()) ? BuildUniqueIdentifierHelper.getBuildNumber(build) : step.buildInfo.getNumber();
             step.buildInfo.setName(buildName);
             step.buildInfo.setNumber(buildNumber);
+            BuildInfo currentBuildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, buildName, buildNumber);
+            step.buildInfo.append(currentBuildInfo);
             DeclarativePipelineUtils.saveBuildInfo(step.buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
