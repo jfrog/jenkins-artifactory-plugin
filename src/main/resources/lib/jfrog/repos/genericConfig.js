@@ -29,12 +29,12 @@ function updateViewBySpecsParam(isUsesSpec, uniqueId) {
     if (isUsesSpec === "true") {
         // Resolution section
         // By changing the name the configuration will decide which server to use
-        resolverSpec.getElementsByTagName(tagName)[0].setAttribute("name", "resolverDetails");
+        resolverSpec.getElementsByTagName(tagName)[0].setAttribute("name", "specsResolverDetails");
         resolverLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "artifactory-resolver-generic-dd");
 
         // Deployment section
         // By changing the name the configuration will decide which server to use
-        deployerSpec.getElementsByTagName(tagName)[0].setAttribute("name", "deployerDetails");
+        deployerSpec.getElementsByTagName(tagName)[0].setAttribute("name", "specsDeployerDetails");
         deployerLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "artifactory-deployer-generic-dd");
 
         specView = "";
@@ -42,12 +42,12 @@ function updateViewBySpecsParam(isUsesSpec, uniqueId) {
         // Resolution section
         // By changing the name the configuration will decide which server to use
         resolverSpec.getElementsByTagName(tagName)[0].setAttribute("name", "artifactory-resolver-spec-dd");
-        resolverLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "resolverDetails");
+        resolverLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "legacyResolverDetails");
 
         // Deployment section
         // By changing the name the configuration will decide which server to use
         deployerSpec.getElementsByTagName(tagName)[0].setAttribute("name", "artifactory-deployer-spec-dd");
-        deployerLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "deployerDetails");
+        deployerLegacy.getElementsByTagName(tagName)[0].setAttribute("name", "legacyDeployerDetails");
 
         legacyView = "";
     }
