@@ -54,7 +54,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
     private CredentialsConfig deployerCredentialsConfig;
     private CredentialsConfig resolverCredentialsConfig;
-    private Boolean useSpecs;
     private SpecConfiguration uploadSpec;
     private SpecConfiguration downloadSpec;
     private String deployPattern;
@@ -75,6 +74,9 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     private boolean multiConfProject;
     private String customBuildName;
     private boolean overrideBuildName;
+
+    @Deprecated
+    private Boolean useSpecs;
 
     /**
      * @deprecated: Use org.jfrog.hudson.generic.ArtifactoryGenericConfigurator#getDeployerCredentials()()
@@ -210,7 +212,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     }
 
     public boolean isUseSpecs() {
-        // useSpecs may be null in Jenkins Job DSL
         return useSpecs == null || useSpecs;
     }
 
