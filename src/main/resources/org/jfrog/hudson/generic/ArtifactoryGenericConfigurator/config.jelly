@@ -3,7 +3,7 @@
 
     <f:section title="${%Artifactory Configuration}">
         <j:set var="uniqueId" value="${h.generateId()}"/>
-        <j:set var="useSpecs" value="${instance.useSpecs}"/>
+        <j:set var="useSpecs" value="${instance.useSpecs ?: true}"/>
         <input type="hidden" name="useSpecs" value="${useSpecs}"/>
 
         <f:block>
@@ -31,7 +31,6 @@
                             </j:forEach>
                         </f:dropdownList>
                     </r:blockWrapper>
-
                     <r:credentials configurationFieldName="deployerCredentialsConfig"
                                    configurationObject="${instance.deployerCredentialsConfig}"
                                    blockTitle="Override default deployer credentials"
@@ -110,6 +109,10 @@
                             </j:forEach>
                         </f:dropdownList>
                     </r:blockWrapper>
+                    <r:credentials configurationFieldName="deployerCredentialsConfig"
+                                   configurationObject="${instance.deployerCredentialsConfig}"
+                                   blockTitle="Override default deployer credentials"
+                                   elementId="overridingDeployerCredentials-generic-${uniqueId}"/>
 
                     <f:block>
                         <r:blockWrapper style="width:100%" id="deployPatternArea-${uniqueId}">
@@ -155,7 +158,6 @@
                             </f:dropdownList>
                         </r:blockWrapper>
                     </f:block>
-
                     <r:credentials configurationFieldName="resolverCredentialsConfig"
                                    configurationObject="${instance.resolverCredentialsConfig}"
                                    blockTitle="Override default download credentials"
@@ -218,6 +220,11 @@
                             </j:forEach>
                         </f:dropdownList>
                     </r:blockWrapper>
+                    <r:credentials configurationFieldName="resolverCredentialsConfig"
+                                   configurationObject="${instance.resolverCredentialsConfig}"
+                                   blockTitle="Override default download credentials"
+                                   elementId="overridingResolverCredentials-generic-${uniqueId}"/>
+
                     <f:block>
                         <r:blockWrapper style="width:100%" id="resolvePatternArea-${uniqueId}">
                             <f:entry title="Download Artifacts" field="resolvePattern"
