@@ -11,7 +11,6 @@ import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.generic.GenericArtifactsDeployer;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
@@ -52,7 +51,7 @@ public class GenericUploadExecutor implements Executor {
         Credentials credentials = server.getDeployerCredentialsConfig().provideCredentials(build.getParent());
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(server);
 
-        new BuildInfoAccessor(buildInfo).appendVcs(Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
+        buildInfo.appendVcs(Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
 
         List<Artifact> deployedArtifacts = ws.act(new GenericArtifactsDeployer.FilesDeployerCallable(listener, spec,
                 server, credentials, Utils.getPropertiesMap(buildInfo, build, context), proxyConfiguration, server.getDeploymentThreads()));
@@ -60,6 +59,6 @@ public class GenericUploadExecutor implements Executor {
             throw new RuntimeException("Fail-no-op: No files were affected in the upload process.");
         }
         String moduleId = StringUtils.isNotBlank(moduleName) ? moduleName : buildInfo.getName();
-        new BuildInfoAccessor(buildInfo).appendArtifacts(deployedArtifacts, moduleId);
+       buildInfo.appendArtifacts(deployedArtifacts, moduleId);
     }
 }

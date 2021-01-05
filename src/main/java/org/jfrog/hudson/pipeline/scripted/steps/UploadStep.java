@@ -9,7 +9,6 @@ import org.jfrog.hudson.pipeline.common.executors.GenericUploadExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -66,7 +65,7 @@ public class UploadStep extends AbstractStepImpl {
             GenericUploadExecutor genericUploadExecutor = new GenericUploadExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), listener, build, ws, step.getBuildInfo(), getContext(), Util.replaceMacro(step.getSpec(), env), step.getFailNoOp(), step.module);
             genericUploadExecutor.execute();
             BuildInfo buildInfo = genericUploadExecutor.getBuildInfo();
-            new BuildInfoAccessor(buildInfo).captureVariables(env, build, listener);
+            buildInfo.captureVariables(env, build, listener);
             return buildInfo;
         }
     }

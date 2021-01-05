@@ -5,13 +5,13 @@ import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.build.api.*;
 import org.jfrog.build.api.Module;
+import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.AbstractBuildInfoDeployer;
 import org.jfrog.hudson.BuildInfoResultAction;
-import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfoAccessor;
+import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 
 import java.io.IOException;
@@ -34,38 +34,38 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
     private boolean asyncBuildRetention;
 
     public BuildInfoDeployer(ArtifactoryConfigurator configurator, ArtifactoryBuildInfoClient client,
-                             Run build, TaskListener listener, BuildInfoAccessor buildinfoAccessor) throws IOException, InterruptedException, NoSuchAlgorithmException {
+                             Run build, TaskListener listener, BuildInfo deployedBuildInfo) throws IOException, InterruptedException, NoSuchAlgorithmException {
         super(configurator, build, listener, client);
         this.configurator = configurator;
         this.build = build;
-        envVars = buildinfoAccessor.getEnvVars();
-        sysVars = buildinfoAccessor.getSysVars();
+        envVars = deployedBuildInfo.getEnvVars();
+        sysVars = deployedBuildInfo.getSysVars();
         buildInfo = createBuildInfo("Pipeline", "");
-        buildInfo.setBuildRetention(buildinfoAccessor.getRetention().createBuildRetention());
-        asyncBuildRetention = buildinfoAccessor.getRetention().isAsync();
+        buildInfo.setBuildRetention(deployedBuildInfo.getRetention().createBuildRetention());
+        asyncBuildRetention = deployedBuildInfo.getRetention().isAsync();
 
-        if (buildinfoAccessor.getStartDate() != null) {
-            buildInfo.setStartedDate(buildinfoAccessor.getStartDate());
+        if (deployedBuildInfo.getStartDate() != null) {
+            buildInfo.setStartedDate(deployedBuildInfo.getStartDate());
         }
 
-        buildInfo.setModules(new ArrayList<Module>(buildinfoAccessor.getModules()));
+        buildInfo.setModules(new ArrayList<Module>(deployedBuildInfo.getModules()));
 
-        if (StringUtils.isNotEmpty(buildinfoAccessor.getBuildName())) {
-            buildInfo.setName(buildinfoAccessor.getBuildName());
+        if (StringUtils.isNotEmpty(deployedBuildInfo.getName())) {
+            buildInfo.setName(deployedBuildInfo.getName());
         }
 
-        if (StringUtils.isNotEmpty(buildinfoAccessor.getBuildNumber())) {
-            buildInfo.setNumber(buildinfoAccessor.getBuildNumber());
+        if (StringUtils.isNotEmpty(deployedBuildInfo.getNumber())) {
+            buildInfo.setNumber(deployedBuildInfo.getNumber());
         }
 
-        if (buildinfoAccessor.getIssues() != null && !buildinfoAccessor.getIssues().isEmpty()) {
-            buildInfo.setIssues(buildinfoAccessor.getIssues());
+        if (deployedBuildInfo.getIssues() != null && !deployedBuildInfo.getConvertedIssues().isEmpty()) {
+            buildInfo.setIssues(deployedBuildInfo.getConvertedIssues());
         }
 
-        addVcsDataToBuild(build, buildinfoAccessor);
+        addVcsDataToBuild(build, deployedBuildInfo);
     }
 
-    private void addVcsDataToBuild(Run build, BuildInfoAccessor buildinfoAccessor) {
+    private void addVcsDataToBuild(Run build, BuildInfo buildinfoAccessor) {
         List<Vcs> vcsList = getVcsFromGitPlugin(build);
 
         // If collected VCS in a different flow

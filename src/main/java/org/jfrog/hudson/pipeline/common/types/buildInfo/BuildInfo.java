@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline.common.types.buildInfo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ArrayListMultimap;
+import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -13,13 +14,19 @@ import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.*;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
+import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.client.DeployableArtifactDetail;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployableArtifactsUtils;
+import org.jfrog.hudson.ArtifactoryServer;
+import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.BuildInfoDeployer;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+import org.jfrog.hudson.util.CredentialManager;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
+import org.jfrog.hudson.util.ProxyUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -228,21 +235,21 @@ public class BuildInfo implements Serializable {
         this.agentName = agentName;
     }
 
-    Map<String, String> getEnvVars() {
+    public Map<String, String> getEnvVars() {
         return env.getEnvVars();
     }
 
-    Map<String, String> getSysVars() {
+    public Map<String, String> getSysVars() {
         return env.getSysVars();
     }
 
-    org.jfrog.build.api.Issues getConvertedIssues() {
+    public org.jfrog.build.api.Issues getConvertedIssues() {
         return this.issues.convertFromPipelineIssues();
     }
 
-    BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryBuildInfoClient client)
+    public BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryBuildInfoClient client)
             throws InterruptedException, NoSuchAlgorithmException, IOException {
-        return new BuildInfoDeployer(config, client, build, listener, new BuildInfoAccessor(this));
+        return new BuildInfoDeployer(config, client, build, listener, this);
     }
 
     public void setCpsScript(CpsScript cpsScript) {
@@ -294,6 +301,51 @@ public class BuildInfo implements Serializable {
             currentModule.append(other);
         }
     }
+    public void appendDependencies(List<Dependency> dependencies, String moduleId) {
+        Module defaultModule = new ModuleBuilder()
+                .id(moduleId)
+                .dependencies(dependencies)
+                .build();
+        Module currentModule = this.getModules().stream()
+                // Check if the default module already exists.
+                .filter(module -> StringUtils.equals(module.getId(), moduleId))
+                .findAny()
+                .orElse(null);
+        if (currentModule != null) {
+            currentModule.append(defaultModule);
+        } else {
+            this.getModules().add(defaultModule);
+        }
+    }
+
+    public void appendArtifacts(List<Artifact> artifacts, String moduleId) {
+        Module defaultModule = new ModuleBuilder()
+                .id(moduleId)
+                .artifacts(artifacts)
+                .build();
+        Module currentModule = this.getModules().stream()
+                // Check if the default module already exists.
+                .filter(module -> StringUtils.equals(module.getId(), moduleId))
+                .findAny()
+                .orElse(null);
+        if (currentModule != null) {
+            currentModule.append(defaultModule);
+        } else {
+            this.getModules().add(defaultModule);
+        }
+    }
+
+    public void filterVariables() {
+        this.getEnv().filter();
+    }
+
+    public void captureVariables(EnvVars envVars, Run build, TaskListener listener)  {
+        Env env = this.getEnv();
+        if (env.isCapture()) {
+            env.collectVariables(envVars, build, listener);
+        }
+    }
+
 
     public static class DeployPathsAndPropsCallable extends MasterToSlaveFileCallable<Map<String, List<DeployDetails>>> {
         private String deployableArtifactsPath;
