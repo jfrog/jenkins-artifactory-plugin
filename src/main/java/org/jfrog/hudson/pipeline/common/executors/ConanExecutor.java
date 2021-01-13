@@ -61,8 +61,7 @@ public class ConanExecutor implements Executor {
     public void execClientInit() throws Exception {
         this.conanCmdArgs = new ArgumentListBuilder();
         conanCmdArgs.addTokenized(CONAN_CONFIG_SET_CMD);
-        // We need to add quotation marks before we save the log file path
-        conanCmdArgs.add("log.trace_file=\"" + StringUtils.trim(getLogFilePath()) + "\"");
+        conanCmdArgs.add("log.trace_file=" + StringUtils.trim(getLogFilePath()));
         execute();
     }
 
