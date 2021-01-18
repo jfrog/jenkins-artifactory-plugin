@@ -18,7 +18,7 @@ import java.util.Objects;
 
 /**
  * Created by Bar Belity on 08/07/2020.
- *
+ * <p>
  * Base class for build-info external processes.
  * Used for running build-tools extractors in a new java process.
  */
@@ -54,20 +54,26 @@ public abstract class BuildInfoProcessRunner implements Executor {
         ExtractorUtils.addVcsDetailsToEnv(new FilePath(ws, path), env, listener);
         envExtractor.execute();
         String absoluteDependencyDirPath = PluginDependencyHelper.copyExtractorJars(env, tempDir);
-        Utils.launch(taskName, launcher, getArgs(absoluteDependencyDirPath, classToExecute, tempDir), env, listener, ws);
+        FilePath javaTmpDir = new FilePath(tempDir, "javatmpdir");
+        try {
+            Utils.launch(taskName, launcher, getArgs(absoluteDependencyDirPath, classToExecute, javaTmpDir), env, listener, ws);
+        } finally {
+            if (javaTmpDir.exists()) {
+                javaTmpDir.deleteRecursive();
+            }
+        }
         String generatedBuildPath = env.get(BuildInfoFields.GENERATED_BUILD_INFO);
         buildInfo.append(Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath));
         buildInfo.setAgentName(Utils.getAgentName(ws));
     }
 
-    private ArgumentListBuilder getArgs(String absoluteDependencyDirPath, String classToExecute, FilePath tempDir) throws IOException, InterruptedException, IOException {
+    private ArgumentListBuilder getArgs(String absoluteDependencyDirPath, String classToExecute, FilePath javaTmpDir) throws InterruptedException, IOException {
         ArgumentListBuilder args = new ArgumentListBuilder();
         args.add(Utils.getJavaPathBuilder(env.get("PATH+JDK"), launcher));
         if (StringUtils.isNotBlank(javaArgs)) {
             args.add(javaArgs.split("\\s+"));
         }
-        if (!args.toList().stream().anyMatch(s -> s.contains("java.io.tmpdir"))) {
-            FilePath javaTmpDir = new FilePath(tempDir, "javatmpdir");
+        if (args.toList().stream().noneMatch(s -> s.contains("java.io.tmpdir"))) {
             if (!javaTmpDir.exists()) {
                 javaTmpDir.mkdirs();
             }
