@@ -59,6 +59,6 @@ public class GenericUploadExecutor implements Executor {
             throw new RuntimeException("Fail-no-op: No files were affected in the upload process.");
         }
         String moduleId = StringUtils.isNotBlank(moduleName) ? moduleName : buildInfo.getName();
-       buildInfo.appendArtifacts(deployedArtifacts, moduleId);
+        buildInfo.appendArtifacts(deployedArtifacts, moduleId);
     }
 }

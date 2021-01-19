@@ -301,21 +301,13 @@ public class BuildInfo implements Serializable {
             currentModule.append(other);
         }
     }
+
     public void appendDependencies(List<Dependency> dependencies, String moduleId) {
         Module defaultModule = new ModuleBuilder()
                 .id(moduleId)
                 .dependencies(dependencies)
                 .build();
-        Module currentModule = this.getModules().stream()
-                // Check if the default module already exists.
-                .filter(module -> StringUtils.equals(module.getId(), moduleId))
-                .findAny()
-                .orElse(null);
-        if (currentModule != null) {
-            currentModule.append(defaultModule);
-        } else {
-            this.getModules().add(defaultModule);
-        }
+        addDefaultModule(defaultModule, moduleId);
     }
 
     public void appendArtifacts(List<Artifact> artifacts, String moduleId) {
@@ -323,6 +315,10 @@ public class BuildInfo implements Serializable {
                 .id(moduleId)
                 .artifacts(artifacts)
                 .build();
+        addDefaultModule(defaultModule, moduleId);
+    }
+
+    private void addDefaultModule(Module defaultModule, String moduleId){
         Module currentModule = this.getModules().stream()
                 // Check if the default module already exists.
                 .filter(module -> StringUtils.equals(module.getId(), moduleId))
@@ -340,12 +336,10 @@ public class BuildInfo implements Serializable {
     }
 
     public void captureVariables(EnvVars envVars, Run build, TaskListener listener)  {
-        Env env = this.getEnv();
         if (env.isCapture()) {
             env.collectVariables(envVars, build, listener);
         }
     }
-
 
     public static class DeployPathsAndPropsCallable extends MasterToSlaveFileCallable<Map<String, List<DeployDetails>>> {
         private String deployableArtifactsPath;

@@ -65,12 +65,12 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
         addVcsDataToBuild(build, deployedBuildInfo);
     }
 
-    private void addVcsDataToBuild(Run build, BuildInfo buildinfoAccessor) {
+    private void addVcsDataToBuild(Run build, BuildInfo deployedBuildInfo) {
         List<Vcs> vcsList = getVcsFromGitPlugin(build);
 
         // If collected VCS in a different flow
-        if (CollectionUtils.isNotEmpty(buildinfoAccessor.getVcs())) {
-            vcsList.addAll(buildinfoAccessor.getVcs());
+        if (CollectionUtils.isNotEmpty(deployedBuildInfo.getVcs())) {
+            vcsList.addAll(deployedBuildInfo.getVcs());
         }
 
         // Keep only distinct values
