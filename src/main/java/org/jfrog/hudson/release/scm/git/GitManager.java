@@ -67,7 +67,7 @@ public class GitManager extends AbstractScmManager<GitSCM> {
 
         debuggingLogger.fine(String.format("Checkout Branch '%s' with create=%s", branch, create));
         if (create) {
-            client.checkoutBranch(null, branch);
+            client.checkoutBranch(branch, null);
         } else {
             client.checkout(branch);
         }
