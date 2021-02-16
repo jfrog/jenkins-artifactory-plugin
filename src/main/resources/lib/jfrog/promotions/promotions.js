@@ -15,6 +15,12 @@ function loadBuild(buildData) {
     if (!buildId) {
         displayErrorResponse(spinner, target, "Please choose a build");
     } else {
+        if (buildId === "all") {
+            showForm(false)
+            return;
+        } else {
+            showForm(true);
+        }
         res = JSON.parse(buildData);
         if (!res.success) {
             displayErrorResponse(spinner, target, res["responseMessage"]);
@@ -48,6 +54,31 @@ function loadBuild(buildData) {
         fillNonePluginFormDefaultValues(promotionConfig, selectTarget, selectSource);
         selectPlugin.onchange();
         spinner.style.display = "none";
+    }
+}
+
+function showForm(show) {
+    var elements = [
+        document.getElementById("pluginList"),
+        document.getElementById("targetStatus"),
+        document.getElementById("promotionComment"),
+        document.getElementById("targetRepositoryKey"),
+        document.getElementById("sourceRepositoryKey"),
+        document.getElementById("includeDependencies"),
+        document.getElementById("useCopy"),
+        document.getElementById("failFast")
+    ];
+
+    if (show) {
+        elements.forEach(function (value, index, array){
+            value.removeAttribute("field-disabled");
+            value.removeAttribute("disabled");
+        });
+    } else {
+        elements.forEach(function (value, index, array){
+            value.setAttribute("field-disabled", "true");
+            value.setAttribute("disabled", "true");
+        });
     }
 }
 

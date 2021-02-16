@@ -39,7 +39,9 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -309,13 +311,37 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         }
 
         String configuratorId = (String) formData.getOrDefault("promotionCandidates", "0");
-        PromotionInfo promotionCandidate = getPromotionCandidate(configuratorId);
-        BuildInfoAwareConfigurator configurator = promotionCandidate.getConfigurator();
-        ArtifactoryServer server = configurator.getArtifactoryServer();
 
-        new PromoteWorkerThread(promotionCandidate, CredentialManager.getPreferredDeployer((DeployerOverrider) configurator, server), ciUser).start();
+        //'all' is the placeholder for every build
+        if( configuratorId.equals("all") ) {
+            List<PromotionInstruction> promotionInstructions = new LinkedList<>();
+            for( PromotionInfo promotionCandidate : promotionCandidates.values() ) {
+                BuildInfoAwareConfigurator configurator = promotionCandidate.getConfigurator();
+                ArtifactoryServer server = configurator.getArtifactoryServer();
 
-        resp.sendRedirect(".");
+                promotionInstructions.add(new PromotionInstruction(
+                  promotionCandidate,
+                  CredentialManager.getPreferredDeployer((DeployerOverrider) configurator, server)
+                ));
+            }
+
+            new PromoteWorkerThread(promotionInstructions, ciUser).start();
+            resp.sendRedirect(".");
+        } else {
+            PromotionInfo promotionCandidate = getPromotionCandidate(configuratorId);
+            BuildInfoAwareConfigurator configurator = promotionCandidate.getConfigurator();
+            ArtifactoryServer server = configurator.getArtifactoryServer();
+
+            new PromoteWorkerThread(Collections.singletonList(
+              new PromotionInstruction(
+                promotionCandidate,
+                CredentialManager.getPreferredDeployer((DeployerOverrider) configurator, server)
+              )),
+              ciUser
+            ).start();
+
+            resp.sendRedirect(".");
+        }
     }
 
     private void configurePromotionPlugin(JSONObject formData, String ciUser) {
@@ -372,47 +398,69 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         return workerThread == null ? "form.jelly" : "progress.jelly";
     }
 
+    private static final class PromotionInstruction {
+        public PromotionInfo promotionCandidate;
+        public CredentialsConfig deployerConfig;
+
+        public PromotionInstruction(PromotionInfo promotionCandidate, CredentialsConfig deployerConfig)
+        {
+            this.promotionCandidate = promotionCandidate;
+            this.deployerConfig  = deployerConfig;
+        }
+    }
+
     /**
      * The thread that performs the promotion asynchronously.
      */
     public final class PromoteWorkerThread extends TaskThread {
 
-        private final PromotionInfo promotionCandidate;
-        private final CredentialsConfig deployerConfig;
+        private final List<PromotionInstruction> mPromotionInstructions;
         private final String ciUser;
 
-        PromoteWorkerThread(PromotionInfo promotionCandidate, CredentialsConfig deployerConfig, String ciUser) {
+        PromoteWorkerThread(List<PromotionInstruction> promotionInstructions, String ciUser) {
             super(UnifiedPromoteBuildAction.this, ListenerAndText.forMemory(null));
-            this.promotionCandidate = promotionCandidate;
-            this.deployerConfig = deployerConfig;
-            this.ciUser = ciUser;
+            mPromotionInstructions = promotionInstructions;
+            this.ciUser            = ciUser;
         }
 
         @Override
         protected void perform(TaskListener listener) {
             long started = System.currentTimeMillis();
-            listener.getLogger().println("Promoting build ....");
-            ArtifactoryServer server = promotionCandidate.getConfigurator().getArtifactoryServer();
-            String buildName = promotionCandidate.getBuildName();
-            String buildNumber = promotionCandidate.getBuildNumber();
-            try (ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
-                    ProxyUtils.createProxyConfiguration())) {
-                if ((promotionPlugin != null) && !UserPluginInfo.NO_PLUGIN_KEY.equals(promotionPlugin.getPluginName())) {
-                    handlePluginPromotion(listener, client, buildName, buildNumber);
-                } else {
-                    PromotionBuilder promotionBuilder = new PromotionBuilder()
-                            .status(targetStatus)
-                            .comment(comment)
-                            .ciUser(ciUser)
-                            .targetRepo(targetRepositoryKey)
-                            .sourceRepo(sourceRepositoryKey)
-                            .dependencies(includeDependencies)
-                            .copy(useCopy)
-                            .failFast(failFast);
 
-                    PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), client, listener, buildName, buildNumber);
+            for( PromotionInstruction promotionInstruction : mPromotionInstructions ) {
+                PromotionInfo promotionCandidate = promotionInstruction.promotionCandidate;
+                CredentialsConfig deployerConfig = promotionInstruction.deployerConfig;
+
+                ArtifactoryServer server = promotionCandidate.getConfigurator().getArtifactoryServer();
+                String buildName = promotionCandidate.getBuildName();
+                String buildNumber = promotionCandidate.getBuildNumber();
+
+                listener.getLogger().printf("Promoting build %s #%s....\n", buildName, buildNumber);
+
+                try (ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
+                        ProxyUtils.createProxyConfiguration())) {
+                    if ((promotionPlugin != null) && !UserPluginInfo.NO_PLUGIN_KEY.equals(promotionPlugin.getPluginName())) {
+                        handlePluginPromotion(listener, client, buildName, buildNumber);
+                    } else {
+                        PromotionBuilder promotionBuilder = new PromotionBuilder()
+                                .status(targetStatus)
+                                .comment(comment)
+                                .ciUser(ciUser)
+                                .targetRepo(targetRepositoryKey)
+                                .sourceRepo(sourceRepositoryKey)
+                                .dependencies(includeDependencies)
+                                .copy(useCopy)
+                                .failFast(failFast);
+
+                        PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), client, listener, buildName, buildNumber);
+                    }
+                } catch (Throwable e) {
+                  e.printStackTrace(listener.error(e.getMessage()));
                 }
+            }
 
+            try
+            {
                 build.save();
                 // if the client gets back to the progress (after the redirect) page when this thread already done,
                 // she will get an error message because the log dies with the thread. So lets delay up to 2 seconds
