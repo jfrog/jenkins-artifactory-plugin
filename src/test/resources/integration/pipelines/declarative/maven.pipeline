@@ -37,13 +37,17 @@ node("TestSlave") {
     stage "Copy project example"
     FileUtils.copyDirectory(Paths.get("${MAVEN_PROJECT_PATH}").toFile(), Paths.get(pwd(), "declarative-maven-example").toFile())
 
-    stage "Config Build Info"
-    rtBuildInfo(
-            buildName: buildName,
-            buildNumber: buildNumber,
-            captureEnv: true,
-            excludeEnvPatterns: ["DONT_COLLECT"]
-    )
+
+    // Should still locate the build info for this run
+    dir('inner') {
+        stage "Config Build Info"
+        rtBuildInfo(
+                buildName: buildName,
+                buildNumber: buildNumber,
+                captureEnv: true,
+                excludeEnvPatterns: ["DONT_COLLECT"]
+        )
+    }
 
     stage "Run maven"
     rtMavenRun(
