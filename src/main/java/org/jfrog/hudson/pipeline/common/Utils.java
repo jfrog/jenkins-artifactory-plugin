@@ -83,21 +83,29 @@ public class Utils {
         return ObjectUtils.defaultIfNull(ws, cwd);
     }
 
+    /**
+     * Walk all flow nodes and find the top most workspace action. This
+     * action would represent the root workspace for the workflow run.
+     *
+     * @param execution the execution of the workflow run.
+     * @return the root workspace from the flow node tree, or null if none exist.
+     */
     private static FilePath extractRootWorkspaceFromFlow(FlowExecution execution) {
         if (execution == null) {
             return null;
         }
         FlowGraphWalker flowWalker = new FlowGraphWalker(execution);
+        FilePath rootPath = null;
         for (FlowNode node : flowWalker) {
             WorkspaceAction workspaceAction = node.getAction(WorkspaceAction.class);
             if (workspaceAction != null) {
                 FilePath rootWorkspace = workspaceAction.getWorkspace();
                 if (rootWorkspace != null) {
-                    return rootWorkspace;
+                    rootPath = rootWorkspace;
                 }
             }
         }
-        return null;
+        return rootPath;
     }
 
     /**
