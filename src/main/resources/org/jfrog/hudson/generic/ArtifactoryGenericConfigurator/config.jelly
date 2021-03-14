@@ -233,7 +233,6 @@
                             </f:entry>
                         </r:blockWrapper>
                         <st:adjunct includes="lib.jfrog.repos.repos"/>
-                        <st:adjunct includes="lib.jfrog.repos.genericConfig"/>
                     </f:block>
                 </j:otherwise>
             </j:choose>
