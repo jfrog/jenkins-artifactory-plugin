@@ -227,6 +227,14 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void uploadWithPropsTest() throws Exception {
+        Set<String> uploadFiles = Sets.newHashSet("a.in", "b.in", "c.in");
+        WorkflowRun build = runPipeline("uploadWithProps", false);
+        for (String fileName : uploadFiles) {
+            assertTrue(fileName + " doesn't exist locally", isExistInWorkspace(slave, build, "UploadWithProps-test", fileName));
+        }
+    }
+
     void promotionTest(String buildName) throws Exception {
         Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
         String buildNumber = "4";

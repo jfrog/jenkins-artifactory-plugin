@@ -1,0 +1,36 @@
+package integration.pipelines.scripted
+
+node("TestSlave") {
+    stage "Configuration"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:upload with props test"
+    buildInfo.number = "3"
+
+    stage "Upload"
+    // Upload all files in 'files' folder with props
+    def uploadSpec = """{
+      "files": [
+        {
+          "pattern": "${FILES_DIR}",
+          "target": "${LOCAL_REPO1}/",
+          "props": "system-api=https://jfrog.com;version=99.0.3.2;state=incremental;package=mccApp",
+          "recursive": "false"
+        }
+     ]
+    }"""
+    rtServer.upload spec: uploadSpec, buildInfo: buildInfo
+
+    stage "Download"
+    // Download only files with the new property
+    def downloadSpec = """{
+      "files": [
+        {
+          "pattern": "${LOCAL_REPO1}/*",
+          "target": "UploadWithProps-test/",
+          "props": "system-api=https://jfrog.com;version=99.0.3.2;state=incremental;package=mccApp"
+        }
+     ]
+    }"""
+    rtServer.download spec: downloadSpec, buildInfo: buildInfo
+}

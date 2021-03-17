@@ -52,6 +52,11 @@ public class DeclarativeITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void uploadWithPropsTest() throws Exception {
+        super.uploadWithPropsTest();
+    }
+
+    @Test
     public void uploadDownloadCustomModuleNameTest() throws Exception {
         super.uploadDownloadCustomModuleNameTest("declarative:uploadDownloadCustomModuleName test");
     }

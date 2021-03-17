@@ -52,6 +52,11 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void uploadWithPropsTest() throws Exception {
+        super.uploadWithPropsTest();
+    }
+
+    @Test
     public void uploadDownloadCustomModuleNameTest() throws Exception {
         super.uploadDownloadCustomModuleNameTest("scripted:uploadDownloadCustomModuleName test");
     }
