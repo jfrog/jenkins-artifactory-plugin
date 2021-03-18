@@ -39,6 +39,7 @@ before_test:
   - cmd: refreshenv
   - cmd: pip install conan -q
   - cmd: "C:\\Python37-x64\\python -m venv pip-venv"
+  - cmd: "go version"
   - sh: sudo pip install conan -q
   - sh: curl -s "https://get.sdkman.io" | bash
   - sh: source "/home/appveyor/.sdkman/bin/sdkman-init.sh"
@@ -49,6 +50,7 @@ before_test:
   - sh: source /home/appveyor/projects/jenkins-artifactory-plugin/pip-venv/bin/activate
   - sh: touch tests.log
   - sh: tail -f tests.log &
+  - sh: "go version"
 
 test_script:
   - mvn -V -B -U clean verify -DskipITs=false -Djna.nosys=true
