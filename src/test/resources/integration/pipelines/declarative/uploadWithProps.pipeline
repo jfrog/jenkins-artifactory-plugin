@@ -32,7 +32,7 @@ node("TestSlave") {
     )
 
     stage "Download"
-    // Download only files with the new property
+    // Download only files with props.
     rtDownload(
             serverId: serverId,
             buildName: buildName,
@@ -41,7 +41,7 @@ node("TestSlave") {
               "files": [
                 {
                   "pattern": "${LOCAL_REPO1}/*",
-                  "target": "setProps-test/",
+                  "target": "UploadWithProps-test/",
                   "props": "system-api=https://jfrog.com;version=99.0.3.2;state=incremental;package=mccApp"
                 }
              ]
