@@ -22,7 +22,7 @@ node("TestSlave") {
     rtServer.upload spec: uploadSpec, buildInfo: buildInfo
 
     stage "Download"
-    // Download only files with the new property
+    // Download only files with props.
     def downloadSpec = """{
       "files": [
         {
