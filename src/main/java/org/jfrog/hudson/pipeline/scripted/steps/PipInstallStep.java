@@ -5,6 +5,7 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.PipInstallExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -17,7 +18,7 @@ import java.io.IOException;
  * Created by Bar Belity on 07/07/2020.
  */
 public class PipInstallStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "artifactoryPipRun";
     private BuildInfo buildInfo;
     private PipBuild pipBuild;
     private String javaArgs;
@@ -51,6 +52,16 @@ public class PipInstallStep extends AbstractStepImpl {
             pipInstallExecutor.execute();
             return pipInstallExecutor.getBuildInfo();
         }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return step.pipBuild.getResolver().getArtifactoryServer();
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -62,7 +73,7 @@ public class PipInstallStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "artifactoryPipRun";
+            return STEP_NAME;
         }
 
         @Override

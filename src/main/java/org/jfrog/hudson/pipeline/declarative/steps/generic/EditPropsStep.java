@@ -66,6 +66,10 @@ public class EditPropsStep extends AbstractStepImpl {
             this.step = step;
         }
 
+        public ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(step.serverId, null);
+        }
+
         void editPropsRun() throws IOException, InterruptedException {
             // Set Artifactory server
             org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils

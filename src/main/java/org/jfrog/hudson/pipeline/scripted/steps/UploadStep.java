@@ -4,17 +4,17 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.Util;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.GenericUploadExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 
 public class UploadStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "artifactoryUpload";
     private BuildInfo buildInfo;
     private String spec;
     private ArtifactoryServer server;
@@ -68,6 +68,17 @@ public class UploadStep extends AbstractStepImpl {
             buildInfo.captureVariables(env, build, listener);
             return buildInfo;
         }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(null, step.getServer());
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
+
     }
 
     @Extension
@@ -80,7 +91,7 @@ public class UploadStep extends AbstractStepImpl {
         @Override
         // The step is invoked by ArtifactoryServer by the step name
         public String getFunctionName() {
-            return "artifactoryUpload";
+            return STEP_NAME;
         }
 
         @Override

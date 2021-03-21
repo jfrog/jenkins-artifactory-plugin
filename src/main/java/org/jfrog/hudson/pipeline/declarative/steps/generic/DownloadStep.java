@@ -14,6 +14,7 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class DownloadStep extends GenericStep {
+    static final String STEP_NAME = "rtDownload";
 
     @DataBoundConstructor
     public DownloadStep(String serverId) {
@@ -37,6 +38,11 @@ public class DownloadStep extends GenericStep {
             DeclarativePipelineUtils.saveBuildInfo(buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -48,7 +54,7 @@ public class DownloadStep extends GenericStep {
 
         @Override
         public String getFunctionName() {
-            return "rtDownload";
+            return STEP_NAME;
         }
 
         @Override

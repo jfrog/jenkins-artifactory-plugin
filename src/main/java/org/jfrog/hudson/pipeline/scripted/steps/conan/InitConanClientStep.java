@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import hudson.FilePath;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
@@ -13,7 +14,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 
 public class InitConanClientStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "initConanClient";
     private ConanClient client;
 
     @DataBoundConstructor
@@ -44,6 +45,16 @@ public class InitConanClientStep extends AbstractStepImpl {
             return true;
         }
 
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
+
         private ConanClient getConanClient() throws Exception {
             ConanClient conanClient = step.getClient();
             conanClient.setUnixAgent(launcher.isUnix());
@@ -62,7 +73,7 @@ public class InitConanClientStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "initConanClient";
+            return STEP_NAME;
         }
 
         @Override

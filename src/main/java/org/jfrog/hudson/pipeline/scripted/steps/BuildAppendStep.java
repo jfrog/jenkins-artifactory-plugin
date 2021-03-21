@@ -6,6 +6,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.BuildAppendExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -14,7 +15,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 
 public class BuildAppendStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "buildAppend";
     private final String buildNumber;
     private final String buildName;
     private final ArtifactoryServer server;
@@ -51,6 +52,16 @@ public class BuildAppendStep extends AbstractStepImpl {
             new BuildAppendExecutor(step.server, step.buildInfo, step.buildName, step.buildNumber, build, listener).execute();
             return null;
         }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(null, step.getServer());
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -63,7 +74,7 @@ public class BuildAppendStep extends AbstractStepImpl {
         @Override
         // The step is invoked by ArtifactoryServer by the step name
         public String getFunctionName() {
-            return "buildAppend";
+            return STEP_NAME;
         }
 
         @Override

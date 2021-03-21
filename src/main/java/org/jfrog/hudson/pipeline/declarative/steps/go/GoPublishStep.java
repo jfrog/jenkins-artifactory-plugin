@@ -29,7 +29,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("unused")
 public class GoPublishStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "rtGoPublish";
     private final GoBuild goBuild;
     private String customBuildNumber;
     private String customBuildName;
@@ -93,15 +93,31 @@ public class GoPublishStep extends AbstractStepImpl {
             return null;
         }
 
-        private void setDeployer(String buildNumber) throws IOException, InterruptedException {
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            CommonDeployer resolver = getDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
+            return resolver.getArtifactoryServer();
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
+
+        private CommonDeployer getDeployer(String buildNumber) throws IOException, InterruptedException {
             if (StringUtils.isBlank(step.deployerId)) {
-                return;
+                return null;
             }
             BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, GoDeployerStep.STEP_NAME, step.deployerId);
             if (buildDataFile == null) {
                 throw new IOException("Deployer " + step.deployerId + " doesn't exist!");
             }
-            CommonDeployer deployer = SerializationUtils.createMapper().treeToValue(buildDataFile.get(GoDeployerStep.STEP_NAME), CommonDeployer.class);
+            return SerializationUtils.createMapper().treeToValue(buildDataFile.get(GoDeployerStep.STEP_NAME), CommonDeployer.class);
+        }
+
+        private void setDeployer(String buildNumber) throws IOException, InterruptedException {
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, GoDeployerStep.STEP_NAME, step.deployerId);
+            CommonDeployer deployer = getDeployer(buildNumber);
             deployer.setServer(getArtifactoryServer(buildNumber, buildDataFile));
             step.goBuild.setDeployer(deployer);
             addProperties(buildDataFile);
@@ -132,7 +148,7 @@ public class GoPublishStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "rtGoPublish";
+            return STEP_NAME;
         }
 
         @Override

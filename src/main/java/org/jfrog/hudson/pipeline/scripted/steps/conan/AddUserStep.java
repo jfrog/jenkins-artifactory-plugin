@@ -17,6 +17,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 
 public class AddUserStep extends AbstractStepImpl {
+    static final String STEP_NAME = "conanAddUser";
     private ArtifactoryServer server;
     private String serverName;
     private String conanHome;
@@ -62,6 +63,16 @@ public class AddUserStep extends AbstractStepImpl {
             executor.execUserAdd(username, password, serverName);
             return true;
         }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(null, step.getServer());
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -73,7 +84,7 @@ public class AddUserStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "conanAddUser";
+            return STEP_NAME;
         }
 
         @Override

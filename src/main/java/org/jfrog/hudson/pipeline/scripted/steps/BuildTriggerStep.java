@@ -6,6 +6,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.BuildTriggerExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -17,7 +18,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("unused")
 public class BuildTriggerStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "artifactoryBuildTrigger";
     private final ArtifactoryServer server;
     private final String paths;
     private final String spec;
@@ -44,6 +45,16 @@ public class BuildTriggerStep extends AbstractStepImpl {
             new BuildTriggerExecutor(build, listener, step.server, step.paths, step.spec).execute();
             return null;
         }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(null, step.server);
+        }
+
+        @Override
+        public String getStepName() {
+            return null;
+        }
     }
 
     @Extension
@@ -55,7 +66,7 @@ public class BuildTriggerStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "artifactoryBuildTrigger";
+            return STEP_NAME;
         }
 
         @Override

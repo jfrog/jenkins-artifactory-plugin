@@ -3,10 +3,10 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -18,6 +18,7 @@ import java.io.IOException;
  */
 
 public class AddInteractivePromotionStep extends AbstractStepImpl {
+    static final String STEP_NAME = "addInteractivePromotion";
     private ArtifactoryServer server;
     private PromotionConfig promotionConfig;
     private String displayName;
@@ -58,6 +59,16 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
             return true;
         }
 
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(null, step.getServer());
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
+
         private void addPromotionAction(ArtifactoryConfigurator configurator) {
             PromotionConfig pipelinePromotionConfig = step.getPromotionConfig();
             org.jfrog.hudson.release.promotion.PromotionConfig promotionConfig = Utils.convertPromotionConfig(pipelinePromotionConfig);
@@ -82,7 +93,7 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "addInteractivePromotion";
+            return STEP_NAME;
         }
 
         @Override

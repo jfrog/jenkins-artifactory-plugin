@@ -10,7 +10,6 @@ import java.util.List;
 
 @SuppressWarnings("unused")
 public class GradleDeployerStep extends GradleDeployerResolver {
-
     static final String STEP_NAME = "rtGradleDeployer";
     private GradleDeployer gradleDeployer;
 

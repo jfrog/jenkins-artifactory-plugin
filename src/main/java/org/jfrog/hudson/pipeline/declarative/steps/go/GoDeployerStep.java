@@ -10,7 +10,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.util.List;
 
 public class GoDeployerStep extends DeployerResolverBase {
-
     static final String STEP_NAME = "rtGoDeployer";
     private CommonDeployer goDeployer;
 

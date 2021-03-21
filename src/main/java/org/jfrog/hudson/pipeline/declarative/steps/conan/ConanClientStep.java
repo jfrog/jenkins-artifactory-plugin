@@ -6,6 +6,7 @@ import hudson.FilePath;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
@@ -19,7 +20,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.io.IOException;
 
 public class ConanClientStep extends AbstractStepImpl {
-
     static final String STEP_NAME = "rtConanClient";
     private final BuildDataFile buildDataFile;
     private String userHome;
@@ -54,6 +54,16 @@ public class ConanClientStep extends AbstractStepImpl {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             DeclarativePipelineUtils.writeBuildDataFile(rootWs, buildNumber, step.buildDataFile, new JenkinsBuildInfoLog(listener));
             return null;
+        }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
     }
 

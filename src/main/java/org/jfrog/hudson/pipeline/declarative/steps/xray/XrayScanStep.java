@@ -8,6 +8,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.XrayExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
@@ -81,6 +82,17 @@ public class XrayScanStep extends AbstractStepImpl {
             XrayExecutor xrayExecutor = new XrayExecutor(xrayScanConfig, listener, server, build);
             xrayExecutor.execute();
             return null;
+        }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
+            return Utils.prepareArtifactoryServer(null, server);
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
     }
 

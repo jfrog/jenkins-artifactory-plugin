@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.executors.GoRunExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -13,7 +14,7 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class GoRunStep extends AbstractStepImpl {
-
+    static final String  STEP_NAME = "artifactoryGoRun";
     private BuildInfo buildInfo;
     private GoBuild goBuild;
     private String path;
@@ -45,6 +46,16 @@ public class GoRunStep extends AbstractStepImpl {
             goRunExecutor.execute();
             return goRunExecutor.getBuildInfo();
         }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return step.goBuild.getResolver().getArtifactoryServer();
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -56,7 +67,7 @@ public class GoRunStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "artifactoryGoRun";
+            return STEP_NAME;
         }
 
         @Override

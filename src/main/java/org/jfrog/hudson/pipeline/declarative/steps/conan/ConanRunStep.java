@@ -5,6 +5,7 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
 import org.jfrog.hudson.pipeline.common.types.ConanClient;
@@ -18,7 +19,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.io.IOException;
 
 public class ConanRunStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "rtConanRun";
     private final String clientId;
     private final String command;
     private String customBuildNumber;
@@ -69,6 +70,16 @@ public class ConanRunStep extends AbstractStepImpl {
             return null;
         }
 
+        @Override
+        public ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
+
     }
 
     @Extension
@@ -80,7 +91,7 @@ public class ConanRunStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "rtConanRun";
+            return STEP_NAME;
         }
 
         @Override

@@ -14,6 +14,7 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class UploadStep extends GenericStep {
+    static final String STEP_NAME = "rtUpload";
 
     @DataBoundConstructor
     public UploadStep(String serverId) {
@@ -25,6 +26,10 @@ public class UploadStep extends GenericStep {
         @Inject
         public Execution(GenericStep step, StepContext context) throws IOException, InterruptedException {
             super(step, context);
+        }
+
+        public String getStepName() {
+            return STEP_NAME;
         }
 
         @Override
@@ -48,7 +53,7 @@ public class UploadStep extends GenericStep {
 
         @Override
         public String getFunctionName() {
-            return "rtUpload";
+            return STEP_NAME;
         }
 
         @Override

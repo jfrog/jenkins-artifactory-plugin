@@ -5,6 +5,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class NugetRunStep extends NugetRunStepBase {
+    static final String STEP_NAME = "rtNugetRun";
 
     @DataBoundConstructor
     public NugetRunStep() {
@@ -13,6 +14,11 @@ public class NugetRunStep extends NugetRunStepBase {
 
     public String getResolverStepName() {
         return NugetResolverStep.STEP_NAME;
+    }
+
+    @Override
+    public String getStepName() {
+        return STEP_NAME;
     }
 
     @Extension
@@ -24,7 +30,7 @@ public class NugetRunStep extends NugetRunStepBase {
 
         @Override
         public String getFunctionName() {
-            return "rtNugetRun";
+            return STEP_NAME;
         }
 
         @Override

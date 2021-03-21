@@ -18,7 +18,6 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class InteractivePromotionStep extends PromoteBuildStep {
-
     public static final String STEP_NAME = "rtAddInteractivePromotion";
     private String displayName;
 
@@ -53,6 +52,17 @@ public class InteractivePromotionStep extends PromoteBuildStep {
             ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(Utils.prepareArtifactoryServer(null, server));
             addPromotionAction(configurator);
             return true;
+        }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws Exception {
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
+            return Utils.prepareArtifactoryServer(null, server);
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
 
         private void addPromotionAction(ArtifactoryConfigurator configurator) {

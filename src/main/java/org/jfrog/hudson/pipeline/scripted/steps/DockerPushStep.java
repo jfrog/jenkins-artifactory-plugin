@@ -18,7 +18,7 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class DockerPushStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "dockerPushStep";
     private final String image;
     private final ArtifactoryServer server;
     private String host;
@@ -87,11 +87,19 @@ public class DockerPushStep extends AbstractStepImpl {
                 return null;
             }
             BuildInfo buildInfo = Utils.prepareBuildinfo(build, step.getBuildInfo());
-
-            ArtifactoryServer server = step.getServer();
-            DockerPushExecutor dockerExecutor = new DockerPushExecutor(server, buildInfo, build, step.image, step.targetRepo, step.host, step.javaArgs, launcher, step.properties, listener, ws, env);
+            DockerPushExecutor dockerExecutor = new DockerPushExecutor(step.getServer(), buildInfo, build, step.image, step.targetRepo, step.host, step.javaArgs, launcher, step.properties, listener, ws, env);
             dockerExecutor.execute();
             return dockerExecutor.getBuildInfo();
+        }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(null, step.getServer());
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
     }
 
@@ -104,7 +112,7 @@ public class DockerPushStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "dockerPushStep";
+            return STEP_NAME;
         }
 
         @Override

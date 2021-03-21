@@ -12,6 +12,7 @@ import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesH
 
 @SuppressWarnings("unused")
 public class SetPropsStep extends EditPropsStep {
+    static final String STEP_NAME = "rtSetProps";
 
     @DataBoundConstructor
     public SetPropsStep(String serverId) {
@@ -30,6 +31,11 @@ public class SetPropsStep extends EditPropsStep {
             super.editPropsRun();
             return null;
         }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -41,7 +47,7 @@ public class SetPropsStep extends EditPropsStep {
 
         @Override
         public String getFunctionName() {
-            return "rtSetProps";
+            return STEP_NAME;
         }
 
         @Override

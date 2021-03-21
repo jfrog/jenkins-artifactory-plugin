@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.scripted.steps.conan;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.executors.ConanExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -11,6 +12,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 
 public class RunCommandStep extends AbstractStepImpl {
+    static final String STEP_NAME = "runConanCommand";
     private String command;
     private String conanHome;
     private BuildInfo buildInfo;
@@ -50,6 +52,16 @@ public class RunCommandStep extends AbstractStepImpl {
             conanExecutor.execCommand(step.getCommand());
             return conanExecutor.getBuildInfo();
         }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -61,7 +73,7 @@ public class RunCommandStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "runConanCommand";
+            return STEP_NAME;
         }
 
         @Override

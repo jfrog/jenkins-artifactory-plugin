@@ -14,7 +14,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 
 public class DownloadStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "artifactoryDownload";
     private BuildInfo buildInfo;
     private boolean failNoOp;
     private String spec;
@@ -69,6 +69,16 @@ public class DownloadStep extends AbstractStepImpl {
             buildInfo.captureVariables(env, build, listener);
             return buildInfo;
         }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(null, step.getServer());
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -81,7 +91,7 @@ public class DownloadStep extends AbstractStepImpl {
         @Override
         // The step is invoked by ArtifactoryServer by the step name
         public String getFunctionName() {
-            return "artifactoryDownload";
+            return STEP_NAME;
         }
 
         @Override

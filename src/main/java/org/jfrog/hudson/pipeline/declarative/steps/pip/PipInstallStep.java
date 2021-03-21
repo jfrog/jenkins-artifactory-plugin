@@ -27,7 +27,7 @@ import java.io.IOException;
  * Created by Bar Belity on 08/07/2020.
  */
 public class PipInstallStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "rtPipInstall";
     private final PipBuild pipBuild;
     private String customBuildNumber;
     private String customBuildName;
@@ -90,16 +90,28 @@ public class PipInstallStep extends AbstractStepImpl {
         @Override
         protected Void runStep() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
-            setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
+            CommonResolver resolver = getResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
+            step.pipBuild.setResolver(resolver);
             PipInstallExecutor pipInstallExecutor = new PipInstallExecutor(buildInfo, launcher, step.pipBuild, step.javaArgs, step.args, ws, step.envActivation, step.module, env, listener, build);
             pipInstallExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(pipInstallExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
 
-        private void setResolver(String buildNumber) throws IOException, InterruptedException {
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            CommonResolver resolver = getResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
+            return resolver.getArtifactoryServer();
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
+
+        private CommonResolver getResolver(String buildNumber) throws IOException, InterruptedException {
             if (StringUtils.isBlank(step.resolverId)) {
-                return;
+                return null;
             }
             BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, PipResolverStep.STEP_NAME, step.resolverId);
             if (buildDataFile == null) {
@@ -107,7 +119,7 @@ public class PipInstallStep extends AbstractStepImpl {
             }
             CommonResolver resolver = SerializationUtils.createMapper().treeToValue(buildDataFile.get(PipResolverStep.STEP_NAME), CommonResolver.class);
             resolver.setServer(getArtifactoryServer(buildDataFile));
-            step.pipBuild.setResolver(resolver);
+            return resolver;
         }
 
         private ArtifactoryServer getArtifactoryServer(BuildDataFile buildDataFile) throws IOException, InterruptedException {

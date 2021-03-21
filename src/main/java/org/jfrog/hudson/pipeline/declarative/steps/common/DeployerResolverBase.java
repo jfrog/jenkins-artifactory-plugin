@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.declarative.steps.common;
 import com.google.inject.Inject;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -49,5 +50,16 @@ public class DeployerResolverBase extends AbstractStepImpl {
             writeBuildDataFile(rootWs, buildNumber, step.buildDataFile, new JenkinsBuildInfoLog(listener));
             return null;
         }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
+            return null;
+        }
+
     }
 }

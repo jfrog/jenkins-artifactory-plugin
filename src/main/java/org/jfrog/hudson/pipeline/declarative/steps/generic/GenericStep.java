@@ -77,6 +77,11 @@ public class GenericStep extends AbstractStepImpl {
             this.step = step;
         }
 
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
+            return Utils.prepareArtifactoryServer(null, pipelineServer);
+        }
+
         void setGenericParameters(GenericStep step, StepContext context) throws IOException, InterruptedException {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
 
@@ -88,8 +93,7 @@ public class GenericStep extends AbstractStepImpl {
             buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
 
             // Set Artifactory server
-            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
-            artifactoryServer = Utils.prepareArtifactoryServer(null, pipelineServer);
+            artifactoryServer = getArtifactoryServer();
         }
     }
 }

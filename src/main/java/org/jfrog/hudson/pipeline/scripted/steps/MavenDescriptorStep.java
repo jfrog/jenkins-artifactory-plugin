@@ -11,6 +11,7 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.build.extractor.maven.reader.ModuleName;
 import org.jfrog.build.extractor.maven.transformer.PomTransformer;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -25,6 +26,7 @@ import java.util.Map;
  * Created by tamirh on 20/11/2016.
  */
 public class MavenDescriptorStep extends AbstractStepImpl {
+    static final String STEP_NAME = "MavenDescriptorStep";
     private String pomFile = "pom.xml";
     private String version = "";
     private Map<String, String> versionPerModule = new HashedMap();
@@ -90,6 +92,16 @@ public class MavenDescriptorStep extends AbstractStepImpl {
                 }
             });
             return call;
+        }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
 
         public boolean transformPoms() {
@@ -187,7 +199,7 @@ public class MavenDescriptorStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "MavenDescriptorStep";
+            return STEP_NAME;
         }
 
         @Override

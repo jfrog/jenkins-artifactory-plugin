@@ -3,10 +3,12 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.executors.GradleExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GradleBuild;
+import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -15,7 +17,7 @@ import java.io.IOException;
  * Created by Tamirh on 04/08/2016.
  */
 public class ArtifactoryGradleBuild extends AbstractStepImpl {
-
+    static final String STEP_NAME = "ArtifactoryGradleBuild";
     private GradleBuild gradleBuild;
     private String tasks;
     private String buildFile;
@@ -73,6 +75,20 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
             gradleExecutor.execute();
             return gradleExecutor.getBuildInfo();
         }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+                Resolver resolver = step.gradleBuild.getResolver();
+                if(resolver != null) {
+                    return resolver.getArtifactoryServer();
+                }
+                return step.gradleBuild.getDeployer().getArtifactoryServer();
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -84,7 +100,7 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "ArtifactoryGradleBuild";
+            return STEP_NAME;
         }
 
         @Override

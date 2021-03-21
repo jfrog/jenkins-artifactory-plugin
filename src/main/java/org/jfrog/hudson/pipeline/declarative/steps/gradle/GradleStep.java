@@ -14,6 +14,8 @@ import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GradleBuild;
 import org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.GradleResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.MavenResolver;
+import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -31,7 +33,7 @@ import static org.jfrog.hudson.util.SerializationUtils.createMapper;
  */
 @SuppressWarnings("unused")
 public class GradleStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "rtGradleRun";
     private final GradleBuild gradleBuild;
     private String customBuildNumber;
     private String customBuildName;
@@ -123,6 +125,19 @@ public class GradleStep extends AbstractStepImpl {
             return null;
         }
 
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            Resolver resolver = step.gradleBuild.getResolver();
+            if (resolver != null) {
+                return resolver.getArtifactoryServer();
+            }
+            return step.gradleBuild.getDeployer().getArtifactoryServer();        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
+
         private void setGradleBuild() throws IOException, InterruptedException {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             setDeployer(buildNumber);
@@ -181,7 +196,7 @@ public class GradleStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "rtGradleRun";
+            return STEP_NAME;
         }
 
         @Override

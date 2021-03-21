@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -23,7 +24,6 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class BuildInfoStep extends AbstractStepImpl {
-
     public static final String STEP_NAME = "rtBuildInfo";
     private final BuildInfo buildInfo;
 
@@ -107,6 +107,16 @@ public class BuildInfoStep extends AbstractStepImpl {
             step.buildInfo.append(currentBuildInfo);
             DeclarativePipelineUtils.saveBuildInfo(step.buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
+        }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() throws Exception {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
     }
 

@@ -21,7 +21,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.io.IOException;
 
 public class ConanRemoteStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "rtConanRemote";
     private final String clientId;
     private final String name;
     private final String serverId;
@@ -95,6 +95,17 @@ public class ConanRemoteStep extends AbstractStepImpl {
             conanExecutor.execUserAdd(username, password, step.getName());
             return null;
         }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
+            return Utils.prepareArtifactoryServer(null, server);
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -106,7 +117,7 @@ public class ConanRemoteStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "rtConanRemote";
+            return STEP_NAME;
         }
 
         @Override

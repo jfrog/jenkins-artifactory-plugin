@@ -5,6 +5,7 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.CollectEnvExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.Env;
@@ -16,7 +17,7 @@ import java.io.IOException;
  * Created by romang on 5/2/16.
  */
 public class CollectEnvStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "collectEnv";
     private Env env;
 
     @DataBoundConstructor
@@ -44,6 +45,16 @@ public class CollectEnvStep extends AbstractStepImpl {
             collectEnvExecutor.execute();
             return null;
         }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -55,7 +66,7 @@ public class CollectEnvStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "collectEnv";
+            return STEP_NAME;
         }
 
         @Override

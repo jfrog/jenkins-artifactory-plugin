@@ -6,7 +6,9 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.DockerPushExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -22,7 +24,7 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class DockerPushStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "rtDockerPush";
     private final ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
     private final String serverId;
     private final String image;
@@ -91,6 +93,16 @@ public class DockerPushStep extends AbstractStepImpl {
             DeclarativePipelineUtils.saveBuildInfo(dockerExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(step.serverId, null);
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -102,7 +114,7 @@ public class DockerPushStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "rtDockerPush";
+            return STEP_NAME;
         }
 
         @Override

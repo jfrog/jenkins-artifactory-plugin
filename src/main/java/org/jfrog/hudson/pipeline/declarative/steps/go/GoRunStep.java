@@ -29,7 +29,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("unused")
 public class GoRunStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "rtGoRun";
     private final GoBuild goBuild;
     private String customBuildNumber;
     private String customBuildName;
@@ -93,15 +93,31 @@ public class GoRunStep extends AbstractStepImpl {
             return null;
         }
 
-        private void setResolver(String buildNumber) throws IOException, InterruptedException {
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            CommonResolver resolver = getResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
+            return resolver.getArtifactoryServer();
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
+
+        private CommonResolver getResolver(String buildNumber) throws IOException, InterruptedException {
             if (StringUtils.isBlank(step.resolverId)) {
-                return;
+                return null;
             }
             BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, GoResolverStep.STEP_NAME, step.resolverId);
             if (buildDataFile == null) {
                 throw new IOException("Resolver " + step.resolverId + " doesn't exist!");
             }
-            CommonResolver resolver = SerializationUtils.createMapper().treeToValue(buildDataFile.get(GoResolverStep.STEP_NAME), CommonResolver.class);
+            return SerializationUtils.createMapper().treeToValue(buildDataFile.get(GoResolverStep.STEP_NAME), CommonResolver.class);
+        }
+
+        private void setResolver(String buildNumber) throws IOException, InterruptedException {
+            BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, GoResolverStep.STEP_NAME, step.resolverId);
+            CommonResolver resolver = getResolver(buildNumber);
             resolver.setServer(getArtifactoryServer(buildDataFile));
             step.goBuild.setResolver(resolver);
             addProperties(buildDataFile);
@@ -132,7 +148,7 @@ public class GoRunStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "rtGoRun";
+            return STEP_NAME;
         }
 
         @Override

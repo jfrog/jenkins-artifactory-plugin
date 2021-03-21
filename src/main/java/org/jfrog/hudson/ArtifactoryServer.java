@@ -21,6 +21,7 @@ import hudson.model.Item;
 import hudson.model.TaskListener;
 import hudson.util.XStream2;
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryHttpClient;
@@ -31,6 +32,8 @@ import org.jfrog.build.extractor.clientConfiguration.ArtifactoryDependenciesClie
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBaseClient;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.usageReport.UsageReporter;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.util.CredentialManager;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -399,6 +402,22 @@ public class ArtifactoryServer implements Serializable {
     public static final class ConverterImpl extends ArtifactoryServerConverter {
         public ConverterImpl(XStream2 xstream) {
             super(xstream);
+        }
+    }
+
+    public void reportUsage(String stepName, WorkflowRun build, Log logger) {
+        try {
+            CredentialsConfig config = this.getDeployerCredentialsConfig();
+            if (config == null) {
+                config = this.getDeployerCredentialsConfig();
+            }
+            Credentials credentials = config.provideCredentials(build.getParent());
+            String[] featureIdArray = new String[]{stepName};
+            UsageReporter usageReporter = new UsageReporter("jenkins-artifactory-plugin/", featureIdArray);
+            usageReporter.reportUsage(this.getArtifactoryUrl(), credentials.getUsername(), credentials.getPassword(), "", Utils.getProxyConfiguration(this), logger);
+            logger.debug("Usage info sent successfully.");
+        } catch (Exception ex) {
+            logger.debug("Failed sending usage report to Artifactory: " + ex);
         }
     }
 }

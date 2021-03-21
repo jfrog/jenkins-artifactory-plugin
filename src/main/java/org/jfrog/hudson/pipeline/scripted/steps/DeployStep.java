@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
@@ -14,7 +15,7 @@ import java.io.IOException;
  * Created by yahavi on 11/05/2017.
  */
 public class DeployStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "deployArtifacts";
     private Deployer deployer;
     private BuildInfo buildInfo;
 
@@ -39,6 +40,19 @@ public class DeployStep extends AbstractStepImpl {
             step.deployer.deployArtifacts(step.buildInfo, listener, ws, build);
             return true;
         }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return step.deployer.getArtifactoryServer();
+        }
+
+        @Override
+        /**
+         * Returns the name of the step and the tool that is using the deploy e.g. maven or gradle.
+         */
+        public String getStepName() {
+            return STEP_NAME + " " + step.deployer.getClass().getSimpleName();
+        }
     }
 
     @Extension
@@ -50,7 +64,7 @@ public class DeployStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "deployArtifacts";
+            return STEP_NAME;
         }
 
         @Override

@@ -11,10 +11,16 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 @SuppressWarnings("unused")
 public class NpmInstallStep extends NpmInstallCiStepBase {
+    static final String STEP_NAME = "artifactoryNpmInstall";
 
     @DataBoundConstructor
     public NpmInstallStep(BuildInfo buildInfo, NpmBuild npmBuild, String javaArgs, String path, String args, String module) {
         super(buildInfo, npmBuild, javaArgs, path, args, module, false);
+    }
+
+    @Override
+    public String getStepName() {
+        return STEP_NAME;
     }
 
     @Extension
@@ -26,7 +32,7 @@ public class NpmInstallStep extends NpmInstallCiStepBase {
 
         @Override
         public String getFunctionName() {
-            return "artifactoryNpmInstall";
+            return STEP_NAME;
         }
 
         @Override

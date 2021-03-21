@@ -6,6 +6,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.BuildAppendExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -18,7 +19,6 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class BuildAppendStep extends AbstractStepImpl {
-
     public static final String STEP_NAME = "rtBuildAppend";
     private final String appendBuildNumber;
     private final String appendBuildName;
@@ -64,6 +64,17 @@ public class BuildAppendStep extends AbstractStepImpl {
             new BuildAppendExecutor(server, buildInfo, step.appendBuildName, step.appendBuildNumber, build, listener).execute();
             DeclarativePipelineUtils.saveBuildInfo(buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
+        }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws Exception {
+            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
+            return Utils.prepareArtifactoryServer(null, server);
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
     }
 

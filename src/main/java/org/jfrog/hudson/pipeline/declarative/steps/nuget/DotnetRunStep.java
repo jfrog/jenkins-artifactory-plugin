@@ -5,6 +5,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 public class DotnetRunStep extends NugetRunStepBase {
+    static final String STEP_NAME = "rtDotnetRun";
 
     @DataBoundConstructor
     public DotnetRunStep() {
@@ -16,6 +17,11 @@ public class DotnetRunStep extends NugetRunStepBase {
         return DotnetResolverStep.STEP_NAME;
     }
 
+    @Override
+    public String getStepName() {
+        return STEP_NAME;
+    }
+
     @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
@@ -25,7 +31,7 @@ public class DotnetRunStep extends NugetRunStepBase {
 
         @Override
         public String getFunctionName() {
-            return "rtDotnetRun";
+            return STEP_NAME;
         }
 
         @Override

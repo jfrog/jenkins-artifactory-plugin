@@ -6,6 +6,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.DockerPullExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -17,7 +18,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.io.IOException;
 
 public class DockerPullStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "rtDockerPull";
     private final String serverId;
     private final String image;
     private final String sourceRepo;
@@ -72,6 +73,16 @@ public class DockerPullStep extends AbstractStepImpl {
             DeclarativePipelineUtils.saveBuildInfo(dockerExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
         }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(step.serverId, null);
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -83,7 +94,7 @@ public class DockerPullStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "rtDockerPull";
+            return STEP_NAME;
         }
 
         @Override

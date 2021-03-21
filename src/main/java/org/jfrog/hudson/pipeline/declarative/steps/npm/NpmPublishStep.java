@@ -32,6 +32,7 @@ import java.io.IOException;
  */
 @SuppressWarnings("unused")
 public class NpmPublishStep extends AbstractStepImpl {
+    static final String STEP_NAME = "rtNpmPublish";
 
     private final NpmBuild npmBuild;
     private String customBuildNumber;
@@ -102,6 +103,17 @@ public class NpmPublishStep extends AbstractStepImpl {
             return null;
         }
 
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
+            return step.npmBuild.getResolver().getArtifactoryServer();
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
+
         private void setDeployer(String buildNumber) throws IOException, InterruptedException {
             if (StringUtils.isBlank(step.deployerId)) {
                 return;
@@ -141,7 +153,7 @@ public class NpmPublishStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "rtNpmPublish";
+            return STEP_NAME;
         }
 
         @Override

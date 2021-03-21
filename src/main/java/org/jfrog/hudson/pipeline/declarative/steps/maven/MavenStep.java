@@ -30,7 +30,7 @@ import static org.jfrog.hudson.util.SerializationUtils.createMapper;
  */
 @SuppressWarnings("unused")
 public class MavenStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "rtMavenRun";
     private final MavenBuild mavenBuild;
     private final String goals;
     private final String pom;
@@ -95,6 +95,20 @@ public class MavenStep extends AbstractStepImpl {
             buildInfo = mavenExecutor.getBuildInfo();
             DeclarativePipelineUtils.saveBuildInfo(buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
+        }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            MavenResolver resolver = step.mavenBuild.getResolver();
+            if (resolver != null) {
+                return resolver.getArtifactoryServer();
+            }
+            return step.mavenBuild.getDeployer().getArtifactoryServer();
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
 
         private void setMavenBuild() throws IOException, InterruptedException {

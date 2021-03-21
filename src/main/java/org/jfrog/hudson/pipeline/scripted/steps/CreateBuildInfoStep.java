@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.kohsuke.stapler.DataBoundConstructor;
@@ -13,7 +14,7 @@ import java.io.IOException;
  * Created by romang on 5/2/16.
  */
 public class CreateBuildInfoStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "newBuildInfo";
     @DataBoundConstructor
     public CreateBuildInfoStep() {
     }
@@ -32,6 +33,16 @@ public class CreateBuildInfoStep extends AbstractStepImpl {
         protected BuildInfo runStep() throws Exception {
             return new BuildInfo(build);
         }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -43,7 +54,7 @@ public class CreateBuildInfoStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "newBuildInfo";
+            return STEP_NAME;
         }
 
         @Override

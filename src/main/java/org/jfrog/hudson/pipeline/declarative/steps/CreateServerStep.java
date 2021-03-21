@@ -20,7 +20,6 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 @SuppressWarnings("unused")
 public class CreateServerStep extends AbstractStepImpl {
-
     public static final String STEP_NAME = "rtServer";
     private final String id;
 
@@ -105,6 +104,16 @@ public class CreateServerStep extends AbstractStepImpl {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             DeclarativePipelineUtils.writeBuildDataFile(rootWs, buildNumber, buildDataFile, new JenkinsBuildInfoLog(listener));
             return null;
+        }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws Exception {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
 
         /**

@@ -11,11 +11,17 @@ import org.kohsuke.stapler.DataBoundConstructor;
  */
 @SuppressWarnings("unused")
 public class NpmInstallStep extends NpmInstallCiStepBase {
+    static final String STEP_NAME = "rtNpmInstall";
 
     @DataBoundConstructor
     public NpmInstallStep() {
         super();
         this.ciCommand = false;
+    }
+
+    @Override
+    public String getStepName() {
+        return STEP_NAME;
     }
 
     @Extension
@@ -27,7 +33,7 @@ public class NpmInstallStep extends NpmInstallCiStepBase {
 
         @Override
         public String getFunctionName() {
-            return "rtNpmInstall";
+            return STEP_NAME;
         }
 
         @Override

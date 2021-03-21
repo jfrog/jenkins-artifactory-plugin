@@ -21,7 +21,7 @@ import java.io.IOException;
  * Created by romang on 5/2/16.
  */
 public class DockerPullStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "dockerPullStep";
     private final String image;
     private final ArtifactoryServer server;
     private final BuildInfo buildInfo;
@@ -88,13 +88,21 @@ public class DockerPullStep extends AbstractStepImpl {
             if (!DockerUtils.isImageVersioned(imageTag)) {
                 imageTag += ":latest";
             }
-
-            ArtifactoryServer server = step.getServer();
-            DockerPullExecutor dockerExecutor = new DockerPullExecutor(server, buildInfo, build, step.image, step.sourceRepo, step.host, step.javaArgs, launcher, listener, ws, env);
+            DockerPullExecutor dockerExecutor = new DockerPullExecutor(step.getServer(), buildInfo, build, step.image, step.sourceRepo, step.host, step.javaArgs, launcher, listener, ws, env);
             dockerExecutor.execute();
             JenkinsBuildInfoLog log = new JenkinsBuildInfoLog(listener);
             log.info("Successfully pulled docker image: " + imageTag);
             return dockerExecutor.getBuildInfo();
+        }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(null, step.getServer());
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
     }
 
@@ -107,7 +115,7 @@ public class DockerPullStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "dockerPullStep";
+            return STEP_NAME;
         }
 
         @Override

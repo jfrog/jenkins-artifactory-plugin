@@ -5,8 +5,10 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.SpecConfiguration;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.CollectIssuesExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -19,7 +21,6 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class CollectIssuesStep extends AbstractStepImpl {
-
     public static final String STEP_NAME = "rtCollectIssues";
     private final String serverId;
     private String config;
@@ -80,6 +81,17 @@ public class CollectIssuesStep extends AbstractStepImpl {
 
             DeclarativePipelineUtils.saveBuildInfo(buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
+        }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() throws Exception {
+            org.jfrog.hudson.pipeline.common.types.ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
+            return Utils.prepareArtifactoryServer(null, server);
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
         }
     }
 

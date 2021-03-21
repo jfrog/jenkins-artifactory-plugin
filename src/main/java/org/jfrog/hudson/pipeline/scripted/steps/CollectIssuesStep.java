@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.CollectIssuesExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
@@ -14,7 +15,7 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class CollectIssuesStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "collectIssues";
     private Issues issues;
     private ArtifactoryServer server;
     private String config;
@@ -57,6 +58,16 @@ public class CollectIssuesStep extends AbstractStepImpl {
             collectIssuesExecutor.execute();
             return true;
         }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(null, step.getServer());
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -68,7 +79,7 @@ public class CollectIssuesStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "collectIssues";
+            return STEP_NAME;
         }
 
         @Override

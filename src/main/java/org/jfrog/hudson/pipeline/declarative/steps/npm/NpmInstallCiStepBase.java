@@ -80,6 +80,8 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
         npmBuild.setTool(tool);
     }
 
+    public abstract String getStepName();
+
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
         private transient NpmInstallCiStepBase step;
@@ -93,7 +95,8 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
         @Override
         protected Void runStep() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
-            setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
+            CommonResolver resolver = getResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
+            step.npmBuild.setResolver(resolver);
             Utils.addNpmToPath(ws, listener, env, launcher, step.npmBuild.getTool());
             NpmInstallCiExecutor npmInstallCiExecutor = new NpmInstallCiExecutor(buildInfo, launcher, step.npmBuild, step.javaArgs, step.args, ws, step.path, step.module, env, listener, build, step.ciCommand);
             npmInstallCiExecutor.execute();
@@ -101,9 +104,14 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
             return null;
         }
 
-        private void setResolver(String buildNumber) throws IOException, InterruptedException {
+        @Override
+        public String getStepName() {
+            return step.getStepName();
+        }
+
+        private CommonResolver getResolver(String buildNumber) throws IOException, InterruptedException {
             if (StringUtils.isBlank(step.resolverId)) {
-                return;
+                return null;
             }
             BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(rootWs, buildNumber, NpmResolverStep.STEP_NAME, step.resolverId);
             if (buildDataFile == null) {
@@ -111,7 +119,7 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
             }
             CommonResolver resolver = SerializationUtils.createMapper().treeToValue(buildDataFile.get(NpmResolverStep.STEP_NAME), CommonResolver.class);
             resolver.setServer(getArtifactoryServer(buildDataFile));
-            step.npmBuild.setResolver(resolver);
+            return resolver;
         }
 
         private ArtifactoryServer getArtifactoryServer(BuildDataFile buildDataFile) throws IOException, InterruptedException {
@@ -120,6 +128,12 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
                 throw new IllegalArgumentException("server ID is missing");
             }
             return DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, serverId.asText(), true);
+        }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+            CommonResolver resolver = getResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
+            return resolver.getArtifactoryServer();
         }
     }
 }

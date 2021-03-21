@@ -6,6 +6,7 @@ import hudson.model.Result;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesJobInfo;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.jfpipelines.OutputResource;
@@ -28,7 +29,6 @@ import static org.jfrog.hudson.jfpipelines.Utils.*;
 
 @SuppressWarnings("unused")
 public class JfPipelinesStep extends AbstractStepImpl {
-
     public static final String STEP_NAME = "jfPipelines";
     public static final List<String> ACCEPTABLE_RESULTS;
     private String outputResources;
@@ -98,6 +98,16 @@ public class JfPipelinesStep extends AbstractStepImpl {
             if (saveJobInfo) {
                 saveJobInfo(jobInfo, logger);
             }
+            return null;
+        }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() throws Exception {
+            return null;
+        }
+
+        @Override
+        public String getStepName() {
             return null;
         }
 

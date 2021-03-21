@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.*;
+import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.executors.GoPublishExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -13,7 +14,7 @@ import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class GoPublishStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "artifactoryGoPublish";
     private BuildInfo buildInfo;
     private GoBuild goBuild;
     private String path;
@@ -45,6 +46,16 @@ public class GoPublishStep extends AbstractStepImpl {
             goPublishExecutor.execute();
             return goPublishExecutor.getBuildInfo();
         }
+
+        @Override
+        public ArtifactoryServer getArtifactoryServer() {
+            return step.goBuild.getDeployer().getArtifactoryServer();
+        }
+
+        @Override
+        public String getStepName() {
+            return null;
+        }
     }
 
     @Extension
@@ -56,7 +67,7 @@ public class GoPublishStep extends AbstractStepImpl {
 
         @Override
         public String getFunctionName() {
-            return "artifactoryGoPublish";
+            return STEP_NAME;
         }
 
         @Override

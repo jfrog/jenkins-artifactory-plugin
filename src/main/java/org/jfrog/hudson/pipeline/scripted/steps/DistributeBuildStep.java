@@ -19,7 +19,7 @@ import java.io.IOException;
  */
 
 public class DistributeBuildStep extends AbstractStepImpl {
-
+    static final String STEP_NAME = "artifactoryDistributeBuild";
     private ArtifactoryServer server;
     private DistributionConfig distributionConfig;
 
@@ -69,6 +69,16 @@ public class DistributeBuildStep extends AbstractStepImpl {
             new DistributionExecutor(Utils.prepareArtifactoryServer(null, step.getServer()), build, listener, getContext(), distributionConfig).execute();
             return true;
         }
+
+        @Override
+        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+            return Utils.prepareArtifactoryServer(null, step.getServer());
+        }
+
+        @Override
+        public String getStepName() {
+            return STEP_NAME;
+        }
     }
 
     @Extension
@@ -81,7 +91,7 @@ public class DistributeBuildStep extends AbstractStepImpl {
         @Override
         // The step is invoked by ArtifactoryServer by the step name
         public String getFunctionName() {
-            return "artifactoryDistributeBuild";
+            return STEP_NAME;
         }
 
         @Override

@@ -7,6 +7,8 @@ import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jenkinsci.plugins.workflow.steps.SynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.ArtifactoryServer;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 import java.io.IOException;
 
@@ -36,9 +38,19 @@ public abstract class ArtifactorySynchronousNonBlockingStepExecution<T> extends 
 
     protected abstract T runStep() throws Exception;
 
+    public abstract org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException;
+
+    public abstract String getStepName();
+
     @Override
     protected T run() throws Exception {
         try {
+            ArtifactoryServer server = getArtifactoryServer();
+            if (server != null) {
+                new Thread(() -> {
+                    server.reportUsage(getStepName(), build, new JenkinsBuildInfoLog(listener));
+                }).start();
+            }
             return runStep();
         } finally {
             listener.getLogger().flush();
