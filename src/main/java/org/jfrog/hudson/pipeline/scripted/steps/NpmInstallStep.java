@@ -19,7 +19,7 @@ public class NpmInstallStep extends NpmInstallCiStepBase {
     }
 
     @Override
-    public String getStepName() {
+    public String getUsageReportFeatureName() {
         return STEP_NAME;
     }
 

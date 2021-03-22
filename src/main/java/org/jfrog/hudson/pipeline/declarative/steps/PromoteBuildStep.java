@@ -104,13 +104,13 @@ public class PromoteBuildStep extends AbstractStepImpl {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws IOException, InterruptedException {
             ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
             return Utils.prepareArtifactoryServer(null, server);
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
     }

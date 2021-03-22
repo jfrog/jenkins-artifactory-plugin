@@ -14,6 +14,7 @@ import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
 import org.jfrog.hudson.pipeline.common.types.deployers.CommonDeployer;
+import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -104,13 +105,17 @@ public class NpmPublishStep extends AbstractStepImpl {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws IOException, InterruptedException {
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            return step.npmBuild.getResolver().getArtifactoryServer();
+            Resolver resolver = step.npmBuild.getResolver();
+            if (resolver != null) {
+                return resolver.getArtifactoryServer();
+            }
+            return null;
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
 

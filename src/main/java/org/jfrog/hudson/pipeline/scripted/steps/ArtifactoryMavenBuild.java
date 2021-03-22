@@ -8,7 +8,8 @@ import org.jfrog.hudson.pipeline.common.executors.MavenExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.MavenBuild;
-import org.jfrog.hudson.pipeline.common.types.resolvers.MavenResolver;
+import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
+import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -66,16 +67,20 @@ public class ArtifactoryMavenBuild extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() {
-            MavenResolver resolver = step.mavenBuild.getResolver();
+        public ArtifactoryServer getUsageReportServer() {
+            Deployer deployer = step.mavenBuild.getDeployer();
+            if (deployer != null) {
+                return deployer.getArtifactoryServer();
+            }
+            Resolver resolver = step.mavenBuild.getResolver();
             if (resolver != null) {
                 return resolver.getArtifactoryServer();
             }
-            return step.mavenBuild.getDeployer().getArtifactoryServer();
+            return null;
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
     }

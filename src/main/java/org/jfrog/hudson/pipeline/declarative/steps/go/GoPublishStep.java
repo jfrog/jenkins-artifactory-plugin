@@ -94,13 +94,16 @@ public class GoPublishStep extends AbstractStepImpl {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws IOException, InterruptedException {
             CommonDeployer resolver = getDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            return resolver.getArtifactoryServer();
+            if (resolver != null) {
+                return resolver.getArtifactoryServer();
+            }
+            return  null;
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
 

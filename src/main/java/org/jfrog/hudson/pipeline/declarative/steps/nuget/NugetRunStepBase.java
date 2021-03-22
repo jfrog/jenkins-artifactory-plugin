@@ -65,7 +65,8 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
         this.args = args;
     }
 
-    public abstract String getStepName();
+    public abstract String getUsageReportFeatureName();
+
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
         private transient final NugetRunStepBase step;
@@ -88,14 +89,14 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws IOException, InterruptedException {
             CommonResolver resolver = getResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             return resolver.getArtifactoryServer();
         }
 
         @Override
-        public String getStepName() {
-            return step.getStepName();
+        public String getUsageReportFeatureName() {
+            return step.getUsageReportFeatureName();
         }
 
         private CommonResolver getResolver(String buildNumber) throws IOException, InterruptedException {

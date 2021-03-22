@@ -10,6 +10,7 @@ import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.PipInstallExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.PipBuild;
+import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -54,12 +55,16 @@ public class PipInstallStep extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() {
-            return step.pipBuild.getResolver().getArtifactoryServer();
+        public ArtifactoryServer getUsageReportServer() {
+            Resolver resolver = step.pipBuild.getResolver();
+            if (resolver != null) {
+                return resolver.getArtifactoryServer();
+            }
+            return null;
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
     }

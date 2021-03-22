@@ -70,12 +70,12 @@ public class UploadStep extends AbstractStepImpl {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() {
             return Utils.prepareArtifactoryServer(null, step.getServer());
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
 

@@ -409,7 +409,7 @@ public class ArtifactoryServer implements Serializable {
         try {
             CredentialsConfig config = this.getDeployerCredentialsConfig();
             if (config == null) {
-                config = this.getDeployerCredentialsConfig();
+                config = this.getResolverCredentialsConfig();
             }
             Credentials credentials = config.provideCredentials(build.getParent());
             String[] featureIdArray = new String[]{stepName};
@@ -417,7 +417,7 @@ public class ArtifactoryServer implements Serializable {
             usageReporter.reportUsage(this.getArtifactoryUrl(), credentials.getUsername(), credentials.getPassword(), "", Utils.getProxyConfiguration(this), logger);
             logger.debug("Usage info sent successfully.");
         } catch (Exception ex) {
-            logger.debug("Failed sending usage report to Artifactory: " + ex);
+            logger.error("Failed sending usage report to Artifactory: " + ex);
         }
     }
 }

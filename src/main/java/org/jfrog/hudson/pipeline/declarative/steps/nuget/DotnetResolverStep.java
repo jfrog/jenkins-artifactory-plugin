@@ -17,7 +17,7 @@ public class DotnetResolverStep extends DeployerResolverBase {
         buildDataFile.putPOJO(nugetResolver);
     }
 
-      @Extension
+    @Extension
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {

@@ -33,7 +33,7 @@ public class SetPropsStep extends EditPropsStep {
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
     }

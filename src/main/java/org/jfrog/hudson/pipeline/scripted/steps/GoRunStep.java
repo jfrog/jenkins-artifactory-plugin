@@ -8,6 +8,7 @@ import org.jfrog.hudson.pipeline.common.executors.GoRunExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
+import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -48,12 +49,16 @@ public class GoRunStep extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() {
-            return step.goBuild.getResolver().getArtifactoryServer();
+        public ArtifactoryServer getUsageReportServer() {
+            Resolver resolver = step.goBuild.getResolver();
+            if (resolver != null) {
+                return resolver.getArtifactoryServer();
+            }
+            return null;
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
     }

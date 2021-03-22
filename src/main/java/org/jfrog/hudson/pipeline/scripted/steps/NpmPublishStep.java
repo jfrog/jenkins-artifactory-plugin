@@ -9,6 +9,7 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.NpmPublishExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -53,12 +54,16 @@ public class NpmPublishStep extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() {
-            return step.npmBuild.getDeployer().getArtifactoryServer();
+        public ArtifactoryServer getUsageReportServer() {
+            Deployer deployer = step.npmBuild.getDeployer();
+            if (deployer != null) {
+                return deployer.getArtifactoryServer();
+            }
+            return null;
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
     }

@@ -66,7 +66,7 @@ public class EditPropsStep extends AbstractStepImpl {
             this.step = step;
         }
 
-        public ArtifactoryServer getArtifactoryServer() {
+        public ArtifactoryServer getUsageReportServer() {
             return Utils.prepareArtifactoryServer(step.serverId, null);
         }
 

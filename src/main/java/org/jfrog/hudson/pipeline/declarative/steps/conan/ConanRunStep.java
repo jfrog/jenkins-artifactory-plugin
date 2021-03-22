@@ -71,13 +71,13 @@ public class ConanRunStep extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+        public ArtifactoryServer getUsageReportServer() throws IOException, InterruptedException {
             return null;
         }
 
         @Override
-        public String getStepName() {
-            return STEP_NAME;
+        public String getUsageReportFeatureName() {
+            return null;
         }
 
     }

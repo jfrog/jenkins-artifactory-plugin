@@ -52,12 +52,12 @@ public class DeployerResolverBase extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() {
+        public ArtifactoryServer getUsageReportServer() {
             return null;
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return null;
         }
 

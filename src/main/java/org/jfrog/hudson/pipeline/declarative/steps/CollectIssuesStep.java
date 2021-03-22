@@ -84,13 +84,13 @@ public class CollectIssuesStep extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() throws Exception {
+        public ArtifactoryServer getUsageReportServer() throws Exception {
             org.jfrog.hudson.pipeline.common.types.ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
             return Utils.prepareArtifactoryServer(null, server);
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
     }

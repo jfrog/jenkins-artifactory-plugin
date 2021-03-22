@@ -38,17 +38,17 @@ public abstract class ArtifactorySynchronousNonBlockingStepExecution<T> extends 
 
     protected abstract T runStep() throws Exception;
 
-    public abstract org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException;
+    public abstract org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws IOException, InterruptedException;
 
-    public abstract String getStepName();
+    public abstract String getUsageReportFeatureName();
 
     @Override
     protected T run() throws Exception {
         try {
-            ArtifactoryServer server = getArtifactoryServer();
+            ArtifactoryServer server = getUsageReportServer();
             if (server != null) {
                 new Thread(() -> {
-                    server.reportUsage(getStepName(), build, new JenkinsBuildInfoLog(listener));
+                    server.reportUsage(getUsageReportFeatureName(), build, new JenkinsBuildInfoLog(listener));
                 }).start();
             }
             return runStep();

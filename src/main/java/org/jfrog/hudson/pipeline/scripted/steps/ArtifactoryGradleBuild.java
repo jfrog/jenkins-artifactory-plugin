@@ -8,6 +8,7 @@ import org.jfrog.hudson.pipeline.common.executors.GradleExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GradleBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -77,16 +78,20 @@ public class ArtifactoryGradleBuild extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() {
-                Resolver resolver = step.gradleBuild.getResolver();
-                if(resolver != null) {
-                    return resolver.getArtifactoryServer();
-                }
-                return step.gradleBuild.getDeployer().getArtifactoryServer();
+        public ArtifactoryServer getUsageReportServer() {
+            Deployer deployer = step.gradleBuild.getDeployer();
+            if (deployer != null) {
+                return deployer.getArtifactoryServer();
+            }
+            Resolver resolver = step.gradleBuild.getResolver();
+            if (resolver != null) {
+                return resolver.getArtifactoryServer();
+            }
+            return null;
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
     }

@@ -55,13 +55,13 @@ public class InteractivePromotionStep extends PromoteBuildStep {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws Exception {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws Exception {
             ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
             return Utils.prepareArtifactoryServer(null, server);
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
 

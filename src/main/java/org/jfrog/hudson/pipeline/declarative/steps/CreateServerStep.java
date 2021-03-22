@@ -107,13 +107,13 @@ public class CreateServerStep extends AbstractStepImpl {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws Exception {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws Exception {
             return null;
         }
 
         @Override
-        public String getStepName() {
-            return STEP_NAME;
+        public String getUsageReportFeatureName() {
+            return null;
         }
 
         /**

@@ -47,13 +47,13 @@ public class BuildTriggerStep extends AbstractStepImpl {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() {
             return Utils.prepareArtifactoryServer(null, step.server);
         }
 
         @Override
-        public String getStepName() {
-            return null;
+        public String getUsageReportFeatureName() {
+            return STEP_NAME;
         }
     }
 

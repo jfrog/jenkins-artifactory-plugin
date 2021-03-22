@@ -24,6 +24,7 @@ public class MavenDeployerResolver extends AbstractStepImpl {
     public MavenDeployerResolver(String stepName, String id, String serverId) {
         buildDataFile = new BuildDataFile(stepName, id).put("serverId", serverId);
     }
+
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
         private transient final MavenDeployerResolver step;
@@ -43,12 +44,12 @@ public class MavenDeployerResolver extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+        public ArtifactoryServer getUsageReportServer() throws IOException, InterruptedException {
             return null;
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return null;
         }
     }

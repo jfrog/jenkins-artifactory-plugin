@@ -18,7 +18,7 @@ public class DotnetRunStep extends NugetRunStepBase {
     }
 
     @Override
-    public String getStepName() {
+    public String getUsageReportFeatureName() {
         return STEP_NAME;
     }
 

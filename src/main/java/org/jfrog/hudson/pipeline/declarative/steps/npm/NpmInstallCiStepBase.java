@@ -80,7 +80,7 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
         npmBuild.setTool(tool);
     }
 
-    public abstract String getStepName();
+    public abstract String getUsageReportFeatureName();
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
@@ -105,8 +105,8 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
         }
 
         @Override
-        public String getStepName() {
-            return step.getStepName();
+        public String getUsageReportFeatureName() {
+            return step.getUsageReportFeatureName();
         }
 
         private CommonResolver getResolver(String buildNumber) throws IOException, InterruptedException {
@@ -131,9 +131,12 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getArtifactoryServer() throws IOException, InterruptedException {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws IOException, InterruptedException {
             CommonResolver resolver = getResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            return resolver.getArtifactoryServer();
+            if (resolver != null) {
+                return resolver.getArtifactoryServer();
+            }
+            return null;
         }
     }
 }

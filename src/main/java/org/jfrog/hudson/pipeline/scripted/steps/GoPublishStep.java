@@ -8,6 +8,7 @@ import org.jfrog.hudson.pipeline.common.executors.GoPublishExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
+import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
@@ -48,13 +49,17 @@ public class GoPublishStep extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() {
-            return step.goBuild.getDeployer().getArtifactoryServer();
+        public ArtifactoryServer getUsageReportServer() {
+            Deployer deployer = step.goBuild.getDeployer();
+            if (deployer != null) {
+                return deployer.getArtifactoryServer();
+            }
+            return null;
         }
 
         @Override
-        public String getStepName() {
-            return null;
+        public String getUsageReportFeatureName() {
+            return STEP_NAME;
         }
     }
 

@@ -65,13 +65,13 @@ public class AddRemoteStep extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() {
+        public ArtifactoryServer getUsageReportServer() {
             return null;
         }
 
         @Override
-        public String getStepName() {
-            return STEP_NAME;
+        public String getUsageReportFeatureName() {
+            return null;
         }
     }
 

@@ -28,7 +28,7 @@ public class UploadStep extends GenericStep {
             super(step, context);
         }
 
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
 

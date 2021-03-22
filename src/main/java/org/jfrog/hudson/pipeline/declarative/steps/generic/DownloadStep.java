@@ -40,7 +40,7 @@ public class DownloadStep extends GenericStep {
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
     }

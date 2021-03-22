@@ -95,12 +95,12 @@ public class DockerPushStep extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() {
+        public ArtifactoryServer getUsageReportServer() {
             return Utils.prepareArtifactoryServer(step.serverId, null);
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return STEP_NAME;
         }
     }

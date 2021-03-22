@@ -9,6 +9,7 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.NpmInstallCiExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
+import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 
 import java.io.IOException;
 
@@ -35,7 +36,8 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
         this.isCiCommand = isCiCommand;
     }
 
-    public abstract String getStepName();
+    public abstract String getUsageReportFeatureName();
+
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<BuildInfo> {
 
         private transient NpmInstallCiStepBase step;
@@ -55,13 +57,17 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() {
-            return step.npmBuild.getResolver().getArtifactoryServer();
+        public ArtifactoryServer getUsageReportServer() {
+            Resolver resolver = step.npmBuild.getResolver();
+            if (resolver != null) {
+                return resolver.getArtifactoryServer();
+            }
+            return null;
         }
 
         @Override
-        public String getStepName() {
-            return step.getStepName();
+        public String getUsageReportFeatureName() {
+            return step.getUsageReportFeatureName();
         }
     }
 }

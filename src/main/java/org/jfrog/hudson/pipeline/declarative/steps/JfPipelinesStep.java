@@ -102,12 +102,12 @@ public class JfPipelinesStep extends AbstractStepImpl {
         }
 
         @Override
-        public ArtifactoryServer getArtifactoryServer() throws Exception {
+        public ArtifactoryServer getUsageReportServer() throws Exception {
             return null;
         }
 
         @Override
-        public String getStepName() {
+        public String getUsageReportFeatureName() {
             return null;
         }
 
