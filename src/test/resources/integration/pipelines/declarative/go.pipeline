@@ -39,7 +39,7 @@ node("TestSlave") {
             buildNumber: buildNumber,
             path: 'declarative-go-example',
             resolverId: "GO_RESOLVER",
-            args: "build"
+            args: "build -mod=mod"
     )
 
     stage "Go Publish"

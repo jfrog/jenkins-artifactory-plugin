@@ -21,7 +21,7 @@ node("TestSlave") {
     FileUtils.copyDirectory(Paths.get("${GO_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-go-example").toFile())
 
     stage "Go build"
-    rtGo.run args: "build", buildInfo: buildInfo, path: "scripted-go-example"
+    rtGo.run args: "build -mod=mod", buildInfo: buildInfo, path: "scripted-go-example"
 
 
     stage "Go publish"
