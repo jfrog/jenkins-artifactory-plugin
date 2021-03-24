@@ -33,6 +33,7 @@ import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBaseClien
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
 import org.jfrog.build.extractor.usageReport.UsageReporter;
+import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.util.CredentialManager;
 import org.jfrog.hudson.util.Credentials;
@@ -413,7 +414,7 @@ public class ArtifactoryServer implements Serializable {
             }
             Credentials credentials = config.provideCredentials(build.getParent());
             String[] featureIdArray = new String[]{stepName};
-            UsageReporter usageReporter = new UsageReporter("jenkins-artifactory-plugin/", featureIdArray);
+            UsageReporter usageReporter = new UsageReporter("jenkins-artifactory-plugin/" + ActionableHelper.getArtifactoryPluginVersion(), featureIdArray);
             usageReporter.reportUsage(this.getArtifactoryUrl(), credentials.getUsername(), credentials.getPassword(), "", Utils.getProxyConfiguration(this), logger);
             logger.debug("Usage info sent successfully.");
         } catch (Exception ex) {
