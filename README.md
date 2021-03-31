@@ -46,6 +46,7 @@ Before running the integration tests, set the following environment variables.
 *GRADLE_HOME* - The local gradle installation path).<br>
 
 To disable build scan with Xray integration tests, set *JENKINS_XRAY_TEST_ENABLE* to *false*.
+Go tests require Go v1.14 or above.
 
 Run the integration tests.
 ```
