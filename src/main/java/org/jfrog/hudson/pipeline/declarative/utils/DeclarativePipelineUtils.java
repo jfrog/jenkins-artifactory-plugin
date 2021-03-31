@@ -116,9 +116,10 @@ public class DeclarativePipelineUtils {
      * @param customBuildNumber - Step's custom build number if exist.
      * @return build info id: <buildname>_<buildnumber>.
      */
-    public static String createBuildInfoId(Run<?, ?> build, String customBuildName, String customBuildNumber) {
+    public static String createBuildInfoId(Run<?, ?> build, String customBuildName, String customBuildNumber, String customBuildProject) {
+        String project = StringUtils.isNotEmpty(customBuildProject) ? "_" + customBuildProject : "";
         return StringUtils.defaultIfEmpty(customBuildName, BuildUniqueIdentifierHelper.getBuildName(build)) + "_" +
-                StringUtils.defaultIfEmpty(customBuildNumber, BuildUniqueIdentifierHelper.getBuildNumber(build));
+                StringUtils.defaultIfEmpty(customBuildNumber, BuildUniqueIdentifierHelper.getBuildNumber(build)) + project;
     }
 
     /**
@@ -130,9 +131,9 @@ public class DeclarativePipelineUtils {
      * @param customBuildNumber - Step's custom build number if exist.
      * @return build info object as defined in previous rtBuildInfo{...} scope or a new build info.
      */
-    public static BuildInfo getBuildInfo(FilePath rootWs, Run<?, ?> build, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {
+    public static BuildInfo getBuildInfo(FilePath rootWs, Run<?, ?> build, String customBuildName, String customBuildNumber, String project) throws IOException, InterruptedException {
         String jobBuildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        String buildInfoId = createBuildInfoId(build, customBuildName, customBuildNumber);
+        String buildInfoId = createBuildInfoId(build, customBuildName, customBuildNumber, project);
 
         BuildDataFile buildDataFile = readBuildDataFile(rootWs, jobBuildNumber, BuildInfoStep.STEP_NAME, buildInfoId);
         if (buildDataFile == null) {
@@ -142,6 +143,10 @@ public class DeclarativePipelineUtils {
             }
             if (StringUtils.isNotBlank(customBuildNumber)) {
                 buildInfo.setNumber(customBuildNumber);
+            }
+            if (StringUtils.isNotBlank(project)) {
+                buildInfo.setProject(project);
+                buildInfo.getIssues().setProject(project);
             }
             return buildInfo;
         }
@@ -157,7 +162,7 @@ public class DeclarativePipelineUtils {
      */
     public static void saveBuildInfo(BuildInfo buildInfo, FilePath rootWs, Run<?, ?> build, Log logger) throws Exception {
         String jobBuildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        String buildInfoId = createBuildInfoId(build, buildInfo.getName(), buildInfo.getNumber());
+        String buildInfoId = createBuildInfoId(build, buildInfo.getName(), buildInfo.getNumber(), buildInfo.getProject());
 
         BuildDataFile buildDataFile = new BuildDataFile(BuildInfoStep.STEP_NAME, buildInfoId);
         buildDataFile.putPOJO(buildInfo);

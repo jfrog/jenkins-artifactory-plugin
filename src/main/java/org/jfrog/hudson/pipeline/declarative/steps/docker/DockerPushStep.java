@@ -32,6 +32,7 @@ public class DockerPushStep extends AbstractStepImpl {
     private String host;
     private String buildNumber;
     private String buildName;
+    private String project;
     private String javaArgs;
 
     @DataBoundConstructor
@@ -55,6 +56,11 @@ public class DockerPushStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String buildName) {
         this.buildName = buildName;
+    }
+
+    @DataBoundSetter
+    public void setBuildProject(String project) {
+        this.project = project;
     }
 
     @DataBoundSetter
@@ -86,7 +92,7 @@ public class DockerPushStep extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber, step.project);
             org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
             DockerPushExecutor dockerExecutor = new DockerPushExecutor(pipelineServer, buildInfo, build, step.image, step.targetRepo, step.host, step.javaArgs, launcher, step.properties, listener, ws, env);
             dockerExecutor.execute();

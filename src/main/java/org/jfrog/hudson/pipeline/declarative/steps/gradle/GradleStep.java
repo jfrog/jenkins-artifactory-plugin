@@ -37,6 +37,7 @@ public class GradleStep extends AbstractStepImpl {
     private final GradleBuild gradleBuild;
     private String customBuildNumber;
     private String customBuildName;
+    private String customProject;
     private String deployerId;
     private String resolverId;
     private String buildFile;
@@ -57,6 +58,11 @@ public class GradleStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String customBuildName) {
         this.customBuildName = customBuildName;
+    }
+
+    @DataBoundSetter
+    public void setProject(String customProject) {
+        this.customProject = customProject;
     }
 
     @DataBoundSetter
@@ -116,7 +122,7 @@ public class GradleStep extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.customProject);
             setGradleBuild();
             GradleExecutor gradleExecutor = new GradleExecutor(build, step.gradleBuild, step.tasks, step.buildFile, step.rootDir, step.switches, buildInfo, env, ws, listener, launcher);
             gradleExecutor.execute();

@@ -31,6 +31,7 @@ public class PipInstallStep extends AbstractStepImpl {
     private final PipBuild pipBuild;
     private String customBuildNumber;
     private String customBuildName;
+    private String project;
     private String resolverId;
     private String javaArgs; // Added to allow java remote debugging
     private String args;
@@ -50,6 +51,11 @@ public class PipInstallStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String customBuildName) {
         this.customBuildName = customBuildName;
+    }
+
+    @DataBoundSetter
+    public void setProject(String customProject) {
+        this.project = customProject;
     }
 
     @DataBoundSetter
@@ -89,7 +95,7 @@ public class PipInstallStep extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
             CommonResolver resolver = getResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             step.pipBuild.setResolver(resolver);
             PipInstallExecutor pipInstallExecutor = new PipInstallExecutor(buildInfo, launcher, step.pipBuild, step.javaArgs, step.args, ws, step.envActivation, step.module, env, listener, build);

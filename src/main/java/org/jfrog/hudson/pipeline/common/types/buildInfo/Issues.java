@@ -17,6 +17,7 @@ public class Issues implements Serializable {
 
     private transient CpsScript cpsScript;
     private String buildName;
+    private String project;
     private String trackerName;
     private boolean aggregateBuildIssues;
     private String aggregationBuildStatus;
@@ -113,12 +114,11 @@ public class Issues implements Serializable {
      * Used to invoke the step in a scripted pipeline
      * */
     @Whitelisted
-    public void collect(ArtifactoryServer server, String config) {
+    public void collect(ArtifactoryServer server, String config, String project) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
         stepVariables.put("issues", this);
         stepVariables.put("server", server);
         stepVariables.put("config", config);
-
         // Throws CpsCallableInvocation - Must be the last line in this method
         cpsScript.invokeMethod("collectIssues", stepVariables);
     }
@@ -162,6 +162,14 @@ public class Issues implements Serializable {
 
     public void setBuildName(String buildName) {
         this.buildName = buildName;
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
     }
 
     public CpsScript getCpsScript() {

@@ -46,6 +46,11 @@ public class PromoteBuildStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
+    public void setBuildProject(String project) {
+        promotionConfig.setProject(project);
+    }
+
+    @DataBoundSetter
     public void setSourceRepo(String sourceRepo) {
         promotionConfig.setSourceRepo(sourceRepo);
     }
@@ -82,6 +87,7 @@ public class PromoteBuildStep extends AbstractStepImpl {
         if (StringUtils.isBlank(promotionConfig.getBuildNumber())) {
             promotionConfig.setBuildNumber(BuildUniqueIdentifierHelper.getBuildNumber(build));
         }
+        promotionConfig.setProject(promotionConfig.getProject());
         return promotionConfig;
     }
 

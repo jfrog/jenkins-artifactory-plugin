@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline.common.executors;
 
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -54,7 +55,7 @@ public class BuildAppendExecutor implements Executor {
 
     @Override
     public void execute() throws Exception {
-        ModuleBuilder moduleBuilder = new ModuleBuilder().id(buildName + "/" + buildNumber).type(ModuleType.BUILD);
+        ModuleBuilder moduleBuilder = new ModuleBuilder().id(buildInfo.getProject() + "/" + buildName + "/" + buildNumber).type(ModuleType.BUILD);
 
         // Prepare Artifactory server
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
@@ -83,7 +84,7 @@ public class BuildAppendExecutor implements Executor {
      */
     private long getBuildTimestamp(org.jfrog.hudson.ArtifactoryServer server, Credentials credentials) throws IOException, ParseException {
         try (ArtifactoryBuildInfoClient client = server.createBuildInfoClientBuilder(credentials, createProxyConfiguration(), new JenkinsBuildInfoLog(listener)).build()) {
-            Build build = client.getBuildInfo(buildName, buildNumber);
+            Build build = client.getBuildInfo(buildName, buildNumber, buildInfo.getProject());
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
             Date date = format.parse(build.getStarted());
             return date.getTime();
@@ -103,9 +104,9 @@ public class BuildAppendExecutor implements Executor {
         // To support build name and numbers with ':', encode ':' by '%3A'. Further encoding will take place in 'getArtifactMetadata'.
         String encodedBuildName = buildName.replaceAll(":", "%3A");
         String encodedBuildNumber = buildNumber.replaceAll(":", "%3A");
-
+        String encodedBuildProject = StringUtils.isNotEmpty(buildInfo.getProject()) ? buildInfo.getProject().replaceAll(":", "%3A") : "artifactory-build-info";
         // Send HEAD request to <artifactory-url>/artifactory-build-info/<build-name>/<build-number>-timestamp.json to get the checksums
-        String buildInfoPath = server.getArtifactoryUrl() + "/artifactory-build-info/" + encodedBuildName + "/" + encodedBuildNumber + "-" + timestamp + ".json";
+        String buildInfoPath = server.getArtifactoryUrl() + "/"+encodedBuildProject+"/" + encodedBuildName + "/" + encodedBuildNumber + "-" + timestamp + ".json";
         try (ArtifactoryDependenciesClient client = server.createArtifactoryDependenciesClient(credentials, createProxyConfiguration(), listener)) {
             // getArtifactMetadata return null response entity - there's no need to consume it
             try (CloseableHttpResponse response = client.getArtifactMetadata(buildInfoPath)) {

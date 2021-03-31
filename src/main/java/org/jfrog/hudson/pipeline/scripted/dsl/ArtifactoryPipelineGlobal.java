@@ -104,6 +104,15 @@ public class ArtifactoryPipelineGlobal implements Serializable {
     }
 
     @Whitelisted
+    public BuildInfo newBuildInfo(String project,String buildName,String buildNumber) {
+        BuildInfo buildInfo = newBuildInfo();
+        buildInfo.setProject(project);
+        buildInfo.setName(buildName);
+        buildInfo.setNumber(buildNumber);
+        return buildInfo;
+    }
+
+    @Whitelisted
     public MavenBuild newMavenBuild() {
         MavenBuild mavenBuild = (MavenBuild) cpsScript.invokeMethod("newMavenBuild", Maps.newLinkedHashMap());
         mavenBuild.setCpsScript(cpsScript);

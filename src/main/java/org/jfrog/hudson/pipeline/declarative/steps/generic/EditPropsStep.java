@@ -27,6 +27,7 @@ public class EditPropsStep extends AbstractStepImpl {
     protected String spec;
     private String props;
     private String specPath;
+    private String project;
     private boolean failNoOp;
 
     EditPropsStep(String serverId, EditPropertiesActionType editType) {
@@ -47,6 +48,11 @@ public class EditPropsStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setProps(String props) {
         this.props = props;
+    }
+
+    @DataBoundSetter
+    public void setProject(String project) {
+        this.project = project;
     }
 
     @DataBoundSetter

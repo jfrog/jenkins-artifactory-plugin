@@ -46,6 +46,7 @@ public class BuildInfo implements Serializable {
 
     private String name; // Build name
     private String number; // Build number
+    private String project; // Project in Artifactory
     private Date startDate;
     private BuildRetention retention;
     // The candidates artifacts to be deployed in the 'deployArtifacts' step, sorted by module name.
@@ -80,6 +81,10 @@ public class BuildInfo implements Serializable {
         this.number = number;
     }
 
+    public void setProject(String project) {
+        this.project = project;
+    }
+
     @Whitelisted
     public String getName() {
         return name;
@@ -88,6 +93,11 @@ public class BuildInfo implements Serializable {
     @Whitelisted
     public String getNumber() {
         return number;
+    }
+
+    @Whitelisted
+    public String getProject() {
+        return project;
     }
 
     @Whitelisted
@@ -386,6 +396,7 @@ public class BuildInfo implements Serializable {
             ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
             properties.put("build.name", buildInfo.getName());
             properties.put("build.number", buildInfo.getNumber());
+            properties.put("build.project", buildInfo.getProject());
             properties.put("build.timestamp", buildInfo.getStartDate().getTime() + "");
             return properties;
         }

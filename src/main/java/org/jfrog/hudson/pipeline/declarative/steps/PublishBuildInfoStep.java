@@ -22,6 +22,7 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
     private final String serverId;
     private String buildNumber;
     private String buildName;
+    private String project;
 
     @DataBoundConstructor
     public PublishBuildInfoStep(String serverId) {
@@ -31,6 +32,11 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String buildName) {
         this.buildName = buildName;
+    }
+
+    @DataBoundSetter
+    public void setProject(String buildProject) {
+        this.project = buildProject;
     }
 
     @DataBoundSetter
@@ -50,9 +56,9 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber, step.project);
             if (buildInfo == null) {
-                throw new RuntimeException("Build " + DeclarativePipelineUtils.createBuildInfoId(build, step.buildName, step.buildNumber) + " does not exist!");
+                throw new RuntimeException("Build " + DeclarativePipelineUtils.createBuildInfoId(build, step.buildName, step.buildNumber, step.project) + " does not exist!");
             }
             ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
             new PublishBuildInfoExecutor(build, listener, buildInfo, server, ws).execute();

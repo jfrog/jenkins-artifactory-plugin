@@ -33,6 +33,7 @@ public class GoPublishStep extends AbstractStepImpl {
     private final GoBuild goBuild;
     private String customBuildNumber;
     private String customBuildName;
+    private String project;
     private String deployerId;
     private String path;
     private String module;
@@ -51,6 +52,11 @@ public class GoPublishStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String customBuildName) {
         this.customBuildName = customBuildName;
+    }
+
+    @DataBoundSetter
+    public void setProject(String customProject) {
+        this.project = customProject;
     }
 
     @DataBoundSetter
@@ -85,7 +91,7 @@ public class GoPublishStep extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
             GoPublishExecutor goPublishExecutor = new GoPublishExecutor(getContext(), buildInfo, step.goBuild, step.path, step.version, step.module, ws, listener, build);
             goPublishExecutor.execute();

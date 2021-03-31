@@ -27,6 +27,7 @@ public class CollectIssuesStep extends AbstractStepImpl {
     private String configPath;
     private String customBuildNumber;
     private String customBuildName;
+    private String project;
 
     @DataBoundConstructor
     public CollectIssuesStep(String serverId) {
@@ -53,6 +54,11 @@ public class CollectIssuesStep extends AbstractStepImpl {
         this.customBuildNumber = buildNumber;
     }
 
+    @DataBoundSetter
+    public void setProject(String project) {
+        this.project = project;
+    }
+
     public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
 
         private transient final CollectIssuesStep step;
@@ -70,13 +76,13 @@ public class CollectIssuesStep extends AbstractStepImpl {
             String config = SpecUtils.getSpecStringFromSpecConf(specConfiguration, env, ws, listener.getLogger());
 
             // Get build info
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
 
             // Get server
             org.jfrog.hudson.pipeline.common.types.ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
 
             // Collect issues
-            CollectIssuesExecutor collectIssuesExecutor = new CollectIssuesExecutor(build, listener, ws, buildInfo.getName(), config, buildInfo.getIssues(), pipelineServer);
+            CollectIssuesExecutor collectIssuesExecutor = new CollectIssuesExecutor(build, listener, ws, buildInfo.getName(), config, buildInfo.getIssues(), pipelineServer, buildInfo.getProject());
             collectIssuesExecutor.execute();
 
             DeclarativePipelineUtils.saveBuildInfo(buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));

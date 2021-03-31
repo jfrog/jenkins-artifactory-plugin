@@ -37,6 +37,7 @@ public class MavenStep extends AbstractStepImpl {
     private final String pom;
     private String customBuildNumber;
     private String customBuildName;
+    private String project;
     private String deployerId;
     private String resolverId;
 
@@ -55,6 +56,11 @@ public class MavenStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String customBuildName) {
         this.customBuildName = customBuildName;
+    }
+
+    @DataBoundSetter
+    public void setProject(String customProject) {
+        this.project = customProject;
     }
 
     @DataBoundSetter
@@ -89,7 +95,7 @@ public class MavenStep extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
             setMavenBuild();
             MavenExecutor mavenExecutor = new MavenExecutor(listener, launcher, build, ws, env, step.mavenBuild, step.pom, step.goals, buildInfo);
             mavenExecutor.execute();

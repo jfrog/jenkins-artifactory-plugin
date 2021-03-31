@@ -33,6 +33,7 @@ public class GoRunStep extends AbstractStepImpl {
     private final GoBuild goBuild;
     private String customBuildNumber;
     private String customBuildName;
+    private String project;
     private String resolverId;
     private String path;
     private String args;
@@ -51,6 +52,11 @@ public class GoRunStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String customBuildName) {
         this.customBuildName = customBuildName;
+    }
+
+    @DataBoundSetter
+    public void setProject(String customProject) {
+        this.project = customProject;
     }
 
     @DataBoundSetter
@@ -85,7 +91,7 @@ public class GoRunStep extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             GoRunExecutor goRunExecutor = new GoRunExecutor(getContext(), buildInfo, step.goBuild, step.path, step.args, step.module, ws, listener, env, build);
             goRunExecutor.execute();

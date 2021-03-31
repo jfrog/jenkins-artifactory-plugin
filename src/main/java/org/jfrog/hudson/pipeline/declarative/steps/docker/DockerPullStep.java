@@ -25,6 +25,7 @@ public class DockerPullStep extends AbstractStepImpl {
     private String host;
     private String buildNumber;
     private String buildName;
+    private String project;
     private String javaArgs;
 
     @DataBoundConstructor
@@ -50,6 +51,11 @@ public class DockerPullStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
+    public void setProject(String project) {
+        this.project = project;
+    }
+
+    @DataBoundSetter
     public void setJavaArgs(String javaArgs) {
         this.javaArgs = javaArgs;
     }
@@ -66,7 +72,7 @@ public class DockerPullStep extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber, step.project);
             ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
             DockerPullExecutor dockerExecutor = new DockerPullExecutor(pipelineServer, buildInfo, build, step.image, step.sourceRepo, step.host, step.javaArgs, launcher, listener, ws, env);
             dockerExecutor.execute();

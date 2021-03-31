@@ -58,6 +58,10 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
             buildInfo.setNumber(deployedBuildInfo.getNumber());
         }
 
+        if (StringUtils.isNotEmpty(deployedBuildInfo.getProject())) {
+            buildInfo.setProject(deployedBuildInfo.getProject());
+        }
+
         if (deployedBuildInfo.getIssues() != null && !deployedBuildInfo.getConvertedIssues().isEmpty()) {
             buildInfo.setIssues(deployedBuildInfo.getConvertedIssues());
         }
@@ -88,7 +92,8 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
 
     public void deploy() throws IOException {
         String artifactoryUrl = configurator.getArtifactoryServer().getArtifactoryUrl();
-        listener.getLogger().println("Deploying build info to: " + artifactoryUrl + "/api/build");
+        String logMessage = "Deploying build info to: " + artifactoryUrl + "/api/build" + ArtifactoryBuildInfoClient.buildRepoNameFromProjectKey(buildInfo.getProject());
+        listener.getLogger().println(logMessage);
         BuildRetention retention = buildInfo.getBuildRetention();
         buildInfo.setBuildRetention(null);
         org.jfrog.build.extractor.retention.Utils.sendBuildAndBuildRetention(client, this.buildInfo, retention, asyncBuildRetention);
