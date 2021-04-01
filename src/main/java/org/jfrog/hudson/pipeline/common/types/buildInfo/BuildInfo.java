@@ -396,7 +396,6 @@ public class BuildInfo implements Serializable {
             ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
             properties.put("build.name", buildInfo.getName());
             properties.put("build.number", buildInfo.getNumber());
-            properties.put("build.project", buildInfo.getProject());
             properties.put("build.timestamp", buildInfo.getStartDate().getTime() + "");
             return properties;
         }

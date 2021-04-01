@@ -55,7 +55,9 @@ public class BuildAppendExecutor implements Executor {
 
     @Override
     public void execute() throws Exception {
-        ModuleBuilder moduleBuilder = new ModuleBuilder().id(buildInfo.getProject() + "/" + buildName + "/" + buildNumber).type(ModuleType.BUILD);
+        String project = buildInfo.getProject();
+        String id = StringUtils.isNotBlank(project) ? buildInfo.getProject() + "/" + buildName + "/" + buildNumber : buildName + "/" + buildNumber;
+        ModuleBuilder moduleBuilder = new ModuleBuilder().id(id).type(ModuleType.BUILD);
 
         // Prepare Artifactory server
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);

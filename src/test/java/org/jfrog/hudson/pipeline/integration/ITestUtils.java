@@ -179,7 +179,6 @@ class ITestUtils {
      */
     static Build getBuildInfo(ArtifactoryBuildInfoClient buildInfoClient, String buildName, String buildNumber) throws IOException {
         return ITestUtils.getBuildInfo(buildInfoClient,buildName, buildNumber,"");
-
     }
 
     static Build getBuildInfo(ArtifactoryBuildInfoClient buildInfoClient, String buildName, String buildNumber, String project) throws IOException {
