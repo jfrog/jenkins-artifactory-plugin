@@ -6,6 +6,7 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.GradleResolver;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -17,6 +18,7 @@ public class GradleBuild extends PackageManagerBuild {
     private boolean useWrapper;
     private boolean usesPlugin;
 
+    @DataBoundConstructor
     public GradleBuild() {
         deployer = new GradleDeployer();
         resolver = new GradleResolver();
