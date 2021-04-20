@@ -17,15 +17,17 @@
 package org.jfrog.hudson;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.google.common.collect.Lists;
 import hudson.Extension;
 import hudson.model.BuildableItem;
 import hudson.model.BuildableItemWithBuildWrappers;
 import hudson.model.Descriptor;
 import hudson.model.Item;
-import hudson.util.Secret;
 import hudson.security.ACL;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import hudson.util.Secret;
+import hudson.util.XStream2;
 import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONNull;
@@ -42,6 +44,7 @@ import org.jfrog.hudson.jfpipelines.JFrogPipelinesHttpClient;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.RepositoriesUtils;
+import org.jfrog.hudson.util.converters.ArtifactoryBuilderConverter;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
@@ -73,6 +76,11 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
     public static final class DescriptorImpl extends Descriptor<GlobalConfiguration> {
 
         private boolean useCredentialsPlugin;
+        private List<JfrogServers> jfrogInstances;
+        /**
+         * @deprecated: Use org.jfrog.hudson.ArtifactoryBuilder.DescriptorImpl#getJfrogInstances()
+         */
+        @Deprecated
         private List<ArtifactoryServer> artifactoryServers;
         private JFrogPipelinesServer jfrogPipelinesServer = new JFrogPipelinesServer();
 
@@ -102,13 +110,13 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             if (value.length() == 0) {
                 return FormValidation.error("Please set server ID");
             }
-            List<ArtifactoryServer> artifactoryServers = RepositoriesUtils.getArtifactoryServers();
-            if (artifactoryServers == null) {
+            List<JfrogServers> jfrogServers = RepositoriesUtils.getJfrogInstances();
+            if (jfrogServers == null) {
                 return FormValidation.ok();
             }
             int countServersByValueAsName = 0;
-            for (ArtifactoryServer server : artifactoryServers) {
-                if (server.getServerId().equals(value)) {
+            for (JfrogServers server : jfrogServers) {
+                if (server.getId().equals(value)) {
                     countServersByValueAsName++;
                     if (countServersByValueAsName > 1) {
                         return FormValidation.error("Duplicated server ID");
@@ -250,7 +258,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             Jenkins jenkins = Jenkins.getInstanceOrNull();
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
                 boolean useCredentialsPlugin = (Boolean) o.get("useCredentialsPlugin");
-                configureArtifactoryServers(req, o);
+                configureJfrogServers(req, o);
                 configureJFrogPipelinesServer(o);
                 if (useCredentialsPlugin && !this.useCredentialsPlugin) {
                     resetJobsCredentials();
@@ -263,21 +271,21 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             throw new FormException("User doesn't have permissions to save", "Server ID");
         }
 
-        private void configureArtifactoryServers(StaplerRequest req, JSONObject o) throws FormException {
-            List<ArtifactoryServer> artifactoryServers = null;
-            Object artifactoryServerObj = o.get("artifactoryServer"); // an array or single object
-            if (!JSONNull.getInstance().equals(artifactoryServerObj)) {
-                artifactoryServers = req.bindJSONToList(ArtifactoryServer.class, artifactoryServerObj);
+        private void configureJfrogServers(StaplerRequest req, JSONObject o) throws FormException {
+            List<JfrogServers> jfrogInstances = Lists.newArrayList();
+            Object jfrogInstancesObj = o.get("jfrogInstances"); // an array or single object
+            if (!JSONNull.getInstance().equals(jfrogInstancesObj)) {
+                jfrogInstances = req.bindJSONToList(JfrogServers.class, jfrogInstancesObj);
             }
 
-            if (!isServerIDConfigured(artifactoryServers)) {
-                throw new FormException("Please set the Artifactory server ID.", "ServerID");
+            if (!isJfrogServersIDConfigured(jfrogInstances)) {
+                throw new FormException("Please set the Instance ID.", "InstanceID");
             }
 
-            if (isServerDuplicated(artifactoryServers)) {
-                throw new FormException("The Artifactory server ID you have entered is already configured", "Server ID");
+            if (isInstanceDuplicated(jfrogInstances)) {
+                throw new FormException("The Jfrog instance ID you have entered is already configured", "Instance ID");
             }
-            setArtifactoryServers(artifactoryServers);
+            setJfrogInstances(jfrogInstances);
         }
 
         private void configureJFrogPipelinesServer(JSONObject o) {
@@ -291,7 +299,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         private void resetServersCredentials() {
-            for (ArtifactoryServer server : artifactoryServers) {
+            for (JfrogServers server : jfrogInstances) {
                 if (server.getResolverCredentialsConfig() != null) {
                     server.getResolverCredentialsConfig().deleteCredentials();
                 }
@@ -352,32 +360,50 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             this.useCredentialsPlugin = useCredentialsPlugin;
         }
 
-        private boolean isServerDuplicated(List<ArtifactoryServer> artifactoryServers) {
+        private boolean isInstanceDuplicated(List<JfrogServers> JfrogInstances) {
             Set<String> serversNames = new HashSet<>();
-            if (artifactoryServers == null) {
+            if (JfrogInstances == null) {
                 return false;
             }
-            for (ArtifactoryServer server : artifactoryServers) {
-                String name = server.getServerId();
-                if (serversNames.contains(name)) {
+            for (JfrogServers instance : JfrogInstances) {
+                String id = instance.getId();
+                if (serversNames.contains(id)) {
                     return true;
                 }
-                serversNames.add(name);
+                serversNames.add(id);
             }
             return false;
         }
 
-        private boolean isServerIDConfigured(List<ArtifactoryServer> artifactoryServers) {
-            if (artifactoryServers == null) {
+        private boolean isJfrogServersIDConfigured(List<JfrogServers> JfrogInstances) {
+            if (JfrogInstances == null) {
                 return true;
             }
-            for (ArtifactoryServer server : artifactoryServers) {
-                String name = server.getServerId();
-                if (StringUtils.isBlank(name)) {
+            for (JfrogServers server : JfrogInstances) {
+                String platformId = server.getId();
+                String artifactoryId = server.getArtifactoryServer().getServerId();
+                if (StringUtils.isBlank(platformId) || StringUtils.isBlank(artifactoryId)) {
                     return false;
                 }
             }
             return true;
+        }
+
+        public List<JfrogServers> getJfrogInstances() {
+            return jfrogInstances;
+        }
+
+        public void setJfrogInstances(List<JfrogServers> jfrogInstances) {
+            this.jfrogInstances = jfrogInstances;
+        }
+
+        /**
+         * Page Converter
+         */
+        public static final class ConverterImpl extends ArtifactoryBuilderConverter {
+            public ConverterImpl(XStream2 xstream) {
+                super(xstream);
+            }
         }
     }
 }

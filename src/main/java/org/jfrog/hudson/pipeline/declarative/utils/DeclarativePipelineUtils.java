@@ -10,7 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.executors.GetArtifactoryServerExecutor;
+import org.jfrog.hudson.pipeline.common.executors.GetJfrogServersExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.ConanClient;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -64,30 +64,30 @@ public class DeclarativePipelineUtils {
     }
 
     /**
-     * Get Artifactory server from global server configuration or from previous rtServer{...} scope.
+     * Get Artifactory server from global jfrog instances configuration or from previous rtServer{...} scope.
      *
      * @param build          - Step's build.
      * @param rootWs         - Step's root workspace.
-     * @param serverId       - The server id. Can be defined from global server configuration or from previous rtServer{...} scope.
+     * @param id             - The Artifactory server id. Can be defined from global jfrog instances configuration or from previous rtServer{...} scope.
      * @param throwIfMissing - Throw exception if server is missing.
      * @return Artifactory server.
      */
-    public static ArtifactoryServer getArtifactoryServer(Run<?, ?> build, FilePath rootWs, String serverId, boolean throwIfMissing) throws IOException, InterruptedException {
+    public static ArtifactoryServer getArtifactoryServer(Run<?, ?> build, FilePath rootWs, String id, boolean throwIfMissing) throws IOException, InterruptedException {
         String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        BuildDataFile buildDataFile = readBuildDataFile(rootWs, buildNumber, CreateServerStep.STEP_NAME, serverId);
+        BuildDataFile buildDataFile = readBuildDataFile(rootWs, buildNumber, CreateServerStep.STEP_NAME, id);
         // If the server has not been configured as part of the declarative pipeline script, get its details from it.
         if (buildDataFile == null) {
             // This server ID has not been configured as part of the declarative pipeline script.
             // Let's get it from the Jenkins configuration.
-            GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, serverId);
+            GetJfrogServersExecutor getJfrogServersExecutor = new GetJfrogServersExecutor(build, id);
             try {
-                getArtifactoryServerExecutor.execute();
-            } catch (GetArtifactoryServerExecutor.ServerNotFoundException serverNotFound) {
+                getJfrogServersExecutor.execute();
+            } catch (GetJfrogServersExecutor.ServerNotFoundException serverNotFound) {
                 if (throwIfMissing) {
                     throw serverNotFound;
                 }
             }
-            return getArtifactoryServerExecutor.getArtifactoryServer();
+            return getJfrogServersExecutor.getAJfrogServers().getArtifactoryServer();
         }
         JsonNode jsonNode = buildDataFile.get(CreateServerStep.STEP_NAME);
         ArtifactoryServer server = createMapper().treeToValue(jsonNode, ArtifactoryServer.class);

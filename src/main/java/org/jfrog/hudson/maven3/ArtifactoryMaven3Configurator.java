@@ -240,7 +240,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     public ArtifactoryServer getArtifactoryServer() {
-        return RepositoriesUtils.getArtifactoryServer(getArtifactoryName(), getDescriptor().getArtifactoryServers());
+        return RepositoriesUtils.getArtifactoryServer(getArtifactoryName());
     }
 
     @SuppressWarnings({"UnusedDeclaration"})
@@ -310,7 +310,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     }
 
     public ArtifactoryServer getArtifactoryServer(String artifactoryServerName) {
-        return RepositoriesUtils.getArtifactoryServer(artifactoryServerName, getDescriptor().getArtifactoryServers());
+        return RepositoriesUtils.getArtifactoryServer(artifactoryServerName);
     }
 
     public List<Repository> getReleaseRepositoryList() {

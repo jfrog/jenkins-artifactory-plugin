@@ -32,12 +32,14 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
     private ArtifactoryConfigurator configurator;
     private Build buildInfo;
     private boolean asyncBuildRetention;
+    private final String platformUrl;
 
     public BuildInfoDeployer(ArtifactoryConfigurator configurator, ArtifactoryBuildInfoClient client,
-                             Run build, TaskListener listener, BuildInfo deployedBuildInfo) throws IOException, InterruptedException, NoSuchAlgorithmException {
+                             Run build, TaskListener listener, BuildInfo deployedBuildInfo, String platformUrl) throws IOException, InterruptedException, NoSuchAlgorithmException {
         super(configurator, build, listener, client);
         this.configurator = configurator;
         this.build = build;
+        this.platformUrl = platformUrl;
         envVars = deployedBuildInfo.getEnvVars();
         sysVars = deployedBuildInfo.getSysVars();
         buildInfo = createBuildInfo("Pipeline", "");
@@ -91,7 +93,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
         listener.getLogger().println("Deploying build info to: " + artifactoryUrl + "/api/build");
         BuildRetention retention = buildInfo.getBuildRetention();
         buildInfo.setBuildRetention(null);
-        org.jfrog.build.extractor.retention.Utils.sendBuildAndBuildRetention(client, this.buildInfo, retention, asyncBuildRetention);
+        org.jfrog.build.extractor.retention.Utils.sendBuildAndBuildRetention(client, this.buildInfo, retention, asyncBuildRetention, platformUrl);
         addBuildInfoResultAction(artifactoryUrl);
     }
 
@@ -102,7 +104,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
                 action = new BuildInfoResultAction(build);
                 build.addAction(action);
             }
-            action.addBuildInfoResults(artifactoryUrl, buildInfo);
+            action.addBuildInfoResults(artifactoryUrl, platformUrl, buildInfo);
         }
     }
 

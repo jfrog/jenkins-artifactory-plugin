@@ -51,7 +51,7 @@ import java.util.logging.Logger;
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**
- * Represents an artifactory instance.
+ * Represents an instance of jenkins artifactory configuration page.
  *
  * @author Yossi Shaul
  */
@@ -92,7 +92,6 @@ public class ArtifactoryServer implements Serializable {
 
     private CredentialsConfig resolverCredentialsConfig;
 
-    @DataBoundConstructor
     public ArtifactoryServer(String serverId, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
                              CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry, Integer deploymentThreads) {
         this.url = StringUtils.removeEnd(artifactoryUrl, "/");

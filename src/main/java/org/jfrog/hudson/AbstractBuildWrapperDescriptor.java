@@ -61,12 +61,12 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
     }
 
     /**
-     * Returns the list of {@link org.jfrog.hudson.ArtifactoryServer} configured.
+     * Returns the list of {@link org.jfrog.hudson.JfrogServers} configured.
      *
      * @return can be empty but never null.
      */
-    public List<ArtifactoryServer> getArtifactoryServers() {
-        return RepositoriesUtils.getArtifactoryServers();
+    public List<JfrogServers> getJfrogInstances() {
+        return RepositoriesUtils.getJfrogInstances();
     }
 
     @SuppressWarnings("unused")
@@ -95,7 +95,7 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
                                                                     String password, boolean overrideCredentials) {
         RefreshServerResponse response = new RefreshServerResponse();
         CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId, overrideCredentials);
-        ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url, RepositoriesUtils.getArtifactoryServers());
+        ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url);
         try {
             List<VirtualRepository> virtualRepositories = refreshVirtualRepositories(artifactoryServer, credentialsConfig);
             response.setVirtualRepositories(virtualRepositories);
@@ -124,7 +124,7 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
                                                                     String password, boolean overrideCredentials, boolean refreshUserPlugins) {
         RefreshServerResponse response = new RefreshServerResponse();
         CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId, overrideCredentials);
-        ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url, RepositoriesUtils.getArtifactoryServers());
+        ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url);
         try {
             response.setRepositories(refreshRepositories(artifactoryServer, credentialsConfig));
             if (refreshUserPlugins) {

@@ -1,11 +1,14 @@
 package org.jfrog.hudson.pipeline.common.types;
 
 import com.google.common.collect.Maps;
+import hudson.model.Item;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
+import org.jfrog.hudson.util.Credentials;
+import org.jfrog.hudson.util.plugins.PluginsUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -19,6 +22,7 @@ import static org.jfrog.hudson.pipeline.common.Utils.appendBuildInfo;
 
 /**
  * Created by romang on 4/21/16.
+ * Represents an instance of Artifactory configuration from pipeline script.
  */
 public class ArtifactoryServer implements Serializable {
     public static final long serialVersionUID = 1L;
@@ -43,6 +47,7 @@ public class ArtifactoryServer implements Serializable {
     private boolean usesCredentialsId;
     private final Connection connection = new Connection();
     private int deploymentThreads;
+    private JfrogServers jfrogServers;
 
     public ArtifactoryServer() {
     }
@@ -64,6 +69,22 @@ public class ArtifactoryServer implements Serializable {
         this.url = url;
         this.credentialsId = credentialsId;
         this.usesCredentialsId = true;
+    }
+
+    public ArtifactoryServer(org.jfrog.hudson.ArtifactoryServer jenkinsArtifactoryServer, Item parent) {
+        serverName = jenkinsArtifactoryServer.getServerId();
+        url = jenkinsArtifactoryServer.getArtifactoryUrl();
+        this.deploymentThreads = jenkinsArtifactoryServer.getDeploymentThreads();
+        if (PluginsUtils.isCredentialsPluginEnabled()) {
+            credentialsId = jenkinsArtifactoryServer.getResolvingCredentialsConfig().getCredentialsId();
+        } else {
+            Credentials serverCredentials = jenkinsArtifactoryServer.getResolvingCredentialsConfig().provideCredentials(parent);
+            username = serverCredentials.getUsername();
+            password = serverCredentials.getPassword();
+        }
+        bypassProxy = jenkinsArtifactoryServer.isBypassProxy();
+        connection.setRetry(jenkinsArtifactoryServer.getConnectionRetry());
+        connection.setTimeout(jenkinsArtifactoryServer.getTimeout());
     }
 
     public CredentialsConfig createCredentialsConfig() {
@@ -359,5 +380,13 @@ public class ArtifactoryServer implements Serializable {
     @Whitelisted
     public void setDeploymentThreads(int deploymentThreads) {
         this.deploymentThreads = deploymentThreads;
+    }
+
+    public JfrogServers getJfrogServers() {
+        return jfrogServers;
+    }
+
+    public void setJfrogServers(JfrogServers jfrogServers) {
+        this.jfrogServers = jfrogServers;
     }
 }

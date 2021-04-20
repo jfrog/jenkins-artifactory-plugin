@@ -620,12 +620,11 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     }
 
     public ArtifactoryServer getArtifactoryServer() {
-        return RepositoriesUtils.getArtifactoryServer(getArtifactoryName(), getDescriptor().getArtifactoryServers());
+        return RepositoriesUtils.getArtifactoryServer(getArtifactoryName());
     }
 
     public ArtifactoryServer getArtifactoryResolverServer() {
-        return RepositoriesUtils.getArtifactoryServer(getArtifactoryResolverName(),
-                getDescriptor().getArtifactoryServers());
+        return RepositoriesUtils.getArtifactoryServer(getArtifactoryResolverName());
     }
 
     public List<Repository> getReleaseRepositories() {

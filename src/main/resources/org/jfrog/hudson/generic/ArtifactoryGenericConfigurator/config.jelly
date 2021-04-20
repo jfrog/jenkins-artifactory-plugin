@@ -16,14 +16,14 @@
                 <j:when test="${useSpecs}">
                     <r:blockWrapper style="width:100%" id="artifactory-deployer-spec-dd-${uniqueId}">
                         <f:dropdownList name="specsDeployerDetails" title="${%Artifactory upload server}">
-                            <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
-                                <f:dropdownListBlock value="${s.serverId}" title="${s.artifactoryUrl}"
-                                                     selected="${s.serverId==instance.specsDeployerDetails.artifactoryName}">
+                            <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
+                                <f:dropdownListBlock value="${s.id}" title="${s.artifactoryServer.artifactoryUrl}"
+                                                     selected="${s.id==instance.specsDeployerDetails.artifactoryName}">
                                     <f:nested>
-                                        <input type="hidden" name="artifactoryName" value="${s.serverId}"/>
+                                        <input type="hidden" name="artifactoryName" value="${s.id}"/>
                                         <input type="hidden" name="artifactoryUrl"
-                                               id="artifactoryUrlDeploy${s.artifactoryUrl}"
-                                               value="${s.artifactoryUrl}"/>
+                                               id="artifactoryUrlDeploy${s.artifactoryServer.artifactoryUrl}"
+                                               value="${s.artifactoryServer.artifactoryUrl}"/>
                                         <input type="hidden" name="stapler-class"
                                                value="org.jfrog.hudson.ServerDetails"/>
                                     </f:nested>
@@ -77,18 +77,18 @@
 
                         <f:dropdownList name="legacyDeployerDetails"
                                         title="${%Artifactory upload server}">
-                            <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
-                                <f:dropdownListBlock value="${s.serverId}" title="${s.artifactoryUrl}"
-                                                     selected="${s.serverId==instance.legacyDeployerDetails.artifactoryName}">
+                            <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
+                                <f:dropdownListBlock value="${s.id}" title="${s.artifactoryServer.artifactoryUrl}"
+                                                     selected="${s.id==instance.legacyDeployerDetails.artifactoryName}">
                                     <f:nested>
-                                        <input type="hidden" name="artifactoryName" value="${s.serverId}"/>
+                                        <input type="hidden" name="artifactoryName" value="${s.id}"/>
                                         <input type="hidden" name="artifactoryUrl"
-                                               id="artifactoryUrlDeploy${s.artifactoryUrl}"
-                                               value="${s.artifactoryUrl}"/>
+                                               id="artifactoryUrlDeploy${s.artifactoryServer.artifactoryUrl}"
+                                               value="${s.artifactoryServer.artifactoryUrl}"/>
                                         <input type="hidden" name="stapler-class"
                                                value="org.jfrog.hudson.ServerDetails"/>
 
-                                        <r:dynamicRepos id="genericRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
+                                        <r:dynamicRepos id="genericRepositoryKeys-${s.artifactoryServer.artifactoryUrl}-${uniqueId}"
                                                         title="Target Repository"
                                                         field="deployReleaseRepository"
                                                         repositoryConf="${instance.legacyDeployerDetails.deployReleaseRepository}"
@@ -101,7 +101,7 @@
                                         </script>
                                         <r:repos bind="genericDeployBind"
                                                  jsFunction="artifactoryGenericConfigurator"
-                                                 repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"
+                                                 repoUrl="artifactoryUrlDeploy${s.artifactoryServer.artifactoryUrl}"
                                                  credentialsDescriber="overridingDeployerCredentials-generic-${uniqueId}"/>
 
                                     </f:nested>
@@ -141,14 +141,14 @@
                     <f:block>
                         <r:blockWrapper style="width:100%" id="artifactory-resolver-spec-dd-${uniqueId}">
                             <f:dropdownList name="specsResolverDetails" title="${%Artifactory download server}">
-                                <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
-                                    <f:dropdownListBlock value="${s.serverId}" title="${s.artifactoryUrl}"
-                                                         selected="${s.serverId==instance.specsResolverDetails.artifactoryName}">
+                                <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
+                                    <f:dropdownListBlock value="${s.id}" title="${s.artifactoryServer.artifactoryUrl}"
+                                                         selected="${s.id==instance.specsResolverDetails.artifactoryName}">
                                         <f:nested>
-                                            <input type="hidden" name="artifactoryName" value="${s.serverId}"/>
+                                            <input type="hidden" name="artifactoryName" value="${s.id}"/>
                                             <input type="hidden" name="artifactoryUrl"
-                                                   id="artifactoryUrlResolve${s.artifactoryUrl}"
-                                                   value="${s.artifactoryUrl}"/>
+                                                   id="artifactoryUrlResolve${s.artifactoryServer.artifactoryUrl}"
+                                                   value="${s.artifactoryServer.artifactoryUrl}"/>
                                             <input type="hidden" name="stapler-class"
                                                    value="org.jfrog.hudson.ServerDetails"/>
 
@@ -204,14 +204,14 @@
                     <r:blockWrapper style="width:100%" id="artifactory-resolver-generic-dd-${uniqueId}">
                         <f:dropdownList name="legacyResolverDetails"
                                         title="${%Artifactory download server}">
-                            <j:forEach var="s" items="${descriptor.artifactoryServers}" varStatus="loop">
-                                <f:dropdownListBlock value="${s.serverId}" title="${s.artifactoryUrl}"
-                                                     selected="${s.serverId==instance.legacyResolverDetails.artifactoryName}">
+                            <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
+                                <f:dropdownListBlock value="${s.id}" title="${s.artifactoryServer.artifactoryUrl}"
+                                                     selected="${s.id==instance.legacyResolverDetails.artifactoryName}">
                                     <f:nested>
-                                        <input type="hidden" name="artifactoryName" value="${s.serverId}"/>
+                                        <input type="hidden" name="artifactoryName" value="${s.id}"/>
                                         <input type="hidden" name="artifactoryUrl"
-                                               id="artifactoryUrlResolve${s.artifactoryUrl}"
-                                               value="${s.artifactoryUrl}"/>
+                                               id="artifactoryUrlResolve${s.artifactoryServer.artifactoryUrl}"
+                                               value="${s.artifactoryServer.artifactoryUrl}"/>
                                         <input type="hidden" name="stapler-class"
                                                value="org.jfrog.hudson.ServerDetails"/>
 

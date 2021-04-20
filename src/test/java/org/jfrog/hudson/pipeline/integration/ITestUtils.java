@@ -333,7 +333,7 @@ class ITestUtils {
         assertNotNull(artifactoryTrigger);
         ArtifactoryServer server = artifactoryTrigger.getArtifactoryServer();
         assertNotNull(server);
-        assertTrue(artifactoryTrigger.getArtifactoryServers().contains(server));
+        assertTrue(artifactoryTrigger.getJfrogInstances().stream().anyMatch(s -> s.getArtifactoryServer().getServerId().equals(server.getServerId())));
         assertEquals("libs-release-local", artifactoryTrigger.getPaths());
         assertEquals("* * * * *", artifactoryTrigger.getSpec());
         return artifactoryTrigger;
