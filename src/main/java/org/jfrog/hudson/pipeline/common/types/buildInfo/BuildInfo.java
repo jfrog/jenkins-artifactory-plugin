@@ -27,6 +27,7 @@ import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.CredentialManager;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.ProxyUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.File;
 import java.io.IOException;
@@ -57,6 +58,7 @@ public class BuildInfo implements Serializable {
     private String agentName;
 
     // Default constructor to allow serialization
+    @DataBoundConstructor
     public BuildInfo() {
         this.startDate = Calendar.getInstance().getTime();
         this.retention = new BuildRetention();
