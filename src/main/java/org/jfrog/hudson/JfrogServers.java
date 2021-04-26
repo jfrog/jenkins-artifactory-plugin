@@ -3,32 +3,43 @@ package org.jfrog.hudson;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 /**
  * Represents an instance of jenkins jfrog instance configuration page.
  */
 public class JfrogServers {
+    public static final int DEFAULT_CONNECTION_TIMEOUT = 300;    // 5 Minutes
+    public static final int DEFAULT_DEPLOYMENT_THREADS_NUMBER = 3;
+
     private String platformUrl;
     private String id;
     private ArtifactoryServer artifactoryServer;
     private CredentialsConfig deployerCredentialsConfig;
     private CredentialsConfig resolverCredentialsConfig;
+    private final boolean bypassProxy;
+    private int timeout = DEFAULT_CONNECTION_TIMEOUT;
+    private Integer connectionRetry;
+    private Integer deploymentThreads;
 
     @DataBoundConstructor
-    public JfrogServers(String id, String artifactoryUrl, String platformUrl, CredentialsConfig deployerCredentialsConfig,
+    public JfrogServers(String instanceId, String artifactoryUrl, String platformUrl, CredentialsConfig deployerCredentialsConfig,
                         CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry, Integer deploymentThreads) {
-        this.id = id;
-        this.platformUrl = StringUtils.removeEnd(platformUrl, "/");
+        this.id = instanceId;
+        this.platformUrl = StringUtils.isNotEmpty(platformUrl) ? StringUtils.removeEnd(platformUrl, "/") : null;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
-        artifactoryServer = new ArtifactoryServer(id, artifactoryUrl, deployerCredentialsConfig, resolverCredentialsConfig, timeout, bypassProxy, connectionRetry, deploymentThreads);
+        this.timeout = timeout > 0 ? timeout : DEFAULT_CONNECTION_TIMEOUT;
+        this.bypassProxy = bypassProxy;
+        this.connectionRetry = connectionRetry != null ? connectionRetry : 3;
+        this.deploymentThreads = deploymentThreads != null && deploymentThreads > 0 ? deploymentThreads : DEFAULT_DEPLOYMENT_THREADS_NUMBER;
+        artifactoryServer = new ArtifactoryServer(this.id, artifactoryUrl, this.deployerCredentialsConfig, this.resolverCredentialsConfig, this.timeout, this.bypassProxy, this.connectionRetry, this.deploymentThreads);
     }
 
     public JfrogServers(ArtifactoryServer artifactoryServer) {
-        id = artifactoryServer.getServerId();
-        this.artifactoryServer = artifactoryServer;
-    }
-
-    public JfrogServers() {
+        this(artifactoryServer.getServerId(), artifactoryServer.getArtifactoryUrl(), "", artifactoryServer.getDeployerCredentialsConfig(), artifactoryServer.getResolverCredentialsConfig(), artifactoryServer.getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnectionRetry(), artifactoryServer.getDeploymentThreads());
     }
 
     public JfrogServers(org.jfrog.hudson.pipeline.common.types.ArtifactoryServer artifactoryServer) {
@@ -39,39 +50,78 @@ public class JfrogServers {
         return id;
     }
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
     public String getPlatformUrl() {
         return platformUrl;
-    }
-
-    public void setPlatformUrl(String platformUrl) {
-        this.platformUrl = platformUrl;
     }
 
     public ArtifactoryServer getArtifactoryServer() {
         return artifactoryServer;
     }
 
-    public void setArtifactoryServer(ArtifactoryServer artifactoryServer) {
-        this.artifactoryServer = artifactoryServer;
-    }
-
     public CredentialsConfig getDeployerCredentialsConfig() {
         return deployerCredentialsConfig;
-    }
-
-    public void setDeployerCredentialsConfig(CredentialsConfig deployerCredentialsConfig) {
-        this.deployerCredentialsConfig = deployerCredentialsConfig;
     }
 
     public CredentialsConfig getResolverCredentialsConfig() {
         return resolverCredentialsConfig;
     }
 
-    public void setResolverCredentialsConfig(CredentialsConfig resolverCredentialsConfig) {
-        this.resolverCredentialsConfig = resolverCredentialsConfig;
+
+    // To populate the dropdown list from the jelly
+    public List<Integer> getConnectionRetries() {
+        List<Integer> items = new ArrayList<Integer>();
+        for (int i = 0; i < 10; i++) {
+            items.add(i);
+        }
+        return items;
+    }
+
+    /**
+     * Return number of deployment threads.
+     * To populate the dropdown list from the jelly:
+     * <j:forEach var="r" items="${server.deploymentsThreads}">
+     */
+    @SuppressWarnings("unused")
+    public List<Integer> getDeploymentsThreads() {
+        List<Integer> items = new ArrayList<>();
+        for (int i = 1; i <= 10; i++) {
+            items.add(i);
+        }
+        return items;
+    }
+
+    public int getTimeout() {
+        return timeout;
+    }
+
+    public boolean isBypassProxy() {
+        return bypassProxy;
+    }
+
+    public int getConnectionRetry() {
+        if (connectionRetry == null) {
+            connectionRetry = 3;
+        }
+        return connectionRetry;
+    }
+
+    public void setConnectionRetry(int connectionRetry) {
+        this.connectionRetry = connectionRetry;
+    }
+
+    public Integer getDeploymentThreads() {
+        return deploymentThreads;
+    }
+
+    /**
+     * Set the number of deployment threads.
+     * Jelly uses reflection here and 'getDeploymentsThreads()' to get the data by the method and variable (matching) names
+     * <f:option selected="${r==server.deploymentThreads}"
+     *
+     * @param deploymentThreads - Deployment threads number
+     */
+    @SuppressWarnings("unused")
+    public void setDeploymentThreads(int deploymentThreads) {
+        this.deploymentThreads = deploymentThreads;
     }
 }

@@ -5,8 +5,8 @@ function populateDropDownList() {
 
     const DEFAULT_OPTIONS_NUMBER = 10;
 
-    let artifactoryServers = document.getElementsByName("artifactoryServer");
-    let t = document.getElementsByName("artifactoryServer")[artifactoryServers.length - 1];
+    let jfrogInstances = document.getElementsByName("jfrogInstances");
+    let t = document.getElementsByName("jfrogInstances")[jfrogInstances.length - 1];
     let button = t.nextElementSibling.nextElementSibling;
 
     button.onclick = function () {
@@ -27,7 +27,7 @@ function populateDropDownList() {
         }
 
         // Populates the timeout field
-        let timeout = document.getElementsByName("_.artifactory.timeout");
+        let timeout = document.getElementsByName("_.instance.timeout");
         let value = 300;
         for (let i = 0; i < timeout.length; i++) {
             if (!timeout[i].value) {

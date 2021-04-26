@@ -40,14 +40,18 @@ import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.jfrog.hudson.util.converters.ArtifactoryServerConverter;
-import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static org.jfrog.hudson.JfrogServers.DEFAULT_CONNECTION_TIMEOUT;
+import static org.jfrog.hudson.JfrogServers.DEFAULT_DEPLOYMENT_THREADS_NUMBER;
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**
@@ -58,9 +62,7 @@ import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 public class ArtifactoryServer implements Serializable {
     private static final Logger log = Logger.getLogger(ArtifactoryServer.class.getName());
 
-    private static final int DEFAULT_CONNECTION_TIMEOUT = 300;    // 5 Minutes
-    private static final int DEFAULT_DEPLOYMENT_THREADS_NUMBER = 3;
-    private final String url;
+    private String url;
     private String id;
     // Network timeout in seconds to use both for connection establishment and for unanswered requests
     private int timeout = DEFAULT_CONNECTION_TIMEOUT;
@@ -95,11 +97,11 @@ public class ArtifactoryServer implements Serializable {
     public ArtifactoryServer(String serverId, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
                              CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry, Integer deploymentThreads) {
         this.url = StringUtils.removeEnd(artifactoryUrl, "/");
+        this.id = serverId;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
         this.timeout = timeout > 0 ? timeout : DEFAULT_CONNECTION_TIMEOUT;
         this.bypassProxy = bypassProxy;
-        this.id = serverId;
         this.connectionRetry = connectionRetry != null ? connectionRetry : 3;
         this.deploymentThreads = deploymentThreads != null && deploymentThreads > 0 ? deploymentThreads : DEFAULT_DEPLOYMENT_THREADS_NUMBER;
     }
@@ -110,6 +112,10 @@ public class ArtifactoryServer implements Serializable {
 
     public void setServerId(String id) {
         this.id = id;
+    }
+
+    public void setArtifactoryUrl(String url) {
+        this.url = url;
     }
 
     public String getArtifactoryUrl() {
@@ -132,14 +138,6 @@ public class ArtifactoryServer implements Serializable {
         return bypassProxy;
     }
 
-    // To populate the dropdown list from the jelly
-    public List<Integer> getConnectionRetries() {
-        List<Integer> items = new ArrayList<Integer>();
-        for (int i = 0; i < 10; i++) {
-            items.add(i);
-        }
-        return items;
-    }
 
     public int getConnectionRetry() {
         if (connectionRetry == null) {
@@ -150,32 +148,6 @@ public class ArtifactoryServer implements Serializable {
 
     public void setConnectionRetry(int connectionRetry) {
         this.connectionRetry = connectionRetry;
-    }
-
-    /**
-     * Return number of deployment threads.
-     * To populate the dropdown list from the jelly:
-     * <j:forEach var="r" items="${server.deploymentsThreads}">
-     */
-    @SuppressWarnings("unused")
-    public List<Integer> getDeploymentsThreads() {
-        List<Integer> items = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            items.add(i);
-        }
-        return items;
-    }
-
-    /**
-     * Set the number of deployment threads.
-     * Jelly uses reflection here and 'getDeploymentsThreads()' to get the data by the method and variable (matching) names
-     * <f:option selected="${r==server.deploymentThreads}"
-     *
-     * @param deploymentThreads - Deployment threads number
-     */
-    @SuppressWarnings("unused")
-    public void setDeploymentThreads(int deploymentThreads) {
-        this.deploymentThreads = deploymentThreads;
     }
 
     public int getDeploymentThreads() {
