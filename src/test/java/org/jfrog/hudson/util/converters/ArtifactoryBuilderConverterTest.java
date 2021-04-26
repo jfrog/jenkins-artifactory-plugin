@@ -4,7 +4,7 @@ import hudson.ExtensionList;
 import jenkins.model.Jenkins;
 import org.hamcrest.Matchers;
 import org.jfrog.hudson.ArtifactoryBuilder;
-import org.jfrog.hudson.JfrogServers;
+import org.jfrog.hudson.JFrogPlatformInstance;
 import org.junit.Assert;
 import org.junit.ClassRule;
 import org.junit.Test;
@@ -33,11 +33,11 @@ public class ArtifactoryBuilderConverterTest {
         Files.copy(testFile.toPath(), targetPath);
         testBuilder.load();
         Assert.assertThat(testBuilder.getJfrogInstances(), Matchers.hasSize(2));
-        JfrogServers jfrogServer = testBuilder.getJfrogInstances().get(0);
+        JFrogPlatformInstance jfrogServer = testBuilder.getJfrogInstances().get(0);
         Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getId()));
         Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getServerId()));
         Assert.assertEquals(ARTIFACTORY_URL, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getArtifactoryUrl()));
-        Assert.assertNull(jfrogServer.getPlatformUrl());
+        Assert.assertNull(jfrogServer.getUrl());
         Files.delete(targetPath);
     }
 
@@ -49,11 +49,11 @@ public class ArtifactoryBuilderConverterTest {
         Files.copy(testFile.toPath(), targetPath);
         testBuilder.load();
         Assert.assertThat(testBuilder.getJfrogInstances(), Matchers.hasSize(1));
-        JfrogServers jfrogServer = testBuilder.getJfrogInstances().get(0);
+        JFrogPlatformInstance jfrogServer = testBuilder.getJfrogInstances().get(0);
         Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getId()));
         Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getServerId()));
         Assert.assertEquals(ARTIFACTORY_URL, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getArtifactoryUrl()));
-        Assert.assertEquals(PLATFORM_URL, Objects.requireNonNull(jfrogServer.getPlatformUrl()));
+        Assert.assertEquals(PLATFORM_URL, Objects.requireNonNull(jfrogServer.getUrl()));
         Files.delete(targetPath);
     }
 }

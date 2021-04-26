@@ -5,7 +5,7 @@ import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.util.XStream2;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.JfrogServers;
+import org.jfrog.hudson.JFrogPlatformInstance;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -45,9 +45,9 @@ public class ArtifactoryBuilderConverter extends XStream2.PassthruConverter<Arti
                 // Must not be null.
                 // Once the artifactory builder will get save in the new form(jfrog instances), it is no longer needed to do a conversion.
                 // In order to identify if a conversion has already made for the first time, we validate if 'jfrogInstances' is found.
-                List<JfrogServers> jfrogInstances = new ArrayList<>();
+                List<JFrogPlatformInstance> jfrogInstances = new ArrayList<>();
                 for (ArtifactoryServer artifactoryServer : artifactoryServers) {
-                    jfrogInstances.add(new JfrogServers(artifactoryServer));
+                    jfrogInstances.add(new JFrogPlatformInstance(artifactoryServer));
                 }
                 jfrogInstancesField.set(artifactoryBuilder, jfrogInstances);
             }

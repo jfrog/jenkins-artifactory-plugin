@@ -8,27 +8,27 @@ import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.executors.GetJfrogServersExecutor;
-import org.jfrog.hudson.pipeline.common.types.JfrogServers;
+import org.jfrog.hudson.pipeline.common.executors.GetJFrogPlatformInstancesExecutor;
+import org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 
 public class GetJfrogServersStep extends AbstractStepImpl {
-    static final String STEP_NAME = "getJfrogServers";
-    private final String jfrogServersID;
-    private JfrogServers jfrogServers;
+    static final String STEP_NAME = "getJFrogPlatformInstance";
+    private final String JFrogPlatformInstanceID;
+    private JFrogPlatformInstance JFrogPlatformInstance;
 
     @DataBoundConstructor
-    public GetJfrogServersStep(String jfrogServersID) {
-        this.jfrogServersID = jfrogServersID;
+    public GetJfrogServersStep(String JFrogPlatformInstanceID) {
+        this.JFrogPlatformInstanceID = JFrogPlatformInstanceID;
     }
 
-    private String getJfrogServersID() {
-        return jfrogServersID;
+    private String getJFrogPlatformInstanceID() {
+        return JFrogPlatformInstanceID;
     }
 
-    public static class Execution extends ArtifactorySynchronousStepExecution<JfrogServers> {
+    public static class Execution extends ArtifactorySynchronousStepExecution<JFrogPlatformInstance> {
 
         private transient final GetJfrogServersStep step;
 
@@ -39,17 +39,17 @@ public class GetJfrogServersStep extends AbstractStepImpl {
         }
 
         @Override
-        protected JfrogServers runStep() throws Exception {
-            String jfrogServersID = step.getJfrogServersID();
-            GetJfrogServersExecutor getArtifactoryServerExecutor = new GetJfrogServersExecutor(build, jfrogServersID);
+        protected JFrogPlatformInstance runStep() throws Exception {
+            String JFrogPlatformInstanceID = step.getJFrogPlatformInstanceID();
+            GetJFrogPlatformInstancesExecutor getArtifactoryServerExecutor = new GetJFrogPlatformInstancesExecutor(build, JFrogPlatformInstanceID);
             getArtifactoryServerExecutor.execute();
-            step.jfrogServers = getArtifactoryServerExecutor.getAJfrogServers();
-            return step.jfrogServers;
+            step.JFrogPlatformInstance = getArtifactoryServerExecutor.getJFrogPlatformInstance();
+            return step.JFrogPlatformInstance;
         }
 
         @Override
         public ArtifactoryServer getUsageReportServer() {
-            return Utils.prepareArtifactoryServer(step.getJfrogServersID(), null);
+            return Utils.prepareArtifactoryServer(step.getJFrogPlatformInstanceID(), null);
         }
 
         @Override

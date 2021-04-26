@@ -11,7 +11,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jfrog.build.client.ItemLastModified;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.JfrogServers;
+import org.jfrog.hudson.JFrogPlatformInstance;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.ProxyUtils;
@@ -158,11 +158,11 @@ public class ArtifactoryTrigger extends Trigger<BuildableItem> {
      *
      * @return a list of Artifactory servers
      */
-    public List<JfrogServers> getJfrogInstances() {
-        List<JfrogServers> jfrogInstances = new ArrayList<>(RepositoriesUtils.getJfrogInstances());
+    public List<JFrogPlatformInstance> getJfrogInstances() {
+        List<JFrogPlatformInstance> jfrogInstances = new ArrayList<>(RepositoriesUtils.getJFrogPlatformInstances());
         ArtifactoryServer propertyServer = getArtifactoryServerFromPipeline();
         if (propertyServer != null) {
-            jfrogInstances.add(new JfrogServers(propertyServer));
+            jfrogInstances.add(new JFrogPlatformInstance(propertyServer));
         }
         return jfrogInstances;
     }
@@ -189,8 +189,8 @@ public class ArtifactoryTrigger extends Trigger<BuildableItem> {
          *
          * @return a list of Artifactory servers
          */
-        public List<JfrogServers> getJfrogInstances() {
-            return RepositoriesUtils.getJfrogInstances();
+        public List<JFrogPlatformInstance> getJfrogInstances() {
+            return RepositoriesUtils.getJFrogPlatformInstances();
         }
     }
 }

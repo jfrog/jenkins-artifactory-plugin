@@ -10,7 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.executors.GetJfrogServersExecutor;
+import org.jfrog.hudson.pipeline.common.executors.GetJFrogPlatformInstancesExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.ConanClient;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -79,15 +79,15 @@ public class DeclarativePipelineUtils {
         if (buildDataFile == null) {
             // This server ID has not been configured as part of the declarative pipeline script.
             // Let's get it from the Jenkins configuration.
-            GetJfrogServersExecutor getJfrogServersExecutor = new GetJfrogServersExecutor(build, id);
+            GetJFrogPlatformInstancesExecutor getJFrogPlatformInstancesExecutor = new GetJFrogPlatformInstancesExecutor(build, id);
             try {
-                getJfrogServersExecutor.execute();
-            } catch (GetJfrogServersExecutor.ServerNotFoundException serverNotFound) {
+                getJFrogPlatformInstancesExecutor.execute();
+            } catch (GetJFrogPlatformInstancesExecutor.ServerNotFoundException serverNotFound) {
                 if (throwIfMissing) {
                     throw serverNotFound;
                 }
             }
-            return getJfrogServersExecutor.getAJfrogServers().getArtifactoryServer();
+            return getJFrogPlatformInstancesExecutor.getJFrogPlatformInstance().getArtifactoryServer();
         }
         JsonNode jsonNode = buildDataFile.get(CreateServerStep.STEP_NAME);
         ArtifactoryServer server = createMapper().treeToValue(jsonNode, ArtifactoryServer.class);

@@ -7,7 +7,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.executors.GetJfrogServersExecutor;
+import org.jfrog.hudson.pipeline.common.executors.GetJFrogPlatformInstancesExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -44,9 +44,9 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
         protected ArtifactoryServer runStep() throws Exception {
             String artifactoryServerID = step.getArtifactoryServerID();
             // jfrogServersID is the same as its Artifactory Server ID
-            GetJfrogServersExecutor getJfrogServersExecutor = new GetJfrogServersExecutor(build, artifactoryServerID);
-            getJfrogServersExecutor.execute();
-            step.artifactoryServer = getJfrogServersExecutor.getAJfrogServers().getArtifactoryServer();
+            GetJFrogPlatformInstancesExecutor getJFrogPlatformInstancesExecutor = new GetJFrogPlatformInstancesExecutor(build, artifactoryServerID);
+            getJFrogPlatformInstancesExecutor.execute();
+            step.artifactoryServer = getJFrogPlatformInstancesExecutor.getJFrogPlatformInstance().getArtifactoryServer();
             return step.artifactoryServer;
         }
 

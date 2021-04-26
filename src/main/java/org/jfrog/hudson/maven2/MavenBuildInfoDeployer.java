@@ -62,9 +62,9 @@ public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
 
     public void deploy() throws IOException {
         String url = configurator.getArtifactoryServer().getArtifactoryUrl() + "/api/build";
-        JfrogServers jfrogServer = RepositoriesUtils.getJfrogServers(configurator.getArtifactoryServer().getServerId());
+        JFrogPlatformInstance jfrogServer = RepositoriesUtils.getJFrogPlatformInstances(configurator.getArtifactoryServer().getServerId());
         listener.getLogger().println("Deploying build info to: " + url);
-        client.sendBuildInfo(buildInfo, jfrogServer.getPlatformUrl());
+        client.sendBuildInfo(buildInfo, jfrogServer.getUrl());
     }
 
     private void gatherModuleAndDependencyInfo(MavenModuleSetBuild mavenModulesBuild) {

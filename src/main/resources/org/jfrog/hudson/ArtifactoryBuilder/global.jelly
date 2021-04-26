@@ -20,7 +20,7 @@
 
             <f:repeatable name="jfrogInstances" var="instance" items="${descriptor.jfrogInstances}"
                           header="JFrog instance details" add="${%Add JFrog Platform Instance}">
-                <input type="hidden" name="stapler-class" value="org.jfrog.hudson.JfrogServers"/>
+                <input type="hidden" name="stapler-class" value="org.jfrog.hudson.JFrogPlatformInstance"/>
 
                 <r:blockWrapper style="width:100%">
                     <f:entry title="Instance ID" help="/plugin/artifactory/help/ArtifactoryBuilder/help-serverId.html">
@@ -29,7 +29,7 @@
 
                     <f:entry title="JFrog Platform URL" field="platformUrl"
                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-platform-url.html">
-                        <f:textbox field="platformUrl" value="${instance.platformUrl}"/>
+                        <f:textbox field="url" value="${instance.url}"/>
                     </f:entry>
                     <f:section title="Advanced Artifactory configuration">
                         <f:advanced>
@@ -54,7 +54,7 @@
                             <f:entry field="deploymentThreads" title="Number of threads for Generic uploads"
                                      help="/plugin/artifactory/help/ArtifactoryBuilder/help-deploymentThreads.html">
                                 <select class="setting-input" name="deploymentThreads">
-                                    <j:forEach var="r" items="${instance.deploymentsThreadsOptions}">
+                                    <j:forEach var="r" items="${instance.deploymentsThreads}">
                                         <f:option selected="${r==instance.deploymentThreads}"
                                                   value="${r}">${r}
                                         </f:option>
@@ -62,7 +62,7 @@
                                 </select>
                             </f:entry>
                             <f:optionalBlock name="instance.bypassProxy" title="Bypass HTTP proxy"
-                                             checked="${instance.bypassProxy}" inline="true"
+                                             checked="${instance.bypassProxy}"
                                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
                             </f:optionalBlock>
                         </f:advanced>

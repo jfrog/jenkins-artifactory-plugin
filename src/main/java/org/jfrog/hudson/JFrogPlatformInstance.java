@@ -8,13 +8,13 @@ import java.util.List;
 
 
 /**
- * Represents an instance of jenkins jfrog instance configuration page.
+ * Represents an instance of jenkins JFrog instance configuration page.
  */
-public class JfrogServers {
+public class JFrogPlatformInstance {
     public static final int DEFAULT_CONNECTION_TIMEOUT = 300;    // 5 Minutes
     public static final int DEFAULT_DEPLOYMENT_THREADS_NUMBER = 3;
 
-    private String platformUrl;
+    private String url;
     private String id;
     private ArtifactoryServer artifactoryServer;
     private CredentialsConfig deployerCredentialsConfig;
@@ -25,10 +25,10 @@ public class JfrogServers {
     private Integer deploymentThreads;
 
     @DataBoundConstructor
-    public JfrogServers(String instanceId, String artifactoryUrl, String platformUrl, CredentialsConfig deployerCredentialsConfig,
-                        CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry, Integer deploymentThreads) {
+    public JFrogPlatformInstance(String instanceId, String url, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
+                                 CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry, Integer deploymentThreads) {
         this.id = instanceId;
-        this.platformUrl = StringUtils.isNotEmpty(platformUrl) ? StringUtils.removeEnd(platformUrl, "/") : null;
+        this.url = StringUtils.isNotEmpty(url) ? StringUtils.removeEnd(url, "/") : null;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
         this.timeout = timeout > 0 ? timeout : DEFAULT_CONNECTION_TIMEOUT;
@@ -38,20 +38,20 @@ public class JfrogServers {
         artifactoryServer = new ArtifactoryServer(this.id, artifactoryUrl, this.deployerCredentialsConfig, this.resolverCredentialsConfig, this.timeout, this.bypassProxy, this.connectionRetry, this.deploymentThreads);
     }
 
-    public JfrogServers(ArtifactoryServer artifactoryServer) {
-        this(artifactoryServer.getServerId(), artifactoryServer.getArtifactoryUrl(), "", artifactoryServer.getDeployerCredentialsConfig(), artifactoryServer.getResolverCredentialsConfig(), artifactoryServer.getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnectionRetry(), artifactoryServer.getDeploymentThreads());
+    public JFrogPlatformInstance(ArtifactoryServer artifactoryServer) {
+        this(artifactoryServer.getServerId(), "", artifactoryServer.getArtifactoryUrl(), artifactoryServer.getDeployerCredentialsConfig(), artifactoryServer.getResolverCredentialsConfig(), artifactoryServer.getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnectionRetry(), artifactoryServer.getDeploymentThreads());
     }
 
-    public JfrogServers(org.jfrog.hudson.pipeline.common.types.ArtifactoryServer artifactoryServer) {
-        this("", artifactoryServer.getUrl(), "", artifactoryServer.createCredentialsConfig(), artifactoryServer.createCredentialsConfig(), artifactoryServer.getConnection().getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnection().getRetry(), artifactoryServer.getDeploymentThreads());
+    public JFrogPlatformInstance(org.jfrog.hudson.pipeline.common.types.ArtifactoryServer artifactoryServer) {
+        this("", "",artifactoryServer.getUrl(), artifactoryServer.createCredentialsConfig(), artifactoryServer.createCredentialsConfig(), artifactoryServer.getConnection().getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnection().getRetry(), artifactoryServer.getDeploymentThreads());
     }
 
     public String getId() {
         return id;
     }
 
-    public String getPlatformUrl() {
-        return platformUrl;
+    public String getUrl() {
+        return url;
     }
 
     public ArtifactoryServer getArtifactoryServer() {

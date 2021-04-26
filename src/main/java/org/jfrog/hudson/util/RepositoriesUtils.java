@@ -125,9 +125,9 @@ public abstract class RepositoriesUtils {
      * @return - ArtifactoryServer
      */
     public static ArtifactoryServer getArtifactoryServer(String key) {
-        JfrogServers jfrogServers = getJfrogServers(key);
-        if (jfrogServers != null) {
-            return jfrogServers.getArtifactoryServer();
+        JFrogPlatformInstance JFrogPlatformInstance = getJFrogPlatformInstances(key);
+        if (JFrogPlatformInstance != null) {
+            return JFrogPlatformInstance.getArtifactoryServer();
         }
         return null;
     }
@@ -136,14 +136,14 @@ public abstract class RepositoriesUtils {
      * Search for Jfrog instance by `key` (could be Artifactory server URL or serverId).
      *
      * @param key - The key on which to do a search.
-     * @return - JfrogServers
+     * @return - JFrogPlatformInstance
      */
-    public static JfrogServers getJfrogServers(String key) {
-        List<JfrogServers> jfrogInstances = getJfrogInstances();
+    public static JFrogPlatformInstance getJFrogPlatformInstances(String key) {
+        List<JFrogPlatformInstance> jfrogInstances = getJFrogPlatformInstances();
         if (jfrogInstances != null && jfrogInstances.size() > 0) {
-            for (JfrogServers jfrogServers : jfrogInstances) {
-                if (jfrogServers.getArtifactoryServer().getArtifactoryUrl().equals(key) || jfrogServers.getArtifactoryServer().getServerId().equals(key)) {
-                    return jfrogServers;
+            for (JFrogPlatformInstance JFrogPlatformInstance : jfrogInstances) {
+                if (JFrogPlatformInstance.getArtifactoryServer().getArtifactoryUrl().equals(key) || JFrogPlatformInstance.getArtifactoryServer().getServerId().equals(key)) {
+                    return JFrogPlatformInstance;
                 }
             }
         }
@@ -151,11 +151,11 @@ public abstract class RepositoriesUtils {
     }
 
     /**
-     * Returns the list of {@link org.jfrog.hudson.JfrogServers} configured.
+     * Returns the list of {@link JFrogPlatformInstance} configured.
      *
      * @return can be empty but never null.
      */
-    public static List<JfrogServers> getJfrogInstances() {
+    public static List<JFrogPlatformInstance> getJFrogPlatformInstances() {
         ArtifactoryBuilder.DescriptorImpl descriptor = (ArtifactoryBuilder.DescriptorImpl)
                 Hudson.get().getDescriptor(ArtifactoryBuilder.class);
         return descriptor.getJfrogInstances();

@@ -34,7 +34,7 @@ public class PublishBuildInfoExecutor implements Executor {
         buildInfo.filterVariables();
         buildInfo.appendVcs(Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
-        String platformUrl = pipelineServer.getJfrogServers() != null ? pipelineServer.getJfrogServers().getPlatformUrl() : null;
+        String platformUrl = pipelineServer.getJfrogServers() != null ? pipelineServer.getJfrogServers().getUrl() : null;
         try (ArtifactoryBuildInfoClient client = this.createArtifactoryClient(server, build, listener)) {
             buildInfo.createDeployer(build, listener, new ArtifactoryConfigurator(server), client, platformUrl).deploy();
         }

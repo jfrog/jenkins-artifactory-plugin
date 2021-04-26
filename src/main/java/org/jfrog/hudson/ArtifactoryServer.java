@@ -50,8 +50,8 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static org.jfrog.hudson.JfrogServers.DEFAULT_CONNECTION_TIMEOUT;
-import static org.jfrog.hudson.JfrogServers.DEFAULT_DEPLOYMENT_THREADS_NUMBER;
+import static org.jfrog.hudson.JFrogPlatformInstance.DEFAULT_CONNECTION_TIMEOUT;
+import static org.jfrog.hudson.JFrogPlatformInstance.DEFAULT_DEPLOYMENT_THREADS_NUMBER;
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**

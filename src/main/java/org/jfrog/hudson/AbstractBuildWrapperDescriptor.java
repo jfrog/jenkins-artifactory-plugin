@@ -61,12 +61,12 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
     }
 
     /**
-     * Returns the list of {@link org.jfrog.hudson.JfrogServers} configured.
+     * Returns the list of {@link JFrogPlatformInstance} configured.
      *
      * @return can be empty but never null.
      */
-    public List<JfrogServers> getJfrogInstances() {
-        return RepositoriesUtils.getJfrogInstances();
+    public List<JFrogPlatformInstance> getJfrogInstances() {
+        return RepositoriesUtils.getJFrogPlatformInstances();
     }
 
     @SuppressWarnings("unused")

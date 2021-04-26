@@ -23,7 +23,7 @@ import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfo
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.JfrogServers;
+import org.jfrog.hudson.JFrogPlatformInstance;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.jfpipelines.Utils;
 import org.junit.*;
@@ -183,9 +183,9 @@ public class PipelineTestBase {
         artifactoryBuilder.setJfrogPipelinesServer(server);
         CredentialsConfig cred = new CredentialsConfig("admin", "password", "cred1");
         CredentialsConfig platformCred = new CredentialsConfig(ARTIFACTORY_USERNAME, ARTIFACTORY_PASSWORD, null);
-        List<JfrogServers> artifactoryServers = new ArrayList<JfrogServers>() {{
-            add(new JfrogServers(new ArtifactoryServer("LOCAL", "http://127.0.0.1:8081/artifactory", cred, cred, 0, false, 3, null)));
-            add(new JfrogServers("PLATFORM", ARTIFACTORY_URL, PLATFORM_URL, platformCred, platformCred, 0, false, 3, null));
+        List<JFrogPlatformInstance> artifactoryServers = new ArrayList<JFrogPlatformInstance>() {{
+            add(new JFrogPlatformInstance(new ArtifactoryServer("LOCAL", "http://127.0.0.1:8081/artifactory", cred, cred, 0, false, 3, null)));
+            add(new JFrogPlatformInstance("PLATFORM",PLATFORM_URL, ARTIFACTORY_URL, platformCred, platformCred, 0, false, 3, null));
         }};
         artifactoryBuilder.setJfrogInstances(artifactoryServers);
     }

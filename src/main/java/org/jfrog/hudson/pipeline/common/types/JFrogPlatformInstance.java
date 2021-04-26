@@ -8,15 +8,15 @@ import java.io.Serializable;
 /**
  * Represents an instance of jfrog server instance from pipeline script.
  */
-public class JfrogServers implements Serializable {
+public class JFrogPlatformInstance implements Serializable {
     private final ArtifactoryServer artifactoryServer;
     private String id;
-    private String platformUrl;
+    private String url;
     private CpsScript cpsScript;
 
-    public JfrogServers(ArtifactoryServer artifactoryServer, String platformUrl, String id) {
+    public JFrogPlatformInstance(ArtifactoryServer artifactoryServer, String url, String id) {
         this.id = id;
-        this.platformUrl = StringUtils.removeEnd(platformUrl, "/");
+        this.url = StringUtils.removeEnd(url, "/");
         this.artifactoryServer = artifactoryServer;
     }
 
@@ -28,12 +28,12 @@ public class JfrogServers implements Serializable {
         this.cpsScript = cpsScript;
     }
 
-    public String getPlatformUrl() {
-        return platformUrl;
+    public String getUrl() {
+        return url;
     }
 
-    public void setPlatformUrl(String platformUrl) {
-        this.platformUrl = platformUrl;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getId() {
