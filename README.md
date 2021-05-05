@@ -33,7 +33,6 @@ To run unit tests execute the following command:
 #### Running integration tests
 Before running the integration tests, set the following environment variables.
 
-*JENKINS_ARTIFACTORY_URL*<br>
 *JENKINS_PLATFORM_URL*<br>
 *JENKINS_ARTIFACTORY_USERNAME*<br>
 *JENKINS_ARTIFACTORY_PASSWORD*<br>

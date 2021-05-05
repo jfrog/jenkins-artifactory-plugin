@@ -6,7 +6,7 @@ import java.nio.file.Paths
 
 node("TestSlave") {
     stage "Configure Artifactory"
-    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.name = "scripted:go test"
     buildInfo.number = "7"

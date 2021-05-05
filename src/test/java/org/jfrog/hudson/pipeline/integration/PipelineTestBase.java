@@ -58,8 +58,8 @@ public class PipelineTestBase {
     public static TemporaryFolder testTemporaryFolder = new TemporaryFolder();
 
     private static final String SLAVE_LABEL = "TestSlave";
-    private static final String ARTIFACTORY_URL = System.getenv("JENKINS_ARTIFACTORY_URL");
     private static final String PLATFORM_URL = System.getenv("JENKINS_PLATFORM_URL");
+    private static final String ARTIFACTORY_URL = org.apache.commons.lang.StringUtils.removeEnd(PLATFORM_URL, "/") + "/artifactory";
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_ARTIFACTORY_USERNAME");
     private static final String ARTIFACTORY_PASSWORD = System.getenv("JENKINS_ARTIFACTORY_PASSWORD");
     static final String JENKINS_XRAY_TEST_ENABLE = System.getenv("JENKINS_XRAY_TEST_ENABLE");
@@ -277,8 +277,8 @@ public class PipelineTestBase {
      * Verify ARTIFACTORY_URL, ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD
      */
     private static void verifyEnvironment() {
-        if (StringUtils.isBlank(ARTIFACTORY_URL)) {
-            throw new IllegalArgumentException("JENKINS_ARTIFACTORY_URL is not set");
+        if (StringUtils.isBlank(PLATFORM_URL)) {
+            throw new IllegalArgumentException("JENKINS_PLATFORM_URL is not set");
         }
         if (StringUtils.isBlank(ARTIFACTORY_USERNAME)) {
             throw new IllegalArgumentException("JENKINS_ARTIFACTORY_USERNAME is not set");

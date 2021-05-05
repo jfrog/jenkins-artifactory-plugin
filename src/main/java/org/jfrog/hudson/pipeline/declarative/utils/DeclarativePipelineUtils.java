@@ -86,6 +86,7 @@ public class DeclarativePipelineUtils {
                 if (throwIfMissing) {
                     throw serverNotFound;
                 }
+                return null;
             }
             return getJFrogPlatformInstancesExecutor.getJFrogPlatformInstance().getArtifactoryServer();
         }
