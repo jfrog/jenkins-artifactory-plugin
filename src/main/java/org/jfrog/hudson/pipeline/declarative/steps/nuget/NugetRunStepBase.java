@@ -71,6 +71,9 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
         this.args = args;
     }
 
+    @DataBoundSetter
+    public void setUseNugetV3(boolean useNugetV3) { nugetBuild.setUseNugetV3(useNugetV3); }
+
     public abstract String getUsageReportFeatureName();
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
