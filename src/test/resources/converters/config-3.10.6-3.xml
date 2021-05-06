@@ -2,8 +2,8 @@
 <org.jfrog.hudson.ArtifactoryBuilder_-DescriptorImpl plugin="artifactory@3.10.x-SNAPSHOT">
     <useCredentialsPlugin>true</useCredentialsPlugin>
     <jfrogInstances>
-        <org.jfrog.hudson.JfrogServers>
-            <platformUrl>https://jfrog.io</platformUrl>
+        <org.jfrog.hudson.JFrogPlatformInstance>
+            <url>https://jfrog.io</url>
             <id>1</id>
             <artifactoryServer>
                 <url>https://jfrog.io/artifactory</url>
@@ -21,7 +21,7 @@
                 </deployerCredentialsConfig>
             </artifactoryServer>
             <deployerCredentialsConfig reference="../artifactoryServer/deployerCredentialsConfig"/>
-        </org.jfrog.hudson.JfrogServers>
+        </org.jfrog.hudson.JFrogPlatformInstance>
     </jfrogInstances>
     <artifactoryServers>
         <org.jfrog.hudson.ArtifactoryServer>
