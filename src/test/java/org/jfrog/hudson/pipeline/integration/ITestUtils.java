@@ -27,6 +27,7 @@ import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.docker.DockerJavaWrapper;
 import org.jfrog.hudson.ArtifactoryServer;
+import org.jfrog.hudson.JFrogPlatformInstance;
 import org.jfrog.hudson.trigger.ArtifactoryTrigger;
 
 import java.io.IOException;
@@ -333,7 +334,8 @@ class ITestUtils {
         assertNotNull(artifactoryTrigger);
         ArtifactoryServer server = artifactoryTrigger.getArtifactoryServer();
         assertNotNull(server);
-        assertTrue(artifactoryTrigger.getJfrogInstances().stream().anyMatch(s -> s.getArtifactoryServer().getServerId().equals(server.getServerId())));
+        List<JFrogPlatformInstance> jfrogInstances = artifactoryTrigger.getJfrogInstances();
+        assertTrue(jfrogInstances.stream().anyMatch(s -> s.getArtifactoryServer().getArtifactoryUrl().equals(server.getArtifactoryUrl())));
         assertEquals("libs-release-local", artifactoryTrigger.getPaths());
         assertEquals("* * * * *", artifactoryTrigger.getSpec());
         return artifactoryTrigger;
