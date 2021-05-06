@@ -72,7 +72,7 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setUseNugetV3(boolean useNugetV3) { nugetBuild.setUseNugetV3(useNugetV3); }
+    public void setApiProtocol(String apiProtocol) { nugetBuild.setApiProtocol(apiProtocol); }
 
     public abstract String getUsageReportFeatureName();
 
