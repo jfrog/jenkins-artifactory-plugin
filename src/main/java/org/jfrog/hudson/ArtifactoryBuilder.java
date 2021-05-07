@@ -294,7 +294,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 throw new FormException("Please set the The JFrog Platform or Artifactory URL", "URL");
             }
             fillEmptyServers(jfrogInstances);
-            setJFrogInstances(jfrogInstances);
+            setJfrogInstances(jfrogInstances);
         }
 
         private void configureJFrogPipelinesServer(JSONObject o) {
@@ -422,11 +422,17 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return true;
         }
 
-         public List<JFrogPlatformInstance> getJFrogInstances() {
+        /**
+         * Used by Jenkins Jelly for displaying values.
+         */
+        public List<JFrogPlatformInstance> getJfrogInstances() {
             return jfrogInstances;
         }
 
-        public void setJFrogInstances(List<JFrogPlatformInstance> jfrogInstances) {
+        /**
+         * Used by Jenkins Jelly for setting values.
+         */
+        public void setJfrogInstances(List<JFrogPlatformInstance> jfrogInstances) {
             this.jfrogInstances = jfrogInstances;
         }
 

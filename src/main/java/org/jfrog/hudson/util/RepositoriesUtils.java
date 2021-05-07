@@ -158,7 +158,7 @@ public abstract class RepositoriesUtils {
     public static List<JFrogPlatformInstance> getJFrogPlatformInstances() {
         ArtifactoryBuilder.DescriptorImpl descriptor = (ArtifactoryBuilder.DescriptorImpl)
                 Hudson.get().getDescriptor(ArtifactoryBuilder.class);
-        return descriptor.getJFrogInstances();
+        return descriptor.getJfrogInstances();
     }
 
     public static List<Repository> createRepositoriesList(List<String> repositoriesValueList) {

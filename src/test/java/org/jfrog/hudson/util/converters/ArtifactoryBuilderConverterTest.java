@@ -32,8 +32,8 @@ public class ArtifactoryBuilderConverterTest {
         Path targetPath = new File(Jenkins.get().getRootDir(), ArtifactoryBuilder.class.getName() + ".xml").toPath();
         Files.copy(testFile.toPath(), targetPath);
         testBuilder.load();
-        Assert.assertThat(testBuilder.getJFrogInstances(), Matchers.hasSize(2));
-        JFrogPlatformInstance jfrogServer = testBuilder.getJFrogInstances().get(0);
+        Assert.assertThat(testBuilder.getJfrogInstances(), Matchers.hasSize(2));
+        JFrogPlatformInstance jfrogServer = testBuilder.getJfrogInstances().get(0);
         Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getId()));
         Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getServerId()));
         Assert.assertEquals(ARTIFACTORY_URL, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getArtifactoryUrl()));
@@ -48,8 +48,8 @@ public class ArtifactoryBuilderConverterTest {
         Path targetPath = new File(Jenkins.get().getRootDir(), ArtifactoryBuilder.class.getName() + ".xml").toPath();
         Files.copy(testFile.toPath(), targetPath);
         testBuilder.load();
-        Assert.assertThat(testBuilder.getJFrogInstances(), Matchers.hasSize(1));
-        JFrogPlatformInstance jfrogServer = testBuilder.getJFrogInstances().get(0);
+        Assert.assertThat(testBuilder.getJfrogInstances(), Matchers.hasSize(1));
+        JFrogPlatformInstance jfrogServer = testBuilder.getJfrogInstances().get(0);
         Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getId()));
         Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getServerId()));
         Assert.assertEquals(ARTIFACTORY_URL, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getArtifactoryUrl()));
