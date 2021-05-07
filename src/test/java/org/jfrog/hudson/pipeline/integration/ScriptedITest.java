@@ -53,7 +53,7 @@ public class ScriptedITest extends CommonITestsPipeline {
 
     @Test
     public void platformUploadTest() throws Exception {
-        super.uploadTest("scripted:platformUpload test", "uploadUsingPlatformConfig");
+        super.uploadTest("scripted:platform upload test", "uploadUsingPlatformConfig");
     }
 
     @Test
