@@ -133,7 +133,7 @@ public abstract class RepositoriesUtils {
     }
 
     /**
-     * Search for Jfrog instance by `key` (could be Artifactory server URL or serverId).
+     * Search for JFrog instance by `key` (could be Artifactory server URL or serverId).
      *
      * @param key - The key on which to do a search.
      * @return - JFrogPlatformInstance
@@ -158,7 +158,7 @@ public abstract class RepositoriesUtils {
     public static List<JFrogPlatformInstance> getJFrogPlatformInstances() {
         ArtifactoryBuilder.DescriptorImpl descriptor = (ArtifactoryBuilder.DescriptorImpl)
                 Hudson.get().getDescriptor(ArtifactoryBuilder.class);
-        return descriptor.getJfrogInstances();
+        return descriptor.getJFrogInstances();
     }
 
     public static List<Repository> createRepositoriesList(List<String> repositoriesValueList) {

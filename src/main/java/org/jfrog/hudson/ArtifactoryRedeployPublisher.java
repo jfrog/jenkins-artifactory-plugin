@@ -551,7 +551,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
         /**
          * Returns the list of {@link JFrogPlatformInstance} configured.
-         *
+         * Used by Jenkins Jelly for displaying values
          * @return can be empty but never null.
          */
         public List<JFrogPlatformInstance> getJfrogInstances() {

@@ -43,7 +43,7 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
         @Override
         protected ArtifactoryServer runStep() throws Exception {
             String artifactoryServerID = step.getArtifactoryServerID();
-            // jfrogServersID is the same as its Artifactory Server ID
+            // JFrogInstancesID is the same as its ArtifactoryServerID
             GetJFrogPlatformInstancesExecutor getJFrogPlatformInstancesExecutor = new GetJFrogPlatformInstancesExecutor(build, artifactoryServerID);
             getJFrogPlatformInstancesExecutor.execute();
             step.artifactoryServer = getJFrogPlatformInstancesExecutor.getJFrogPlatformInstance().getArtifactoryServer();

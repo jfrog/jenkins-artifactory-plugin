@@ -187,7 +187,7 @@ public class PipelineTestBase {
             add(new JFrogPlatformInstance(new ArtifactoryServer("LOCAL", "http://127.0.0.1:8081/artifactory", cred, cred, 0, false, 3, null)));
             add(new JFrogPlatformInstance("PLATFORM",PLATFORM_URL, ARTIFACTORY_URL, platformCred, platformCred, 0, false, 3, null));
         }};
-        artifactoryBuilder.setJfrogInstances(artifactoryServers);
+        artifactoryBuilder.setJFrogInstances(artifactoryServers);
     }
 
     /**

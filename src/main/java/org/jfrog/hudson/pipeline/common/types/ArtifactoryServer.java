@@ -47,7 +47,7 @@ public class ArtifactoryServer implements Serializable {
     private boolean usesCredentialsId;
     private final Connection connection = new Connection();
     private int deploymentThreads;
-    private JFrogPlatformInstance JFrogPlatformInstance;
+    private JFrogPlatformInstance jfrogPlatformInstance;
 
     public ArtifactoryServer() {
     }
@@ -382,11 +382,11 @@ public class ArtifactoryServer implements Serializable {
         this.deploymentThreads = deploymentThreads;
     }
 
-    public JFrogPlatformInstance getJfrogServers() {
-        return JFrogPlatformInstance;
+    public JFrogPlatformInstance getJfrogPlatformInstance() {
+        return jfrogPlatformInstance;
     }
 
-    public void setJfrogServers(JFrogPlatformInstance JFrogPlatformInstance) {
-        this.JFrogPlatformInstance = JFrogPlatformInstance;
+    public void setJfrogPlatformInstance(JFrogPlatformInstance jfrogPlatformInstance) {
+        this.jfrogPlatformInstance = jfrogPlatformInstance;
     }
 }

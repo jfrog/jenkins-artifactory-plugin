@@ -69,7 +69,7 @@
 
                     <f:dropdownList name="resolverDetails" title="${%Artifactory server}">
                         <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
-                            <f:dropdownListBlock value="${s.id}" title="${s.artifactoryServer.artifactoryUrl}"
+                            <f:dropdownListBlock value="${s.id}" title="${s.id} (${s.artifactoryServer.artifactoryUrl})"
                                                  selected="${s.id==instance.resolverDetails.artifactoryName}">
 
                                 <f:nested>

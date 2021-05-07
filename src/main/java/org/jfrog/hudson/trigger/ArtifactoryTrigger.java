@@ -115,7 +115,7 @@ public class ArtifactoryTrigger extends Trigger<BuildableItem> {
     }
 
     /**
-     * Get Artifactory server from the Jfrog Instances configuration by server ID. Throw RuntimeException if not exist.
+     * Get Artifactory server from the JFrog Instances configuration by server ID. Throw RuntimeException if not exist.
      *
      * @param serverId - The server ID to look
      * @return artifactory server
@@ -153,10 +153,10 @@ public class ArtifactoryTrigger extends Trigger<BuildableItem> {
     }
 
     /**
-     * Get a list of Jfrog instances. Used in the Jelly to show the available servers to select.
+     * Get a list of JFrog instances. Used in the Jelly to show the available servers to select.
      * If applicable, show the server selected in the pipeline.
      *
-     * @return a list of Artifactory servers
+     * @return a list of JFrog Platform instances
      */
     public List<JFrogPlatformInstance> getJfrogInstances() {
         List<JFrogPlatformInstance> jfrogInstances = new ArrayList<>(RepositoriesUtils.getJFrogPlatformInstances());
@@ -184,10 +184,10 @@ public class ArtifactoryTrigger extends Trigger<BuildableItem> {
         }
 
         /**
-         * Get a list of Artifactory servers.
+         * Get a list of JFrog platform instance.
          * Used in the Jelly to show the available servers to select when the ArtifactoryTrigger instance is yet to be created.
          *
-         * @return a list of Artifactory servers
+         * @return a list of JFrog Platform instances
          */
         public List<JFrogPlatformInstance> getJfrogInstances() {
             return RepositoriesUtils.getJFrogPlatformInstances();

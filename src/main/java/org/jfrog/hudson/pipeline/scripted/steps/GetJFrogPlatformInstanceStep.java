@@ -14,13 +14,13 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 
-public class GetJfrogServersStep extends AbstractStepImpl {
+public class GetJFrogPlatformInstanceStep extends AbstractStepImpl {
     static final String STEP_NAME = "getJFrogPlatformInstance";
     private final String JFrogPlatformInstanceID;
     private JFrogPlatformInstance JFrogPlatformInstance;
 
     @DataBoundConstructor
-    public GetJfrogServersStep(String JFrogPlatformInstanceID) {
+    public GetJFrogPlatformInstanceStep(String JFrogPlatformInstanceID) {
         this.JFrogPlatformInstanceID = JFrogPlatformInstanceID;
     }
 
@@ -30,10 +30,10 @@ public class GetJfrogServersStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousStepExecution<JFrogPlatformInstance> {
 
-        private transient final GetJfrogServersStep step;
+        private transient final GetJFrogPlatformInstanceStep step;
 
         @Inject
-        public Execution(GetJfrogServersStep step, StepContext context) throws IOException, InterruptedException {
+        public Execution(GetJFrogPlatformInstanceStep step, StepContext context) throws IOException, InterruptedException {
             super(context);
             this.step = step;
         }
@@ -72,7 +72,7 @@ public class GetJfrogServersStep extends AbstractStepImpl {
 
         @Override
         public String getDisplayName() {
-            return "Get Jfrog servers from Jenkins config";
+            return "Get JFrog servers from Jenkins config";
         }
 
         @Override

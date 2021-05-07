@@ -9,19 +9,19 @@ import org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance;
 import java.io.Serializable;
 import java.util.Map;
 
-public class JfrogPipelineGlobal implements Serializable {
+public class JFrogPipelineGlobal implements Serializable {
     private final CpsScript cpsScript;
     private JFrogPlatformInstance JFrogPlatformInstance;
 
-    public JfrogPipelineGlobal(CpsScript script) {
+    public JFrogPipelineGlobal(CpsScript script) {
         this.cpsScript = script;
     }
 
     @Whitelisted
-    public JfrogPipelineGlobal instance(String instanceId) {
+    public JFrogPipelineGlobal instance(String instanceId) {
         Map<String, Object> stepVariables = Maps.newLinkedHashMap();
-        stepVariables.put("jfrogServersID", instanceId);
-        JFrogPlatformInstance = (JFrogPlatformInstance) cpsScript.invokeMethod("getJfrogServers", stepVariables);
+        stepVariables.put("JFrogPlatformInstanceID", instanceId);
+        JFrogPlatformInstance = (JFrogPlatformInstance) cpsScript.invokeMethod("getJFrogPlatformInstance", stepVariables);
         JFrogPlatformInstance.setCpsScript(cpsScript);
         JFrogPlatformInstance.getArtifactoryServer().setCpsScript(cpsScript);
         return this;

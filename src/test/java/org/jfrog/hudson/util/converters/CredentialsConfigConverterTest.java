@@ -32,8 +32,8 @@ public class CredentialsConfigConverterTest {
         File testFile = new File(getClass().getResource("/converters/config-3.5.0.xml").getFile());
         Files.copy(testFile.toPath(), new File(Jenkins.get().getRootDir(), ArtifactoryBuilder.class.getName() + ".xml").toPath());
         testBuilder.load();
-        Assert.assertThat(testBuilder.getJfrogInstances(), Matchers.hasSize(1));
-        ArtifactoryServer artifactoryServer = testBuilder.getJfrogInstances().get(0).getArtifactoryServer();
+        Assert.assertThat(testBuilder.getJFrogInstances(), Matchers.hasSize(1));
+        ArtifactoryServer artifactoryServer = testBuilder.getJFrogInstances().get(0).getArtifactoryServer();
         Assert.assertEquals(DEPLOYER_USERNAME, Objects.requireNonNull(artifactoryServer.getDeployerCredentialsConfig().getUsername()));
         Assert.assertEquals(DEPLOYER_PASSWORD, Objects.requireNonNull(artifactoryServer.getDeployerCredentialsConfig().getPassword()).getPlainText());
         Assert.assertEquals(RESOLVER_USERNAME, Objects.requireNonNull(artifactoryServer.getResolverCredentialsConfig().getUsername()));

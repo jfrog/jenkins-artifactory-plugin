@@ -78,7 +78,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         private boolean useCredentialsPlugin;
         private List<JFrogPlatformInstance> jfrogInstances;
         /**
-         * @deprecated: Use org.jfrog.hudson.ArtifactoryBuilder.DescriptorImpl#getJfrogInstances()
+         * @deprecated: Use org.jfrog.hudson.ArtifactoryBuilder.DescriptorImpl#getJFrogInstances()
          */
         @Deprecated
         private List<ArtifactoryServer> artifactoryServers;
@@ -262,7 +262,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             Jenkins jenkins = Jenkins.getInstanceOrNull();
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
                 boolean useCredentialsPlugin = (Boolean) o.get("useCredentialsPlugin");
-                configureJfrogServers(req, o);
+                configureJFrogInstances(req, o);
                 configureJFrogPipelinesServer(o);
                 if (useCredentialsPlugin && !this.useCredentialsPlugin) {
                     resetJobsCredentials();
@@ -275,14 +275,14 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             throw new FormException("User doesn't have permissions to save", "Server ID");
         }
 
-        private void configureJfrogServers(StaplerRequest req, JSONObject o) throws FormException {
+        private void configureJFrogInstances(StaplerRequest req, JSONObject o) throws FormException {
             List<JFrogPlatformInstance> jfrogInstances = Lists.newArrayList();
             Object jfrogInstancesObj = o.get("jfrogInstances"); // an array or single object
             if (!JSONNull.getInstance().equals(jfrogInstancesObj)) {
                 jfrogInstances = req.bindJSONToList(JFrogPlatformInstance.class, jfrogInstancesObj);
             }
 
-            if (!isJfrogServersIDConfigured(jfrogInstances)) {
+            if (!isJFrogInstancesIDConfigured(jfrogInstances)) {
                 throw new FormException("Please set the Instance ID.", "InstanceID");
             }
 
@@ -294,7 +294,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 throw new FormException("Please set the The JFrog Platform or Artifactory URL", "URL");
             }
             fillEmptyServers(jfrogInstances);
-            setJfrogInstances(jfrogInstances);
+            setJFrogInstances(jfrogInstances);
         }
 
         private void configureJFrogPipelinesServer(JSONObject o) {
@@ -369,11 +369,11 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             this.useCredentialsPlugin = useCredentialsPlugin;
         }
 
-        private boolean isEmptyUrls(List<JFrogPlatformInstance> JfrogInstances) {
-            if (JfrogInstances == null) {
+        private boolean isEmptyUrls(List<JFrogPlatformInstance> jfrogInstances) {
+            if (jfrogInstances == null) {
                 return false;
             }
-            for (JFrogPlatformInstance instance : JfrogInstances) {
+            for (JFrogPlatformInstance instance : jfrogInstances) {
                 if (StringUtils.isBlank(instance.getUrl()) && StringUtils.isBlank(instance.getArtifactoryServer().getArtifactoryUrl())) {
                     return true;
                 }
@@ -381,11 +381,11 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return false;
         }
 
-        private boolean fillEmptyServers(List<JFrogPlatformInstance> JfrogInstances) {
-            if (JfrogInstances == null) {
+        private boolean fillEmptyServers(List<JFrogPlatformInstance> jfrogInstances) {
+            if (jfrogInstances == null) {
                 return false;
             }
-            for (JFrogPlatformInstance instance : JfrogInstances) {
+            for (JFrogPlatformInstance instance : jfrogInstances) {
                 if (StringUtils.isBlank(instance.getArtifactoryServer().getArtifactoryUrl())) {
                     instance.getArtifactoryServer().setArtifactoryUrl(instance.getUrl() + "/artifactory");
                 }
@@ -393,12 +393,12 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return false;
         }
 
-        private boolean isInstanceDuplicated(List<JFrogPlatformInstance> JfrogInstances) {
+        private boolean isInstanceDuplicated(List<JFrogPlatformInstance> jfrogInstances) {
             Set<String> serversNames = new HashSet<>();
-            if (JfrogInstances == null) {
+            if (jfrogInstances == null) {
                 return false;
             }
-            for (JFrogPlatformInstance instance : JfrogInstances) {
+            for (JFrogPlatformInstance instance : jfrogInstances) {
                 String id = instance.getId();
                 if (serversNames.contains(id)) {
                     return true;
@@ -408,11 +408,11 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return false;
         }
 
-        private boolean isJfrogServersIDConfigured(List<JFrogPlatformInstance> JfrogInstances) {
-            if (JfrogInstances == null) {
+        private boolean isJFrogInstancesIDConfigured(List<JFrogPlatformInstance> jfrogInstances) {
+            if (jfrogInstances == null) {
                 return true;
             }
-            for (JFrogPlatformInstance server : JfrogInstances) {
+            for (JFrogPlatformInstance server : jfrogInstances) {
                 String platformId = server.getId();
                 String artifactoryId = server.getArtifactoryServer().getServerId();
                 if (StringUtils.isBlank(platformId) || StringUtils.isBlank(artifactoryId)) {
@@ -422,11 +422,11 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             return true;
         }
 
-        public List<JFrogPlatformInstance> getJfrogInstances() {
+         public List<JFrogPlatformInstance> getJFrogInstances() {
             return jfrogInstances;
         }
 
-        public void setJfrogInstances(List<JFrogPlatformInstance> jfrogInstances) {
+        public void setJFrogInstances(List<JFrogPlatformInstance> jfrogInstances) {
             this.jfrogInstances = jfrogInstances;
         }
 

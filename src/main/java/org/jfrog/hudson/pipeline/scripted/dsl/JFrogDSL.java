@@ -8,11 +8,11 @@ import org.jenkinsci.plugins.workflow.cps.GlobalVariable;
 import javax.annotation.Nonnull;
 
 @Extension
-public class JfrogDSL extends GlobalVariable {
+public class JFrogDSL extends GlobalVariable {
     @Nonnull
     @Override
     public String getName() {
-        return "Jfrog";
+        return "JFrog";
     }
 
     @Nonnull
@@ -23,7 +23,7 @@ public class JfrogDSL extends GlobalVariable {
         if (binding.hasVariable(getName())) {
             jfrog = binding.getVariable(getName());
         } else {
-            jfrog = new JfrogPipelineGlobal(cpsScript);
+            jfrog = new JFrogPipelineGlobal(cpsScript);
             binding.setVariable(getName(), jfrog);
         }
         return jfrog;

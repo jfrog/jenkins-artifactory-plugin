@@ -11,12 +11,12 @@ import java.util.List;
 
 public class GetJFrogPlatformInstancesExecutor implements Executor {
 
-    private final String jfrogServersID;
+    private final String jfrogInstancesID;
     private final Run<?, ?> build;
     private org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance JFrogPlatformInstance;
 
-    public GetJFrogPlatformInstancesExecutor(Run<?, ?> build, String jfrogServersID) {
-        this.jfrogServersID = jfrogServersID;
+    public GetJFrogPlatformInstancesExecutor(Run<?, ?> build, String jfrogInstancesID) {
+        this.jfrogInstancesID = jfrogInstancesID;
         this.build = build;
     }
 
@@ -26,7 +26,7 @@ public class GetJFrogPlatformInstancesExecutor implements Executor {
 
     @Override
     public void execute() {
-        if (StringUtils.isEmpty(jfrogServersID)) {
+        if (StringUtils.isEmpty(jfrogInstancesID)) {
             throw new ServerNotFoundException("JFrog Instance ID is mandatory");
         }
         List<JFrogPlatformInstance> jfrogInstancesFound = new ArrayList<>();
@@ -35,20 +35,20 @@ public class GetJFrogPlatformInstancesExecutor implements Executor {
             throw new ServerNotFoundException("No JFrog Instances were configured");
         }
         for (JFrogPlatformInstance instance : jfrogInstances) {
-            if (instance.getId().equals(jfrogServersID)) {
+            if (instance.getId().equals(jfrogInstancesID)) {
                 jfrogInstancesFound.add(instance);
             }
         }
         if (jfrogInstancesFound.isEmpty()) {
-            throw new ServerNotFoundException("Couldn't find JFrog Instance ID: " + jfrogServersID);
+            throw new ServerNotFoundException("Couldn't find JFrog Instance ID: " + jfrogInstancesID);
         }
         if (jfrogInstancesFound.size() > 1) {
-            throw new ServerNotFoundException("Duplicate configured JFrog instance ID: " + jfrogServersID);
+            throw new ServerNotFoundException("Duplicate configured JFrog instance ID: " + jfrogInstancesID);
         }
         JFrogPlatformInstance JFrogPlatformInstance = jfrogInstancesFound.get(0);
         ArtifactoryServer artifactoryServer = new ArtifactoryServer(JFrogPlatformInstance.getArtifactoryServer(), build.getParent());
         this.JFrogPlatformInstance = new org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance(artifactoryServer, JFrogPlatformInstance.getUrl(), JFrogPlatformInstance.getId());
-        artifactoryServer.setJfrogServers(this.JFrogPlatformInstance);
+        artifactoryServer.setJfrogPlatformInstance(this.JFrogPlatformInstance);
     }
 
     public static class ServerNotFoundException extends RuntimeException {
