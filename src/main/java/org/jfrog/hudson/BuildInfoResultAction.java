@@ -109,7 +109,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         } else {
             buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         }
-        return createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber, platformUrl, buildInfo.getStarted());
+        return createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber, platformUrl, String.valueOf(buildInfo.getStartedMillis()));
     }
 
     private String generateUrl(String artifactoryUrl, Run build, String buildName) {
