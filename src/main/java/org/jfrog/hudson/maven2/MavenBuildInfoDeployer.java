@@ -33,11 +33,9 @@ import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.builder.DependencyBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.hudson.AbstractBuildInfoDeployer;
-import org.jfrog.hudson.BuildInfoAwareConfigurator;
-import org.jfrog.hudson.MavenDependenciesRecord;
-import org.jfrog.hudson.MavenDependency;
+import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.hudson.util.RepositoriesUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -64,8 +62,9 @@ public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
 
     public void deploy() throws IOException {
         String url = configurator.getArtifactoryServer().getArtifactoryUrl() + "/api/build";
+        JFrogPlatformInstance jfrogServer = RepositoriesUtils.getJFrogPlatformInstances(configurator.getArtifactoryServer().getServerId());
         listener.getLogger().println("Deploying build info to: " + url);
-        client.sendBuildInfo(buildInfo);
+        client.sendBuildInfo(buildInfo, jfrogServer.getUrl());
     }
 
     private void gatherModuleAndDependencyInfo(MavenModuleSetBuild mavenModulesBuild) {

@@ -11,22 +11,17 @@ import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
-import org.jfrog.build.api.*;
 import org.jfrog.build.api.Module;
+import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.client.DeployableArtifactDetail;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployableArtifactsUtils;
-import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.BuildInfoDeployer;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
-import org.jfrog.hudson.util.CredentialManager;
-import org.jfrog.hudson.util.JenkinsBuildInfoLog;
-import org.jfrog.hudson.util.ProxyUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -257,9 +252,9 @@ public class BuildInfo implements Serializable {
         return this.issues.convertFromPipelineIssues();
     }
 
-    public BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryBuildInfoClient client)
+    public BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryBuildInfoClient client, String platformUrl)
             throws InterruptedException, NoSuchAlgorithmException, IOException {
-        return new BuildInfoDeployer(config, client, build, listener, this);
+        return new BuildInfoDeployer(config, client, build, listener, this, platformUrl);
     }
 
     public void setCpsScript(CpsScript cpsScript) {

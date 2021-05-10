@@ -50,7 +50,7 @@ public class ArtifactoryProjectAction implements ProminentProjectAction {
     }
 
     public String getUrlName() {
-        return RepositoriesUtils.getArtifactoryServer(artifactoryServerName, RepositoriesUtils.getArtifactoryServers()).getArtifactoryUrl() + urlSuffix;
+        return RepositoriesUtils.getArtifactoryServer(artifactoryServerName).getArtifactoryUrl() + urlSuffix;
     }
 
     private String generateUrlSuffix(AbstractProject<?, ?> project) {

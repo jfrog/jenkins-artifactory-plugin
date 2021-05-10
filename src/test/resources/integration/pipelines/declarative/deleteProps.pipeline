@@ -8,7 +8,7 @@ node("TestSlave") {
     stage "Configuration"
     rtServer(
             id: serverId,
-            url: "${env.JENKINS_ARTIFACTORY_URL}",
+            url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory',
             username: "${env.JENKINS_ARTIFACTORY_USERNAME}",
             password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     )

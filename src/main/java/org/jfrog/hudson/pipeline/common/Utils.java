@@ -130,7 +130,7 @@ public class Utils {
             return new org.jfrog.hudson.ArtifactoryServer(null, pipelineServer.getUrl(), credentials,
                     credentials, pipelineServer.getConnection().getTimeout(), pipelineServer.isBypassProxy(), pipelineServer.getConnection().getRetry(), pipelineServer.getDeploymentThreads());
         }
-        return RepositoriesUtils.getArtifactoryServer(artifactoryServerID, RepositoriesUtils.getArtifactoryServers());
+        return RepositoriesUtils.getArtifactoryServer(artifactoryServerID);
     }
 
     public static BuildInfo prepareBuildinfo(Run build, BuildInfo buildinfo) {

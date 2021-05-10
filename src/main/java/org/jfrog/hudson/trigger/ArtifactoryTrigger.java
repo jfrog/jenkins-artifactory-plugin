@@ -11,6 +11,7 @@ import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jfrog.build.client.ItemLastModified;
 import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.ArtifactoryServer;
+import org.jfrog.hudson.JFrogPlatformInstance;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.jfrog.hudson.util.ProxyUtils;
@@ -114,13 +115,13 @@ public class ArtifactoryTrigger extends Trigger<BuildableItem> {
     }
 
     /**
-     * Get Artifactory server from the global configuration by server ID. Throw RuntimeException if not exist.
+     * Get Artifactory server from the JFrog Instances configuration by server ID. Throw RuntimeException if not exist.
      *
      * @param serverId - The server ID to look
      * @return artifactory server
      */
     private ArtifactoryServer getGlobalArtifactoryServer(String serverId) {
-        ArtifactoryServer server = RepositoriesUtils.getArtifactoryServer(serverId, RepositoriesUtils.getArtifactoryServers());
+        ArtifactoryServer server = RepositoriesUtils.getArtifactoryServer(serverId);
         if (server == null) {
             handleServerNotExist(serverId);
         }
@@ -152,18 +153,18 @@ public class ArtifactoryTrigger extends Trigger<BuildableItem> {
     }
 
     /**
-     * Get a list of Artifactory servers. Used in the Jelly to show the available servers to select.
+     * Get a list of JFrog instances. Used in the Jelly to show the available servers to select.
      * If applicable, show the server selected in the pipeline.
      *
-     * @return a list of Artifactory servers
+     * @return a list of JFrog Platform instances
      */
-    public List<ArtifactoryServer> getArtifactoryServers() {
-        List<ArtifactoryServer> servers = new ArrayList<>(RepositoriesUtils.getArtifactoryServers());
+    public List<JFrogPlatformInstance> getJfrogInstances() {
+        List<JFrogPlatformInstance> jfrogInstances = new ArrayList<>(RepositoriesUtils.getJFrogPlatformInstances());
         ArtifactoryServer propertyServer = getArtifactoryServerFromPipeline();
         if (propertyServer != null) {
-            servers.add(propertyServer);
+            jfrogInstances.add(new JFrogPlatformInstance(propertyServer));
         }
-        return servers;
+        return jfrogInstances;
     }
 
     @Override
@@ -183,13 +184,13 @@ public class ArtifactoryTrigger extends Trigger<BuildableItem> {
         }
 
         /**
-         * Get a list of Artifactory servers.
+         * Get a list of JFrog platform instance.
          * Used in the Jelly to show the available servers to select when the ArtifactoryTrigger instance is yet to be created.
          *
-         * @return a list of Artifactory servers
+         * @return a list of JFrog Platform instances
          */
-        public List<ArtifactoryServer> getArtifactoryServers() {
-            return RepositoriesUtils.getArtifactoryServers();
+        public List<JFrogPlatformInstance> getJfrogInstances() {
+            return RepositoriesUtils.getJFrogPlatformInstances();
         }
     }
 }

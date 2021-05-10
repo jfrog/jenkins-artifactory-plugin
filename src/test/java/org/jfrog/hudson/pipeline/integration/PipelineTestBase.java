@@ -23,6 +23,7 @@ import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfo
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
+import org.jfrog.hudson.JFrogPlatformInstance;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.jfpipelines.Utils;
 import org.junit.*;
@@ -57,7 +58,8 @@ public class PipelineTestBase {
     public static TemporaryFolder testTemporaryFolder = new TemporaryFolder();
 
     private static final String SLAVE_LABEL = "TestSlave";
-    private static final String ARTIFACTORY_URL = System.getenv("JENKINS_ARTIFACTORY_URL");
+    private static final String PLATFORM_URL = System.getenv("JENKINS_PLATFORM_URL");
+    private static final String ARTIFACTORY_URL = org.apache.commons.lang.StringUtils.removeEnd(PLATFORM_URL, "/") + "/artifactory";
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_ARTIFACTORY_USERNAME");
     private static final String ARTIFACTORY_PASSWORD = System.getenv("JENKINS_ARTIFACTORY_PASSWORD");
     static final String JENKINS_XRAY_TEST_ENABLE = System.getenv("JENKINS_XRAY_TEST_ENABLE");
@@ -180,10 +182,12 @@ public class PipelineTestBase {
         JFrogPipelinesServer server = new JFrogPipelinesServer("http://127.0.0.1:1080", CredentialsConfig.EMPTY_CREDENTIALS_CONFIG, 300, false, 3);
         artifactoryBuilder.setJfrogPipelinesServer(server);
         CredentialsConfig cred = new CredentialsConfig("admin", "password", "cred1");
-        List<ArtifactoryServer> artifactoryServers = new ArrayList<ArtifactoryServer>() {{
-            add(new ArtifactoryServer("LOCAL", "http://127.0.0.1:8081/artifactory", cred, cred, 0, false, 3, null));
+        CredentialsConfig platformCred = new CredentialsConfig(ARTIFACTORY_USERNAME, ARTIFACTORY_PASSWORD, null);
+        List<JFrogPlatformInstance> artifactoryServers = new ArrayList<JFrogPlatformInstance>() {{
+            add(new JFrogPlatformInstance(new ArtifactoryServer("LOCAL", "http://127.0.0.1:8081/artifactory", cred, cred, 0, false, 3, null)));
+            add(new JFrogPlatformInstance("PLATFORM",PLATFORM_URL, ARTIFACTORY_URL, platformCred, platformCred, 0, false, 3, null));
         }};
-        artifactoryBuilder.setArtifactoryServers(artifactoryServers);
+        artifactoryBuilder.setJfrogInstances(artifactoryServers);
     }
 
     /**
@@ -273,8 +277,8 @@ public class PipelineTestBase {
      * Verify ARTIFACTORY_URL, ARTIFACTORY_USERNAME and ARTIFACTORY_PASSWORD
      */
     private static void verifyEnvironment() {
-        if (StringUtils.isBlank(ARTIFACTORY_URL)) {
-            throw new IllegalArgumentException("JENKINS_ARTIFACTORY_URL is not set");
+        if (StringUtils.isBlank(PLATFORM_URL)) {
+            throw new IllegalArgumentException("JENKINS_PLATFORM_URL is not set");
         }
         if (StringUtils.isBlank(ARTIFACTORY_USERNAME)) {
             throw new IllegalArgumentException("JENKINS_ARTIFACTORY_USERNAME is not set");

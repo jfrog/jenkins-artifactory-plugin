@@ -7,7 +7,7 @@ node("TestSlave") {
     }
     def imageName = domainName + "jfrog_artifactory_jenkins_tests:2"
     def targetRepo = "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO}"
-    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
 
     stage "dockerPush"
     def rtDocker = Artifactory.docker (rtServer, "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}")

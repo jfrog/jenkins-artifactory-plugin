@@ -191,11 +191,11 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
-    void uploadTest(String buildName) throws Exception {
+    void uploadTest(String buildName, String pipelineName) throws Exception {
         Set<String> expectedArtifacts = getTestFilesNamesByLayer(0);
         String buildNumber = "3";
 
-        runPipeline("upload", false);
+        runPipeline(pipelineName, false);
         try {
             expectedArtifacts.forEach(artifactName ->
                     assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
@@ -717,7 +717,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         ArtifactoryTrigger artifactoryTrigger = checkArtifactoryTrigger(run);
 
         // Change something in Artifactory server
-        ArtifactoryServer server = RepositoriesUtils.getArtifactoryServer("LOCAL", RepositoriesUtils.getArtifactoryServers());
+        ArtifactoryServer server = RepositoriesUtils.getArtifactoryServer("LOCAL");
         server.setConnectionRetry(4);
 
         // Make sure the change took place
