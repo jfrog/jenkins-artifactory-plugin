@@ -18,7 +18,7 @@ public class NugetBuild extends PackageManagerBuild {
     public static final String JAVA_ARGS = "javaArgs";
 
     private boolean useDotnetCli = false;
-    private String apiProtocol = "V2";
+    private String apiProtocol = "v2";
 
     public NugetBuild() {
         resolver = new CommonResolver();
