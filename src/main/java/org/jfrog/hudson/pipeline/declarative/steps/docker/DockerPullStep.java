@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.steps.docker;
 
 import com.google.inject.Inject;
 import hudson.Extension;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -52,7 +53,9 @@ public class DockerPullStep extends AbstractStepImpl {
 
     @DataBoundSetter
     public void setProject(String project) {
-        this.project = project;
+        if (StringUtils.isNotEmpty(project)) {
+            this.project = project;
+        }
     }
 
     @DataBoundSetter

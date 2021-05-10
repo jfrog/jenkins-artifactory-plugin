@@ -5,6 +5,7 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
@@ -52,7 +53,9 @@ public class EditPropsStep extends AbstractStepImpl {
 
     @DataBoundSetter
     public void setProject(String project) {
-        this.project = project;
+        if (StringUtils.isNotEmpty(project)) {
+            this.project = project;
+        }
     }
 
     @DataBoundSetter

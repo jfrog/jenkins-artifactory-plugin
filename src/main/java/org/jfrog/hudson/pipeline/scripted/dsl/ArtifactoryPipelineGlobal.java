@@ -104,11 +104,16 @@ public class ArtifactoryPipelineGlobal implements Serializable {
     }
 
     @Whitelisted
-    public BuildInfo newBuildInfo(String project,String buildName,String buildNumber) {
+    public BuildInfo newBuildInfo(String buildName, String buildNumber) {
+        return newBuildInfo(buildName, buildNumber, null);
+    }
+
+    @Whitelisted
+    public BuildInfo newBuildInfo(String buildName, String buildNumber, String project) {
         BuildInfo buildInfo = newBuildInfo();
-        buildInfo.setProject(project);
         buildInfo.setName(buildName);
         buildInfo.setNumber(buildNumber);
+        buildInfo.setProject(project);
         return buildInfo;
     }
 

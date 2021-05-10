@@ -53,7 +53,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
     public BuildInfoResultAction(String artifactoryUrl, Run build, String buildName) {
         this(build);
         String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        publishedBuildsDetails.add(createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber, "", ""));
+        publishedBuildsDetails.add(createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber, "", "", ""));
     }
 
     public void addBuildInfoResults(String artifactoryUrl, String platformUrl, Build buildInfo) {
@@ -92,8 +92,8 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         return "published_builds";
     }
 
-    private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, String buildName, String buildNumber, String platformUrl, String startedBuildTimestamp) {
-        return new PublishedBuildDetails(artifactoryUrl, Util.rawEncode(buildName), Util.rawEncode(buildNumber), platformUrl, startedBuildTimestamp);
+    private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, String buildName, String buildNumber, String platformUrl, String startedBuildTimestamp, String project) {
+        return new PublishedBuildDetails(artifactoryUrl, Util.rawEncode(buildName), Util.rawEncode(buildNumber), platformUrl, startedBuildTimestamp, project);
     }
 
     private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, Run build, Build buildInfo, String platformUrl) {
@@ -109,7 +109,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         } else {
             buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         }
-        return createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber, platformUrl, String.valueOf(buildInfo.getStartedMillis()));
+        return createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber, platformUrl, String.valueOf(buildInfo.getStartedMillis()), buildInfo.getProject());
     }
 
     private String generateUrl(String artifactoryUrl, Run build, String buildName) {

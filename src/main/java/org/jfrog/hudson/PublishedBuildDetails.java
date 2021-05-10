@@ -17,6 +17,7 @@ public class PublishedBuildDetails implements Serializable {
     private String buildNumber;
     private String platformUrl;
     private String startedTimeStamp;
+    private String project;
 
     public PublishedBuildDetails(String artifactoryUrl, String buildName, String buildNumber) {
         this.artifactoryUrl = artifactoryUrl;
@@ -24,15 +25,16 @@ public class PublishedBuildDetails implements Serializable {
         this.buildNumber = buildNumber;
     }
 
-    public PublishedBuildDetails(String artifactoryUrl, String buildName, String buildNumber, String platformUrl, String startedTimeStamp) {
+    public PublishedBuildDetails(String artifactoryUrl, String buildName, String buildNumber, String platformUrl, String startedTimeStamp, String project) {
         this(artifactoryUrl, buildName, buildNumber);
         this.platformUrl = platformUrl;
         this.startedTimeStamp = startedTimeStamp;
+        this.project = project;
     }
 
     public String getBuildInfoUrl() throws ParseException {
         if (StringUtils.isNotBlank(platformUrl) && StringUtils.isNotBlank(startedTimeStamp)) {
-            return ArtifactoryBuildInfoClient.createBuildInfoUrl(platformUrl, buildName, buildNumber, startedTimeStamp);
+            return ArtifactoryBuildInfoClient.createBuildInfoUrl(platformUrl, buildName, buildNumber, startedTimeStamp, project);
         }
         return ArtifactoryBuildInfoClient.createBuildInfoUrl(this.artifactoryUrl, this.buildName, this.buildNumber);
     }

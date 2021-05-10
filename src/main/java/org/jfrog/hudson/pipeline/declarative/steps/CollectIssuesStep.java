@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -56,7 +57,9 @@ public class CollectIssuesStep extends AbstractStepImpl {
 
     @DataBoundSetter
     public void setProject(String project) {
-        this.project = project;
+        if (StringUtils.isNotEmpty(project)) {
+            this.project = project;
+        }
     }
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Void> {

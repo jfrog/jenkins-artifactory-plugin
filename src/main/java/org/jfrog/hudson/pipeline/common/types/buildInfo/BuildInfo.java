@@ -11,7 +11,6 @@ import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
-import org.jfrog.build.api.Module;
 import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
@@ -76,8 +75,12 @@ public class BuildInfo implements Serializable {
         this.number = number;
     }
 
+    @Whitelisted
     public void setProject(String project) {
-        this.project = project;
+        if (StringUtils.isNotEmpty(project)) {
+            this.project = project;
+            this.issues.setProject(project);
+        }
     }
 
     @Whitelisted
