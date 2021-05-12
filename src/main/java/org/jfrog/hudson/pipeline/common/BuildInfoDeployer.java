@@ -94,7 +94,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
 
     public void deploy() throws IOException {
         String artifactoryUrl = configurator.getArtifactoryServer().getArtifactoryUrl();
-        String logMessage = "Deploying build info to: " + artifactoryUrl + "/api/build" + ArtifactoryBuildInfoClient.buildRepoNameFromProjectKey(buildInfo.getProject());
+        String logMessage = "Deploying build info to: " + artifactoryUrl + "/api/build" + ArtifactoryBuildInfoClient.getProjectQueryParam(buildInfo.getProject());
         listener.getLogger().println(logMessage);
         BuildRetention retention = buildInfo.getBuildRetention();
         buildInfo.setBuildRetention(null);
