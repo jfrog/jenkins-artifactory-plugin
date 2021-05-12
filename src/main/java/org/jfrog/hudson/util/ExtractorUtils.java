@@ -52,6 +52,7 @@ import org.jfrog.hudson.release.ReleaseAction;
 import org.jfrog.hudson.util.plugins.MultiConfigurationUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.util.*;
 
@@ -182,11 +183,7 @@ public class ExtractorUtils {
                     publisherContext.getAggregationBuildStatus()).setIssueTrackerInfo(configuration);
         }
 
-        IncludesExcludes envVarsPatterns = new IncludesExcludes("", "");
-        if (publisherContext != null && publisherContext.getEnvVarsPatterns() != null) {
-            envVarsPatterns = publisherContext.getEnvVarsPatterns();
-        }
-        addEnvVars(env, build, configuration, envVarsPatterns, listener);
+        addEnvVars(env, build, pipelineBuildInfo, publisherContext, configuration, listener);
         return configuration;
     }
 
@@ -398,12 +395,6 @@ public class ExtractorUtils {
         configuration.publisher.setFilterExcludedArtifactsFromBuild(context.isFilterExcludedArtifactsFromBuild());
         configuration.publisher.setPublishBuildInfo(!context.isSkipBuildInfoDeploy());
         configuration.publisher.setRecordAllDependencies(context.isRecordAllDependencies());
-        configuration.setIncludeEnvVars(context.isIncludeEnvVars());
-        IncludesExcludes envVarsPatterns = context.getEnvVarsPatterns();
-        if (envVarsPatterns != null) {
-            configuration.setEnvVarsIncludePatterns(Util.replaceMacro(envVarsPatterns.getIncludePatterns(), env));
-            configuration.setEnvVarsExcludePatterns(Util.replaceMacro(envVarsPatterns.getExcludePatterns(), env));
-        }
         List<String> gradlePublications = context.getGradlePublications();
         if (gradlePublications != null) {
             String publications = String.join(",", gradlePublications);
@@ -513,12 +504,11 @@ public class ExtractorUtils {
         publisher.addMatrixParams(params);
     }
 
-    private static void addEnvVars(Map<String, String> env, Run<?, ?> build,
-                                   ArtifactoryClientConfiguration configuration, IncludesExcludes envVarsPatterns, TaskListener listener) {
-        IncludeExcludePatterns patterns = new IncludeExcludePatterns(
-                Util.replaceMacro(envVarsPatterns.getIncludePatterns(), env),
-                Util.replaceMacro(envVarsPatterns.getExcludePatterns(), env)
-        );
+    private static void addEnvVars(Map<String, String> env, Run<?, ?> build, BuildInfo pipelineBuildInfo, PublisherContext publisherContext,
+                                   ArtifactoryClientConfiguration configuration, TaskListener listener) {
+
+        // Allow capturing env during extractors processing and get the calculated patterns
+        IncludeExcludePatterns patterns = setAndGetEnvPatterns(pipelineBuildInfo, publisherContext, env, configuration);
 
         // Add only the jenkins specific environment variables
         MapDifference<String, String> envDifference = Maps.difference(env, System.getenv());
@@ -540,6 +530,38 @@ public class ExtractorUtils {
         }
 
         MultiConfigurationUtils.addMatrixCombination(build, configuration);
+    }
+
+    /**
+     * Allow capturing environment variables during extractor process by configuring the ArtifactoryClientConfiguration.
+     *
+     * @param pipelineBuildInfo - Pipelines build info object or null
+     * @param publisherContext  - Publisher in UI jobs
+     * @param env               - Job's environment variables
+     * @param configuration     - The target artifactory client configuration
+     * @return calculated include-exclude patterns.
+     */
+    private static IncludeExcludePatterns setAndGetEnvPatterns(@Nullable BuildInfo pipelineBuildInfo,
+                                                               @Nullable PublisherContext publisherContext,
+                                                               Map<String, String> env, ArtifactoryClientConfiguration configuration) {
+        IncludesExcludes includesExcludes;
+        if (pipelineBuildInfo != null) {
+            // Pipelines jobs
+            includesExcludes = Utils.getArtifactsIncludeExcludeForDeyployment(pipelineBuildInfo.getEnv().getFilter().getPatternFilter());
+            configuration.setIncludeEnvVars(pipelineBuildInfo.getEnv().isCapture());
+        } else if (publisherContext != null && publisherContext.getEnvVarsPatterns() != null) {
+            // UI based jobs
+            includesExcludes = publisherContext.getEnvVarsPatterns();
+            configuration.setIncludeEnvVars(publisherContext.isIncludeEnvVars());
+        } else {
+            return new IncludeExcludePatterns("", "");
+        }
+
+        String includePatterns = Util.replaceMacro(includesExcludes.getIncludePatterns(), env);
+        String excludePatterns = Util.replaceMacro(includesExcludes.getExcludePatterns(), env);
+        configuration.setEnvVarsIncludePatterns(includePatterns);
+        configuration.setEnvVarsExcludePatterns(excludePatterns);
+        return new IncludeExcludePatterns(includePatterns, excludePatterns);
     }
 
     private static EnvVars getEnvVars(Run<?, ?> build, TaskListener listener) {
