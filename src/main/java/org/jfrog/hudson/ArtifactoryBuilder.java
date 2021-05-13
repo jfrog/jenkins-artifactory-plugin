@@ -386,28 +386,37 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             if (jfrogInstances == null) {
                 return;
             }
-            for (JFrogPlatformInstance instance : jfrogInstances) {
-                if (StringUtils.isBlank(instance.getArtifactoryServer().getArtifactoryUrl())) {
-                    instance.getArtifactoryServer().setArtifactoryUrl(instance.getUrl() + "/artifactory");
+            for (JFrogPlatformInstance newInstance : jfrogInstances) {
+                if (StringUtils.isBlank(newInstance.getUrl())) {
                     continue;
                 }
-                if (StringUtils.isBlank(instance.getUrl())) {
+                if (StringUtils.isBlank(newInstance.getArtifactoryServer().getArtifactoryUrl())) {
+                    newInstance.getArtifactoryServer().setArtifactoryUrl(newInstance.getUrl() + "/artifactory");
                     continue;
                 }
                 // Check if Artifactory URL has a different prefix than platform URL.
-                if (!StringUtils.startsWithIgnoreCase(instance.getArtifactoryServer().getArtifactoryUrl(), instance.getUrl())) {
-                    // Try to search JFrog instance by the current Artifactory URL.
-                    Optional<JFrogPlatformInstance> oldInstance = this.jfrogInstances.stream().filter(currentInstance -> currentInstance.getArtifactoryServer().getArtifactoryUrl().equals(instance.getArtifactoryServer().getArtifactoryUrl()) && currentInstance.getId().equals(instance.getId())).findFirst();
-                    if (oldInstance.isPresent()) {
+                if (!StringUtils.startsWithIgnoreCase(newInstance.getArtifactoryServer().getArtifactoryUrl(), newInstance.getUrl())) {
+                    // Search for previous saved JFrog instance.
+                    Optional<JFrogPlatformInstance> preSavedInstance = getPreSavedInstance(newInstance.getId());
+                    // Check if the new Artifactory URL has changed since last time by comparing the URLs.
+                    if (preSavedInstance.isPresent() && !isArtifactoryUrlChangedSinceLastSave(preSavedInstance.get(), newInstance)) {
                         // At this point, the Platform URL is different than the Artifactory URL.
                         // Artifactory URL has a different prefix than Platform URL.
                         // Artifactory URL has not changed, compared to last time configuration.
                         // Since Artifactory URL is hidden in Jenkins UI under the advanced tab, the user may forget to change the Artifactory URL along with the platform.
                         // As a result, override Artifactory url
-                        instance.getArtifactoryServer().setArtifactoryUrl(instance.getUrl() + "/artifactory");
+                        newInstance.getArtifactoryServer().setArtifactoryUrl(newInstance.getUrl() + "/artifactory");
                     }
                 }
             }
+        }
+
+        private Optional<JFrogPlatformInstance> getPreSavedInstance(String id) {
+            return this.jfrogInstances.stream().filter(inst -> inst.getId().equals(id)).findFirst();
+        }
+
+        private boolean isArtifactoryUrlChangedSinceLastSave(JFrogPlatformInstance oldInstance, JFrogPlatformInstance newInstance) {
+            return oldInstance.getArtifactoryServer().getArtifactoryUrl().equals(newInstance.getArtifactoryServer().getArtifactoryUrl());
         }
 
         private boolean isInstanceDuplicated(List<JFrogPlatformInstance> jfrogInstances) {
