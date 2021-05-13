@@ -35,8 +35,8 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setProject(String buildProject) {
-        this.project = buildProject;
+    public void setProject(String project) {
+        this.project = project;
     }
 
     @DataBoundSetter

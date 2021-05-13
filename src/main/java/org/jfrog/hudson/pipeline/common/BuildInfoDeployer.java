@@ -60,9 +60,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
             buildInfo.setNumber(deployedBuildInfo.getNumber());
         }
 
-        if (StringUtils.isNotEmpty(deployedBuildInfo.getProject())) {
-            buildInfo.setProject(deployedBuildInfo.getProject());
-        }
+        buildInfo.setProject(deployedBuildInfo.getProject());
 
         if (deployedBuildInfo.getIssues() != null && !deployedBuildInfo.getConvertedIssues().isEmpty()) {
             buildInfo.setIssues(deployedBuildInfo.getConvertedIssues());

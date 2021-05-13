@@ -59,7 +59,7 @@ public class DockerPushStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setBuildProject(String project) {
+    public void setProject(String project) {
         this.project = project;
     }
 

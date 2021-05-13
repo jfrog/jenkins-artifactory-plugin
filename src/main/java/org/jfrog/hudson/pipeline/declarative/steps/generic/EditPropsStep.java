@@ -1,18 +1,13 @@
 package org.jfrog.hudson.pipeline.declarative.steps.generic;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
-import hudson.FilePath;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.SpecConfiguration;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.EditPropsExecutor;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.SpecUtils;
 import org.kohsuke.stapler.DataBoundSetter;
@@ -28,7 +23,6 @@ public class EditPropsStep extends AbstractStepImpl {
     protected String spec;
     private String props;
     private String specPath;
-    private String project;
     private boolean failNoOp;
 
     EditPropsStep(String serverId, EditPropertiesActionType editType) {
@@ -49,13 +43,6 @@ public class EditPropsStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setProps(String props) {
         this.props = props;
-    }
-
-    @DataBoundSetter
-    public void setProject(String project) {
-        if (StringUtils.isNotEmpty(project)) {
-            this.project = project;
-        }
     }
 
     @DataBoundSetter

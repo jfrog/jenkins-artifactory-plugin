@@ -191,7 +191,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
-    void uploadTest(String buildName, String pipelineName) throws Exception {
+    void uploadTest(String buildName, String project, String pipelineName) throws Exception {
         Set<String> expectedArtifacts = getTestFilesNamesByLayer(0);
         String buildNumber = "3";
 
@@ -199,7 +199,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             expectedArtifacts.forEach(artifactName ->
                     assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
-            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
+            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber, project);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleArtifacts(module, expectedArtifacts);
         } finally {

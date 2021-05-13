@@ -1,0 +1,34 @@
+package integration.pipelines.declarative
+
+node("TestSlave") {
+    def serverId = "PLATFORM"
+    def buildName = "declarative:project upload test"
+    def buildNumber = "3"
+
+    stage "Configuration"
+
+    stage "Upload"
+    rtUpload(
+            serverId: serverId,
+            buildName: buildName,
+            buildNumber: buildNumber,
+            project: 'jit',
+            spec: """{
+              "files": [
+                {
+                  "pattern": "${FILES_DIR}",
+                  "target": "${LOCAL_REPO1}/",
+                  "recursive": "false"
+                }
+             ]
+            }"""
+    )
+
+    stage "Publish Build Info"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName,
+            buildNumber: buildNumber,
+            project: 'jit'
+    )
+}

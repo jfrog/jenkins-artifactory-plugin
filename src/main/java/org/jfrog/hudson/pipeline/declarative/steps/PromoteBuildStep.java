@@ -46,7 +46,7 @@ public class PromoteBuildStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setBuildProject(String project) {
+    public void setProject(String project) {
         promotionConfig.setProject(project);
     }
 

@@ -1,7 +1,6 @@
 package org.jfrog.hudson.pipeline.declarative.steps.generic;
 
 import com.google.inject.Inject;
-import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
@@ -57,9 +56,7 @@ public class GenericStep extends AbstractStepImpl {
 
     @DataBoundSetter
     public void setProject(String project) {
-        if (StringUtils.isNotEmpty(project)) {
-            this.project = project;
-        }
+        this.project = project;
     }
 
     @DataBoundSetter

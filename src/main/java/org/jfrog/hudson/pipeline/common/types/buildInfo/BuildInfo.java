@@ -77,10 +77,8 @@ public class BuildInfo implements Serializable {
 
     @Whitelisted
     public void setProject(String project) {
-        if (StringUtils.isNotEmpty(project)) {
             this.project = project;
             this.issues.setProject(project);
-        }
     }
 
     @Whitelisted

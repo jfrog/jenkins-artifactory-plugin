@@ -117,10 +117,10 @@ public class DeclarativePipelineUtils {
      * @param customBuildNumber - Step's custom build number if exist.
      * @return build info id: <buildname>_<buildnumber>.
      */
-    public static String createBuildInfoId(Run<?, ?> build, String customBuildName, String customBuildNumber, String customBuildProject) {
-        String project = StringUtils.isNotEmpty(customBuildProject) ? "_" + customBuildProject : "";
+    public static String createBuildInfoId(Run<?, ?> build, String customBuildName, String customBuildNumber, String project) {
+        String projectId = StringUtils.isNotEmpty(project) ? "_" + project : "";
         return StringUtils.defaultIfEmpty(customBuildName, BuildUniqueIdentifierHelper.getBuildName(build)) + "_" +
-                StringUtils.defaultIfEmpty(customBuildNumber, BuildUniqueIdentifierHelper.getBuildNumber(build)) + project;
+                StringUtils.defaultIfEmpty(customBuildNumber, BuildUniqueIdentifierHelper.getBuildNumber(build)) + projectId;
     }
 
     /**
@@ -145,10 +145,7 @@ public class DeclarativePipelineUtils {
             if (StringUtils.isNotBlank(customBuildNumber)) {
                 buildInfo.setNumber(customBuildNumber);
             }
-            if (StringUtils.isNotBlank(project)) {
-                buildInfo.setProject(project);
-                buildInfo.getIssues().setProject(project);
-            }
+            buildInfo.setProject(project);
             return buildInfo;
         }
         return createMapper().treeToValue(buildDataFile.get(BuildInfoStep.STEP_NAME), BuildInfo.class);

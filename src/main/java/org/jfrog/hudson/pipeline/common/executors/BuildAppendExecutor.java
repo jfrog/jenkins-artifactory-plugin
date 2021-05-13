@@ -107,9 +107,9 @@ public class BuildAppendExecutor implements Executor {
         String encodedBuildName = buildName.replaceAll(":", "%3A");
         String encodedBuildNumber = buildNumber.replaceAll(":", "%3A");
         // For each project there is a different repo that stores the JSONs e.g. : projKey-build-info
-        String encodedBuildProject = StringUtils.isNotEmpty(buildInfo.getProject()) ? buildInfo.getProject() + "-build-info" : "artifactory-build-info";
+        String buildInfoRepo = StringUtils.isNotEmpty(buildInfo.getProject()) ? buildInfo.getProject() + "-build-info" : "artifactory-build-info";
         // Send HEAD request to <artifactory-url>/artifactory-build-info/<build-name>/<build-number>-timestamp.json to get the checksums
-        String buildInfoPath = server.getArtifactoryUrl() + "/" + encodedBuildProject + "/" + encodedBuildName + "/" + encodedBuildNumber + "-" + timestamp + ".json";
+        String buildInfoPath = server.getArtifactoryUrl() + "/" + buildInfoRepo + "/" + encodedBuildName + "/" + encodedBuildNumber + "-" + timestamp + ".json";
         try (ArtifactoryDependenciesClient client = server.createArtifactoryDependenciesClient(credentials, createProxyConfiguration(), listener)) {
             // getArtifactMetadata return null response entity - there's no need to consume it
             try (CloseableHttpResponse response = client.getArtifactMetadata(buildInfoPath)) {

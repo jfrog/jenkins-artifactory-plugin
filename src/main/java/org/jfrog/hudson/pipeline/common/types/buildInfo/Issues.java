@@ -1,7 +1,6 @@
 package org.jfrog.hudson.pipeline.common.types.buildInfo;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.IssueTracker;
@@ -170,9 +169,7 @@ public class Issues implements Serializable {
     }
 
     public void setProject(String project) {
-        if (StringUtils.isNotEmpty(project)) {
-            this.project = project;
-        }
+        this.project = project;
     }
 
     public CpsScript getCpsScript() {

@@ -43,8 +43,8 @@ public class BuildInfoStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
-    public void setBuildProject(String buildProject) {
-        buildInfo.setProject(buildProject);
+    public void setProject(String project) {
+        buildInfo.setProject(project);
     }
 
     @DataBoundSetter

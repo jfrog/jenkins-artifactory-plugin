@@ -197,9 +197,7 @@ public class ExtractorUtils {
         String buildNumber = pipelineBuildInfo != null ? pipelineBuildInfo.getNumber() : BuildUniqueIdentifierHelper.getBuildNumber(build);
         configuration.info.setBuildNumber(buildNumber);
         String project = pipelineBuildInfo != null ? pipelineBuildInfo.getProject() : null;
-        if (StringUtils.isNotBlank(project)) {
-            configuration.info.setProject(project);
-        }
+        configuration.info.setProject(project);
 
         if (publisherContext != null) {
             setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration, buildName, buildNumber);
