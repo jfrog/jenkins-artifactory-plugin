@@ -4,10 +4,14 @@ import org.apache.commons.io.FileUtils
 
 import java.nio.file.Paths
 
+env.DONT_COLLECT='FOO'
+env.COLLECT='BAR'
 node("TestSlave") {
     stage "Configure Artifactory"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
     def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.env.capture = true
+    buildInfo.env.filter.addExclude("DONT_COLLECT")
     buildInfo.name = "scripted:go test"
     buildInfo.number = "7"
 
@@ -16,17 +20,14 @@ node("TestSlave") {
     rtGo.deployer repo: "${GO_LOCAL}", server: rtServer
     rtGo.resolver repo: "${GO_VIRTUAL}", server: rtServer
 
-
     stage "Copy project example"
     FileUtils.copyDirectory(Paths.get("${GO_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-go-example").toFile())
 
     stage "Go build"
     rtGo.run args: "build -mod=mod", buildInfo: buildInfo, path: "scripted-go-example"
 
-
     stage "Go publish"
     rtGo.publish version:"1.0.0", buildInfo: buildInfo, path: "scripted-go-example"
-
 
     stage "Publish build info"
     rtServer.publishBuildInfo buildInfo
