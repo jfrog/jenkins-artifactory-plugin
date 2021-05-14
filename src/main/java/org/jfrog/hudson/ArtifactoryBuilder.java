@@ -404,7 +404,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                         // Artifactory URL has a different prefix than Platform URL.
                         // Artifactory URL has not changed, compared to last time configuration.
                         // Since Artifactory URL is hidden in Jenkins UI under the advanced tab, the user may forget to change the Artifactory URL along with the platform.
-                        // As a result, override Artifactory url
+                        // As a result, override Artifactory URL.
                         newInstance.getArtifactoryServer().setArtifactoryUrl(newInstance.getUrl() + "/artifactory");
                     }
                 }
