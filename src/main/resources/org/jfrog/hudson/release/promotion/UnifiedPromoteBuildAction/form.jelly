@@ -20,6 +20,7 @@
                                      help="/plugin/artifactory/help/release/PromoteBuildAction/help-build.html">
                                 <select class="setting-input" name="promotionCandidates"
                                         id="buildId" onchange="loadBuild('${it.buildsData}')">
+                                    <option value="all">All Builds</option>
                                     <j:forEach var="promotionCandidate"
                                                items="${it.promotionCandidates}">
                                         <option value="${promotionCandidate.id}">
