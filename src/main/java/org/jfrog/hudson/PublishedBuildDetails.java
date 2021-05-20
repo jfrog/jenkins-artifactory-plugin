@@ -1,10 +1,11 @@
 package org.jfrog.hudson;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 
 import java.io.Serializable;
 import java.text.ParseException;
+
+import static org.jfrog.build.extractor.clientConfiguration.client.artifactory.services.PublishBuildInfo.createBuildInfoUrl;
 
 /**
  * Created by yahavi on 28/03/2017.
@@ -34,9 +35,9 @@ public class PublishedBuildDetails implements Serializable {
 
     public String getBuildInfoUrl() throws ParseException {
         if (StringUtils.isNotBlank(platformUrl) && StringUtils.isNotBlank(startedTimeStamp)) {
-            return ArtifactoryBuildInfoClient.createBuildInfoUrl(platformUrl, buildName, buildNumber, startedTimeStamp, project);
+            return createBuildInfoUrl(platformUrl, buildName, buildNumber, startedTimeStamp, project);
         }
-        return ArtifactoryBuildInfoClient.createBuildInfoUrl(this.artifactoryUrl, this.buildName, this.buildNumber);
+        return createBuildInfoUrl(this.artifactoryUrl, this.buildName, this.buildNumber);
     }
 
     public String getDisplayName() {

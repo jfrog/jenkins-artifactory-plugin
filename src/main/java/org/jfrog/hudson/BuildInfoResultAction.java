@@ -21,13 +21,15 @@ import hudson.model.BuildBadgeAction;
 import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Build;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+
 import java.text.ParseException;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static org.jfrog.build.extractor.clientConfiguration.client.artifactory.services.PublishBuildInfo.createBuildInfoUrl;
 
 /**
  * Result of the redeploy publisher. Currently only a link to Artifactory build info.
@@ -113,7 +115,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
     }
 
     private String generateUrl(String artifactoryUrl, Run build, String buildName) {
-        return ArtifactoryBuildInfoClient.createBuildInfoUrl(artifactoryUrl, buildName, BuildUniqueIdentifierHelper.getBuildNumber(build));
+        return createBuildInfoUrl(artifactoryUrl, buildName, BuildUniqueIdentifierHelper.getBuildNumber(build));
     }
 
     /**

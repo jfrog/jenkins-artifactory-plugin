@@ -90,8 +90,6 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
 
     public void deploy() throws IOException {
         String artifactoryUrl = configurator.getArtifactoryServer().getArtifactoryUrl();
-        String logMessage = "Deploying build info to: " + artifactoryUrl + "/api/build" + ArtifactoryBuildInfoClient.getProjectQueryParam(buildInfo.getProject());
-        listener.getLogger().println(logMessage);
         BuildRetention retention = buildInfo.getBuildRetention();
         buildInfo.setBuildRetention(null);
         org.jfrog.build.extractor.retention.Utils.sendBuildAndBuildRetention(artifactoryManager, this.buildInfo, retention, asyncBuildRetention, platformUrl);
