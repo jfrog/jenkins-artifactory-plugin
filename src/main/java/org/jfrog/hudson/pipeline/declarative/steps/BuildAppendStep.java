@@ -25,6 +25,7 @@ public class BuildAppendStep extends AbstractStepImpl {
     private final String serverId;
     private String buildNumber;
     private String buildName;
+    private String project;
 
     @DataBoundConstructor
     public BuildAppendStep(String serverId, String appendBuildName, String appendBuildNumber) {
@@ -56,9 +57,9 @@ public class BuildAppendStep extends AbstractStepImpl {
         @Override
         protected Void runStep() throws Exception {
             ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber, step.project);
             if (buildInfo == null) {
-                throw new RuntimeException("Build " + DeclarativePipelineUtils.createBuildInfoId(build, step.buildName, step.buildNumber) + " does not exist!");
+                throw new RuntimeException("Build " + DeclarativePipelineUtils.createBuildInfoId(build, step.buildName, step.buildNumber, step.project) + " does not exist!");
             }
 
             new BuildAppendExecutor(server, buildInfo, step.appendBuildName, step.appendBuildNumber, build, listener).execute();

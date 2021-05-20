@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline.common.executors;
 
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.builder.ModuleBuilder;
@@ -51,7 +52,9 @@ public class BuildAppendExecutor implements Executor {
 
     @Override
     public void execute() throws Exception {
-        ModuleBuilder moduleBuilder = new ModuleBuilder().id(buildName + "/" + buildNumber).type(ModuleType.BUILD);
+        String project = buildInfo.getProject();
+        String id = StringUtils.isNotBlank(project) ? buildInfo.getProject() + "/" + buildName + "/" + buildNumber : buildName + "/" + buildNumber;
+        ModuleBuilder moduleBuilder = new ModuleBuilder().id(id).type(ModuleType.BUILD);
 
         // Prepare Artifactory server
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
@@ -80,7 +83,7 @@ public class BuildAppendExecutor implements Executor {
      */
     private long getBuildTimestamp(org.jfrog.hudson.ArtifactoryServer server, Credentials credentials) throws IOException, ParseException {
         try (ArtifactoryManager artifactoryManager = server.createArtifactoryManagerBuilder(credentials, createProxyConfiguration(), new JenkinsBuildInfoLog(listener)).build()) {
-            Build build = artifactoryManager.getBuildInfo(buildName, buildNumber);
+            Build build = artifactoryManager.getBuildInfo(buildName, buildNumber, buildInfo.getProject());
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
             Date date = format.parse(build.getStarted());
             return date.getTime();
@@ -100,9 +103,10 @@ public class BuildAppendExecutor implements Executor {
         // To support build name and numbers with ':', encode ':' by '%3A'. Further encoding will take place in 'downloadHeaders'.
         String encodedBuildName = buildName.replaceAll(":", "%3A");
         String encodedBuildNumber = buildNumber.replaceAll(":", "%3A");
-
+        // For each project there is a different repo that stores the JSONs e.g. : projKey-build-info
+        String buildInfoRepo = StringUtils.isNotEmpty(buildInfo.getProject()) ? buildInfo.getProject() + "-build-info" : "artifactory-build-info";
         // Send HEAD request to <artifactory-url>/artifactory-build-info/<build-name>/<build-number>-timestamp.json to get the checksums
-        String buildInfoPath = "artifactory-build-info/" + encodedBuildName + "/" + encodedBuildNumber + "-" + timestamp + ".json";
+        String buildInfoPath = buildInfoRepo +"/" + encodedBuildName + "/" + encodedBuildNumber + "-" + timestamp + ".json";
         try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(credentials, createProxyConfiguration(), listener)) {
             for (Header header : artifactoryManager.downloadHeaders(buildInfoPath)) {
                 switch (header.getName()) {

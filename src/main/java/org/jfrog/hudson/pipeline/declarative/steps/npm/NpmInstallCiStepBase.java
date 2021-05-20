@@ -29,6 +29,7 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
     private final NpmBuild npmBuild;
     private String customBuildNumber;
     private String customBuildName;
+    private String project;
     private String resolverId;
     private String javaArgs; // Added to allow java remote debugging
     private String path;
@@ -48,6 +49,11 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String customBuildName) {
         this.customBuildName = customBuildName;
+    }
+
+    @DataBoundSetter
+    public void setProject(String customProject) {
+        this.project = customProject;
     }
 
     @DataBoundSetter
@@ -94,7 +100,7 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
             CommonResolver resolver = getResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             step.npmBuild.setResolver(resolver);
             Utils.addNpmToPath(ws, listener, env, launcher, step.npmBuild.getTool());

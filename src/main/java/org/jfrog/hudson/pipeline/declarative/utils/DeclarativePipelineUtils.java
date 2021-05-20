@@ -10,7 +10,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.executors.GetArtifactoryServerExecutor;
+import org.jfrog.hudson.pipeline.common.executors.GetJFrogPlatformInstancesExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.ConanClient;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -64,30 +64,31 @@ public class DeclarativePipelineUtils {
     }
 
     /**
-     * Get Artifactory server from global server configuration or from previous rtServer{...} scope.
+     * Get Artifactory server from global jfrog instances configuration or from previous rtServer{...} scope.
      *
      * @param build          - Step's build.
      * @param rootWs         - Step's root workspace.
-     * @param serverId       - The server id. Can be defined from global server configuration or from previous rtServer{...} scope.
+     * @param id             - The Artifactory server id. Can be defined from global jfrog instances configuration or from previous rtServer{...} scope.
      * @param throwIfMissing - Throw exception if server is missing.
      * @return Artifactory server.
      */
-    public static ArtifactoryServer getArtifactoryServer(Run<?, ?> build, FilePath rootWs, String serverId, boolean throwIfMissing) throws IOException, InterruptedException {
+    public static ArtifactoryServer getArtifactoryServer(Run<?, ?> build, FilePath rootWs, String id, boolean throwIfMissing) throws IOException, InterruptedException {
         String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        BuildDataFile buildDataFile = readBuildDataFile(rootWs, buildNumber, CreateServerStep.STEP_NAME, serverId);
+        BuildDataFile buildDataFile = readBuildDataFile(rootWs, buildNumber, CreateServerStep.STEP_NAME, id);
         // If the server has not been configured as part of the declarative pipeline script, get its details from it.
         if (buildDataFile == null) {
             // This server ID has not been configured as part of the declarative pipeline script.
             // Let's get it from the Jenkins configuration.
-            GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, serverId);
+            GetJFrogPlatformInstancesExecutor getJFrogPlatformInstancesExecutor = new GetJFrogPlatformInstancesExecutor(build, id);
             try {
-                getArtifactoryServerExecutor.execute();
-            } catch (GetArtifactoryServerExecutor.ServerNotFoundException serverNotFound) {
+                getJFrogPlatformInstancesExecutor.execute();
+            } catch (GetJFrogPlatformInstancesExecutor.ServerNotFoundException serverNotFound) {
                 if (throwIfMissing) {
                     throw serverNotFound;
                 }
+                return null;
             }
-            return getArtifactoryServerExecutor.getArtifactoryServer();
+            return getJFrogPlatformInstancesExecutor.getJFrogPlatformInstance().getArtifactoryServer();
         }
         JsonNode jsonNode = buildDataFile.get(CreateServerStep.STEP_NAME);
         ArtifactoryServer server = createMapper().treeToValue(jsonNode, ArtifactoryServer.class);
@@ -116,9 +117,10 @@ public class DeclarativePipelineUtils {
      * @param customBuildNumber - Step's custom build number if exist.
      * @return build info id: <buildname>_<buildnumber>.
      */
-    public static String createBuildInfoId(Run<?, ?> build, String customBuildName, String customBuildNumber) {
+    public static String createBuildInfoId(Run<?, ?> build, String customBuildName, String customBuildNumber, String project) {
+        String projectId = StringUtils.isNotEmpty(project) ? "_" + project : "";
         return StringUtils.defaultIfEmpty(customBuildName, BuildUniqueIdentifierHelper.getBuildName(build)) + "_" +
-                StringUtils.defaultIfEmpty(customBuildNumber, BuildUniqueIdentifierHelper.getBuildNumber(build));
+                StringUtils.defaultIfEmpty(customBuildNumber, BuildUniqueIdentifierHelper.getBuildNumber(build)) + projectId;
     }
 
     /**
@@ -130,9 +132,9 @@ public class DeclarativePipelineUtils {
      * @param customBuildNumber - Step's custom build number if exist.
      * @return build info object as defined in previous rtBuildInfo{...} scope or a new build info.
      */
-    public static BuildInfo getBuildInfo(FilePath rootWs, Run<?, ?> build, String customBuildName, String customBuildNumber) throws IOException, InterruptedException {
+    public static BuildInfo getBuildInfo(FilePath rootWs, Run<?, ?> build, String customBuildName, String customBuildNumber, String project) throws IOException, InterruptedException {
         String jobBuildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        String buildInfoId = createBuildInfoId(build, customBuildName, customBuildNumber);
+        String buildInfoId = createBuildInfoId(build, customBuildName, customBuildNumber, project);
 
         BuildDataFile buildDataFile = readBuildDataFile(rootWs, jobBuildNumber, BuildInfoStep.STEP_NAME, buildInfoId);
         if (buildDataFile == null) {
@@ -143,6 +145,7 @@ public class DeclarativePipelineUtils {
             if (StringUtils.isNotBlank(customBuildNumber)) {
                 buildInfo.setNumber(customBuildNumber);
             }
+            buildInfo.setProject(project);
             return buildInfo;
         }
         return createMapper().treeToValue(buildDataFile.get(BuildInfoStep.STEP_NAME), BuildInfo.class);
@@ -157,7 +160,7 @@ public class DeclarativePipelineUtils {
      */
     public static void saveBuildInfo(BuildInfo buildInfo, FilePath rootWs, Run<?, ?> build, Log logger) throws Exception {
         String jobBuildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        String buildInfoId = createBuildInfoId(build, buildInfo.getName(), buildInfo.getNumber());
+        String buildInfoId = createBuildInfoId(build, buildInfo.getName(), buildInfo.getNumber(), buildInfo.getProject());
 
         BuildDataFile buildDataFile = new BuildDataFile(BuildInfoStep.STEP_NAME, buildInfoId);
         buildDataFile.putPOJO(buildInfo);

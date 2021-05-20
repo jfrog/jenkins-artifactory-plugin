@@ -1,6 +1,6 @@
 <?jelly escape-by-default='true'?>
 <div>
-  Jfrog Artifactory Pipeline DSL.
+  JFrog Artifactory Pipeline DSL.
   <br/>
   Full documentation is available here: <a href="https://wiki.jenkins-ci.org/display/JENKINS/Artifactory+-+Working+With+the+Pipeline+Jenkins+Plugin">the plugin's Wiki page</a>.
 </div>

@@ -17,6 +17,7 @@
 package org.jfrog.hudson;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
+import com.google.common.collect.Lists;
 import hudson.Extension;
 import hudson.model.BuildableItem;
 import hudson.model.BuildableItemWithBuildWrappers;
@@ -42,6 +43,7 @@ import org.jfrog.hudson.jfpipelines.JFrogPipelinesHttpClient;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.RepositoriesUtils;
+import org.jfrog.hudson.util.converters.ArtifactoryBuilderConverter;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
@@ -51,6 +53,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
@@ -73,6 +76,11 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
     public static final class DescriptorImpl extends Descriptor<GlobalConfiguration> {
 
         private boolean useCredentialsPlugin;
+        private List<JFrogPlatformInstance> jfrogInstances;
+        /**
+         * @deprecated: Use org.jfrog.hudson.ArtifactoryBuilder.DescriptorImpl#getJFrogInstances()
+         */
+        @Deprecated
         private List<ArtifactoryServer> artifactoryServers;
         private JFrogPipelinesServer jfrogPipelinesServer = new JFrogPipelinesServer();
 
@@ -92,26 +100,26 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         /**
-         * Performs on-the-fly validation of the form field 'ServerId'.
+         * Performs on-the-fly validation of the form field 'InstanceId'.
          *
          * @param value This parameter receives the value that the user has typed.
          * @return Indicates the outcome of the validation. This is sent to the browser.
          */
         @SuppressWarnings("unused")
-        public FormValidation doCheckServerId(@QueryParameter String value) {
+        public FormValidation doCheckInstanceId(@QueryParameter String value) {
             if (value.length() == 0) {
                 return FormValidation.error("Please set server ID");
             }
-            List<ArtifactoryServer> artifactoryServers = RepositoriesUtils.getArtifactoryServers();
-            if (artifactoryServers == null) {
+            List<JFrogPlatformInstance> JFrogPlatformInstances = RepositoriesUtils.getJFrogPlatformInstances();
+            if (JFrogPlatformInstances == null) {
                 return FormValidation.ok();
             }
             int countServersByValueAsName = 0;
-            for (ArtifactoryServer server : artifactoryServers) {
-                if (server.getServerId().equals(value)) {
+            for (JFrogPlatformInstance JFrogPlatformInstance : JFrogPlatformInstances) {
+                if (JFrogPlatformInstance.getId().equals(value)) {
                     countServersByValueAsName++;
                     if (countServersByValueAsName > 1) {
-                        return FormValidation.error("Duplicated server ID");
+                        return FormValidation.error("Duplicated JFrog platform instances ID");
                     }
                 }
             }
@@ -121,9 +129,10 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         @SuppressWarnings("unused")
         @RequirePOST
         public FormValidation doTestConnection(
-                @QueryParameter("artifactoryUrl") final String url,
-                @QueryParameter("artifactory.timeout") final String timeout,
-                @QueryParameter("artifactory.bypassProxy") final boolean bypassProxy,
+                @QueryParameter("url") final String url,
+                @QueryParameter("artifactoryUrl") final String artifactoryUrl,
+                @QueryParameter("instance.timeout") final String timeout,
+                @QueryParameter("instance.bypassProxy") final boolean bypassProxy,
                 @QueryParameter("useCredentialsPlugin") final boolean useCredentialsPlugin,
                 @QueryParameter("credentialsId") final String deployerCredentialsId,
                 @QueryParameter("username") final String deployerCredentialsUsername,
@@ -132,17 +141,20 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
                 return FormValidation.error("Testing the connection requires 'Administer' permission");
             }
-            if (StringUtils.isBlank(url)) {
-                return FormValidation.error("Please set a valid Artifactory URL");
+            if (StringUtils.isBlank(artifactoryUrl) && StringUtils.isBlank(url)) {
+                return FormValidation.error("Please set a valid Artifactory or platform URL");
             }
             if (connectionRetry < 0) {
                 return FormValidation.error("Connection Retries can not be less then 0");
             }
-
+            if (StringUtils.isEmpty(deployerCredentialsId) && (StringUtils.isEmpty(deployerCredentialsUsername) || StringUtils.isEmpty(deployerCredentialsPassword))) {
+                return FormValidation.error("Please set a valid credentials");
+            }
+            String targetArtUrl = StringUtils.isBlank(artifactoryUrl) ? StringUtils.removeEnd(url, "/") + "/artifactory" : artifactoryUrl;
             String accessToken = StringUtils.EMPTY;
             String username = StringUtils.EMPTY;
             String password = StringUtils.EMPTY;
-            
+
             StringCredentials accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(deployerCredentialsId, null);
             if (accessTokenCredentials != null) {
                 accessToken = accessTokenCredentials.getSecret().getPlainText();
@@ -182,7 +194,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 } catch (Exception e) {
                     return FormValidation.error(e.getMessage());
                 }
-                return FormValidation.ok("Found Artifactory " + version.toString());
+                return FormValidation.ok("Found Artifactory " + version.toString() + " on " + targetArtUrl);
             } finally {
                 artifactoryManager.close();
             }
@@ -250,7 +262,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             Jenkins jenkins = Jenkins.getInstanceOrNull();
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
                 boolean useCredentialsPlugin = (Boolean) o.get("useCredentialsPlugin");
-                configureArtifactoryServers(req, o);
+                configureJFrogInstances(req, o);
                 configureJFrogPipelinesServer(o);
                 if (useCredentialsPlugin && !this.useCredentialsPlugin) {
                     resetJobsCredentials();
@@ -263,21 +275,26 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             throw new FormException("User doesn't have permissions to save", "Server ID");
         }
 
-        private void configureArtifactoryServers(StaplerRequest req, JSONObject o) throws FormException {
-            List<ArtifactoryServer> artifactoryServers = null;
-            Object artifactoryServerObj = o.get("artifactoryServer"); // an array or single object
-            if (!JSONNull.getInstance().equals(artifactoryServerObj)) {
-                artifactoryServers = req.bindJSONToList(ArtifactoryServer.class, artifactoryServerObj);
+        private void configureJFrogInstances(StaplerRequest req, JSONObject o) throws FormException {
+            List<JFrogPlatformInstance> jfrogInstances = Lists.newArrayList();
+            Object jfrogInstancesObj = o.get("jfrogInstances"); // an array or single object
+            if (!JSONNull.getInstance().equals(jfrogInstancesObj)) {
+                jfrogInstances = req.bindJSONToList(JFrogPlatformInstance.class, jfrogInstancesObj);
             }
 
-            if (!isServerIDConfigured(artifactoryServers)) {
-                throw new FormException("Please set the Artifactory server ID.", "ServerID");
+            if (!isJFrogInstancesIDConfigured(jfrogInstances)) {
+                throw new FormException("Please set the Instance ID.", "InstanceID");
             }
 
-            if (isServerDuplicated(artifactoryServers)) {
-                throw new FormException("The Artifactory server ID you have entered is already configured", "Server ID");
+            if (isInstanceDuplicated(jfrogInstances)) {
+                throw new FormException("The JFrog instance ID you have entered is already configured", "Instance ID");
             }
-            setArtifactoryServers(artifactoryServers);
+
+            if (isEmptyUrls(jfrogInstances)) {
+                throw new FormException("Please set the The JFrog Platform or Artifactory URL", "URL");
+            }
+            autoFillPlatformServers(jfrogInstances);
+            setJfrogInstances(jfrogInstances);
         }
 
         private void configureJFrogPipelinesServer(JSONObject o) {
@@ -291,7 +308,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         private void resetServersCredentials() {
-            for (ArtifactoryServer server : artifactoryServers) {
+            for (JFrogPlatformInstance server : jfrogInstances) {
                 if (server.getResolverCredentialsConfig() != null) {
                     server.getResolverCredentialsConfig().deleteCredentials();
                 }
@@ -352,32 +369,105 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             this.useCredentialsPlugin = useCredentialsPlugin;
         }
 
-        private boolean isServerDuplicated(List<ArtifactoryServer> artifactoryServers) {
-            Set<String> serversNames = new HashSet<>();
-            if (artifactoryServers == null) {
+        private boolean isEmptyUrls(List<JFrogPlatformInstance> jfrogInstances) {
+            if (jfrogInstances == null) {
                 return false;
             }
-            for (ArtifactoryServer server : artifactoryServers) {
-                String name = server.getServerId();
-                if (serversNames.contains(name)) {
+            for (JFrogPlatformInstance instance : jfrogInstances) {
+                if (StringUtils.isBlank(instance.getUrl()) && StringUtils.isBlank(instance.getArtifactoryServer().getArtifactoryUrl())) {
                     return true;
                 }
-                serversNames.add(name);
             }
             return false;
         }
 
-        private boolean isServerIDConfigured(List<ArtifactoryServer> artifactoryServers) {
-            if (artifactoryServers == null) {
+        private void autoFillPlatformServers(List<JFrogPlatformInstance> jfrogInstances) {
+            if (jfrogInstances == null) {
+                return;
+            }
+            for (JFrogPlatformInstance newInstance : jfrogInstances) {
+                if (StringUtils.isBlank(newInstance.getUrl())) {
+                    continue;
+                }
+                if (StringUtils.isBlank(newInstance.getArtifactoryServer().getArtifactoryUrl())) {
+                    newInstance.getArtifactoryServer().setArtifactoryUrl(newInstance.getUrl() + "/artifactory");
+                    continue;
+                }
+                // Check if Artifactory URL has a different prefix than platform URL.
+                if (!StringUtils.startsWithIgnoreCase(newInstance.getArtifactoryServer().getArtifactoryUrl(), newInstance.getUrl())) {
+                    // Search for previous saved JFrog instance.
+                    Optional<JFrogPlatformInstance> preSavedInstance = getPreSavedInstance(newInstance.getId());
+                    // Check if the new Artifactory URL has changed since last time by comparing the URLs.
+                    if (preSavedInstance.isPresent() && !isArtifactoryUrlChangedSinceLastSave(preSavedInstance.get(), newInstance)) {
+                        // At this point, the Platform URL is different than the Artifactory URL.
+                        // Artifactory URL has a different prefix than Platform URL.
+                        // Artifactory URL has not changed, compared to last time configuration.
+                        // Since Artifactory URL is hidden in Jenkins UI under the advanced tab, the user may forget to change the Artifactory URL along with the platform.
+                        // As a result, override Artifactory URL.
+                        newInstance.getArtifactoryServer().setArtifactoryUrl(newInstance.getUrl() + "/artifactory");
+                    }
+                }
+            }
+        }
+
+        private Optional<JFrogPlatformInstance> getPreSavedInstance(String id) {
+            return this.jfrogInstances.stream().filter(inst -> inst.getId().equals(id)).findFirst();
+        }
+
+        private boolean isArtifactoryUrlChangedSinceLastSave(JFrogPlatformInstance oldInstance, JFrogPlatformInstance newInstance) {
+            return oldInstance.getArtifactoryServer().getArtifactoryUrl().equals(newInstance.getArtifactoryServer().getArtifactoryUrl());
+        }
+
+        private boolean isInstanceDuplicated(List<JFrogPlatformInstance> jfrogInstances) {
+            Set<String> serversNames = new HashSet<>();
+            if (jfrogInstances == null) {
+                return false;
+            }
+            for (JFrogPlatformInstance instance : jfrogInstances) {
+                String id = instance.getId();
+                if (serversNames.contains(id)) {
+                    return true;
+                }
+                serversNames.add(id);
+            }
+            return false;
+        }
+
+        private boolean isJFrogInstancesIDConfigured(List<JFrogPlatformInstance> jfrogInstances) {
+            if (jfrogInstances == null) {
                 return true;
             }
-            for (ArtifactoryServer server : artifactoryServers) {
-                String name = server.getServerId();
-                if (StringUtils.isBlank(name)) {
+            for (JFrogPlatformInstance server : jfrogInstances) {
+                String platformId = server.getId();
+                String artifactoryId = server.getArtifactoryServer().getServerId();
+                if (StringUtils.isBlank(platformId) || StringUtils.isBlank(artifactoryId)) {
                     return false;
                 }
             }
             return true;
+        }
+
+        /**
+         * Used by Jenkins Jelly for displaying values.
+         */
+        public List<JFrogPlatformInstance> getJfrogInstances() {
+            return jfrogInstances;
+        }
+
+        /**
+         * Used by Jenkins Jelly for setting values.
+         */
+        public void setJfrogInstances(List<JFrogPlatformInstance> jfrogInstances) {
+            this.jfrogInstances = jfrogInstances;
+        }
+
+        /**
+         * Page Converter
+         */
+        public static final class ConverterImpl extends ArtifactoryBuilderConverter {
+            public ConverterImpl(XStream2 xstream) {
+                super(xstream);
+            }
         }
     }
 }

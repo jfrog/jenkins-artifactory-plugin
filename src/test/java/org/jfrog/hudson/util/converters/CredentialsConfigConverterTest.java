@@ -24,16 +24,16 @@ public class CredentialsConfigConverterTest {
     
     @ClassRule
     public static JenkinsRule jenkins = new JenkinsRule();
-    
+
     @Test
     public void testConvertToSecret_pre_3_6_0() throws IOException {
         ArtifactoryBuilder.DescriptorImpl testBuilder = ExtensionList.lookupSingleton(ArtifactoryBuilder.DescriptorImpl.class);
-        
+
         File testFile = new File(getClass().getResource("/converters/config-3.5.0.xml").getFile());
         Files.copy(testFile.toPath(), new File(Jenkins.get().getRootDir(), ArtifactoryBuilder.class.getName() + ".xml").toPath());
         testBuilder.load();
-        Assert.assertThat(testBuilder.getArtifactoryServers(), Matchers.hasSize(1));
-        ArtifactoryServer artifactoryServer = testBuilder.getArtifactoryServers().get(0);
+        Assert.assertThat(testBuilder.getJfrogInstances(), Matchers.hasSize(1));
+        ArtifactoryServer artifactoryServer = testBuilder.getJfrogInstances().get(0).getArtifactoryServer();
         Assert.assertEquals(DEPLOYER_USERNAME, Objects.requireNonNull(artifactoryServer.getDeployerCredentialsConfig().getUsername()));
         Assert.assertEquals(DEPLOYER_PASSWORD, Objects.requireNonNull(artifactoryServer.getDeployerCredentialsConfig().getPassword()).getPlainText());
         Assert.assertEquals(RESOLVER_USERNAME, Objects.requireNonNull(artifactoryServer.getResolverCredentialsConfig().getUsername()));

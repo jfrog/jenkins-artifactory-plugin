@@ -1,0 +1,24 @@
+package integration.pipelines.scripted
+
+node("TestSlave") {
+    stage "Configuration"
+    def artifactory = JFrog.instance('PLATFORM').artifactory()
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:platform upload test"
+    buildInfo.number = "3"
+
+    stage "Upload"
+    def uploadSpec = """{
+      "files": [
+        {
+          "pattern": "${FILES_DIR}",
+          "target": "${LOCAL_REPO1}/",
+          "recursive": "false"
+        }
+     ]
+    }"""
+    artifactory.upload spec: uploadSpec, buildInfo: buildInfo
+
+    stage "Publish Build Info"
+    artifactory.publishBuildInfo buildInfo
+}

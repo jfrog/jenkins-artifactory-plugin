@@ -24,6 +24,7 @@ public class ConanRunStep extends AbstractStepImpl {
     private final String command;
     private String customBuildNumber;
     private String customBuildName;
+    private String project;
 
     @DataBoundConstructor
     public ConanRunStep(String clientId, String command) {
@@ -39,6 +40,11 @@ public class ConanRunStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String customBuildName) {
         this.customBuildName = customBuildName;
+    }
+
+    @DataBoundSetter
+    public void setProject(String customProject) {
+        this.project = customProject;
     }
 
     public String getCommand() {
@@ -63,7 +69,7 @@ public class ConanRunStep extends AbstractStepImpl {
         protected Void runStep() throws Exception {
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             ConanClient conanClient = DeclarativePipelineUtils.buildConanClient(step.getClientId(), buildNumber, ConanClientStep.STEP_NAME, launcher, ws, rootWs, env);
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
             ConanExecutor conanExecutor = new ConanExecutor(buildInfo, conanClient.getUserPath(), ws, launcher, listener, env, build);
             conanExecutor.execCommand(step.getCommand());
             DeclarativePipelineUtils.saveBuildInfo(conanExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));

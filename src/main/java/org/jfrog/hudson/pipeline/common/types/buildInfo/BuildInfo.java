@@ -39,6 +39,7 @@ public class BuildInfo implements Serializable {
 
     private String name; // Build name
     private String number; // Build number
+    private String project; // Project in Artifactory
     private Date startDate;
     private BuildRetention retention;
     // The candidates artifacts to be deployed in the 'deployArtifacts' step, sorted by module name.
@@ -74,6 +75,12 @@ public class BuildInfo implements Serializable {
     }
 
     @Whitelisted
+    public void setProject(String project) {
+            this.project = project;
+            this.issues.setProject(project);
+    }
+
+    @Whitelisted
     public String getName() {
         return name;
     }
@@ -81,6 +88,11 @@ public class BuildInfo implements Serializable {
     @Whitelisted
     public String getNumber() {
         return number;
+    }
+
+    @Whitelisted
+    public String getProject() {
+        return project;
     }
 
     @Whitelisted
@@ -240,9 +252,9 @@ public class BuildInfo implements Serializable {
         return this.issues.convertFromPipelineIssues();
     }
 
-    public BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryManager artifactoryManager)
+    public BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryManager artifactoryManager, String platformUrl)
             throws InterruptedException, IOException {
-        return new BuildInfoDeployer(config, artifactoryManager, build, listener, this);
+        return new BuildInfoDeployer(config, artifactoryManager, build, listener, this, platformUrl);
     }
 
     public void setCpsScript(CpsScript cpsScript) {

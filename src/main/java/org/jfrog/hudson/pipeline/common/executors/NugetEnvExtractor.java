@@ -13,14 +13,16 @@ public class NugetEnvExtractor extends EnvExtractor {
     private String args;
     private String module;
     private boolean useDotnetCli;
+    private String apiProtocol;
 
     public NugetEnvExtractor(Run build, BuildInfo buildInfo, Resolver resolver,
                              TaskListener buildListener, Launcher launcher, FilePath tempDir,
-                             EnvVars env, String args, String module, boolean useDotnetCli) {
+                             EnvVars env, String args, String module, boolean useDotnetCli, String apiProtocol) {
         super(build, buildInfo, null, resolver, buildListener, launcher, tempDir, env);
         this.args = args;
         this.module = module;
         this.useDotnetCli = useDotnetCli;
+        this.apiProtocol = apiProtocol;
     }
 
     @Override
@@ -28,5 +30,6 @@ public class NugetEnvExtractor extends EnvExtractor {
         configuration.packageManagerHandler.setArgs(args);
         configuration.packageManagerHandler.setModule(module);
         configuration.dotnetHandler.setUseDotnetCli(useDotnetCli);
+        configuration.dotnetHandler.setApiProtocol(apiProtocol);
     }
 }

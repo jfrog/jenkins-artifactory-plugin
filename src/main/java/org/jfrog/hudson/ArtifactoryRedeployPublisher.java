@@ -414,7 +414,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     public ArtifactoryServer getArtifactoryServer() {
-        return RepositoriesUtils.getArtifactoryServer(getArtifactoryName(), getDescriptor().getArtifactoryServers());
+        return RepositoriesUtils.getArtifactoryServer(getArtifactoryName());
     }
 
     private Result getTreshold() {
@@ -514,9 +514,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
             CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId, overrideCredentials);
 
             try {
-                ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(
-                        url, getArtifactoryServers()
-                );
+                ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url);
                 List<Repository> releaseRepositories = refreshRepositories(artifactoryServer, credentialsConfig);
                 List<PluginSettings> userPluginKeys = refreshUserPlugins(artifactoryServer, credentialsConfig);
 
@@ -541,12 +539,12 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         }
 
         /**
-         * Returns the list of {@link ArtifactoryServer} configured.
-         *
+         * Returns the list of {@link JFrogPlatformInstance} configured.
+         * Used by Jenkins Jelly for displaying values
          * @return can be empty but never null.
          */
-        public List<ArtifactoryServer> getArtifactoryServers() {
-            return RepositoriesUtils.getArtifactoryServers();
+        public List<JFrogPlatformInstance> getJfrogInstances() {
+            return RepositoriesUtils.getJFrogPlatformInstances();
         }
 
         public boolean isJiraPluginEnabled() {

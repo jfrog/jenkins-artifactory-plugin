@@ -1,5 +1,6 @@
 package org.jfrog.hudson.pipeline.common.types;
 
+import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 
 import java.io.Serializable;
@@ -11,6 +12,7 @@ public class PromotionConfig implements Serializable {
 
     private String buildName;
     private String buildNumber;
+    private String project;
     private String targetRepo;
     private String sourceRepo;
     private String status;
@@ -25,6 +27,16 @@ public class PromotionConfig implements Serializable {
 
     public void setBuildName(String buildName) {
         this.buildName = buildName.trim();
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        if (StringUtils.isNotEmpty(project)){
+            this.project = project.trim();
+        }
     }
 
     public String getBuildNumber() {

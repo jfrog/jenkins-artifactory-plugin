@@ -18,6 +18,7 @@ public class NugetBuild extends PackageManagerBuild {
     public static final String JAVA_ARGS = "javaArgs";
 
     private boolean useDotnetCli = false;
+    private String apiProtocol = "v2";
 
     public NugetBuild() {
         resolver = new CommonResolver();
@@ -42,6 +43,16 @@ public class NugetBuild extends PackageManagerBuild {
 
     public boolean useDotnetCli() {
         return useDotnetCli;
+    }
+
+    @Whitelisted
+    public void setApiProtocol(String apiProtocol) {
+        this.apiProtocol = apiProtocol;
+    }
+
+    @Whitelisted
+    public String getApiProtocol() {
+        return apiProtocol;
     }
 
     private Map<String, Object> prepareNugetStep(Map<String, Object> args, List<String> keysAsList) {

@@ -7,7 +7,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.executors.GetArtifactoryServerExecutor;
+import org.jfrog.hudson.pipeline.common.executors.GetJFrogPlatformInstancesExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.kohsuke.stapler.DataBoundConstructor;
 
@@ -19,7 +19,7 @@ import java.io.IOException;
 public class GetArtifactoryServerStep extends AbstractStepImpl {
     static final String STEP_NAME = "getArtifactoryServer";
     private final String artifactoryServerID;
-    private org.jfrog.hudson.pipeline.common.types.ArtifactoryServer artifactoryServer;
+    private ArtifactoryServer artifactoryServer;
 
     @DataBoundConstructor
     public GetArtifactoryServerStep(String artifactoryServerID) {
@@ -41,11 +41,12 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
         }
 
         @Override
-        protected org.jfrog.hudson.pipeline.common.types.ArtifactoryServer runStep() throws Exception {
+        protected ArtifactoryServer runStep() throws Exception {
             String artifactoryServerID = step.getArtifactoryServerID();
-            GetArtifactoryServerExecutor getArtifactoryServerExecutor = new GetArtifactoryServerExecutor(build, artifactoryServerID);
-            getArtifactoryServerExecutor.execute();
-            step.artifactoryServer = getArtifactoryServerExecutor.getArtifactoryServer();
+            // JFrogInstancesID is the same as its ArtifactoryServerID
+            GetJFrogPlatformInstancesExecutor getJFrogPlatformInstancesExecutor = new GetJFrogPlatformInstancesExecutor(build, artifactoryServerID);
+            getJFrogPlatformInstancesExecutor.execute();
+            step.artifactoryServer = getJFrogPlatformInstancesExecutor.getJFrogPlatformInstance().getArtifactoryServer();
             return step.artifactoryServer;
         }
 

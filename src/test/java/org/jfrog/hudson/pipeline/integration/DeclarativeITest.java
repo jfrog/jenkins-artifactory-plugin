@@ -48,7 +48,17 @@ public class DeclarativeITest extends CommonITestsPipeline {
 
     @Test
     public void uploadTest() throws Exception {
-        super.uploadTest("declarative:upload test");
+        super.uploadTest("declarative:upload test", null, "upload");
+    }
+
+    @Test
+    public void platformUploadTest() throws Exception {
+        super.uploadTest("declarative:platform upload test", null, "uploadUsingPlatformConfig");
+    }
+
+    @Test
+    public void uploadUsingProjectTest() throws Exception {
+        super.uploadTest("declarative:project upload test", "jit", "uploadWithProject");
     }
 
     @Test

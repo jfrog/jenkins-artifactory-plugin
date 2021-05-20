@@ -38,6 +38,7 @@ public class NpmPublishStep extends AbstractStepImpl {
     private final NpmBuild npmBuild;
     private String customBuildNumber;
     private String customBuildName;
+    private String project;
     private String deployerId;
     private String javaArgs; // Added to allow java remote debugging
     private String path;
@@ -56,6 +57,11 @@ public class NpmPublishStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildName(String customBuildName) {
         this.customBuildName = customBuildName;
+    }
+
+    @DataBoundSetter
+    public void setProject(String customProject) {
+        this.project = customProject;
     }
 
     @DataBoundSetter
@@ -95,7 +101,7 @@ public class NpmPublishStep extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
             Utils.addNpmToPath(ws, listener, env, launcher, step.npmBuild.getTool());
             NpmPublishExecutor npmPublishExecutor = new NpmPublishExecutor(listener, buildInfo, launcher, step.npmBuild, step.javaArgs, step.path, step.module, ws, env, build);

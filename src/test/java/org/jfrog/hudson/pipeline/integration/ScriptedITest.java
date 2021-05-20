@@ -48,7 +48,17 @@ public class ScriptedITest extends CommonITestsPipeline {
 
     @Test
     public void uploadTest() throws Exception {
-        super.uploadTest("scripted:upload test");
+        super.uploadTest("scripted:upload test", null, "upload");
+    }
+
+    @Test
+    public void platformUploadTest() throws Exception {
+        super.uploadTest("scripted:platform upload test", null, "uploadUsingPlatformConfig");
+    }
+
+    @Test
+    public void uploadWithProjectTest() throws Exception {
+        super.uploadTest("scripted:project upload test","jit", "uploadWithProject");
     }
 
     @Test

@@ -34,7 +34,7 @@ public class NugetRunExecutor extends BuildInfoProcessRunner {
             throw new IllegalStateException("Resolver must be configured with resolution repository and Artifactory server");
         }
         FilePath tempDir = ExtractorUtils.createAndGetTempDir(ws);
-        EnvExtractor envExtractor = new NugetEnvExtractor(build, buildInfo, resolver, listener, launcher, tempDir, env, nugetArgs, module, nugetBuild.useDotnetCli());
+        EnvExtractor envExtractor = new NugetEnvExtractor(build, buildInfo, resolver, listener, launcher, tempDir, env, nugetArgs, module, nugetBuild.useDotnetCli(), nugetBuild.getApiProtocol());
         super.execute("nuget", "org.jfrog.build.extractor.nuget.extractor.NugetRun", envExtractor, tempDir);
     }
 }

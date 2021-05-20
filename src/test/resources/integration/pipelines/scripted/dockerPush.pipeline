@@ -1,5 +1,7 @@
 package integration.pipelines.scripted
 
+env.DONT_COLLECT='FOO'
+env.COLLECT='BAR'
 node("TestSlave") {
     def domainName = "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN}"
     if (!domainName.endsWith("/")) {
@@ -7,13 +9,16 @@ node("TestSlave") {
     }
     def imageName = domainName + "jfrog_artifactory_jenkins_tests:2"
     def targetRepo = "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO}"
-    def rtServer = Artifactory.newServer url: "${env.JENKINS_ARTIFACTORY_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.env.capture = true
+    buildInfo.env.filter.addExclude("DONT_COLLECT")
+    buildInfo.name = "scripted:dockerPush test"
+    buildInfo.number = "3"
 
     stage "dockerPush"
     def rtDocker = Artifactory.docker (rtServer, "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}")
-    def buildInfo = rtDocker.push imageName, targetRepo
-    buildInfo.name = "scripted:dockerPush test"
-    buildInfo.number = "3"
+    rtDocker.push imageName, targetRepo, buildInfo
 
     stage "Publish Build Info"
     rtServer.publishBuildInfo buildInfo

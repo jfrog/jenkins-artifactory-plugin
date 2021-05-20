@@ -120,7 +120,7 @@ public class GradleExecutor implements Executor {
         if (!gradleBuild.isUsesPlugin()) {
             try {
                 initScriptPath = createInitScript();
-                switches += " --init-script " + initScriptPath;
+                switches += " --init-script \"" + initScriptPath + "\"";
             } catch (Exception e) {
                 listener.getLogger().println("Error occurred while writing Gradle Init Script: " + e.getMessage());
                 throw new Run.RunnerAbortedException();

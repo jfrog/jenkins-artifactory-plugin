@@ -191,15 +191,15 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
-    void uploadTest(String buildName) throws Exception {
+    void uploadTest(String buildName, String project, String pipelineName) throws Exception {
         Set<String> expectedArtifacts = getTestFilesNamesByLayer(0);
         String buildNumber = "3";
 
-        runPipeline("upload", false);
+        runPipeline(pipelineName, false);
         try {
             expectedArtifacts.forEach(artifactName ->
                     assertTrue(artifactName + " doesn't exist in Artifactory", isExistInArtifactory(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1), artifactName)));
-            Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber);
+            Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber, project);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleArtifacts(module, expectedArtifacts);
         } finally {
@@ -327,7 +327,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             Module module = getAndAssertModule(buildInfo, "org.jfrog.example.gradle:" + pipelineType.toString() + "-gradle-example-ci-server-publication:1.0");
             // Gradle 6 and above produce an extra artifact of type "module".
             // In order to allow the test to run on Gradle 6 and above, we remove it.
-            module.setArtifacts(module.getArtifacts().stream().filter(art -> !art.getType().toLowerCase().equals("module")).collect(Collectors.toList()));
+            module.setArtifacts(module.getArtifacts().stream().filter(art -> !art.getType().equalsIgnoreCase("module")).collect(Collectors.toList()));
             assertModuleArtifacts(module, expectedArtifacts);
             assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
 
@@ -346,6 +346,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber);
+            assertFilteredProperties(buildInfo);
             Module module = getAndAssertModule(buildInfo, moduleName);
             assertModuleDependencies(module, expectedDependencies);
             assertModuleArtifacts(module, expectedArtifact);
@@ -361,6 +362,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber);
+            // TODO - uncomment after making the Go step running in a new Java process:
+            // assertFilteredProperties(buildInfo);
             Module module = getAndAssertModule(buildInfo, moduleName);
             assertModuleDependencies(module, expectedDependencies);
             assertModuleArtifacts(module, expectedArtifact);
@@ -389,6 +392,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber);
+            assertFilteredProperties(buildInfo);
             Module module = getAndAssertModule(buildInfo, moduleName);
             assertEquals(expectedDependencies, module.getDependencies().size());
         } finally {
@@ -401,6 +405,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber);
+            assertFilteredProperties(buildInfo);
             Module module = getAndAssertModule(buildInfo, moduleName);
             assertTrue(module.getDependencies() != null && module.getDependencies().size() > 0);
         } finally {
@@ -413,6 +418,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             runPipeline(pipelineName, false);
             Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber);
+            assertFilteredProperties(buildInfo);
             Module module = getAndAssertModule(buildInfo, moduleName);
             assertTrue(module.getDependencies() != null && module.getDependencies().size() > 0);
         } finally {
@@ -510,6 +516,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
             // Get build info
             Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber);
+            assertFilteredProperties(buildInfo);
             assertEquals(1, buildInfo.getModules().size());
             List<Module> modules = buildInfo.getModules();
             Module module = modules.get(0);
@@ -623,7 +630,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         String buildNumber = "3";
         // Clear older build if exists
         deleteBuild(artifactoryClient, buildName);
-        WorkflowRun build = runPipeline("append", false);
+        runPipeline("append", false);
         try {
             Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber);
             // Assert Issues
@@ -717,7 +724,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         ArtifactoryTrigger artifactoryTrigger = checkArtifactoryTrigger(run);
 
         // Change something in Artifactory server
-        ArtifactoryServer server = RepositoriesUtils.getArtifactoryServer("LOCAL", RepositoriesUtils.getArtifactoryServers());
+        ArtifactoryServer server = RepositoriesUtils.getArtifactoryServer("LOCAL");
         server.setConnectionRetry(4);
 
         // Make sure the change took place

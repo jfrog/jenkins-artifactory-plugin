@@ -24,6 +24,7 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
     protected NugetBuild nugetBuild;
     private String customBuildNumber;
     private String customBuildName;
+    private String project;
     private String resolverId;
     private String javaArgs; // Added to allow java remote debugging
     private String args;
@@ -46,6 +47,11 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
     }
 
     @DataBoundSetter
+    public void setProject(String customProject) {
+        this.project = customProject;
+    }
+
+    @DataBoundSetter
     public void setResolverId(String resolverId) {
         this.resolverId = resolverId;
     }
@@ -65,6 +71,9 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
         this.args = args;
     }
 
+    @DataBoundSetter
+    public void setApiProtocol(String apiProtocol) { nugetBuild.setApiProtocol(apiProtocol); }
+
     public abstract String getUsageReportFeatureName();
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
@@ -79,7 +88,7 @@ abstract public class NugetRunStepBase extends AbstractStepImpl {
 
         @Override
         protected Void runStep() throws Exception {
-            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
             CommonResolver resolver = getResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
             step.nugetBuild.setResolver(resolver);
             NugetRunExecutor nugetRunExecutor = new NugetRunExecutor(buildInfo, launcher, step.nugetBuild, step.javaArgs, step.args, ws, step.module, env, listener, build);

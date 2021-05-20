@@ -9,7 +9,6 @@ import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
-import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import org.jfrog.hudson.util.SpecUtils;
 import org.kohsuke.stapler.DataBoundSetter;
 
@@ -26,6 +25,7 @@ public class GenericStep extends AbstractStepImpl {
     protected String spec;
     private String customBuildNumber;
     private String customBuildName;
+    private String project;
     private String specPath;
     boolean failNoOp;
     protected String module;
@@ -52,6 +52,11 @@ public class GenericStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setBuildNumber(String buildNumber) {
         this.customBuildNumber = buildNumber;
+    }
+
+    @DataBoundSetter
+    public void setProject(String project) {
+        this.project = project;
     }
 
     @DataBoundSetter
@@ -87,14 +92,12 @@ public class GenericStep extends AbstractStepImpl {
         }
 
         void setGenericParameters(GenericStep step, StepContext context) throws IOException, InterruptedException {
-            String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-
             // Set spec
             SpecConfiguration specConfiguration = new SpecConfiguration(step.spec, step.specPath);
             spec = SpecUtils.getSpecStringFromSpecConf(specConfiguration, env, ws, listener.getLogger());
 
             // Set Build Info
-            buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber);
+            buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
 
             // Set Artifactory server
             artifactoryServer = getArtifactoryServer();

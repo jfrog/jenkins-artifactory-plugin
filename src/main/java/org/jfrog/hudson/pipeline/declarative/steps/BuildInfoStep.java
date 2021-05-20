@@ -43,6 +43,11 @@ public class BuildInfoStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
+    public void setProject(String project) {
+        buildInfo.setProject(project);
+    }
+
+    @DataBoundSetter
     public void setStartDate(Date date) {
         buildInfo.setStartDate(date);
     }
@@ -101,9 +106,11 @@ public class BuildInfoStep extends AbstractStepImpl {
         protected Void runStep() throws Exception {
             String buildName = StringUtils.isBlank(step.buildInfo.getName()) ? BuildUniqueIdentifierHelper.getBuildName(build) : step.buildInfo.getName();
             String buildNumber = StringUtils.isBlank(step.buildInfo.getNumber()) ? BuildUniqueIdentifierHelper.getBuildNumber(build) : step.buildInfo.getNumber();
+            String project = step.buildInfo.getProject();
             step.buildInfo.setName(buildName);
             step.buildInfo.setNumber(buildNumber);
-            BuildInfo currentBuildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, buildName, buildNumber);
+            step.buildInfo.setProject(project);
+            BuildInfo currentBuildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, buildName, buildNumber, project);
             step.buildInfo.append(currentBuildInfo);
             DeclarativePipelineUtils.saveBuildInfo(step.buildInfo, rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;

@@ -29,10 +29,11 @@ public class CollectIssuesExecutor implements Executor {
     private String config;
     private Issues issues;
     private ArtifactoryServer pipelineServer;
+    private String project;
 
     // In declarative, build name is expected to be passed as an argument (in scripted taken from the object).
     public CollectIssuesExecutor(Run build, TaskListener listener, FilePath ws, String buildName,
-                                 String config, Issues issues, ArtifactoryServer pipelineServer) {
+                                 String config, Issues issues, ArtifactoryServer pipelineServer, String project) {
         this.build = build;
         this.listener = listener;
         this.ws = ws;
@@ -40,13 +41,14 @@ public class CollectIssuesExecutor implements Executor {
         this.config = config;
         this.issues = issues;
         this.pipelineServer = pipelineServer;
+        this.project = project;
     }
 
     public void execute() throws IOException, InterruptedException {
         ArtifactoryManagerBuilder artifactoryManagerBuilder = getArtifactoryManagerBuilder(pipelineServer, build, listener);
 
         // Collect issues
-        org.jfrog.build.api.Issues newIssues = ws.act(new CollectIssuesCallable(new JenkinsBuildInfoLog(listener), config, artifactoryManagerBuilder, buildName, ws, listener));
+        org.jfrog.build.api.Issues newIssues = ws.act(new CollectIssuesCallable(new JenkinsBuildInfoLog(listener), config, artifactoryManagerBuilder, buildName, ws, listener, project));
 
         // Convert and append Issues
         this.issues.convertAndAppend(newIssues);
@@ -64,22 +66,24 @@ public class CollectIssuesExecutor implements Executor {
         private String config;
         private ArtifactoryManagerBuilder artifactoryManagerBuilder;
         private String buildName;
+        private String project;
         private FilePath ws;
         private TaskListener listener;
 
         CollectIssuesCallable(Log logger, String config, ArtifactoryManagerBuilder artifactoryManagerBuilder,
-                              String buildName, FilePath ws, TaskListener listener) {
+                              String buildName, FilePath ws, TaskListener listener, String project) {
             this.logger = logger;
             this.config = config;
             this.artifactoryManagerBuilder = artifactoryManagerBuilder;
             this.buildName = buildName;
+            this.project = project;
             this.ws = ws;
             this.listener = listener;
         }
 
         public org.jfrog.build.api.Issues invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
             IssuesCollector issuesCollector = new IssuesCollector();
-            return issuesCollector.collectIssues(file, logger, config, artifactoryManagerBuilder, buildName, Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
+            return issuesCollector.collectIssues(file, logger, config, artifactoryManagerBuilder, buildName, Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)), project);
         }
     }
 }

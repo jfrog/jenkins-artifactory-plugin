@@ -1,17 +1,13 @@
 package org.jfrog.hudson.pipeline.declarative.steps.generic;
 
 import com.google.inject.Inject;
-import hudson.EnvVars;
-import hudson.FilePath;
-import hudson.model.Run;
-import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.SpecConfiguration;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.EditPropsExecutor;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
 import org.jfrog.hudson.util.SpecUtils;
 import org.kohsuke.stapler.DataBoundSetter;

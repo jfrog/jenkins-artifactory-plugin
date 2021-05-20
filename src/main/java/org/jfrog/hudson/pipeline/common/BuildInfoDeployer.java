@@ -30,12 +30,14 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
     private ArtifactoryConfigurator configurator;
     private Build buildInfo;
     private boolean asyncBuildRetention;
+    private final String platformUrl;
 
     public BuildInfoDeployer(ArtifactoryConfigurator configurator, ArtifactoryManager artifactoryManager,
-                             Run build, TaskListener listener, BuildInfo deployedBuildInfo) throws IOException, InterruptedException {
+                             Run build, TaskListener listener, BuildInfo deployedBuildInfo,  String platformUrl) throws IOException, InterruptedException {
         super(configurator, build, listener, artifactoryManager);
         this.configurator = configurator;
         this.build = build;
+        this.platformUrl = platformUrl;
         envVars = deployedBuildInfo.getEnvVars();
         sysVars = deployedBuildInfo.getSysVars();
         buildInfo = createBuildInfo("Pipeline", "");
@@ -55,6 +57,8 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
         if (StringUtils.isNotEmpty(deployedBuildInfo.getNumber())) {
             buildInfo.setNumber(deployedBuildInfo.getNumber());
         }
+
+        buildInfo.setProject(deployedBuildInfo.getProject());
 
         if (deployedBuildInfo.getIssues() != null && !deployedBuildInfo.getConvertedIssues().isEmpty()) {
             buildInfo.setIssues(deployedBuildInfo.getConvertedIssues());
@@ -86,10 +90,11 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
 
     public void deploy() throws IOException {
         String artifactoryUrl = configurator.getArtifactoryServer().getArtifactoryUrl();
-        listener.getLogger().println("Deploying build info to: " + artifactoryUrl + "/api/build");
+        String logMessage = "Deploying build info to: " + artifactoryUrl + "/api/build" + ArtifactoryBuildInfoClient.getProjectQueryParam(buildInfo.getProject());
+        listener.getLogger().println(logMessage);
         BuildRetention retention = buildInfo.getBuildRetention();
         buildInfo.setBuildRetention(null);
-        org.jfrog.build.extractor.retention.Utils.sendBuildAndBuildRetention(artifactoryManager, this.buildInfo, retention, asyncBuildRetention);
+        org.jfrog.build.extractor.retention.Utils.sendBuildAndBuildRetention(artifactoryManager, this.buildInfo, retention, asyncBuildRetention, platformUrl);
         addBuildInfoResultAction(artifactoryUrl);
     }
 
@@ -100,7 +105,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
                 action = new BuildInfoResultAction(build);
                 build.addAction(action);
             }
-            action.addBuildInfoResults(artifactoryUrl, buildInfo);
+            action.addBuildInfoResults(artifactoryUrl, platformUrl, buildInfo);
         }
     }
 
