@@ -9,7 +9,7 @@ import hudson.triggers.TriggerDescriptor;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jfrog.build.client.ItemLastModified;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
@@ -59,10 +59,10 @@ public class ArtifactoryTrigger extends Trigger<BuildableItem> {
         }
         ArtifactoryServer server = getArtifactoryServer();
 
-        try (ArtifactoryBuildInfoClient client = server.createArtifactoryClient(server.getDeployerCredentialsConfig().provideCredentials(job), ProxyUtils.createProxyConfiguration())) {
+        try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(server.getDeployerCredentialsConfig().provideCredentials(job), ProxyUtils.createProxyConfiguration())) {
             String[] paths = this.paths.split(";");
             for (String path : paths) {
-                ItemLastModified itemLastModified = client.getItemLastModified(StringUtils.trimToEmpty(path));
+                ItemLastModified itemLastModified = artifactoryManager.getItemLastModified(StringUtils.trimToEmpty(path));
                 long responseLastModified = itemLastModified.getLastModified();
                 if (responseLastModified > lastModified) {
                     this.lastModified = responseLastModified;

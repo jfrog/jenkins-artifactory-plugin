@@ -5,17 +5,15 @@ import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.build.api.Module;
 import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.AbstractBuildInfoDeployer;
 import org.jfrog.hudson.BuildInfoResultAction;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
 
 import java.io.IOException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +31,9 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
     private Build buildInfo;
     private boolean asyncBuildRetention;
 
-    public BuildInfoDeployer(ArtifactoryConfigurator configurator, ArtifactoryBuildInfoClient client,
-                             Run build, TaskListener listener, BuildInfo deployedBuildInfo) throws IOException, InterruptedException, NoSuchAlgorithmException {
-        super(configurator, build, listener, client);
+    public BuildInfoDeployer(ArtifactoryConfigurator configurator, ArtifactoryManager artifactoryManager,
+                             Run build, TaskListener listener, BuildInfo deployedBuildInfo) throws IOException, InterruptedException {
+        super(configurator, build, listener, artifactoryManager);
         this.configurator = configurator;
         this.build = build;
         envVars = deployedBuildInfo.getEnvVars();
@@ -91,7 +89,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
         listener.getLogger().println("Deploying build info to: " + artifactoryUrl + "/api/build");
         BuildRetention retention = buildInfo.getBuildRetention();
         buildInfo.setBuildRetention(null);
-        org.jfrog.build.extractor.retention.Utils.sendBuildAndBuildRetention(client, this.buildInfo, retention, asyncBuildRetention);
+        org.jfrog.build.extractor.retention.Utils.sendBuildAndBuildRetention(artifactoryManager, this.buildInfo, retention, asyncBuildRetention);
         addBuildInfoResultAction(artifactoryUrl);
     }
 

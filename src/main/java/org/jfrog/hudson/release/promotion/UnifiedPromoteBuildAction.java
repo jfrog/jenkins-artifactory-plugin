@@ -22,11 +22,8 @@ import hudson.security.ACL;
 import hudson.security.Permission;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.util.EntityUtils;
 import org.jfrog.build.api.builder.PromotionBuilder;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.release.PromotionUtils;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
@@ -395,10 +392,10 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
             ArtifactoryServer server = promotionCandidate.getConfigurator().getArtifactoryServer();
             String buildName = promotionCandidate.getBuildName();
             String buildNumber = promotionCandidate.getBuildNumber();
-            try (ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
+            try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(deployerConfig.provideCredentials(build.getParent()),
                     ProxyUtils.createProxyConfiguration())) {
                 if ((promotionPlugin != null) && !UserPluginInfo.NO_PLUGIN_KEY.equals(promotionPlugin.getPluginName())) {
-                    handlePluginPromotion(listener, client, buildName, buildNumber);
+                    handlePluginPromotion(listener, artifactoryManager, buildName, buildNumber);
                 } else {
                     PromotionBuilder promotionBuilder = new PromotionBuilder()
                             .status(targetStatus)
@@ -410,7 +407,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                             .copy(useCopy)
                             .failFast(failFast);
 
-                    PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), client, listener, buildName, buildNumber);
+                    PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), artifactoryManager, listener, buildName, buildNumber);
                 }
 
                 build.save();
@@ -426,16 +423,14 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
             }
         }
 
-        private void handlePluginPromotion(TaskListener listener, ArtifactoryBuildInfoClient client, String buildName, String buildNumber) throws IOException {
-            HttpEntity entity = null;
-            try (CloseableHttpResponse response = client.executePromotionUserPlugin(promotionPlugin.getPluginName(), buildName, buildNumber, promotionPlugin.getParamMap())) {
-                entity = response.getEntity();
-                PromotionUtils.validatePromotionSuccessful(response, false, failFast, listener);
+        private void handlePluginPromotion(TaskListener listener, ArtifactoryManager artifactoryManager, String buildName, String buildNumber) {
+            try {
+                artifactoryManager.promotionUserPlugin(promotionPlugin.getPluginName(), buildName, buildNumber, promotionPlugin.getParamMap());
                 listener.getLogger().println("Promotion completed successfully!");
             } catch (IOException e) {
-                listener.error(e.getMessage());
-            } finally {
-                EntityUtils.consumeQuietly(entity);
+                if (PromotionUtils.onPromotionFailFast(false, failFast, listener)) {
+                    listener.error("Promotion failed.", e);
+                }
             }
         }
     }

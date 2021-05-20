@@ -17,8 +17,8 @@ import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.util.PublishedItemsHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
@@ -144,19 +144,17 @@ public class GenericArtifactsDeployer {
             this.threads = threads;
         }
 
-        public List<Artifact> invoke(File workspace, VirtualChannel channel) throws IOException, InterruptedException {
+        public List<Artifact> invoke(File workspace, VirtualChannel channel) throws IOException {
             Log log = new JenkinsBuildInfoLog(listener);
 
-            // Create ArtifactoryClientBuilder
-            ArtifactoryBuildInfoClientBuilder clientBuilder = server.createBuildInfoClientBuilder(credentials, proxyConfiguration, log);
+            // Create ArtifactoryManagerBuilder
+            ArtifactoryManagerBuilder artifactoryManagerBuilder = server.createArtifactoryManagerBuilder(credentials, proxyConfiguration, log);
 
             // Option 1. Upload - Use file specs.
             if (StringUtils.isNotEmpty(spec)) {
                 SpecsHelper specsHelper = new SpecsHelper(log);
                 try {
-                    return specsHelper.uploadArtifactsBySpec(spec, threads, workspace, buildProperties, clientBuilder);
-                } catch (InterruptedException e) {
-                    throw e;
+                    return specsHelper.uploadArtifactsBySpec(spec, threads, workspace, buildProperties, artifactoryManagerBuilder);
                 } catch (Exception e) {
                     throw new RuntimeException("Failed uploading artifacts by spec", e);
                 }
@@ -168,8 +166,8 @@ public class GenericArtifactsDeployer {
             for (Map.Entry<String, File> entry : targetPathToFilesMap.entries()) {
                 artifactsToDeploy.addAll(buildDeployDetailsFromFileEntry(entry));
             }
-            try (ArtifactoryBuildInfoClient client = clientBuilder.build()) {
-                deploy(client, artifactsToDeploy);
+            try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
+                deploy(artifactoryManager, artifactsToDeploy);
                 return convertDeployDetailsToArtifacts(artifactsToDeploy);
             }
         }
@@ -185,10 +183,10 @@ public class GenericArtifactsDeployer {
             return result;
         }
 
-        public void deploy(ArtifactoryBuildInfoClient client, Set<DeployDetails> artifactsToDeploy)
+        public void deploy(ArtifactoryManager artifactoryManager, Set<DeployDetails> artifactsToDeploy)
                 throws IOException {
             for (DeployDetails deployDetail : artifactsToDeploy) {
-                client.deployArtifact(deployDetail);
+                artifactoryManager.upload(deployDetail);
             }
         }
 

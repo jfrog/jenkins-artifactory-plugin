@@ -32,7 +32,7 @@ import org.jfrog.build.api.Module;
 import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.builder.DependencyBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.AbstractBuildInfoDeployer;
 import org.jfrog.hudson.BuildInfoAwareConfigurator;
 import org.jfrog.hudson.MavenDependenciesRecord;
@@ -54,9 +54,9 @@ public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
     private final Build buildInfo;
     private BuildInfoAwareConfigurator configurator;
 
-    public MavenBuildInfoDeployer(BuildInfoAwareConfigurator configurator, ArtifactoryBuildInfoClient client,
-            MavenModuleSetBuild build, TaskListener listener) throws IOException, InterruptedException {
-        super(configurator, build, listener, client);
+    public MavenBuildInfoDeployer(BuildInfoAwareConfigurator configurator, ArtifactoryManager artifactoryManager,
+                                  MavenModuleSetBuild build, TaskListener listener) throws IOException, InterruptedException {
+        super(configurator, build, listener, artifactoryManager);
         this.configurator = configurator;
         buildInfo = createBuildInfo("Maven", build.getParent().getMaven().getName());
         gatherModuleAndDependencyInfo(build);
@@ -65,7 +65,7 @@ public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
     public void deploy() throws IOException {
         String url = configurator.getArtifactoryServer().getArtifactoryUrl() + "/api/build";
         listener.getLogger().println("Deploying build info to: " + url);
-        client.sendBuildInfo(buildInfo);
+        artifactoryManager.publishBuildInfo(buildInfo);
     }
 
     private void gatherModuleAndDependencyInfo(MavenModuleSetBuild mavenModulesBuild) {

@@ -24,7 +24,7 @@ import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.docker.DockerJavaWrapper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.trigger.ArtifactoryTrigger;
@@ -172,13 +172,13 @@ class ITestUtils {
     /**
      * Get build info from Artifactory.
      *
-     * @param buildInfoClient - Artifactory build-info client
-     * @param buildName       - Build name
-     * @param buildNumber     - Build number
+     * @param artifactoryManager - ArtifactoryManager
+     * @param buildName          - Build name
+     * @param buildNumber        - Build number
      * @return build info for the specified build name and number
      */
-    static Build getBuildInfo(ArtifactoryBuildInfoClient buildInfoClient, String buildName, String buildNumber) throws IOException {
-        return buildInfoClient.getBuildInfo(buildName, buildNumber);
+    static Build getBuildInfo(ArtifactoryManager artifactoryManager, String buildName, String buildNumber) throws IOException {
+        return artifactoryManager.getBuildInfo(buildName, buildNumber);
     }
 
     /**

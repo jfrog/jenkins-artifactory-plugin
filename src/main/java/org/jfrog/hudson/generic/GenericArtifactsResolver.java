@@ -23,7 +23,7 @@ import hudson.model.BuildListener;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.util.AntPatternsDependenciesHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.BuildDependenciesHelper;
 import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloader;
@@ -40,14 +40,14 @@ import java.util.List;
  */
 public class GenericArtifactsResolver {
     private final AbstractBuild build;
-    private final ArtifactoryDependenciesClient client;
+    private final ArtifactoryManager artifactoryManager;
     private Log log;
     private EnvVars envVars;
 
-    public GenericArtifactsResolver(AbstractBuild build, BuildListener listener, ArtifactoryDependenciesClient client)
+    public GenericArtifactsResolver(AbstractBuild build, BuildListener listener, ArtifactoryManager artifactoryManager)
             throws IOException, InterruptedException {
         this.build = build;
-        this.client = client;
+        this.artifactoryManager = artifactoryManager;
         this.envVars = build.getEnvironment(listener);
         this.log = new JenkinsBuildInfoLog(listener);
     }
@@ -63,6 +63,6 @@ public class GenericArtifactsResolver {
     }
 
     private DependenciesDownloader createDependenciesDownloader() {
-        return new DependenciesDownloaderImpl(client, build.getWorkspace(), log);
+        return new DependenciesDownloaderImpl(artifactoryManager, build.getWorkspace(), log);
     }
 }

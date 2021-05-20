@@ -3,13 +3,10 @@ package org.jfrog.hudson.pipeline.common.executors;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.builder.ModuleType;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
@@ -23,8 +20,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBaseClient.MD5_HEADER_NAME;
-import static org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBaseClient.SHA1_HEADER_NAME;
+import static org.jfrog.build.extractor.clientConfiguration.client.artifactory.services.Upload.MD5_HEADER_NAME;
+import static org.jfrog.build.extractor.clientConfiguration.client.artifactory.services.Upload.SHA1_HEADER_NAME;
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**
@@ -82,8 +79,8 @@ public class BuildAppendExecutor implements Executor {
      * @throws ParseException in case of the returned timestamp contains unexpected format.
      */
     private long getBuildTimestamp(org.jfrog.hudson.ArtifactoryServer server, Credentials credentials) throws IOException, ParseException {
-        try (ArtifactoryBuildInfoClient client = server.createBuildInfoClientBuilder(credentials, createProxyConfiguration(), new JenkinsBuildInfoLog(listener)).build()) {
-            Build build = client.getBuildInfo(buildName, buildNumber);
+        try (ArtifactoryManager artifactoryManager = server.createArtifactoryManagerBuilder(credentials, createProxyConfiguration(), new JenkinsBuildInfoLog(listener)).build()) {
+            Build build = artifactoryManager.getBuildInfo(buildName, buildNumber);
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
             Date date = format.parse(build.getStarted());
             return date.getTime();
@@ -100,36 +97,23 @@ public class BuildAppendExecutor implements Executor {
      * @throws IOException if a header the build info object are missing.
      */
     private void addChecksumHeaders(org.jfrog.hudson.ArtifactoryServer server, Credentials credentials, ModuleBuilder moduleBuilder, long timestamp) throws IOException {
-        // To support build name and numbers with ':', encode ':' by '%3A'. Further encoding will take place in 'getArtifactMetadata'.
+        // To support build name and numbers with ':', encode ':' by '%3A'. Further encoding will take place in 'downloadHeaders'.
         String encodedBuildName = buildName.replaceAll(":", "%3A");
         String encodedBuildNumber = buildNumber.replaceAll(":", "%3A");
 
         // Send HEAD request to <artifactory-url>/artifactory-build-info/<build-name>/<build-number>-timestamp.json to get the checksums
-        String buildInfoPath = server.getArtifactoryUrl() + "/artifactory-build-info/" + encodedBuildName + "/" + encodedBuildNumber + "-" + timestamp + ".json";
-        try (ArtifactoryDependenciesClient client = server.createArtifactoryDependenciesClient(credentials, createProxyConfiguration(), listener)) {
-            // getArtifactMetadata return null response entity - there's no need to consume it
-            try (CloseableHttpResponse response = client.getArtifactMetadata(buildInfoPath)) {
-                moduleBuilder
-                        .sha1(readHeader(response, buildInfoPath, SHA1_HEADER_NAME))
-                        .md5(readHeader(response, buildInfoPath, MD5_HEADER_NAME));
+        String buildInfoPath = "artifactory-build-info/" + encodedBuildName + "/" + encodedBuildNumber + "-" + timestamp + ".json";
+        try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(credentials, createProxyConfiguration(), listener)) {
+            for (Header header : artifactoryManager.downloadHeaders(buildInfoPath)) {
+                switch (header.getName()) {
+                    case SHA1_HEADER_NAME:
+                        moduleBuilder.sha1(header.getValue());
+                        break;
+                    case MD5_HEADER_NAME:
+                        moduleBuilder.md5(header.getValue());
+                        break;
+                }
             }
         }
-    }
-
-    /**
-     * Read a header from the HTTP response.
-     *
-     * @param response   - The HTTP response
-     * @param path       - The path to the resource in Artifactory
-     * @param headerName - The header name to search for
-     * @return the header value.
-     * @throws IOException if the requested header is missing.
-     */
-    private String readHeader(HttpResponse response, String path, String headerName) throws IOException {
-        Header sha1 = response.getFirstHeader(headerName);
-        if (sha1 == null) {
-            throw new IOException("'" + headerName + "' header is missing in HEAD request to '" + path + "'");
-        }
-        return sha1.getValue();
     }
 }

@@ -6,7 +6,7 @@ import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.build.extractor.issuesCollection.IssuesCollector;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
@@ -43,35 +43,35 @@ public class CollectIssuesExecutor implements Executor {
     }
 
     public void execute() throws IOException, InterruptedException {
-        ArtifactoryBuildInfoClientBuilder clientBuilder = getBuildInfoClientBuilder(pipelineServer, build, listener);
+        ArtifactoryManagerBuilder artifactoryManagerBuilder = getArtifactoryManagerBuilder(pipelineServer, build, listener);
 
         // Collect issues
-        org.jfrog.build.api.Issues newIssues = ws.act(new CollectIssuesCallable(new JenkinsBuildInfoLog(listener), config, clientBuilder, buildName,ws,listener));
+        org.jfrog.build.api.Issues newIssues = ws.act(new CollectIssuesCallable(new JenkinsBuildInfoLog(listener), config, artifactoryManagerBuilder, buildName, ws, listener));
 
         // Convert and append Issues
         this.issues.convertAndAppend(newIssues);
     }
 
-    private ArtifactoryBuildInfoClientBuilder getBuildInfoClientBuilder(ArtifactoryServer pipelineServer, Run build, TaskListener listener) {
+    private ArtifactoryManagerBuilder getArtifactoryManagerBuilder(ArtifactoryServer pipelineServer, Run build, TaskListener listener) {
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(new ArtifactoryConfigurator(server), server);
-        return server.createBuildInfoClientBuilder(preferredDeployer.provideCredentials(build.getParent()),
+        return server.createArtifactoryManagerBuilder(preferredDeployer.provideCredentials(build.getParent()),
                 ProxyUtils.createProxyConfiguration(), new JenkinsBuildInfoLog(listener));
     }
 
     public static class CollectIssuesCallable extends MasterToSlaveFileCallable<org.jfrog.build.api.Issues> {
         private Log logger;
         private String config;
-        private ArtifactoryBuildInfoClientBuilder clientBuilder;
+        private ArtifactoryManagerBuilder artifactoryManagerBuilder;
         private String buildName;
         private FilePath ws;
         private TaskListener listener;
 
-        CollectIssuesCallable(Log logger, String config, ArtifactoryBuildInfoClientBuilder clientBuilder,
+        CollectIssuesCallable(Log logger, String config, ArtifactoryManagerBuilder artifactoryManagerBuilder,
                               String buildName, FilePath ws, TaskListener listener) {
             this.logger = logger;
             this.config = config;
-            this.clientBuilder = clientBuilder;
+            this.artifactoryManagerBuilder = artifactoryManagerBuilder;
             this.buildName = buildName;
             this.ws = ws;
             this.listener = listener;
@@ -79,7 +79,7 @@ public class CollectIssuesExecutor implements Executor {
 
         public org.jfrog.build.api.Issues invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
             IssuesCollector issuesCollector = new IssuesCollector();
-            return issuesCollector.collectIssues(file, logger, config, clientBuilder, buildName, Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
+            return issuesCollector.collectIssues(file, logger, config, artifactoryManagerBuilder, buildName, Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
         }
     }
 }
