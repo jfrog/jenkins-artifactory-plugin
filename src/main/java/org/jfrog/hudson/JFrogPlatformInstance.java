@@ -19,16 +19,16 @@ public class JFrogPlatformInstance {
     private ArtifactoryServer artifactoryServer;
     private CredentialsConfig deployerCredentialsConfig;
     private CredentialsConfig resolverCredentialsConfig;
-    private final boolean bypassProxy;
+    private boolean bypassProxy;
     private int timeout = DEFAULT_CONNECTION_TIMEOUT;
     private Integer connectionRetry;
     private Integer deploymentThreads;
 
     @DataBoundConstructor
-    public JFrogPlatformInstance(String instanceId, String url, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
+    public JFrogPlatformInstance(String instanceId, String platformUrl, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
                                  CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry, Integer deploymentThreads) {
         this.id = instanceId;
-        this.url = StringUtils.isNotEmpty(url) ? StringUtils.removeEnd(url, "/") : null;
+        this.url = StringUtils.isNotEmpty(platformUrl) ? StringUtils.removeEnd(platformUrl, "/") : null;
         this.deployerCredentialsConfig = deployerCredentialsConfig;
         this.resolverCredentialsConfig = resolverCredentialsConfig;
         this.timeout = timeout > 0 ? timeout : DEFAULT_CONNECTION_TIMEOUT;
@@ -43,29 +43,74 @@ public class JFrogPlatformInstance {
     }
 
     public JFrogPlatformInstance(org.jfrog.hudson.pipeline.common.types.ArtifactoryServer artifactoryServer) {
-        this("", "",artifactoryServer.getUrl(), artifactoryServer.createCredentialsConfig(), artifactoryServer.createCredentialsConfig(), artifactoryServer.getConnection().getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnection().getRetry(), artifactoryServer.getDeploymentThreads());
+        this("", "", artifactoryServer.getUrl(), artifactoryServer.createCredentialsConfig(), artifactoryServer.createCredentialsConfig(), artifactoryServer.getConnection().getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnection().getRetry(), artifactoryServer.getDeploymentThreads());
     }
 
     public String getId() {
         return id;
     }
 
+    // Required by external plugins (JCasC).
+    public String getInstanceId() {
+        return getId();
+    }
+
+    // Required by external plugins (JCasC).
+    public void setInstanceId(String instanceId) {
+        this.id = id;
+    }
+
     public String getUrl() {
         return url;
     }
 
-    public ArtifactoryServer getArtifactoryServer() {
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    // Required by external plugins (JCasC).
+    public String getPlatformUrl() {
+        return getUrl();
+    }
+
+    // Required by external plugins (JCasC).
+    public void setPlatformUrl(String url) {
+        setUrl(url);
+    }
+
+    // Required by external plugins (JCasC).
+    public String getArtifactoryUrl() {
+        return artifactoryServer.getArtifactoryUrl();
+    }
+
+    // Required by external plugins (JCasC).
+    public void setArtifactoryUrl(String artifactoryUrl) {
+        artifactoryServer.setArtifactoryUrl(artifactoryUrl);
+    }
+
+    // Required by external plugins (JCasC).
+    public ArtifactoryServer getArtifactory() {
         return artifactoryServer;
     }
 
+    // Required by external plugins (JCasC).
     public CredentialsConfig getDeployerCredentialsConfig() {
         return deployerCredentialsConfig;
     }
 
+    public void setDeployerCredentialsConfig(CredentialsConfig cred) {
+        deployerCredentialsConfig = cred;
+    }
+
+    // Required by external plugins (JCasC).
     public CredentialsConfig getResolverCredentialsConfig() {
         return resolverCredentialsConfig;
     }
 
+    // Required by external plugins (JCasC).
+    public void setResolverCredentialsConfig(CredentialsConfig cred) {
+        resolverCredentialsConfig = cred;
+    }
 
     // To populate the dropdown list from the jelly
     public List<Integer> getConnectionRetries() {
@@ -90,14 +135,32 @@ public class JFrogPlatformInstance {
         return items;
     }
 
+    // Required by external plugins (JCasC).
     public int getTimeout() {
         return timeout;
     }
 
+    // Required by external plugins (JCasC).
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+
+    // Required by external plugins (JCasC).
     public boolean isBypassProxy() {
+        return getBypassProxy();
+    }
+
+    // Required by external plugins (JCasC).
+    public boolean getBypassProxy() {
         return bypassProxy;
     }
 
+    // Required by external plugins (JCasC).
+    public void setBypassProxy(boolean bypassProxy) {
+        this.bypassProxy = bypassProxy;
+    }
+
+    // Required by external plugins (JCasC).
     public int getConnectionRetry() {
         if (connectionRetry == null) {
             connectionRetry = 3;
@@ -105,10 +168,12 @@ public class JFrogPlatformInstance {
         return connectionRetry;
     }
 
+    // Required by external plugins (JCasC).
     public void setConnectionRetry(int connectionRetry) {
         this.connectionRetry = connectionRetry;
     }
 
+    // Required by external plugins (JCasC).
     public Integer getDeploymentThreads() {
         return deploymentThreads;
     }

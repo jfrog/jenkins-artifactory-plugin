@@ -133,7 +133,7 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
         List<JFrogPlatformInstance> jfrogInstances = getDescriptor().getJfrogInstances();
         for (JFrogPlatformInstance JFrogPlatformInstance : jfrogInstances) {
             if (JFrogPlatformInstance.getId().equals(getArtifactoryName())) {
-                return JFrogPlatformInstance.getArtifactoryServer();
+                return JFrogPlatformInstance.getArtifactory();
             }
         }
         return null;

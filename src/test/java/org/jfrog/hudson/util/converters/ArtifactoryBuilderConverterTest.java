@@ -35,8 +35,8 @@ public class ArtifactoryBuilderConverterTest {
         Assert.assertThat(testBuilder.getJfrogInstances(), Matchers.hasSize(2));
         JFrogPlatformInstance jfrogServer = testBuilder.getJfrogInstances().get(0);
         Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getId()));
-        Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getServerId()));
-        Assert.assertEquals(ARTIFACTORY_URL, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getArtifactoryUrl()));
+        Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getArtifactory().getServerId()));
+        Assert.assertEquals(ARTIFACTORY_URL, Objects.requireNonNull(jfrogServer.getArtifactory().getArtifactoryUrl()));
         Assert.assertNull(jfrogServer.getUrl());
         Files.delete(targetPath);
     }
@@ -51,8 +51,8 @@ public class ArtifactoryBuilderConverterTest {
         Assert.assertThat(testBuilder.getJfrogInstances(), Matchers.hasSize(1));
         JFrogPlatformInstance jfrogServer = testBuilder.getJfrogInstances().get(0);
         Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getId()));
-        Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getServerId()));
-        Assert.assertEquals(ARTIFACTORY_URL, Objects.requireNonNull(jfrogServer.getArtifactoryServer().getArtifactoryUrl()));
+        Assert.assertEquals(SERVER_ID, Objects.requireNonNull(jfrogServer.getArtifactory().getServerId()));
+        Assert.assertEquals(ARTIFACTORY_URL, Objects.requireNonNull(jfrogServer.getArtifactory().getArtifactoryUrl()));
         Assert.assertEquals(PLATFORM_URL, Objects.requireNonNull(jfrogServer.getUrl()));
         Files.delete(targetPath);
     }

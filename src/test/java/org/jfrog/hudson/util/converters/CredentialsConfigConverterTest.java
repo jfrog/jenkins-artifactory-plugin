@@ -33,7 +33,7 @@ public class CredentialsConfigConverterTest {
         Files.copy(testFile.toPath(), new File(Jenkins.get().getRootDir(), ArtifactoryBuilder.class.getName() + ".xml").toPath());
         testBuilder.load();
         Assert.assertThat(testBuilder.getJfrogInstances(), Matchers.hasSize(1));
-        ArtifactoryServer artifactoryServer = testBuilder.getJfrogInstances().get(0).getArtifactoryServer();
+        ArtifactoryServer artifactoryServer = testBuilder.getJfrogInstances().get(0).getArtifactory();
         Assert.assertEquals(DEPLOYER_USERNAME, Objects.requireNonNull(artifactoryServer.getDeployerCredentialsConfig().getUsername()));
         Assert.assertEquals(DEPLOYER_PASSWORD, Objects.requireNonNull(artifactoryServer.getDeployerCredentialsConfig().getPassword()).getPlainText());
         Assert.assertEquals(RESOLVER_USERNAME, Objects.requireNonNull(artifactoryServer.getResolverCredentialsConfig().getUsername()));

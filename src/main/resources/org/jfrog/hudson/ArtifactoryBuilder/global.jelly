@@ -29,7 +29,7 @@
 
                     <f:entry title="JFrog Platform URL" field="platformUrl"
                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-platform-url.html">
-                        <f:textbox field="url" value="${instance.url}"/>
+                        <f:textbox field="platformUrl" value="${instance.url}"/>
                     </f:entry>
                     <f:section title="Advanced Artifactory configuration">
                         <f:advanced>
