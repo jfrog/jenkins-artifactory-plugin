@@ -48,10 +48,10 @@ public abstract class RepositoriesUtils {
         return server.getVirtualRepositoryKeys(resolverOverrider, null);
     }
 
-    public static List<VirtualRepository> generateVirtualRepos(ArtifactoryManager ArtifactoryManager) throws IOException {
+    public static List<VirtualRepository> generateVirtualRepos(ArtifactoryManager artifactoryManager) throws IOException {
         List<VirtualRepository> virtualRepositories;
 
-        List<String> keys = ArtifactoryManager.getVirtualRepositoriesKeys();
+        List<String> keys = artifactoryManager.getVirtualRepositoriesKeys();
         virtualRepositories = Lists.newArrayList(Lists.transform(keys, new Function<String, VirtualRepository>() {
             public VirtualRepository apply(String from) {
                 return new VirtualRepository(from, from);

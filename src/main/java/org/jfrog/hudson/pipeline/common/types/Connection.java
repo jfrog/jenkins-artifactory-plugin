@@ -1,7 +1,7 @@
 package org.jfrog.hudson.pipeline.common.types;
 
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
-import org.jfrog.hudson.action.ActionableHelper;
+import org.jfrog.build.client.JFrogHttpClient;
 
 import java.io.Serializable;
 
@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class Connection implements Serializable {
     public static final long serialVersionUID = 1L;
 
-    private int connectionRetry = ActionableHelper.getDefaultConnectionRetries();
+    private int connectionRetry = JFrogHttpClient.DEFAULT_CONNECTION_RETRY;
     private int timeout = 300;
 
     @Whitelisted

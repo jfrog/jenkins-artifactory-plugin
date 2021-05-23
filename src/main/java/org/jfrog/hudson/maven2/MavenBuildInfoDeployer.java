@@ -61,9 +61,8 @@ public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
     }
 
     public void deploy() throws IOException {
-        String url = configurator.getArtifactoryServer().getArtifactoryUrl() + "/api/build";
         JFrogPlatformInstance jfrogServer = RepositoriesUtils.getJFrogPlatformInstances(configurator.getArtifactoryServer().getServerId());
-        listener.getLogger().println("Deploying build info to: " + url);
+        listener.getLogger().println("Deploying build info to: " + jfrogServer.getArtifactoryServer().getArtifactoryUrl() + "/api/build");
         artifactoryManager.publishBuildInfo(buildInfo, jfrogServer.getUrl());
     }
 

@@ -216,7 +216,7 @@ public class ArtifactoryServer implements Serializable {
         Credentials credentials = credentialsConfig.provideCredentials(item);
         try {
             ArtifactoryManager artifactoryManager = new ArtifactoryManager(url, credentials.getUsername(), credentials.getPassword(), new NullLog());
-            return artifactoryManager.getVersion().hasAddons();
+            return !artifactoryManager.getVersion().isOSS();
         } catch (IOException e) {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.WARNING, "Could not obtain artifactory version from '" + url + "'", e);

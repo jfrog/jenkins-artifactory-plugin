@@ -13,10 +13,9 @@ public class PromotionUtils {
 
     /**
      * Two stage promotion, dry run and actual promotion to verify correctness.
-     *
      */
     public static boolean promoteAndCheckResponse(Promotion promotion, ArtifactoryManager artifactoryManager, TaskListener listener,
-                                                  String buildName, String buildNumber) {
+                                                  String buildName, String buildNumber) throws IOException {
         // If failFast is true, perform dry run first
         if (promotion.isFailFast()) {
             promotion.setDryRun(true);
@@ -26,10 +25,8 @@ public class PromotionUtils {
                 artifactoryManager.stageBuild(buildName, buildNumber, promotion);
                 listener.getLogger().println("Dry run finished successfully.\nPerforming promotion ...");
             } catch (IOException e) {
-                if (onPromotionFailFast(true, promotion.isFailFast(), listener)) {
-                    return false;
-                }
-                listener.getLogger().println("Dry run failed to perform promotion ...");
+                onPromotionFailFast(true, promotion.isFailFast());
+                return false;
             }
         }
 
@@ -46,17 +43,15 @@ public class PromotionUtils {
         return true;
     }
 
-    public static boolean onPromotionFailFast(boolean dryRun, boolean failFast, TaskListener listener) {
+    public static void onPromotionFailFast(boolean dryRun, boolean failFast) throws IOException {
         if (failFast) {
             if (dryRun) {
-                listener.error(
+                throw new IOException(
                         "Promotion failed during dry run (no change in Artifactory was done).");
             } else {
-                listener.error(
+                throw new IOException(
                         "Promotion failed. View Artifactory logs for more details.");
             }
-            return true;
         }
-        return false;
     }
 }

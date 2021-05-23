@@ -423,14 +423,13 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
             }
         }
 
-        private void handlePluginPromotion(TaskListener listener, ArtifactoryManager artifactoryManager, String buildName, String buildNumber) {
+        private void handlePluginPromotion(TaskListener listener, ArtifactoryManager artifactoryManager, String buildName, String buildNumber) throws IOException {
             try {
                 artifactoryManager.promotionUserPlugin(promotionPlugin.getPluginName(), buildName, buildNumber, promotionPlugin.getParamMap());
                 listener.getLogger().println("Promotion completed successfully!");
             } catch (IOException e) {
-                if (PromotionUtils.onPromotionFailFast(false, failFast, listener)) {
-                    listener.error("Promotion failed.", e);
-                }
+                PromotionUtils.onPromotionFailFast(false, failFast);
+                listener.error("Promotion failed.", e);
             }
         }
     }
