@@ -67,7 +67,7 @@ public class MavenExecutor implements Executor {
         if (!mavenBuild.getResolver().isEmpty()) {
             extendedEnv.put(BuildInfoConfigProperties.PROP_ARTIFACTORY_RESOLUTION_ENABLED, Boolean.TRUE.toString());
         }
-        Maven3Builder maven3Builder = new Maven3Builder(mavenBuild.getTool(), pom, goals, mavenOpts);
+        Maven3Builder maven3Builder = new Maven3Builder(mavenBuild.getTool(), pom, goals, mavenOpts, mavenBuild.isUseWrapper());
         convertJdkPath(launcher, extendedEnv);
         maven3Builder.perform(build, launcher, listener, extendedEnv, ws, tempDir);
 

@@ -15,6 +15,7 @@ import static org.jfrog.hudson.pipeline.common.Utils.appendBuildInfo;
  * Created by Tamirh on 04/08/2016.
  */
 public class MavenBuild extends PackageManagerBuild {
+    private boolean useWrapper;
     private String opts = "";
 
     public MavenBuild() {
@@ -35,6 +36,16 @@ public class MavenBuild extends PackageManagerBuild {
     @Whitelisted
     public void setTool(String tool) {
         this.tool = tool;
+    }
+
+    @Whitelisted
+    public boolean isUseWrapper() {
+        return useWrapper;
+    }
+
+    @Whitelisted
+    public void setUseWrapper(boolean useWrapper) {
+        this.useWrapper = useWrapper;
     }
 
     @Whitelisted

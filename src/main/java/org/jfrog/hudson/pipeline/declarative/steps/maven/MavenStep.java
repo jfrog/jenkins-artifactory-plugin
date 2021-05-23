@@ -79,6 +79,11 @@ public class MavenStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
+    public void setUseWrapper(boolean useWrapper) {
+        mavenBuild.setUseWrapper(useWrapper);
+    }
+
+    @DataBoundSetter
     public void setOpts(String opts) {
         mavenBuild.setOpts(opts);
     }

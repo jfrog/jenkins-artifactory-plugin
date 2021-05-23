@@ -24,7 +24,7 @@ import hudson.tasks.Maven;
 import hudson.util.ArgumentListBuilder;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.jfrog.build.api.BuildInfoConfigProperties;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.common.Utils;
@@ -33,9 +33,11 @@ import org.jfrog.hudson.util.plugins.PluginsUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.StaplerRequest;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 /**
  * Maven3 builder for free style projects. Hudson 1.392 added native support for maven 3 but this one is useful for free style.
@@ -45,20 +47,23 @@ import java.net.URL;
 public class Maven3Builder extends Builder {
 
     public static final String CLASSWORLDS_LAUNCHER = "org.codehaus.plexus.classworlds.launcher.Launcher";
+    public static final String MAVEN_HOME_PREFIX_IN_VERSION = "Maven home:";
     public static final String MAVEN_HOME = "MAVEN_HOME";
 
     private final String mavenName;
     private final String rootPom;
     private final String goals;
     private final String mavenOpts;
+    private final boolean useWrapper;
     private String classworldsConfPath;
 
     @DataBoundConstructor
-    public Maven3Builder(String mavenName, String rootPom, String goals, String mavenOpts) {
+    public Maven3Builder(String mavenName, String rootPom, String goals, String mavenOpts, boolean useWrapper) {
         this.mavenName = mavenName;
         this.rootPom = rootPom;
         this.goals = goals;
         this.mavenOpts = mavenOpts;
+        this.useWrapper = useWrapper;
     }
 
     public String getMavenName() {
@@ -85,7 +90,7 @@ public class Maven3Builder extends Builder {
         EnvVars env = build.getEnvironment(listener);
         FilePath workDir = build.getModuleRoot();
         FilePath ws = build.getWorkspace();
-        FilePath mavenHome = getMavenHome(listener, env, launcher);
+        FilePath mavenHome = getMavenHome(listener, env, launcher, ws);
 
         if (!mavenHome.exists()) {
             listener.error("Couldn't find Maven home: " + mavenHome.getRemote());
@@ -100,7 +105,7 @@ public class Maven3Builder extends Builder {
     public void perform(Run<?, ?> build, Launcher launcher, TaskListener listener, EnvVars env, FilePath workDir, FilePath tempDir)
             throws InterruptedException, IOException {
         listener.getLogger().println("Jenkins Artifactory Plugin version: " + ActionableHelper.getArtifactoryPluginVersion());
-        FilePath mavenHome = getMavenHome(listener, env, launcher);
+        FilePath mavenHome = getMavenHome(listener, env, launcher, workDir);
 
         if (!mavenHome.exists()) {
             listener.getLogger().println("Couldn't find Maven home at " + mavenHome.getRemote() + " on agent " + Utils.getAgentName(workDir) +
@@ -133,7 +138,7 @@ public class Maven3Builder extends Builder {
         // classpath
         String fileSeparator = getFileSeparator(launcher);
         String[] pathsToJoin = {mavenHome.getRemote(), "boot", "*"};
-        args.add("-classpath", StringUtils.join(pathsToJoin, fileSeparator));
+        args.add("-classpath", join(pathsToJoin, fileSeparator));
 
         // maven home
         args.addKeyValuePair("-D", "maven.home", mavenHome.getRemote(), false);
@@ -143,7 +148,7 @@ public class Maven3Builder extends Builder {
         args.addKeyValuePair("-D", "maven.conf", mavenConf.getRemote(), false);
 
         String buildInfoPropertiesFile = env.get(BuildInfoConfigProperties.PROP_PROPS_FILE);
-        boolean artifactoryIntegration = StringUtils.isNotBlank(buildInfoPropertiesFile);
+        boolean artifactoryIntegration = isNotBlank(buildInfoPropertiesFile);
         listener.getLogger().println("Artifactory integration is " + (artifactoryIntegration ? "enabled" : "disabled"));
         if (artifactoryIntegration) {
             addArtifactoryIntegrationArgs(args, buildInfoPropertiesFile, tempDir, env);
@@ -162,7 +167,7 @@ public class Maven3Builder extends Builder {
 
         // pom file to build
         String rootPom = getRootPom();
-        if (StringUtils.isNotBlank(rootPom)) {
+        if (isNotBlank(rootPom)) {
             args.add("-f", rootPom);
         }
 
@@ -201,7 +206,7 @@ public class Maven3Builder extends Builder {
     }
 
     private void addMavenOpts(ArgumentListBuilder args, Run<?, ?> build) {
-        if (StringUtils.isNotBlank(getMavenOpts())) {
+        if (isNotBlank(getMavenOpts())) {
             String mavenOpts = getMavenOpts();
             if (build instanceof AbstractBuild) {
                 // If we aren't in pipeline job we, might need to evaluate the variable real value.
@@ -212,26 +217,107 @@ public class Maven3Builder extends Builder {
         }
     }
 
-    private FilePath getMavenHome(TaskListener listener, EnvVars env, Launcher launcher) throws IOException, InterruptedException {
-        if (StringUtils.isNotEmpty(mavenName)) {
-            Maven.MavenInstallation mi = getMaven();
-            if (mi == null) {
-                listener.error("Couldn't find Maven executable.");
-                throw new Run.RunnerAbortedException();
-            } else {
-                Node node = ActionableHelper.getNode(launcher);
-                mi = mi.forNode(node, listener);
-                mi = mi.forEnvironment(env);
+    private FilePath getMavenHome(TaskListener listener, EnvVars env, Launcher launcher, FilePath ws) throws IOException, InterruptedException {
+        String mavenHome = null;
+        if (useWrapper) {
+            // Use Maven wrapper
+            mavenHome = createAndGetWrapper(launcher, env, listener, ws);
+        } else if (isNotEmpty(mavenName)) {
+            // Use Maven from tool
+            mavenHome = getMavenFromTool(launcher, env, listener);
+        } else if (env.get(MAVEN_HOME) != null) {
+            // Use Maven from MAVEN_HOME environment variable
+            mavenHome = env.get(MAVEN_HOME);
+        }
+        if (isBlank(mavenHome)) {
+            throw new RuntimeException("Couldn't find maven installation");
+        }
+        return new FilePath(launcher.getChannel(), mavenHome);
+    }
+
+    /**
+     * Install Maven wrapper by running `mvn -version` command and return the Maven wrapper home.
+     *
+     * @param launcher - Job's process launcher
+     * @param env      - Job's environment variables
+     * @param listener - Job's task listener
+     * @param ws       - Job's workspace
+     * @return Maven wrapper home
+     * @throws IOException in case of any I/O error.
+     */
+    private String createAndGetWrapper(Launcher launcher, EnvVars env, TaskListener listener, FilePath ws) throws IOException {
+        // Create output stream to parse the `mvn -version` command results
+        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            // Create TeeOutputStream to show the `mvn -version` command results either in the local output stream
+            // and in the task listener.
+            // The TeeOutputStream should NOT be closed, since it may close the task listener as well.
+            TeeOutputStream printStream = new TeeOutputStream(listener.getLogger(), os);
+            Utils.launch("Maven Wrapper", launcher, getMavenWrapperVersionArgs(launcher), env,
+                    new StreamBuildListener(printStream), getMavenWrapperPath(ws));
+            os.flush();
+
+            // Extract the Maven wrapper home directory from the `mvn -version` output
+            String mvnVersionOutput = os.toString(StandardCharsets.UTF_8.name());
+            try (BufferedReader reader = new BufferedReader(new StringReader(mvnVersionOutput))) {
+                for (String line = reader.readLine(); line != null; line = reader.readLine()) {
+                    if (startsWithIgnoreCase(line, MAVEN_HOME_PREFIX_IN_VERSION)) {
+                        return trim(removeStartIgnoreCase(line, MAVEN_HOME_PREFIX_IN_VERSION));
+                    }
+                }
             }
-
-            return new FilePath(launcher.getChannel(), mi.getHome());
         }
 
-        if (env.get(MAVEN_HOME) != null) {
-            return new FilePath(launcher.getChannel(), env.get(MAVEN_HOME));
+        throw new IOException("Failed to detect the Maven home of the Maven wrapper");
+    }
+
+    /**
+     * Get the path to the directory containing the mvnw and mvnw.bat files.
+     *
+     * @param ws - Job's workspace
+     * @return path to the directory containing the mvnw and mvnw.bat files
+     */
+    private FilePath getMavenWrapperPath(FilePath ws) {
+        if (isNotBlank(rootPom)) {
+            ws = ws.child(rootPom);
+            if (endsWith(rootPom, ".xml")) {
+                // The root pom leads directly to the pom file, but the maven wrapper should be in the pom's directory
+                ws = ws.getParent();
+            }
+        }
+        return ws;
+    }
+
+    private ArgumentListBuilder getMavenWrapperVersionArgs(Launcher launcher) {
+        String wrapperExe = launcher.isUnix() ? "./mvnw" : "mvnw.cmd";
+        ArgumentListBuilder args = new ArgumentListBuilder(wrapperExe, "-version");
+        if (!launcher.isUnix()) {
+            args = args.toWindowsCommand();
+        }
+        return args;
+    }
+
+    /**
+     * Get Maven home from configured Maven tool.
+     *
+     * @param launcher - Job's process launcher
+     * @param env      - Job's environment variables
+     * @param listener - Job's task listener
+     * @return Maven tool home
+     * @throws IOException          in case of any I/O error.
+     * @throws InterruptedException in case thread interrupted while trying to retrieve the running node.
+     */
+    private String getMavenFromTool(Launcher launcher, EnvVars env, TaskListener listener) throws IOException, InterruptedException {
+        Maven.MavenInstallation mi = getMaven();
+        if (mi == null) {
+            listener.error("Couldn't find Maven executable.");
+            throw new Run.RunnerAbortedException();
+        } else {
+            Node node = ActionableHelper.getNode(launcher);
+            mi = mi.forNode(node, listener);
+            mi = mi.forEnvironment(env);
         }
 
-        throw new RuntimeException("Couldn't find maven installation");
+        return mi.getHome();
     }
 
     private Maven.MavenInstallation getMaven() {
@@ -246,9 +332,9 @@ public class Maven3Builder extends Builder {
 
     private String getMavenProjectPath(Run<?, ?> build, FilePath ws) {
         if (build instanceof AbstractBuild) {
-            if (StringUtils.isNotBlank(getRootPom())) {
+            if (isNotBlank(getRootPom())) {
                 return ((AbstractBuild) build).getModuleRoot().getRemote() + File.separatorChar +
-                        getRootPom().replace("/pom.xml", StringUtils.EMPTY);
+                        getRootPom().replace("/pom.xml", EMPTY);
             }
             return ((AbstractBuild) build).getModuleRoot().getRemote();
         }

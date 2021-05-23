@@ -82,6 +82,11 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void mavenWrapperTest() throws Exception {
+        super.mavenWrapperTest("scripted:mavenWrapper test");
+    }
+
+    @Test
     public void gradleTest() throws Exception {
         super.gradleTest("scripted:gradle test");
     }
