@@ -194,6 +194,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 } catch (UnsupportedOperationException uoe) {
                     return FormValidation.warning(uoe.getMessage());
                 } catch (ClientProtocolException e) {
+                    // If http/https are missing, ClientProtocolException will be thrown.
+                    // Since this kind of exception hold the error message inside 'cause' we must catch it to show a proper error message on Jenkins UI.
                     return FormValidation.error(e.getCause().getMessage());
                 } catch (Exception e) {
                     return FormValidation.error(e.getMessage());
