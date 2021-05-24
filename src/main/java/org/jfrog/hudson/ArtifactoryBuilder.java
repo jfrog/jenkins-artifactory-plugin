@@ -33,6 +33,7 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.ClientProtocolException;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
@@ -172,9 +173,9 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
             ArtifactoryManager artifactoryManager;
             if (StringUtils.isNotEmpty(username) || StringUtils.isNotEmpty(accessToken)) {
-                artifactoryManager = new ArtifactoryManager(url, username, password, accessToken, new NullLog());
+                artifactoryManager = new ArtifactoryManager(targetArtUrl, username, password, accessToken, new NullLog());
             } else {
-                artifactoryManager = new ArtifactoryManager(url, new NullLog());
+                artifactoryManager = new ArtifactoryManager(targetArtUrl, new NullLog());
             }
 
             try {
@@ -192,6 +193,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                     version = artifactoryManager.getVersion();
                 } catch (UnsupportedOperationException uoe) {
                     return FormValidation.warning(uoe.getMessage());
+                } catch (ClientProtocolException e) {
+                    return FormValidation.error(e.getCause().getMessage());
                 } catch (Exception e) {
                     return FormValidation.error(e.getMessage());
                 }

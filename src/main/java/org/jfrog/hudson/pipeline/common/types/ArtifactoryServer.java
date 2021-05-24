@@ -39,6 +39,7 @@ public class ArtifactoryServer implements Serializable {
 
     private String serverName;
     private String url;
+    private String platformUrl;
     private String username;
     private String password;
     private String credentialsId;
@@ -47,7 +48,6 @@ public class ArtifactoryServer implements Serializable {
     private boolean usesCredentialsId;
     private final Connection connection = new Connection();
     private int deploymentThreads;
-    private JFrogPlatformInstance jfrogPlatformInstance;
 
     public ArtifactoryServer() {
     }
@@ -382,11 +382,11 @@ public class ArtifactoryServer implements Serializable {
         this.deploymentThreads = deploymentThreads;
     }
 
-    public JFrogPlatformInstance getJfrogPlatformInstance() {
-        return jfrogPlatformInstance;
+    public String getPlatformUrl() {
+        return platformUrl;
     }
 
-    public void setJfrogPlatformInstance(JFrogPlatformInstance jfrogPlatformInstance) {
-        this.jfrogPlatformInstance = jfrogPlatformInstance;
+    public void setPlatformUrl(String platformUrl) {
+        this.platformUrl = platformUrl;
     }
 }
