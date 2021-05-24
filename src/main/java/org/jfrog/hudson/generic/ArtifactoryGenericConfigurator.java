@@ -15,8 +15,7 @@ import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.client.ProxyConfiguration;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
@@ -372,27 +371,21 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         if (Jenkins.get().proxy != null && !resolverServer.isBypassProxy()) {
             proxyConfiguration = createProxyConfiguration();
         }
-
-        ArtifactoryDependenciesClient dependenciesClient = null;
-        try {
-            if (isUseSpecs()) {
-                String spec = SpecUtils.getSpecStringFromSpecConf(downloadSpec, build.getEnvironment(listener),
-                        build.getExecutor().getCurrentWorkspace(), listener.getLogger());
-                FilePath workspace = build.getExecutor().getCurrentWorkspace();
-                publishedDependencies = workspace.act(new FilesResolverCallable(new JenkinsBuildInfoLog(listener),
-                        resolverCredentials, resolverServer.getArtifactoryUrl(), spec, proxyConfiguration));
-            } else {
-                dependenciesClient = resolverServer.createArtifactoryDependenciesClient(resolverCredentials, proxyConfiguration, listener);
-                GenericArtifactsResolver artifactsResolver = new GenericArtifactsResolver(build, listener, dependenciesClient);
+        if (isUseSpecs()) {
+            String spec = SpecUtils.getSpecStringFromSpecConf(downloadSpec, build.getEnvironment(listener),
+                    build.getExecutor().getCurrentWorkspace(), listener.getLogger());
+            FilePath workspace = build.getExecutor().getCurrentWorkspace();
+            publishedDependencies = workspace.act(new FilesResolverCallable(new JenkinsBuildInfoLog(listener),
+                    resolverCredentials, resolverServer.getArtifactoryUrl(), spec, proxyConfiguration));
+        } else {
+            try (ArtifactoryManager artifactoryManager = resolverServer.createArtifactoryManager(resolverCredentials, proxyConfiguration, listener)) {
+                GenericArtifactsResolver artifactsResolver = new GenericArtifactsResolver(build, listener, artifactoryManager);
                 publishedDependencies = artifactsResolver.retrievePublishedDependencies(resolvePattern);
                 buildDependencies = artifactsResolver.retrieveBuildDependencies(resolvePattern);
             }
-            return createEnvironmentOnSuccessfulSetup();
-        } finally {
-            if (dependenciesClient != null) {
-                dependenciesClient.close();
-            }
+
         }
+        return createEnvironmentOnSuccessfulSetup();
     }
 
     private Environment createEnvironmentOnSuccessfulSetup() {
@@ -406,10 +399,9 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
                 ArtifactoryServer server = getArtifactoryServer();
                 CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(ArtifactoryGenericConfigurator.this, server);
-                ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideCredentials(build.getProject()),
-                        createProxyConfiguration());
-                server.setLog(listener, client);
-                try {
+
+                try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(preferredDeployer.provideCredentials(build.getProject()), createProxyConfiguration())) {
+                    server.setLog(listener, artifactoryManager);
                     boolean isFiltered = false;
                     if (isMultiConfProject(build)) {
                         if (multiConfProject && StringUtils.isBlank(getArtifactoryCombinationFilter())) {
@@ -427,7 +419,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
                         List<Artifact> deployedArtifacts = artifactsDeployer.getDeployedArtifacts();
                         if (deployBuildInfo) {
-                            new GenericBuildInfoDeployer(ArtifactoryGenericConfigurator.this, client, build,
+                            new GenericBuildInfoDeployer(ArtifactoryGenericConfigurator.this, artifactoryManager, build,
                                     listener, deployedArtifacts, buildDependencies, publishedDependencies).deploy();
                             String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGenericConfigurator.this, build);
                             // add the result action (prefer always the same index)
@@ -439,8 +431,6 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                     return true;
                 } catch (Exception e) {
                     e.printStackTrace(listener.error(e.getMessage()));
-                } finally {
-                    client.close();
                 }
 
                 // failed

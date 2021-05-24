@@ -33,12 +33,13 @@ import jenkins.model.Jenkins;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.client.ClientProtocolException;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.client.ArtifactoryVersion;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.client.Version;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesHttpClient;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
@@ -170,34 +171,38 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 }
             }
 
-            ArtifactoryBuildInfoClient client;
+            ArtifactoryManager artifactoryManager;
             if (StringUtils.isNotEmpty(username) || StringUtils.isNotEmpty(accessToken)) {
-                client = new ArtifactoryBuildInfoClient(targetArtUrl, username, password, accessToken, new NullLog());
+                artifactoryManager = new ArtifactoryManager(targetArtUrl, username, password, accessToken, new NullLog());
             } else {
-                client = new ArtifactoryBuildInfoClient(targetArtUrl, new NullLog());
+                artifactoryManager = new ArtifactoryManager(targetArtUrl, new NullLog());
             }
 
             try {
                 if (!bypassProxy && Jenkins.get().proxy != null) {
-                    client.setProxyConfiguration(createProxyConfiguration());
+                    artifactoryManager.setProxyConfiguration(createProxyConfiguration());
                 }
 
                 if (StringUtils.isNotBlank(timeout)) {
-                    client.setConnectionTimeout(Integer.parseInt(timeout));
+                    artifactoryManager.setConnectionTimeout(Integer.parseInt(timeout));
                 }
-                RepositoriesUtils.setRetryParams(connectionRetry, client);
+                RepositoriesUtils.setRetryParams(connectionRetry, artifactoryManager);
 
                 ArtifactoryVersion version;
                 try {
-                    version = client.verifyCompatibleArtifactoryVersion();
+                    version = artifactoryManager.getVersion();
                 } catch (UnsupportedOperationException uoe) {
                     return FormValidation.warning(uoe.getMessage());
+                } catch (ClientProtocolException e) {
+                    // If http/https are missing, ClientProtocolException will be thrown.
+                    // Since this kind of exception hold the error message inside 'cause' we must catch it to show a proper error message on Jenkins UI.
+                    return FormValidation.error(e.getCause().getMessage());
                 } catch (Exception e) {
                     return FormValidation.error(e.getMessage());
                 }
                 return FormValidation.ok("Found Artifactory " + version.toString() + " on " + targetArtUrl);
             } finally {
-                client.close();
+                artifactoryManager.close();
             }
         }
 

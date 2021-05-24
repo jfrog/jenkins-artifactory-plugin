@@ -14,9 +14,9 @@ import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.ModuleParallelDeployHelper;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.DeployerOverrider;
@@ -297,10 +297,10 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
 
         public Void invoke(File workspace, VirtualChannel channel) throws IOException, InterruptedException {
             Log log = new JenkinsBuildInfoLog(listener);
-            ArtifactoryBuildInfoClientBuilder clientBuilder = server.createBuildInfoClientBuilder(credentials, proxyConfiguration, log);
+            ArtifactoryManagerBuilder artifactoryManagerBuilder = server.createArtifactoryManagerBuilder(credentials, proxyConfiguration, log);
 
-            try (ArtifactoryBuildInfoClient client = clientBuilder.build()) {
-                new ModuleParallelDeployHelper().deployArtifacts(client, deployableArtifactsByModule, threads);
+            try (ArtifactoryManager artifactoryManager = artifactoryManagerBuilder.build()) {
+                new ModuleParallelDeployHelper().deployArtifacts(artifactoryManager, deployableArtifactsByModule, threads);
             }
             return null;
         }

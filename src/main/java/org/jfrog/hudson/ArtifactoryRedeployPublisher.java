@@ -36,7 +36,7 @@ import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.action.ArtifactoryProjectAction;
 import org.jfrog.hudson.maven2.ArtifactsDeployer;
 import org.jfrog.hudson.maven2.MavenBuildInfoDeployer;
@@ -349,24 +349,19 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
         ArtifactoryServer server = getArtifactoryServer();
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(this, server);
-        ArtifactoryBuildInfoClient client = server.createArtifactoryClient(preferredDeployer.provideCredentials(((MavenModuleSetBuild) build).getProject()),
-                ProxyUtils.createProxyConfiguration());
-        server.setLog(listener, client);
-        try {
-            verifySupportedArtifactoryVersion(client);
+        try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(preferredDeployer.provideCredentials(((MavenModuleSetBuild) build).getProject()), ProxyUtils.createProxyConfiguration())) {
+            server.setLog(listener, artifactoryManager);
             if (deployArtifacts) {
-                new ArtifactsDeployer(this, client, mavenBuild, listener).deploy();
+                new ArtifactsDeployer(this, artifactoryManager, mavenBuild, listener).deploy();
             }
             if (deployBuildInfo) {
-                new MavenBuildInfoDeployer(this, client, mavenBuild, listener).deploy();
+                new MavenBuildInfoDeployer(this, artifactoryManager, mavenBuild, listener).deploy();
                 // add the result action (prefer always the same index)
                 addJobActions(build, buildName);
             }
             return true;
         } catch (Exception e) {
             e.printStackTrace(listener.error(e.getMessage()));
-        } finally {
-            client.close();
         }
         // failed
         build.setResult(Result.FAILURE);
@@ -396,12 +391,6 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
     private boolean isExtractorUsed(EnvVars env) {
         return Boolean.parseBoolean(env.get(ExtractorUtils.EXTRACTOR_USED));
-    }
-
-    private void verifySupportedArtifactoryVersion(ArtifactoryBuildInfoClient client) throws Exception {
-        // get the version of artifactory, if it is an unsupported version, an UnsupportedOperationException
-        // will be thrown, and no deployment will commence.
-        client.verifyCompatibleArtifactoryVersion();
     }
 
     protected List<MavenAbstractArtifactRecord> getArtifactRecordActions(MavenModuleSetBuild build) {

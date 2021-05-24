@@ -5,13 +5,12 @@ import com.google.common.collect.Iterables;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.dependency.DownloadableArtifact;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloader;
 import org.jfrog.build.extractor.clientConfiguration.util.DependenciesDownloaderHelper;
 
@@ -31,19 +30,20 @@ import java.util.Set;
  */
 public class DependenciesDownloaderImpl implements DependenciesDownloader {
 
-    private ArtifactoryDependenciesClient client;
+    private final ArtifactoryManager artifactoryManager;
     private FilePath workspace;
     private Log log;
     private boolean flatDownload = false;
 
-    public DependenciesDownloaderImpl(ArtifactoryDependenciesClient client, FilePath workspace, Log log) {
-        this.client = client;
+    public DependenciesDownloaderImpl(ArtifactoryManager artifactoryManager, FilePath workspace, Log log) {
+        this.artifactoryManager = artifactoryManager;
         this.workspace = workspace;
         this.log = log;
     }
 
-    public ArtifactoryDependenciesClient getClient() {
-        return client;
+    @Override
+    public ArtifactoryManager getArtifactoryManager() {
+        return artifactoryManager;
     }
 
     public List<Dependency> download(Set<DownloadableArtifact> downloadableArtifacts) throws IOException {

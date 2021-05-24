@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.go.GoRunCallable;
@@ -76,7 +76,7 @@ public class GoRunExecutor implements Executor {
         }
         String username = resolverCredentials.getUsername();
         String password = resolverCredentials.getPassword();
-        ArtifactoryBuildInfoClientBuilder resolverClientBuilder = new ArtifactoryBuildInfoClientBuilder()
+        ArtifactoryManagerBuilder resolverArtifactoryManagerBuilder = new ArtifactoryManagerBuilder()
                 .setArtifactoryUrl(server.getArtifactoryUrl())
                 .setUsername(username)
                 .setPassword(password)
@@ -84,6 +84,6 @@ public class GoRunExecutor implements Executor {
                 .setLog(logger)
                 .setConnectionRetry(server.getConnectionRetry())
                 .setConnectionTimeout(server.getTimeout());
-        callable.setResolverDetails(resolverClientBuilder, resolver.getRepo(), username, password);
+        callable.setResolverDetails(resolverArtifactoryManagerBuilder, resolver.getRepo(), username, password);
     }
 }

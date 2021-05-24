@@ -19,10 +19,13 @@ package org.jfrog.hudson.generic;
 import com.google.common.collect.Lists;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.jfrog.build.api.*;
+import org.jfrog.build.api.Artifact;
+import org.jfrog.build.api.Build;
+import org.jfrog.build.api.BuildRetention;
+import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.api.dependency.BuildDependency;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.retention.Utils;
 import org.jfrog.hudson.AbstractBuildInfoDeployer;
 import org.jfrog.hudson.util.BuildRetentionFactory;
@@ -43,11 +46,11 @@ public class GenericBuildInfoDeployer extends AbstractBuildInfoDeployer {
     private ArtifactoryGenericConfigurator configurator;
     private Build buildInfo;
 
-    public GenericBuildInfoDeployer(ArtifactoryGenericConfigurator configurator, ArtifactoryBuildInfoClient client,
+    public GenericBuildInfoDeployer(ArtifactoryGenericConfigurator configurator, ArtifactoryManager artifactoryManager,
                                     Run build, TaskListener listener, List<Artifact> deployedArtifacts,
                                     List<BuildDependency> buildDependencies, List<Dependency> publishedDependencies)
             throws IOException, NoSuchAlgorithmException, InterruptedException {
-        super(configurator, build, listener, client);
+        super(configurator, build, listener, artifactoryManager);
         this.configurator = configurator;
         this.build = build;
         this.buildInfo = createBuildInfo("Generic", "");
@@ -58,7 +61,7 @@ public class GenericBuildInfoDeployer extends AbstractBuildInfoDeployer {
         String url = configurator.getArtifactoryServer().getArtifactoryUrl() + "/api/build";
         listener.getLogger().println("Deploying build info to: " + url);
         BuildRetention retention = getBuildRetention();
-        Utils.sendBuildAndBuildRetention(client, buildInfo, retention, configurator.isAsyncBuildRetention());
+        Utils.sendBuildAndBuildRetention(artifactoryManager, buildInfo, retention, configurator.isAsyncBuildRetention());
     }
 
     private BuildRetention getBuildRetention() {

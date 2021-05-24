@@ -6,7 +6,7 @@ import hudson.model.TaskListener;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.util.Log;
-import org.jfrog.build.extractor.clientConfiguration.ArtifactoryBuildInfoClientBuilder;
+import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.go.GoPublishCallable;
 import org.jfrog.hudson.pipeline.common.Utils;
@@ -52,7 +52,7 @@ public class GoPublishExecutor implements Executor {
         if (deployer.isEmpty()) {
             throw new IllegalStateException("Deployer must be configured with deployment repository and Artifactory server");
         }
-        Build build = ws.act(new GoPublishCallable(createArtifactoryClientBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), deployer.getRepo(), path, version, module, logger));
+        Build build = ws.act(new GoPublishCallable(createArtifactoryManagerBuilder(deployer), Utils.getPropertiesMap(buildInfo, this.build, context), deployer.getRepo(), path, version, module, logger));
         if (build == null) {
             throw new RuntimeException("go publish failed");
         }
@@ -60,10 +60,10 @@ public class GoPublishExecutor implements Executor {
         buildInfo.setAgentName(Utils.getAgentName(ws));
     }
 
-    private ArtifactoryBuildInfoClientBuilder createArtifactoryClientBuilder(Deployer deployer) {
+    private ArtifactoryManagerBuilder createArtifactoryManagerBuilder(Deployer deployer) {
         ArtifactoryServer server = deployer.getArtifactoryServer();
         Credentials deployerCredentials = server.getDeployerCredentialsConfig().provideCredentials(build.getParent());
-        return new ArtifactoryBuildInfoClientBuilder()
+        return new ArtifactoryManagerBuilder()
                 .setArtifactoryUrl(server.getArtifactoryUrl())
                 .setUsername(deployerCredentials.getUsername())
                 .setPassword(deployerCredentials.getPassword())

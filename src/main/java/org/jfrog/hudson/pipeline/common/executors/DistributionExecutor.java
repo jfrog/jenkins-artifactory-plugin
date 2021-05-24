@@ -6,7 +6,7 @@ import net.sf.json.JSONArray;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.builder.DistributionBuilder;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
@@ -41,7 +41,7 @@ public class DistributionExecutor implements Executor {
     public void execute() throws IOException {
         ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(server);
         CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, server);
-        ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
+        ArtifactoryManager artifactoryManager = server.createArtifactoryManager(deployerConfig.provideCredentials(build.getParent()),
                 ProxyUtils.createProxyConfiguration());
 
         DistributionBuilder distributionBuilder = new DistributionBuilder()
@@ -55,7 +55,7 @@ public class DistributionExecutor implements Executor {
 
         logInfo();
 
-        boolean status = DistributionUtils.distributeAndCheckResponse(distributionBuilder, client, listener,
+        boolean status = DistributionUtils.distributeAndCheckResponse(distributionBuilder, artifactoryManager, listener,
                 distributionConfig.getBuildName(), distributionConfig.getBuildNumber(), distributionConfig.isDryRun());
         if (!status) {
             context.onFailure(new Exception("Build distribution failed"));

@@ -7,7 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.hudson.util.Credentials;
 
@@ -28,7 +28,7 @@ public class FilesResolverCallable extends MasterToSlaveFileCallable<List<Depend
     private ProxyConfiguration proxyConfig;
 
     public FilesResolverCallable(Log log, Credentials credentials, String serverUrl,
-                                 String downloadSpec, ProxyConfiguration proxyConfig) throws IOException, InterruptedException {
+                                 String downloadSpec, ProxyConfiguration proxyConfig) {
         this.log = log;
         this.username = credentials.getUsername();
         this.password = credentials.getPassword();
@@ -38,19 +38,19 @@ public class FilesResolverCallable extends MasterToSlaveFileCallable<List<Depend
         this.proxyConfig = proxyConfig;
     }
 
-    public List<Dependency> invoke(File file, VirtualChannel channel) throws IOException, InterruptedException {
+    public List<Dependency> invoke(File file, VirtualChannel channel) throws IOException {
         if (StringUtils.isEmpty(downloadSpec)) {
             return Lists.newArrayList();
         }
         SpecsHelper specsHelper = new SpecsHelper(log);
-        ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(serverUrl, username, password, accessToken, log);
+        ArtifactoryManager artifactoryManager = new ArtifactoryManager(serverUrl, username, password, accessToken, log);
         if (proxyConfig != null) {
-            client.setProxyConfiguration(proxyConfig);
+            artifactoryManager.setProxyConfiguration(proxyConfig);
         }
         try {
-            return specsHelper.downloadArtifactsBySpec(downloadSpec, client, file.getCanonicalPath());
+            return specsHelper.downloadArtifactsBySpec(downloadSpec, artifactoryManager, file.getCanonicalPath());
         } finally {
-            client.close();
+            artifactoryManager.close();
         }
     }
 }

@@ -15,7 +15,7 @@ import org.jfrog.build.api.*;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
 import org.jfrog.build.client.DeployableArtifactDetail;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployableArtifactsUtils;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
@@ -25,7 +25,6 @@ import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -253,9 +252,9 @@ public class BuildInfo implements Serializable {
         return this.issues.convertFromPipelineIssues();
     }
 
-    public BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryBuildInfoClient client, String platformUrl)
-            throws InterruptedException, NoSuchAlgorithmException, IOException {
-        return new BuildInfoDeployer(config, client, build, listener, this, platformUrl);
+    public BuildInfoDeployer createDeployer(Run build, TaskListener listener, ArtifactoryConfigurator config, ArtifactoryManager artifactoryManager, String platformUrl)
+            throws InterruptedException, IOException {
+        return new BuildInfoDeployer(config, artifactoryManager, build, listener, this, platformUrl);
     }
 
     public void setCpsScript(CpsScript cpsScript) {
