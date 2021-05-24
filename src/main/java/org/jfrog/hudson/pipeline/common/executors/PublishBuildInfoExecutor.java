@@ -3,7 +3,7 @@ package org.jfrog.hudson.pipeline.common.executors;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
 import org.jfrog.hudson.pipeline.common.Utils;
@@ -34,15 +34,14 @@ public class PublishBuildInfoExecutor implements Executor {
         buildInfo.filterVariables();
         buildInfo.appendVcs(Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
-        String platformUrl = pipelineServer.getJfrogPlatformInstance() != null ? pipelineServer.getJfrogPlatformInstance().getUrl() : null;
-        try (ArtifactoryBuildInfoClient client = this.createArtifactoryClient(server, build, listener)) {
-            buildInfo.createDeployer(build, listener, new ArtifactoryConfigurator(server), client, platformUrl).deploy();
+        try (ArtifactoryManager artifactoryManager = this.createArtifactoryManager(server, build, listener)) {
+            buildInfo.createDeployer(build, listener, new ArtifactoryConfigurator(server), artifactoryManager, pipelineServer.getPlatformUrl()).deploy();
         }
     }
 
-    private ArtifactoryBuildInfoClient createArtifactoryClient(org.jfrog.hudson.ArtifactoryServer server, Run build, TaskListener listener) {
+    private ArtifactoryManager createArtifactoryManager(org.jfrog.hudson.ArtifactoryServer server, Run build, TaskListener listener) {
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(new ArtifactoryConfigurator(server), server);
-        return server.createArtifactoryClient(preferredDeployer.provideCredentials(build.getParent()),
+        return server.createArtifactoryManager(preferredDeployer.provideCredentials(build.getParent()),
                 ProxyUtils.createProxyConfiguration(), new JenkinsBuildInfoLog(listener));
     }
 }

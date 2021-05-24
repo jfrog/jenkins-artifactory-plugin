@@ -5,7 +5,7 @@ import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.api.builder.PromotionBuilder;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.ArtifactoryConfigurator;
@@ -39,7 +39,7 @@ public class PromotionExecutor implements Executor {
     public void execute() throws IOException {
         ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(server);
         CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, server);
-        ArtifactoryBuildInfoClient client = server.createArtifactoryClient(deployerConfig.provideCredentials(build.getParent()),
+        ArtifactoryManager artifactoryManager = server.createArtifactoryManager(deployerConfig.provideCredentials(build.getParent()),
                 ProxyUtils.createProxyConfiguration());
 
         PromotionBuilder promotionBuilder = new PromotionBuilder()
@@ -53,7 +53,7 @@ public class PromotionExecutor implements Executor {
 
         logInfo();
 
-        boolean status = PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), client, listener,
+        boolean status = PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), artifactoryManager, listener,
                 promotionConfig.getBuildName(), promotionConfig.getBuildNumber());
         if (!status) {
             context.onFailure(new Exception("Build promotion failed"));

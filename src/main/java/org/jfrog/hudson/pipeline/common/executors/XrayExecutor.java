@@ -8,14 +8,14 @@ import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.client.artifactoryXrayResponse.ArtifactoryXrayResponse;
 import org.jfrog.build.extractor.buildScanTable.BuildScanTableHelper;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryXrayClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
+import org.jfrog.hudson.XrayScanResultAction;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
 import org.jfrog.hudson.pipeline.common.types.XrayScanResult;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
-import org.jfrog.hudson.XrayScanResultAction;
 
 /**
  * @author Alexei Vainshtein
@@ -40,13 +40,13 @@ public class XrayExecutor implements Executor {
     public void execute() throws Exception {
         Log log = new JenkinsBuildInfoLog(listener);
         Credentials credentials = server.createCredentialsConfig().provideCredentials(build.getParent());
-        ArtifactoryXrayClient client = new ArtifactoryXrayClient(server.getUrl(), credentials.getUsername(),
+        ArtifactoryManager artifactoryManager = new ArtifactoryManager(server.getUrl(), credentials.getUsername(),
                 credentials.getPassword(), credentials.getAccessToken(), log);
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(Utils.prepareArtifactoryServer(null, server));
         if (proxyConfiguration != null) {
-            client.setProxyConfiguration(proxyConfiguration);
+            artifactoryManager.setProxyConfiguration(proxyConfiguration);
         }
-        ArtifactoryXrayResponse buildScanResult = client.xrayScanBuild(xrayScanConfig.getBuildName(), xrayScanConfig.getBuildNumber(), "jenkins");
+        ArtifactoryXrayResponse buildScanResult = artifactoryManager.scanBuild(xrayScanConfig.getBuildName(), xrayScanConfig.getBuildNumber(), "jenkins");
         xrayScanResult = new XrayScanResult(buildScanResult);
 
         if (xrayScanResult.isFoundVulnerable()) {

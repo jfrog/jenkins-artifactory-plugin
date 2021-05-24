@@ -19,7 +19,7 @@ import org.jfrog.artifactory.client.ArtifactoryClientBuilder;
 import org.jfrog.artifactory.client.ArtifactoryRequest;
 import org.jfrog.artifactory.client.impl.ArtifactoryRequestImpl;
 import org.jfrog.build.api.util.NullLog;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryBuildInfoClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
@@ -67,7 +67,7 @@ public class PipelineTestBase {
 
     private static long currentTime;
     private static StrSubstitutor pipelineSubstitution;
-    static ArtifactoryBuildInfoClient buildInfoClient;
+    static ArtifactoryManager artifactoryManager;
     static Artifactory artifactoryClient;
 
     private static final ClassLoader classLoader = PipelineTestBase.class.getClassLoader();
@@ -111,7 +111,7 @@ public class PipelineTestBase {
                 Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.VIRTUAL),
                 Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() != TestRepository.RepoType.VIRTUAL))
                 .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete());
-        buildInfoClient.close();
+        artifactoryManager.close();
         artifactoryClient.close();
     }
 
@@ -164,7 +164,7 @@ public class PipelineTestBase {
      * Creates build-info and Artifactory Java clients.
      */
     private static void createClients() {
-        buildInfoClient = new ArtifactoryBuildInfoClient(ARTIFACTORY_URL, ARTIFACTORY_USERNAME, ARTIFACTORY_PASSWORD, new NullLog());
+        artifactoryManager = new ArtifactoryManager(ARTIFACTORY_URL, ARTIFACTORY_USERNAME, ARTIFACTORY_PASSWORD, new NullLog());
         artifactoryClient = ArtifactoryClientBuilder.create()
                 .setUrl(ARTIFACTORY_URL)
                 .setUsername(ARTIFACTORY_USERNAME)

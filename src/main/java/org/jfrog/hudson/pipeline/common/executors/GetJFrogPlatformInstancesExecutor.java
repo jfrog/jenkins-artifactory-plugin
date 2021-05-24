@@ -48,7 +48,7 @@ public class GetJFrogPlatformInstancesExecutor implements Executor {
         JFrogPlatformInstance JFrogPlatformInstance = jfrogInstancesFound.get(0);
         ArtifactoryServer artifactoryServer = new ArtifactoryServer(JFrogPlatformInstance.getArtifactoryServer(), build.getParent());
         this.JFrogPlatformInstance = new org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance(artifactoryServer, JFrogPlatformInstance.getUrl(), JFrogPlatformInstance.getId());
-        artifactoryServer.setJfrogPlatformInstance(this.JFrogPlatformInstance);
+        artifactoryServer.setPlatformUrl(this.JFrogPlatformInstance.getUrl());
     }
 
     public static class ServerNotFoundException extends RuntimeException {

@@ -33,7 +33,8 @@ node("TestSlave") {
     )
 
     stage "Copy project example"
-    FileUtils.copyDirectory(Paths.get("${NPM_PROJECT_PATH}").toFile(), Paths.get(pwd(), "declarative-npm-example").toFile())
+    def npmProjectPath = Paths.get(pwd(), "declarative-npm-example").toFile()
+    FileUtils.copyDirectory(Paths.get("${NPM_PROJECT_PATH}").toFile(), npmProjectPath)
 
     stage "Config Build Info"
     rtBuildInfo(
@@ -49,7 +50,10 @@ node("TestSlave") {
             buildNumber: buildNumber,
             path: 'declarative-npm-example',
             resolverId: "NPM_RESOLVER",
-            module: "my-npm-module"
+            module: "my-npm-module",
+            // Run install with -cache argument to download the artifacts from Artifactory
+            // This done to be sure the artifacts exist in Artifactory
+            args: "-cache="+npmProjectPath.toString()
     )
 
     stage "Run npm publish"

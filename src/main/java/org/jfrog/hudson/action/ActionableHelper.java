@@ -32,7 +32,6 @@ import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.build.client.ArtifactoryHttpClient;
 import org.jfrog.hudson.DeployerOverrider;
 import org.jfrog.hudson.ResolverOverrider;
 import org.jfrog.hudson.util.publisher.PublisherFindImpl;
@@ -257,15 +256,6 @@ public abstract class ActionableHelper implements Serializable {
             return Jenkins.get().getPlugin(pluginsSortName).getWrapper().getVersion();
         }
         return "";
-    }
-
-    /**
-     * Returns the default number of retries
-     *
-     * @return the default number of retries
-     */
-    public static int getDefaultConnectionRetries() {
-        return ArtifactoryHttpClient.DEFAULT_CONNECTION_RETRY;
     }
 
     /**

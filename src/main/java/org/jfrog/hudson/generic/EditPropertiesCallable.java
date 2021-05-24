@@ -5,7 +5,7 @@ import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
-import org.jfrog.build.extractor.clientConfiguration.client.ArtifactoryDependenciesClient;
+import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.hudson.util.Credentials;
 
@@ -26,8 +26,7 @@ public class EditPropertiesCallable extends MasterToSlaveFileCallable<Boolean> {
     private String props;
 
     public EditPropertiesCallable(Log log, Credentials credentials, String serverUrl, String spec,
-                                  ProxyConfiguration proxyConfig, EditPropertiesActionType editType, String props)
-            throws IOException, InterruptedException {
+                                  ProxyConfiguration proxyConfig, EditPropertiesActionType editType, String props) {
         this.log = log;
         this.username = credentials.getUsername();
         this.password = credentials.getPassword();
@@ -44,14 +43,11 @@ public class EditPropertiesCallable extends MasterToSlaveFileCallable<Boolean> {
             return false;
         }
         SpecsHelper specsHelper = new SpecsHelper(log);
-        ArtifactoryDependenciesClient client = new ArtifactoryDependenciesClient(serverUrl, username, password, accessToken, log);
-        if (proxyConfig != null) {
-            client.setProxyConfiguration(proxyConfig);
-        }
-        try {
-            return specsHelper.editPropertiesBySpec(spec, client, editType, props);
-        } finally {
-            client.close();
+        try (ArtifactoryManager artifactoryManager = new ArtifactoryManager(serverUrl, username, password, accessToken, log)) {
+            if (proxyConfig != null) {
+                artifactoryManager.setProxyConfiguration(proxyConfig);
+            }
+            return specsHelper.editPropertiesBySpec(spec, artifactoryManager, editType, props);
         }
     }
 }
