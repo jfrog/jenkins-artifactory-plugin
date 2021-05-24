@@ -20,11 +20,15 @@ node("TestSlave") {
     rtNpm.deployer repo: "${NPM_LOCAL}", server: rtServer
     rtNpm.resolver repo: "${NPM_REMOTE}", server: rtServer
 
+    def npmProjectPath = Paths.get(pwd(), "scripted-npm-example").toFile()
+
     stage "Copy project example"
-    FileUtils.copyDirectory(Paths.get("${NPM_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-npm-example").toFile())
+    FileUtils.copyDirectory(Paths.get("${NPM_PROJECT_PATH}").toFile(), npmProjectPath)
 
     stage "Rum npm ci"
-    rtNpm.ci buildInfo: buildInfo, path: "scripted-npm-example"
+    // Run install with -cache argument to download the artifacts from Artifactory
+    // This done to be sure the artifacts exist in Artifactory
+    rtNpm.ci buildInfo: buildInfo, path: "scripted-npm-example", args: "-cache="+npmProjectPath.toString()
 
     stage "Publish npm"
     rtNpm.publish buildInfo: buildInfo, path: "scripted-npm-example"
