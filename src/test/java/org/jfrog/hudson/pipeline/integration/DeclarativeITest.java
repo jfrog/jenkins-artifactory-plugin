@@ -78,12 +78,12 @@ public class DeclarativeITest extends CommonITestsPipeline {
 
     @Test
     public void mavenTest() throws Exception {
-        super.mavenTest("declarative:maven test");
+        super.mavenTest("declarative:maven test", false);
     }
 
     @Test
     public void mavenWrapperTest() throws Exception {
-        super.mavenWrapperTest("declarative:mavenWrapper test");
+        super.mavenTest("declarative:mavenWrapper test", true);
     }
 
     @Test

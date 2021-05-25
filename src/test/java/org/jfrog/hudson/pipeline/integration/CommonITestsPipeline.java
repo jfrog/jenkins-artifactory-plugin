@@ -258,32 +258,12 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
-    void mavenTest(String buildName) throws Exception {
+    void mavenTest(String buildName, boolean useWrapper) throws Exception {
         Set<String> expectedArtifacts = Sets.newHashSet("multi-3.7-SNAPSHOT.pom");
         String buildNumber = "3";
         try {
-            runPipeline("maven", false);
+            runPipeline(useWrapper ? "mavenWrapper" : "maven", false);
             Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber);
-            assertFilteredProperties(buildInfo);
-            assertEquals(4, buildInfo.getModules().size());
-
-            Module module = getAndAssertModule(buildInfo, "org.jfrog.test:multi:3.7-SNAPSHOT");
-            assertModuleArtifacts(module, expectedArtifacts);
-            assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
-            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi1:3.7-SNAPSHOT");
-            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi2:3.7-SNAPSHOT");
-            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi3:3.7-SNAPSHOT");
-        } finally {
-            deleteBuild(artifactoryClient, buildName);
-        }
-    }
-
-    void mavenWrapperTest(String buildName) throws Exception {
-        Set<String> expectedArtifacts = Sets.newHashSet("multi-3.7-SNAPSHOT.pom");
-        String buildNumber = "3";
-        try {
-            runPipeline("mavenWrapper", false);
-            Build buildInfo = getBuildInfo(buildInfoClient, buildName, buildNumber);
             assertFilteredProperties(buildInfo);
             assertEquals(4, buildInfo.getModules().size());
 
