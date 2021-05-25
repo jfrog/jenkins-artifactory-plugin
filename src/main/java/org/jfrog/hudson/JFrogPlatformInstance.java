@@ -20,7 +20,7 @@ public class JFrogPlatformInstance {
     private CredentialsConfig deployerCredentialsConfig;
     private CredentialsConfig resolverCredentialsConfig;
     private boolean bypassProxy;
-    private int timeout = DEFAULT_CONNECTION_TIMEOUT;
+    private int timeout;
     private Integer connectionRetry;
     private Integer deploymentThreads;
 
@@ -51,13 +51,15 @@ public class JFrogPlatformInstance {
     }
 
     // Required by external plugins (JCasC).
+    @SuppressWarnings("unused")
     public String getInstanceId() {
         return getId();
     }
 
     // Required by external plugins (JCasC).
+    @SuppressWarnings("unused")
     public void setInstanceId(String instanceId) {
-        this.id = id;
+        this.id = instanceId;
     }
 
     public String getUrl() {
@@ -69,11 +71,13 @@ public class JFrogPlatformInstance {
     }
 
     // Required by external plugins (JCasC).
+    @SuppressWarnings("unused")
     public String getPlatformUrl() {
         return getUrl();
     }
 
     // Required by external plugins (JCasC).
+    @SuppressWarnings("unused")
     public void setPlatformUrl(String url) {
         setUrl(url);
     }
@@ -113,6 +117,7 @@ public class JFrogPlatformInstance {
     }
 
     // To populate the dropdown list from the jelly
+    @SuppressWarnings("unused")
     public List<Integer> getConnectionRetries() {
         List<Integer> items = new ArrayList<Integer>();
         for (int i = 0; i < 10; i++) {
@@ -146,6 +151,7 @@ public class JFrogPlatformInstance {
     }
 
     // Required by external plugins (JCasC).
+    @SuppressWarnings("unused")
     public boolean isBypassProxy() {
         return getBypassProxy();
     }
@@ -156,11 +162,13 @@ public class JFrogPlatformInstance {
     }
 
     // Required by external plugins (JCasC).
+    @SuppressWarnings("unused")
     public void setBypassProxy(boolean bypassProxy) {
         this.bypassProxy = bypassProxy;
     }
 
     // Required by external plugins (JCasC).
+    @SuppressWarnings("unused")
     public int getConnectionRetry() {
         if (connectionRetry == null) {
             connectionRetry = 3;
@@ -174,6 +182,7 @@ public class JFrogPlatformInstance {
     }
 
     // Required by external plugins (JCasC).
+    @SuppressWarnings("unused")
     public Integer getDeploymentThreads() {
         return deploymentThreads;
     }
