@@ -72,7 +72,7 @@ public class GetJFrogPlatformInstanceStep extends AbstractStepImpl {
 
         @Override
         public String getDisplayName() {
-            return "Get JFrog servers from Jenkins config";
+            return "Get JFrog Platform instance from Jenkins config";
         }
 
         @Override

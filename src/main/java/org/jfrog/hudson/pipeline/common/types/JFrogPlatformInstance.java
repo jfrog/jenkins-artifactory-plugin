@@ -6,7 +6,7 @@ import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import java.io.Serializable;
 
 /**
- * Represents an instance of jfrog server instance from pipeline script.
+ * Represents an instance of JFrog Platform from pipeline script.
  */
 public class JFrogPlatformInstance implements Serializable {
     private final ArtifactoryServer artifactoryServer;
