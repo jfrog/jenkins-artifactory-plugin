@@ -62,7 +62,7 @@
                                 </select>
                             </f:entry>
                             <f:optionalBlock name="instance.bypassProxy" title="Bypass HTTP proxy"
-                                             checked="${instance.bypassProxy}"
+                                             checked="${instance.bypassProxy}" inline="true"
                                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
                             </f:optionalBlock>
                         </f:advanced>
