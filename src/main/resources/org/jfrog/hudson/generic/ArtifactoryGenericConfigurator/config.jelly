@@ -17,13 +17,13 @@
                     <r:blockWrapper style="width:100%" id="artifactory-deployer-spec-dd-${uniqueId}">
                         <f:dropdownList name="specsDeployerDetails" title="${%Artifactory upload server}">
                             <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
-                                <f:dropdownListBlock value="${s.id}" title="${s.artifactoryServer.artifactoryUrl}"
-                                                     selected="${s.id==instance.specsDeployerDetails.artifactoryName}">
+                                <f:dropdownListBlock value="${s.instanceId}" title="${s.instanceId} ${s.artifactoryUrl}"
+                                                     selected="${s.instanceId==instance.specsDeployerDetails.artifactoryName}">
                                     <f:nested>
-                                        <input type="hidden" name="artifactoryName" value="${s.id}"/>
+                                        <input type="hidden" name="artifactoryName" value="${s.instanceId}"/>
                                         <input type="hidden" name="artifactoryUrl"
-                                               id="artifactoryUrlDeploy${s.artifactoryServer.artifactoryUrl}"
-                                               value="${s.artifactoryServer.artifactoryUrl}"/>
+                                               id="artifactoryUrlDeploy${s.artifactoryUrl}"
+                                               value="${s.artifactoryUrl}"/>
                                         <input type="hidden" name="stapler-class"
                                                value="org.jfrog.hudson.ServerDetails"/>
                                     </f:nested>
@@ -142,13 +142,13 @@
                         <r:blockWrapper style="width:100%" id="artifactory-resolver-spec-dd-${uniqueId}">
                             <f:dropdownList name="specsResolverDetails" title="${%Artifactory download server}">
                                 <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
-                                    <f:dropdownListBlock value="${s.id}" title="${s.artifactoryServer.artifactoryUrl}"
-                                                         selected="${s.id==instance.specsResolverDetails.artifactoryName}">
+                                    <f:dropdownListBlock value="${s.instanceId}" title="${s.instanceId} ${s.artifactoryUrl}"
+                                                         selected="${s.instanceId==instance.specsResolverDetails.artifactoryName}">
                                         <f:nested>
                                             <input type="hidden" name="artifactoryName" value="${s.id}"/>
                                             <input type="hidden" name="artifactoryUrl"
-                                                   id="artifactoryUrlResolve${s.artifactoryServer.artifactoryUrl}"
-                                                   value="${s.artifactoryServer.artifactoryUrl}"/>
+                                                   id="artifactoryUrlResolve${s.artifactoryUrl}"
+                                                   value="${s.artifactoryUrl}"/>
                                             <input type="hidden" name="stapler-class"
                                                    value="org.jfrog.hudson.ServerDetails"/>
 

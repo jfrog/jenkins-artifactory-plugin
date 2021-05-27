@@ -1,10 +1,10 @@
 <j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
     <f:dropdownList name="details" title="${%Artifactory server}">
         <j:forEach var="s" items="${instance.jfrogInstances ?: descriptor.jfrogInstances}" varStatus="loop">
-            <f:dropdownListBlock value="${s.id}" title="${s.id} (${s.artifactoryServer.artifactoryUrl})"
-                                 selected="${s.id==instance.selectedServerId}">
+            <f:dropdownListBlock value="${s.instanceId}" title="${s.instanceId} ${s.artifactoryUrl}"
+                                 selected="${s.instanceId==instance.selectedServerId}">
                 <f:nested>
-                    <input type="hidden" name="artifactoryName" value="${s.id}"/>
+                    <input type="hidden" name="artifactoryName" value="${s.instanceId}"/>
                     <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
                 </f:nested>
             </f:dropdownListBlock>

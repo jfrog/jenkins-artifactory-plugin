@@ -6,12 +6,12 @@
         <j:set var="uniqueId" value="${h.generateId()}"/>
         <f:dropdownList name="deployerDetails" title="${%Artifactory server}">
             <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
-                <f:dropdownListBlock value="${s.id}" title="${s.artifactoryServer.artifactoryUrl}" selected="${s.id==instance.artifactoryName}">
+                <f:dropdownListBlock value="${s.instanceId}" title="${s.instanceId} ${s.artifactoryUrl}" selected="${s.instanceId==instance.artifactoryName}">
                     <f:nested>
-                        <input type="hidden" name="artifactoryName" value="${s.id}"/>
-                        <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.artifactoryServer.artifactoryUrl}" value="${s.artifactoryServer.artifactoryUrl}"/>
+                        <input type="hidden" name="artifactoryName" value="${s.instanceId}"/>
+                        <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.artifactoryUrl}" value="${s.artifactoryUrl}"/>
                         <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
-                        <r:dynamicRepos id="ivyFreeRepositoryKeys-${s.artifactoryServer.artifactoryUrl}-${uniqueId}"
+                        <r:dynamicRepos id="ivyFreeRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                         title="Publishing repository"
                                         field="deployReleaseRepository"
                                         repositoryConf="${instance.deployerDetails.deployReleaseRepository}"
@@ -23,7 +23,7 @@
                         </script>
                         <r:repos bind="ivyFreeDeployBind"
                                  jsFunction="artifactoryIvyFreeStyleConfigurator"
-                                 repoUrl="artifactoryUrlDeploy${s.artifactoryServer.artifactoryUrl}"
+                                 repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"
                                  credentialsDescriber="overridingDeployerCredentials-ivy-${uniqueId}"/>
                     </f:nested>
                 </f:dropdownListBlock>

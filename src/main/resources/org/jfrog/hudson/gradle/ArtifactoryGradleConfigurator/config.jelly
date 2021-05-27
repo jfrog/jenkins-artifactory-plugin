@@ -6,15 +6,15 @@
         <f:section title="Deployment Details">
             <f:dropdownList name="deployerDetails" title="${%Artifactory deployment server}">
                 <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
-                    <f:dropdownListBlock value="${s.artifactoryServer.serverId}" title="${s.artifactoryServer.artifactoryUrl}"
-                                         selected="${s.id==instance.artifactoryName}">
+                    <f:dropdownListBlock value="${s.instanceId}" title="${s.instanceId} ${s.artifactoryUrl}"
+                                         selected="${s.instanceId==instance.artifactoryName}">
                         <f:nested>
-                            <input type="hidden" name="artifactoryName" value="${s.id}"/>
-                            <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.artifactoryServer.artifactoryUrl}"
-                                   value="${s.artifactoryServer.artifactoryUrl}"/>
+                            <input type="hidden" name="artifactoryName" value="${s.instanceId}"/>
+                            <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.artifactoryUrl}"
+                                   value="${s.artifactoryUrl}"/>
                             <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
 
-                            <r:dynamicRepos id="gradlePublishRepositoryKeys-${s.artifactoryServer.artifactoryUrl}-${uniqueId}"
+                            <r:dynamicRepos id="gradlePublishRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                             title="Publishing repository"
                                             field="deployReleaseRepository"
                                             repositories="${instance.releaseRepositories}"
@@ -23,10 +23,10 @@
                             <f:entry title="${%Custom staging configuration}"
                                      help="/plugin/artifactory/help/release/common/help-stagingPlugin.html">
                                 <select class="setting-input" name="userPluginKey"
-                                        id="gradleCustomStagingConfiguration-${s.artifactoryServer.artifactoryUrl}-${uniqueId}"
+                                        id="gradleCustomStagingConfiguration-${s.artifactoryUrl}-${uniqueId}"
                                         onchange="setStagingParamsSelectedValue(this)">
                                     <j:choose>
-                                        <j:when test="${s.serverId==instance.artifactoryName}">
+                                        <j:when test="${s.instanceId==instance.artifactoryName}">
                                             <j:choose>
                                                 <f:option
                                                         selected="${instance.deployerDetails.stagingPlugin.pluginName}"
@@ -39,7 +39,7 @@
                                 </select>
                                 <div id="stagingParamsDiv-${uniqueId}">
                                     <j:choose>
-                                        <j:when test="${s.id==instance.artifactoryName}">
+                                        <j:when test="${s.instanceId==instance.artifactoryName}">
                                             <j:choose>
                                                 <j:when test="${instance.deployerDetails.stagingPlugin.paramsString != ''}">
                                                     <input class='setting-input' name='userPluginParams'
@@ -58,7 +58,7 @@
                             </script>
                             <r:repos bind="bindToDescriptor"
                                      jsFunction="artifactoryGradleConfigurator"
-                                     repoUrl="artifactoryUrlDeploy${s.artifactoryServer.artifactoryUrl}"
+                                     repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"
                                      credentialsDescriber="overridingDeployerCredentials-gradle-${uniqueId}"/>
 
                         </f:nested>
@@ -74,14 +74,14 @@
         <f:section title="Resolution Details">
             <f:dropdownList name="resolverDetails" title="${%Artifactory resolve server}">
                 <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
-                    <f:dropdownListBlock value="${s.id}" title="${s.artifactoryServer.artifactoryUrl}"
-                                         selected="${s.id==instance.resolverDetails.artifactoryName}">
+                    <f:dropdownListBlock value="${s.instanceId}" title="${s.instanceId} ${s.artifactoryUrl}"
+                                         selected="${s.instanceId==instance.resolverDetails.artifactoryName}">
                         <f:nested>
-                            <input type="hidden" name="artifactoryName" value="${s.id}"/>
-                            <input type="hidden" name="artifactoryUrl" id="artifactoryUrlResolver${s.artifactoryServer.artifactoryUrl}"
-                                   value="${s.artifactoryServer.artifactoryUrl}"/>
+                            <input type="hidden" name="artifactoryName" value="${s.instanceId}"/>
+                            <input type="hidden" name="artifactoryUrl" id="artifactoryUrlResolver${s.artifactoryUrl}"
+                                   value="${s.artifactoryUrl}"/>
                             <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
-                            <r:dynamicRepos id="gradleResolutionRepositoryKeys-${s.artifactoryServer.artifactoryUrl}-${uniqueId}"
+                            <r:dynamicRepos id="gradleResolutionRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                             title="Resolution repository"
                                             field="resolveReleaseRepository"
                                             repositories="${instance.virtualRepositories}"
@@ -93,7 +93,7 @@
                             </script>
                             <r:repos bind="bindToDescriptorResolver"
                                      jsFunction="artifactoryGradleConfigurationResolve"
-                                     repoUrl="artifactoryUrlResolver${s.artifactoryServer.artifactoryUrl}"
+                                     repoUrl="artifactoryUrlResolver${s.artifactoryUrl}"
                                      credentialsDescriber="overridingResolverCredentials-gradle-${uniqueId}"/>
 
                         </f:nested>

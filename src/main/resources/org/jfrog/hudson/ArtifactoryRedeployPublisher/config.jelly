@@ -2,20 +2,20 @@
     <j:set var="uniqueId" value="${h.generateId()}"/>
     <f:dropdownList name="deployerDetails" title="${%Artifactory server}">
         <j:forEach var="s" items="${descriptor.jfrogInstances}" varStatus="loop">
-            <f:dropdownListBlock value="${s.id}" title="${s.artifactoryServer.artifactoryUrl}" selected="${s.id==instance.artifactoryName}">
+            <f:dropdownListBlock value="${s.instanceId}" title="${s.artifactoryUrl}" selected="${s.instanceId==instance.artifactoryName}">
                 <f:nested>
-                    <input type="hidden" name="artifactoryName" value="${s.id}"/>
-                    <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.artifactoryServer.artifactoryUrl}" value="${s.artifactoryServer.artifactoryUrl}"/>
+                    <input type="hidden" name="artifactoryName" value="${s.instanceId}"/>
+                    <input type="hidden" name="artifactoryUrl" id="artifactoryUrlDeploy${s.artifactoryUrl}" value="${s.artifactoryUrl}"/>
                     <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
 
-                    <r:dynamicRepos id="publishRepositoryKey-${s.artifactoryServer.artifactoryUrl}-${uniqueId}"
+                    <r:dynamicRepos id="publishRepositoryKey-${s.artifactoryUrl}-${uniqueId}"
                                     field="deployReleaseRepository"
                                     title="Target releases repository"
                                     repositoryConf="${instance.deployerDetails.deployReleaseRepository}"
                                     repositories="${instance.releaseRepositoryList}"
                                     helpUrl="/plugin/artifactory/help/common/help-deployReleases.html"/>
 
-                    <r:dynamicRepos id="publishSnapshotsRepositoryKeys-${s.artifactoryServer.artifactoryUrl}-${uniqueId}"
+                    <r:dynamicRepos id="publishSnapshotsRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                     title="Target snapshot repository"
                                     field="deploySnapshotRepository"
                                     repositoryConf="${instance.deployerDetails.deploySnapshotRepository}"
@@ -24,10 +24,10 @@
 
                     <f:entry title="${%Custom staging configuration}"
                              help="/plugin/artifactory/help/release/common/help-stagingPlugin.html">
-                        <select class="setting-input" name="userPluginKey" id="customStagingConfiguration-${s.artifactoryServer.artifactoryUrl}-${uniqueId}"
+                        <select class="setting-input" name="userPluginKey" id="customStagingConfiguration-${s.artifactoryUrl}-${uniqueId}"
                                 onchange="setStagingParamsSelectedValue(this)">
                             <j:choose>
-                                <j:when test="${s.id==instance.artifactoryName}">
+                                <j:when test="${s.instanceId==instance.artifactoryName}">
                                     <j:choose>
                                         <f:option selected="${instance.deployerDetails.stagingPlugin.pluginName}"
                                                   value="${instance.deployerDetails.stagingPlugin.pluginName}">
@@ -39,7 +39,7 @@
                         </select>
                         <div id="stagingParamsDiv-${uniqueId}">
                             <j:choose>
-                                <j:when test="${s.id==instance.artifactoryName}">
+                                <j:when test="${s.instanceId==instance.artifactoryName}">
                                     <j:choose>
                                         <j:when test="${instance.deployerDetails.stagingPlugin != null}">
                                             <j:choose>
@@ -62,7 +62,7 @@
                     </script>
                     <r:repos bind="bindToDescriptor"
                              jsFunction="artifactoryRedeployPublisher"
-                             repoUrl="artifactoryUrlDeploy${s.artifactoryServer.artifactoryUrl}"
+                             repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"
                              credentialsDescriber="overridingDeployerCredentials-${uniqueId}"/>
                 </f:nested>
             </f:dropdownListBlock>
