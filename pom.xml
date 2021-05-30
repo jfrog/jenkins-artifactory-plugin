@@ -40,14 +40,7 @@
         <skipITs>true</skipITs>
       
         <buildinfo.version>2.26.3</buildinfo.version>
-        <buildinfo.maven3.version>2.26.3</buildinfo.maven3.version>
         <buildinfo.gradle.version>4.24.3</buildinfo.gradle.version>
-        <buildinfo.ivy.version>2.26.3</buildinfo.ivy.version>
-        <buildinfo.npm.version>2.26.3</buildinfo.npm.version>
-        <buildinfo.go.version>2.26.3</buildinfo.go.version>
-        <buildinfo.pip.version>2.26.3</buildinfo.pip.version>
-        <buildinfo.nuget.version>2.26.3</buildinfo.nuget.version>
-        <buildinfo.docker.version>2.26.3</buildinfo.docker.version>
     </properties>
 
     <developers>
@@ -277,7 +270,7 @@
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-ivy</artifactId>
-            <version>${buildinfo.ivy.version}</version>
+            <version>${buildinfo.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.ant</groupId>
@@ -297,7 +290,7 @@
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-maven3</artifactId>
-            <version>${buildinfo.maven3.version}</version>
+            <version>${buildinfo.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>classworlds</groupId>
@@ -347,27 +340,27 @@
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-npm</artifactId>
-            <version>${buildinfo.npm.version}</version>
+            <version>${buildinfo.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-go</artifactId>
-            <version>${buildinfo.go.version}</version>
+            <version>${buildinfo.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-pip</artifactId>
-            <version>${buildinfo.pip.version}</version>
+            <version>${buildinfo.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-docker</artifactId>
-            <version>${buildinfo.docker.version}</version>
+            <version>${buildinfo.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-nuget</artifactId>
-            <version>${buildinfo.nuget.version}</version>
+            <version>${buildinfo.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
