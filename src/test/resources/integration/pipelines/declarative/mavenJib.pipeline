@@ -1,0 +1,77 @@
+package integration.pipelines.declarative
+
+import org.apache.commons.io.FileUtils
+
+import java.nio.file.Paths
+
+env.DONT_COLLECT = 'FOO'
+env.COLLECT = 'BAR'
+node("TestSlave") {
+    def serverId = "Artifactory-1"
+    def buildName = "declarative:mavenJib test"
+    def buildNumber = "3"
+
+    stage "Configure Artifactory"
+    rtServer(
+            id: serverId,
+            url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '') + '/artifactory',
+            username: "${env.JENKINS_ARTIFACTORY_USERNAME}",
+            password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    )
+
+    stage "Configure Maven build"
+    rtMavenDeployer(
+            id: "MAVEN_DEPLOYER",
+            serverId: serverId,
+            releaseRepo: "${LOCAL_REPO1}",
+            snapshotRepo: "${LOCAL_REPO1}"
+    )
+
+    rtMavenResolver(
+            id: "MAVEN_RESOLVER",
+            serverId: serverId,
+            releaseRepo: "${JCENTER_REMOTE_REPO}",
+            snapshotRepo: "${JCENTER_REMOTE_REPO}"
+    )
+
+    stage "Copy project example"
+    FileUtils.copyDirectory(Paths.get("${MAVEN_JIB_PROJECT_PATH}").toFile(), Paths.get(pwd(), "declarative-maven-jib-example").toFile())
+
+
+    stage "Config Build Info"
+    rtBuildInfo(
+            buildName: buildName,
+            buildNumber: buildNumber,
+            captureEnv: true,
+            excludeEnvPatterns: ["DONT_COLLECT"]
+    )
+
+
+    stage "Run Maven"
+    rtMavenRun(
+            buildName: buildName,
+            buildNumber: buildNumber,
+            pom: 'declarative-maven-jib-example/pom.xml',
+            goals: 'clean install jib:build -U',
+            deployerId: "MAVEN_DEPLOYER",
+            resolverId: "MAVEN_RESOLVER"
+    )
+
+    stage "Run Build Docker Create"
+    dir('declarative-maven-jib-example') {
+        rtBuildDockerCreate(
+                serverId: serverId,
+                sourceRepo: "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO}",
+                buildName: buildName,
+                buildNumber: buildNumber,
+                jibImageFiles: "*/target/jib-image.json"
+        )
+    }
+
+    stage "Publish build info"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName,
+            buildNumber: buildNumber
+    )
+}

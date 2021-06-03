@@ -278,6 +278,38 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void mavenJibTest(String buildName) throws Exception {
+        Set<String> expectedArtifacts = Sets.newHashSet("multi-3.7-SNAPSHOT.pom");
+        String buildNumber = "3";
+        try {
+            runPipeline("mavenJib", false);
+            Build buildInfo = getBuildInfo(artifactoryManager, buildName, buildNumber);
+            assertFilteredProperties(buildInfo);
+            assertEquals(7, buildInfo.getModules().size());
+
+            // Assert Maven modules
+            Module module = getAndAssertModule(buildInfo, "org.jfrog.test:multi:3.7-SNAPSHOT");
+            assertModuleArtifacts(module, expectedArtifacts);
+            assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi1:3.7-SNAPSHOT");
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi2:3.7-SNAPSHOT");
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi3:3.7-SNAPSHOT");
+
+            // Assert Docker modules
+            module = getAndAssertModule(buildInfo, "multi1");
+            assertTrue(CollectionUtils.isNotEmpty(module.getArtifacts()));
+            assertDockerModuleProperties(module);
+            module = getAndAssertModule(buildInfo, "multi2");
+            assertTrue(CollectionUtils.isNotEmpty(module.getArtifacts()));
+            assertDockerModuleProperties(module);
+            module = getAndAssertModule(buildInfo, "multi3");
+            assertTrue(CollectionUtils.isNotEmpty(module.getArtifacts()));
+            assertDockerModuleProperties(module);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
+
     void gradleTest(String buildName) throws Exception {
         String buildNumber = "3";
         try {

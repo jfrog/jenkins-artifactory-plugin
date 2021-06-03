@@ -179,7 +179,7 @@ class ITestUtils {
      * @return build info for the specified build name and number
      */
     static Build getBuildInfo(ArtifactoryManager artifactoryManager, String buildName, String buildNumber) throws IOException {
-        return ITestUtils.getBuildInfo(artifactoryManager,buildName, buildNumber,null);
+        return ITestUtils.getBuildInfo(artifactoryManager, buildName, buildNumber, null);
     }
 
     static Build getBuildInfo(ArtifactoryManager artifactoryManager, String buildName, String buildNumber, String project) throws IOException {
@@ -288,6 +288,17 @@ class ITestUtils {
     }
 
     /**
+     * Assert Docker module contains "docker.image.id" and "docker.captured.image".
+     *
+     * @param module - Docker module
+     */
+    static void assertDockerModuleProperties(Module module) {
+        Properties moduleProps = module.getProperties();
+        assertTrue("Module " + module.getId() + " expected to contain 'docker.image.id' property.", moduleProps.containsKey("docker.image.id"));
+        assertTrue("Module " + module.getId() + " expected to contain 'docker.captured.image' property.", moduleProps.containsKey("docker.captured.image"));
+    }
+
+    /**
      * Delete build in Artifactory.
      *
      * @param artifactoryClient - Artifactory java client
@@ -339,7 +350,7 @@ class ITestUtils {
         ArtifactoryServer server = artifactoryTrigger.getArtifactoryServer();
         assertNotNull(server);
         List<JFrogPlatformInstance> jfrogInstances = artifactoryTrigger.getJfrogInstances();
-        assertTrue(jfrogInstances.stream().anyMatch(s -> s.getArtifactory().getArtifactoryUrl().equals(server.getArtifactoryUrl()) && s.getId()==server.getServerId()));
+        assertTrue(jfrogInstances.stream().anyMatch(s -> s.getArtifactory().getArtifactoryUrl().equals(server.getArtifactoryUrl()) && s.getId().equals(server.getServerId())));
         assertEquals("libs-release-local", artifactoryTrigger.getPaths());
         assertEquals("* * * * *", artifactoryTrigger.getSpec());
         return artifactoryTrigger;
@@ -350,7 +361,7 @@ class ITestUtils {
     }
 
     public static String getImageId(String image, String host, Log logger) {
-        String id = DockerJavaWrapper.InspectImage(image, host, Collections.emptyMap(), logger).getId().replace(":", "__");
+        String id = DockerJavaWrapper.InspectImage(image, host, Collections.emptyMap(), logger).getId();
         assertNotNull(id);
         return id.replace(":", "__");
     }

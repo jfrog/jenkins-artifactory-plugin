@@ -196,9 +196,10 @@ public class PipelineTestBase {
      */
     private static void createPipelineSubstitution() {
         pipelineSubstitution = new StrSubstitutor(new HashMap<String, String>() {{
-            put("FILES_DIR", fixWindowsPath(FILES_PATH.toString() + File.separator + "*"));
-            put("FILES_DIR_1", fixWindowsPath(FILES_PATH.toString() + File.separator + "1" + File.separator + "*"));
+            put("FILES_DIR", fixWindowsPath(FILES_PATH + File.separator + "*"));
+            put("FILES_DIR_1", fixWindowsPath(FILES_PATH + File.separator + "1" + File.separator + "*"));
             put("MAVEN_PROJECT_PATH", getProjectPath("maven-example"));
+            put("MAVEN_JIB_PROJECT_PATH", getProjectPath("maven-jib-example"));
             put("GRADLE_PROJECT_PATH", getProjectPath("gradle-example"));
             put("GRADLE_CI_PROJECT_PATH", getProjectPath("gradle-example-ci"));
             put("GRADLE_CI_PUBLICATION_PROJECT_PATH", getProjectPath("gradle-example-ci-publications"));

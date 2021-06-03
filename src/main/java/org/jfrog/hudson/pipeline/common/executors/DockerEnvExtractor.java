@@ -11,10 +11,10 @@ import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 
 public class DockerEnvExtractor extends EnvExtractor {
-    private String imageTag;
-    private String host;
+    private final String imageTag;
+    private final String host;
 
-    public DockerEnvExtractor(Run build, BuildInfo buildInfo, Deployer deployer, Resolver resolver,
+    public DockerEnvExtractor(Run<?, ?> build, BuildInfo buildInfo, Deployer deployer, Resolver resolver,
                               TaskListener buildListener, Launcher launcher, FilePath tempDir,
                               EnvVars env, String imageTag, String host) {
         super(build, buildInfo, deployer, resolver, buildListener, launcher, tempDir, env);

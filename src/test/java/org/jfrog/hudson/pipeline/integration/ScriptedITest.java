@@ -82,6 +82,11 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void mavenJibTest() throws Exception {
+        super.mavenJibTest("scripted:mavenJib test");
+    }
+
+    @Test
     public void gradleTest() throws Exception {
         super.gradleTest("scripted:gradle test");
     }
