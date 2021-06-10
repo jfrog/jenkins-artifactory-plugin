@@ -1,0 +1,26 @@
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:dropdownList name="details" title="${%Artifactory server}">
+        <j:forEach var="s" items="${instance.jfrogInstances ?: descriptor.jfrogInstances}" varStatus="loop">
+            <f:dropdownListBlock value="${s.instanceId}" title="${s.instanceId} ${s.artifactoryUrl}"
+                                 selected="${s.instanceId==instance.selectedServerId}">
+                <f:nested>
+                    <input type="hidden" name="artifactoryName" value="${s.instanceId}"/>
+                    <input type="hidden" name="stapler-class" value="org.jfrog.hudson.ServerDetails"/>
+                </f:nested>
+            </f:dropdownListBlock>
+        </j:forEach>
+    </f:dropdownList>
+
+    <f:entry title="Schedule:"
+             help="/descriptor/hudson.triggers.TimerTrigger/help/spec">
+        <f:textbox field="spec" value="${instance.spec}"/>
+    </f:entry>
+    <f:entry title="Paths to watch:"
+             help="/plugin/artifactory/help/Trigger/help-pathsToWatch.html">
+        <f:textbox field="paths" value="${instance.paths}"/>
+    </f:entry>
+    <f:entry title="Branches to trigger:"
+             help="/plugin/artifactory/help/Trigger/help-branchesToTrigger.html">
+        <f:textbox field="branches" value="${instance.branches}"/>
+    </f:entry>
+</j:jelly>
