@@ -95,7 +95,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
     }
 
     private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, String buildName, String buildNumber, String platformUrl, String startedBuildTimestamp, String project) {
-        return new PublishedBuildDetails(artifactoryUrl, Util.rawEncode(buildName), Util.rawEncode(buildNumber), platformUrl, startedBuildTimestamp, project);
+        return new PublishedBuildDetails(artifactoryUrl, buildName, buildNumber, platformUrl, startedBuildTimestamp, project);
     }
 
     private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, Run build, Build buildInfo, String platformUrl) {

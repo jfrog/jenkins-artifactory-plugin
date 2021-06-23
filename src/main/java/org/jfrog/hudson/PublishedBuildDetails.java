@@ -3,6 +3,9 @@ package org.jfrog.hudson;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 
 import static org.jfrog.build.extractor.clientConfiguration.client.artifactory.services.PublishBuildInfo.createBuildInfoUrl;
@@ -12,6 +15,8 @@ import static org.jfrog.build.extractor.clientConfiguration.client.artifactory.s
  */
 public class PublishedBuildDetails implements Serializable {
     private static final long serialVersionUID = 1L;
+
+    private final static String ESCAPED_URI_DETECTION = "%20%3A%3A%20";
 
     private String artifactoryUrl;
     private String buildName;
@@ -31,6 +36,31 @@ public class PublishedBuildDetails implements Serializable {
         this.platformUrl = platformUrl;
         this.startedTimeStamp = startedTimeStamp;
         this.project = project;
+    }
+
+    /**
+     * Intends to solve https://github.com/jfrog/jenkins-artifactory-plugin/issues/454
+     * where URLs became URL encoded twice.
+     *
+     * @return this but with raw buildName and buildNumbers
+     */
+    private Object readResolve() {
+        if (buildName.contains(ESCAPED_URI_DETECTION)) {
+            buildName = safeURLDecoder(buildName);
+        }
+        if (buildNumber.contains(ESCAPED_URI_DETECTION)) {
+            buildNumber = safeURLDecoder(buildNumber);
+        }
+        return this;
+    }
+
+    private String safeURLDecoder(String url) {
+        try {
+            url = URLDecoder.decode(buildName, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return url;
     }
 
     public String getBuildInfoUrl() throws ParseException {
