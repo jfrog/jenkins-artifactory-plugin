@@ -49,7 +49,7 @@ public class ArtifactoryMultibranchTrigger extends BaseTrigger<MultiBranchProjec
             }
         }
         if (!inputBranches.isEmpty()) {
-            logger.warning("The following branches does not exist in multibranch pipeline '" +
+            logger.warning("The following branches do not exist in multibranch pipeline '" +
                     Objects.requireNonNull(job).getName() + "': " + String.join(", ", inputBranches));
         }
         return jobsToTrigger;
