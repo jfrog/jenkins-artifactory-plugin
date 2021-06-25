@@ -279,6 +279,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void mavenJibTest(String buildName) throws Exception {
+        Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS);
         Set<String> expectedArtifacts = Sets.newHashSet("multi-3.7-SNAPSHOT.pom");
         String buildNumber = "3";
         try {
