@@ -7,7 +7,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.executors.BuildDockerCreateExecutor;
+import org.jfrog.hudson.pipeline.common.executors.CreateDockerBuildExecutor;
 import org.jfrog.hudson.pipeline.common.executors.BuildInfoProcessRunner;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -22,8 +22,8 @@ import java.io.IOException;
 /**
  * @author yahavi
  **/
-public class BuildDockerCreate extends AbstractStepImpl {
-    static final String STEP_NAME = "rtBuildDockerCreate";
+public class CreateDockerBuild extends AbstractStepImpl {
+    static final String STEP_NAME = "rtCreateDockerBuild";
     private final String sourceRepo;
     private final String serverId;
 
@@ -35,7 +35,7 @@ public class BuildDockerCreate extends AbstractStepImpl {
     private String project;
 
     @DataBoundConstructor
-    public BuildDockerCreate(String serverId, String sourceRepo) {
+    public CreateDockerBuild(String serverId, String sourceRepo) {
         this.sourceRepo = sourceRepo;
         this.serverId = serverId;
     }
@@ -72,10 +72,10 @@ public class BuildDockerCreate extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
-        private transient final BuildDockerCreate step;
+        private transient final CreateDockerBuild step;
 
         @Inject
-        public Execution(BuildDockerCreate step, StepContext context) throws IOException, InterruptedException {
+        public Execution(CreateDockerBuild step, StepContext context) throws IOException, InterruptedException {
             super(context);
             this.step = step;
         }
@@ -84,7 +84,7 @@ public class BuildDockerCreate extends AbstractStepImpl {
         protected Void runStep() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.buildName, step.buildNumber, step.project);
             ArtifactoryServer pipelineServer = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
-            BuildInfoProcessRunner dockerExecutor = new BuildDockerCreateExecutor(pipelineServer, buildInfo, build, step.kanikoImageFile, step.jibImageFiles, step.sourceRepo, step.javaArgs, launcher, listener, ws, env);
+            BuildInfoProcessRunner dockerExecutor = new CreateDockerBuildExecutor(pipelineServer, buildInfo, build, step.kanikoImageFile, step.jibImageFiles, step.sourceRepo, step.javaArgs, launcher, listener, ws, env);
             dockerExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(dockerExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;
@@ -105,7 +105,7 @@ public class BuildDockerCreate extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(BuildDockerCreate.Execution.class);
+            super(CreateDockerBuild.Execution.class);
         }
 
         @Override
@@ -116,7 +116,7 @@ public class BuildDockerCreate extends AbstractStepImpl {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "run Artifactory build docker create";
+            return "run Artifactory create Docker build";
         }
 
         @Override

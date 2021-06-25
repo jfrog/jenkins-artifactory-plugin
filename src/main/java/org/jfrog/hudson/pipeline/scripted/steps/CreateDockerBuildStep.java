@@ -7,7 +7,7 @@ import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.pipeline.common.executors.BuildDockerCreateExecutor;
+import org.jfrog.hudson.pipeline.common.executors.CreateDockerBuildExecutor;
 import org.jfrog.hudson.pipeline.common.executors.BuildInfoProcessRunner;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -16,8 +16,8 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
-public class BuildDockerCreateStep extends AbstractStepImpl {
-    static final String STEP_NAME = "buildDockerCreateStep";
+public class CreateDockerBuildStep extends AbstractStepImpl {
+    static final String STEP_NAME = "createDockerBuildStep";
     private final ArtifactoryServer server;
     private final String kanikoImageFile;
     private final String jibImageFiles;
@@ -26,7 +26,7 @@ public class BuildDockerCreateStep extends AbstractStepImpl {
     private final String javaArgs;
 
     @DataBoundConstructor
-    public BuildDockerCreateStep(String kanikoImageFile, String jibImageFiles, String sourceRepo, BuildInfo buildInfo, ArtifactoryServer server, String javaArgs) {
+    public CreateDockerBuildStep(String kanikoImageFile, String jibImageFiles, String sourceRepo, BuildInfo buildInfo, ArtifactoryServer server, String javaArgs) {
         this.kanikoImageFile = kanikoImageFile;
         this.jibImageFiles = jibImageFiles;
         this.sourceRepo = sourceRepo;
@@ -49,10 +49,10 @@ public class BuildDockerCreateStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<BuildInfo> {
 
-        private final transient BuildDockerCreateStep step;
+        private final transient CreateDockerBuildStep step;
 
         @Inject
-        public Execution(BuildDockerCreateStep step, StepContext context) throws IOException, InterruptedException {
+        public Execution(CreateDockerBuildStep step, StepContext context) throws IOException, InterruptedException {
             super(context);
             this.step = step;
         }
@@ -60,7 +60,7 @@ public class BuildDockerCreateStep extends AbstractStepImpl {
         @Override
         protected BuildInfo runStep() throws Exception {
             BuildInfo buildInfo = Utils.prepareBuildinfo(build, step.getBuildInfo());
-            BuildInfoProcessRunner dockerExecutor = new BuildDockerCreateExecutor(step.server, buildInfo, build, step.kanikoImageFile, step.jibImageFiles, step.sourceRepo, step.javaArgs, launcher, listener, ws, env);
+            BuildInfoProcessRunner dockerExecutor = new CreateDockerBuildExecutor(step.server, buildInfo, build, step.kanikoImageFile, step.jibImageFiles, step.sourceRepo, step.javaArgs, launcher, listener, ws, env);
             dockerExecutor.execute();
             return dockerExecutor.getBuildInfo();
         }
@@ -80,7 +80,7 @@ public class BuildDockerCreateStep extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(BuildDockerCreateStep.Execution.class);
+            super(CreateDockerBuildStep.Execution.class);
         }
 
         @Override
@@ -91,7 +91,7 @@ public class BuildDockerCreateStep extends AbstractStepImpl {
         @Nonnull
         @Override
         public String getDisplayName() {
-            return "Artifactory build docker create";
+            return "Artifactory create Docker build";
         }
 
         @Override

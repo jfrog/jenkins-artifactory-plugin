@@ -57,9 +57,9 @@ node("TestSlave") {
             resolverId: "MAVEN_RESOLVER"
     )
 
-    stage "Run Build Docker Create"
+    stage "Run create Docker build"
     dir('declarative-maven-jib-example') {
-        rtBuildDockerCreate(
+        rtCreateDockerBuild(
                 serverId: serverId,
                 sourceRepo: "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO}",
                 buildName: buildName,

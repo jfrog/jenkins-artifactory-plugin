@@ -9,11 +9,11 @@ import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfigurat
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 
-public class BuildDockerCreateEnvExtractor extends EnvExtractor {
+public class CreateDockerBuildEnvExtractor extends EnvExtractor {
     private final String kanikoImageFile;
     private final String jibImageFiles;
 
-    public BuildDockerCreateEnvExtractor(Run<?, ?> build, BuildInfo buildInfo, Deployer deployer,
+    public CreateDockerBuildEnvExtractor(Run<?, ?> build, BuildInfo buildInfo, Deployer deployer,
                                          TaskListener buildListener, Launcher launcher, FilePath tempDir,
                                          EnvVars env, String kanikoImageFile, String jibImageFiles) {
         super(build, buildInfo, deployer, null, buildListener, launcher, tempDir, env);

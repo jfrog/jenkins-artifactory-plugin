@@ -26,9 +26,9 @@ node("TestSlave") {
     stage "Run Maven"
     rtMaven.run pom: "scripted-maven-jib-example", goals: "clean install jib:build -U", buildInfo: buildInfo
 
-    stage "Run Build Docker Create"
+    stage "Run create Docker build"
     def rtDocker = Artifactory.docker server: rtServer
-    rtDocker.buildDockerCreate sourceRepo: "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO}", jibImageFiles: "*/target/jib-image.json", buildInfo: buildInfo
+    rtDocker.createDockerBuild sourceRepo: "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO}", jibImageFiles: "*/target/jib-image.json", buildInfo: buildInfo
 
     stage "Publish build info"
     rtServer.publishBuildInfo buildInfo
