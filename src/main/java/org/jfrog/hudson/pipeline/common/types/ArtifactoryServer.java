@@ -32,6 +32,7 @@ public class ArtifactoryServer implements Serializable {
     public static final String SERVER = "server";
     public static final String BUILD_NAME = "buildName";
     public static final String BUILD_NUMBER = "buildNumber";
+    public static final String PROJECT = "project";
     public static final String FAIL_NO_OP = "failNoOp";
     public static final String MODULE = "module";
     public static final String PROPERTIES = "props";

@@ -46,8 +46,7 @@ import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.*;
 
-import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.BUILD_NAME;
-import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.BUILD_NUMBER;
+import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.*;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
 /**
@@ -511,13 +510,13 @@ public class Utils {
         }
 
         Set<String> xrayScanParamsSet = xrayScanParams.keySet();
-        List<String> keysAsList = Arrays.asList(BUILD_NAME, BUILD_NUMBER, failBuild, printTable);
+        List<String> keysAsList = Arrays.asList(BUILD_NAME, BUILD_NUMBER, PROJECT, failBuild, printTable);
         if (!keysAsList.containsAll(xrayScanParamsSet)) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + keysAsList.toString());
         }
 
         return new XrayScanConfig((String) xrayScanParams.get(BUILD_NAME),
-                (String) xrayScanParams.get(BUILD_NUMBER), (Boolean) xrayScanParams.get(failBuild),
+                (String) xrayScanParams.get(BUILD_NUMBER), (String) xrayScanParams.get(PROJECT), (Boolean) xrayScanParams.get(failBuild),
                 (Boolean) xrayScanParams.get(printTable));
     }
 

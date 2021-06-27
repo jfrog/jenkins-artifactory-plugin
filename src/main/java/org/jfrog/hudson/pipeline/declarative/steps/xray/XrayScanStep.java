@@ -46,6 +46,11 @@ public class XrayScanStep extends AbstractStepImpl {
     }
 
     @DataBoundSetter
+    public void setProject(String project) {
+        xrayScanConfig.setProject(project);
+    }
+
+    @DataBoundSetter
     public void setFailBuild(boolean failBuild) {
         xrayScanConfig.setFailBuild(failBuild);
     }

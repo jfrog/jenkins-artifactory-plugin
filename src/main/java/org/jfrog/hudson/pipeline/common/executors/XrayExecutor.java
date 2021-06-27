@@ -46,7 +46,7 @@ public class XrayExecutor implements Executor {
         if (proxyConfiguration != null) {
             artifactoryManager.setProxyConfiguration(proxyConfiguration);
         }
-        ArtifactoryXrayResponse buildScanResult = artifactoryManager.scanBuild(xrayScanConfig.getBuildName(), xrayScanConfig.getBuildNumber(), "jenkins");
+        ArtifactoryXrayResponse buildScanResult = artifactoryManager.scanBuild(xrayScanConfig.getBuildName(), xrayScanConfig.getBuildNumber(), xrayScanConfig.getProject(), "jenkins");
         xrayScanResult = new XrayScanResult(buildScanResult);
 
         if (xrayScanResult.isFoundVulnerable()) {
