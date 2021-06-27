@@ -1,0 +1,39 @@
+package integration.pipelines.scripted
+
+node("TestSlave") {
+    stage "Configuration"
+    def jfrogInstance = JFrog.newInstance url: "${env.JENKINS_PLATFORM_URL}", username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def rtServer = jfrogInstance.getArtifactoryServer()
+    def dsServer = jfrogInstance.getDistributionServer()
+    def releaseBundleName = "scripted:createUpdateSign"
+    def releaseBundleVersion = "1"
+
+    stage "Upload"
+    def uploadSpec = """{
+      "files": [
+        {
+          "pattern": "${FILES_DIR}",
+          "target": "${LOCAL_REPO1}/",
+          "recursive": "false"
+        }
+     ]
+    }"""
+    rtServer.upload spec: uploadSpec
+
+    stage "Create a release bundle"
+    def releaseBundleSpec = """{
+      "files": [
+        {
+          "pattern": "${LOCAL_REPO1}/"
+        }
+     ]
+    }"""
+    dsServer.createReleaseBundle name: releaseBundleName, version: releaseBundleVersion, spec: releaseBundleSpec
+
+    stage "Update release bundle"
+    dsServer.updateReleaseBundle name: releaseBundleName, version: releaseBundleVersion, spec: releaseBundleSpec, description: "Update a release bundle"
+
+    stage "Sign release bundle"
+    dsServer.signReleaseBundle name: releaseBundleName, version: releaseBundleVersion
+
+}

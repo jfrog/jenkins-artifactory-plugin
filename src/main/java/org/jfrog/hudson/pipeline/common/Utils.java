@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import hudson.EnvVars;
@@ -17,9 +18,11 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.nodejs.NodeJSConstants;
 import jenkins.plugins.nodejs.tools.NodeJSInstallation;
 import jenkins.security.MasterToSlaveCallable;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jenkinsci.plugins.workflow.actions.WorkspaceAction;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -33,6 +36,9 @@ import org.jfrog.build.api.Vcs;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
+import org.jfrog.build.extractor.clientConfiguration.client.distribution.request.DistributeReleaseBundleRequest;
+import org.jfrog.build.extractor.clientConfiguration.client.distribution.types.DistributionRules;
+import org.jfrog.build.extractor.clientConfiguration.client.distribution.types.ReleaseNotes;
 import org.jfrog.build.extractor.clientConfiguration.util.GitUtils;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.ActionableHelper;
@@ -44,8 +50,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.*;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
@@ -230,7 +239,7 @@ public class Utils {
             inputStream = generatedBuildInfoFilePath.read();
             IOUtils.copy(inputStream, writer, "UTF-8");
             String buildInfoFileContent = writer.toString();
-            if (StringUtils.isBlank(buildInfoFileContent)) {
+            if (isBlank(buildInfoFileContent)) {
                 return new org.jfrog.build.api.Build();
             }
             return mapper.readValue(buildInfoFileContent, org.jfrog.build.api.Build.class);
@@ -291,7 +300,7 @@ public class Utils {
 
     public static String getJavaPathBuilder(String jdkBinPath, Launcher launcher) {
         StringBuilder javaPathBuilder = new StringBuilder();
-        if (StringUtils.isNotBlank(jdkBinPath)) {
+        if (isNotBlank(jdkBinPath)) {
             javaPathBuilder.append(jdkBinPath).append("/");
         }
         javaPathBuilder.append("java");
@@ -422,11 +431,11 @@ public class Utils {
 
     public static void addVcsDetailsToProps(EnvVars env, ArrayListMultimap<String, String> properties) {
         String revision = ExtractorUtils.getVcsRevision(env);
-        if (StringUtils.isNotBlank(revision)) {
+        if (isNotBlank(revision)) {
             properties.put(BuildInfoFields.VCS_REVISION, revision);
         }
         String gitUrl = ExtractorUtils.getVcsUrl(env);
-        if (StringUtils.isNotBlank(gitUrl)) {
+        if (isNotBlank(gitUrl)) {
             properties.put(BuildInfoFields.VCS_URL, gitUrl);
         }
     }
@@ -472,7 +481,7 @@ public class Utils {
         }
         Node node = ActionableHelper.getNode(launcher);
         String nodeJsHome = nodeInstallation.forNode(node, listener).forEnvironment(env).getHome();
-        if (StringUtils.isBlank(nodeJsHome)) {
+        if (isBlank(nodeJsHome)) {
             logger.error("Couldn't find NodeJS home");
             throw new Run.RunnerAbortedException();
         }
@@ -550,5 +559,43 @@ public class Utils {
         }
         serverURL.append("api/conan/").append(repo);
         return serverURL.toString();
+    }
+
+    /**
+     * Create release notes for a release bundle.
+     *
+     * @param releaseNotesPath   - Release notes file path
+     * @param releaseNotesSyntax - Release notes syntax. Can be one of: "markdown", "asciidoc", "plain_text".
+     * @return release notes or null if path is missing.
+     * @throws IOException in case of errors during reading the release notes file.
+     */
+    public static ReleaseNotes createReleaseNotes(String releaseNotesPath, String releaseNotesSyntax) throws IOException {
+        if (isBlank(releaseNotesPath)) {
+            return null;
+        }
+        String content = FileUtils.readFileToString(new File(releaseNotesPath), StandardCharsets.UTF_8.name());
+        ReleaseNotes releaseNotes = new ReleaseNotes();
+        releaseNotes.setContent(content);
+        releaseNotes.setSyntax(isBlank(releaseNotesSyntax) ? ReleaseNotes.Syntax.plain_text : ReleaseNotes.Syntax.valueOf(releaseNotesSyntax));
+        return releaseNotes;
+    }
+
+    /**
+     * Create distribution rules for distributing and deleting a release bundle.
+     *
+     * @param countryCodes - Semicolon-separated list of wildcard filters for site country codes
+     * @param siteName     - Wildcard filter for site name
+     * @param cityName     - Wildcard filter for site city name
+     * @return list of distribution rules
+     * @throws IOException in case of errors during reading the release notes file or a wrong input.
+     */
+    public static List<DistributionRules> createDistributionRules(List<String> countryCodes, String siteName, String cityName) throws IOException {
+        DistributionRules distributionRules = new DistributionRules();
+        distributionRules.setCountryCodes(countryCodes);
+        distributionRules.setSiteName(siteName);
+        distributionRules.setCityName(cityName);
+        List<DistributionRules> distributionRulesList = new ArrayList<>();
+        distributionRulesList.add(distributionRules);
+        return distributionRulesList;
     }
 }

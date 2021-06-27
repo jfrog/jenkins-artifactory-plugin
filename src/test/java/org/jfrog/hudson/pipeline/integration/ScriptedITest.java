@@ -205,4 +205,14 @@ public class ScriptedITest extends CommonITestsPipeline {
     public void buildAppendTest() throws Exception {
         super.buildAppendTest("scripted:buildAppend test");
     }
+
+    @Test
+    public void rbCreateUpdateSign() throws Exception {
+        super.rbCreateUpdateSign("scripted:createUpdateSign");
+    }
+
+    @Test
+    public void rbCreateDistDel() throws Exception {
+        super.rbCreateDistDel("scripted:createDistributeDelete");
+    }
 }

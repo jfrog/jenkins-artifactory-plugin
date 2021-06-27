@@ -77,7 +77,7 @@ public class GoRunExecutor implements Executor {
         String username = resolverCredentials.getUsername();
         String password = resolverCredentials.getPassword();
         ArtifactoryManagerBuilder resolverArtifactoryManagerBuilder = new ArtifactoryManagerBuilder()
-                .setArtifactoryUrl(server.getArtifactoryUrl())
+                .setServerUrl(server.getArtifactoryUrl())
                 .setUsername(username)
                 .setPassword(password)
                 .setProxyConfiguration(ProxyUtils.createProxyConfiguration())

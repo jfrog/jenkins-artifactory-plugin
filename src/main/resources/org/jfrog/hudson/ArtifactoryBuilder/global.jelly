@@ -37,6 +37,10 @@
                                      help="/plugin/artifactory/help/ArtifactoryBuilder/help-artifactory-url.html">
                                 <f:textbox field="artifactoryUrl" value="${instance.artifactoryUrl}"/>
                             </f:entry>
+                            <f:entry title="JFrog Distribution URL"
+                                     help="/plugin/artifactory/help/ArtifactoryBuilder/help-distribution-url.html">
+                                <f:textbox field="distributionUrl" value="${instance.distributionUrl}"/>
+                            </f:entry>
                             <f:entry title="Connection timeout" field="instance.timeout"
                                      help="/plugin/artifactory/help/ArtifactoryBuilder/help-timeout.html">
                                 <f:textbox clazz="number" value="${instance.timeout}"/>
@@ -97,7 +101,7 @@
                     <f:validateButton
                             title="${%Test Connection}" progress="${%Testing...}"
                             method="testConnection"
-                            with="platformUrl,artifactoryUrl,instance.timeout,instance.bypassProxy,useCredentialsPlugin,credentialsId,username,password,connectionRetry"/>
+                            with="platformUrl,artifactoryUrl,distributionUrl,instance.timeout,instance.bypassProxy,useCredentialsPlugin,credentialsId,username,password,connectionRetry"/>
 
                     <f:optionalBlock title="Use Different Resolver Credentials"
                                      name="resolverCredentialsConfig"

@@ -254,13 +254,12 @@ public class ArtifactoryServer implements Serializable {
 
     public ArtifactoryManagerBuilder createArtifactoryManagerBuilder(Credentials credentials, ProxyConfiguration proxyConfiguration, Log logger) {
         ArtifactoryManagerBuilder artifactoryManagerBuilder = new ArtifactoryManagerBuilder();
-        artifactoryManagerBuilder.setArtifactoryUrl(url).setUsername(credentials.getUsername()).setPassword(credentials.getPassword())
+        artifactoryManagerBuilder.setServerUrl(url).setUsername(credentials.getUsername()).setPassword(credentials.getPassword())
                 .setAccessToken(credentials.getAccessToken()).setLog(logger).setConnectionRetry(getConnectionRetry())
                 .setConnectionTimeout(timeout);
         if (!bypassProxy) {
             artifactoryManagerBuilder.setProxyConfiguration(proxyConfiguration);
         }
-
         return artifactoryManagerBuilder;
     }
 

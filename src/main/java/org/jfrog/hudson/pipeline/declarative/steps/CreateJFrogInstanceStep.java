@@ -2,12 +2,11 @@ package org.jfrog.hudson.pipeline.declarative.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
-import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.common.types.DistributionServer;
 import org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -16,16 +15,20 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
-import static org.apache.commons.lang3.StringUtils.*;
+import static org.apache.commons.lang3.StringUtils.isAllBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("unused")
-public class CreateServerStep extends AbstractStepImpl {
-    public static final String STEP_NAME = "rtServer";
+public class CreateJFrogInstanceStep extends AbstractStepImpl {
+    public static final String STEP_NAME = "jfrogInstance";
     private final String id;
 
     private Integer deploymentThreads;
+    private String distributionUrl;
+    private String artifactoryUrl;
     private String credentialsId;
     private Boolean bypassProxy;
     private String username;
@@ -34,15 +37,24 @@ public class CreateServerStep extends AbstractStepImpl {
     private Integer retry;
     private String url;
 
-
     @DataBoundConstructor
-    public CreateServerStep(String id) {
+    public CreateJFrogInstanceStep(String id) {
         this.id = id;
     }
 
     @DataBoundSetter
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @DataBoundSetter
+    public void setDistributionUrl(String distributionUrl) {
+        this.distributionUrl = distributionUrl;
+    }
+
+    @DataBoundSetter
+    public void setArtifactoryUrl(String artifactoryUrl) {
+        this.artifactoryUrl = artifactoryUrl;
     }
 
     @DataBoundSetter
@@ -82,10 +94,10 @@ public class CreateServerStep extends AbstractStepImpl {
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
 
-        private transient final CreateServerStep step;
+        private transient final CreateJFrogInstanceStep step;
 
         @Inject
-        public Execution(CreateServerStep step, StepContext context) throws IOException, InterruptedException {
+        public Execution(CreateJFrogInstanceStep step, StepContext context) throws IOException, InterruptedException {
             super(context);
             this.step = step;
         }
@@ -93,17 +105,16 @@ public class CreateServerStep extends AbstractStepImpl {
         @Override
         protected Void runStep() throws Exception {
             // Prepare Artifactory server
-            ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, ws, step.id, false);
+            JFrogPlatformInstance server = DeclarativePipelineUtils.getJFrogPlatformInstance(build, ws, step.id, false);
             if (server == null) {
-                server = new ArtifactoryServer();
+                server = new JFrogPlatformInstance();
             }
             checkInputs(server);
             overrideServerParameters(server);
-            JFrogPlatformInstance instance = new JFrogPlatformInstance(server, new DistributionServer(), "", step.id);
 
             // Store Artifactory server in the BuildDataFile
-            BuildDataFile buildDataFile = new BuildDataFile(CreateJFrogInstanceStep.STEP_NAME, step.id);
-            buildDataFile.putPOJO(instance);
+            BuildDataFile buildDataFile = new BuildDataFile(STEP_NAME, step.id);
+            buildDataFile.putPOJO(server);
             String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
             DeclarativePipelineUtils.writeBuildDataFile(rootWs, buildNumber, buildDataFile, new JenkinsBuildInfoLog(listener));
             return null;
@@ -125,8 +136,9 @@ public class CreateServerStep extends AbstractStepImpl {
          * @param server - The server to check
          * @throws IOException if there is an illegal step configuration.
          */
-        private void checkInputs(ArtifactoryServer server) throws IOException {
-            if (isAllBlank(server.getUrl(), step.url)) {
+        private void checkInputs(JFrogPlatformInstance server) throws IOException {
+            if (isAllBlank(server.getUrl(), server.getArtifactoryServer().getUrl(), server.getDistributionServer().getUrl(),
+                    step.url, step.artifactoryUrl, step.distributionUrl)) {
                 throw new IOException("Server URL is missing");
             }
             if (isNotBlank(step.credentialsId)) {
@@ -140,34 +152,45 @@ public class CreateServerStep extends AbstractStepImpl {
         }
 
         /**
-         * Override Artifactory pipeline server parameter with parameters configured in this step.
+         * Override JFrog instance pipeline server parameter with parameters configured in this step.
          *
          * @param server - The server to update
          */
-        private void overrideServerParameters(ArtifactoryServer server) {
+        private void overrideServerParameters(JFrogPlatformInstance server) {
             if (isNotBlank(step.url)) {
                 server.setUrl(step.url);
+                server.getArtifactoryServer().setUrl(StringUtils.appendIfMissing(step.url, "/") + "artifactory");
+                server.getDistributionServer().setUrl(StringUtils.appendIfMissing(step.url, "/") + "distribution");
+            }
+            if (isNotBlank(step.artifactoryUrl)) {
+                server.getArtifactoryServer().setUrl(step.artifactoryUrl);
+            }
+            if (isNotBlank(step.distributionUrl)) {
+                server.getDistributionServer().setUrl(step.distributionUrl);
             }
             if (isNotBlank(step.credentialsId)) {
-                server.setCredentialsId(step.credentialsId);
+                server.getArtifactoryServer().setCredentialsId(step.credentialsId);
+                server.getDistributionServer().setCredentialsId(step.credentialsId);
             }
             if (isNotBlank(step.username)) {
-                server.setUsername(step.username);
+                server.getArtifactoryServer().setUsername(step.username);
+                server.getDistributionServer().setUsername(step.username);
             }
             if (isNotBlank(step.password)) {
-                server.setPassword(step.password);
+                server.getArtifactoryServer().setPassword(step.password);
+                server.getDistributionServer().setPassword(step.password);
             }
             if (step.deploymentThreads != null) {
-                server.setDeploymentThreads(step.deploymentThreads);
+                server.getArtifactoryServer().setDeploymentThreads(step.deploymentThreads);
             }
             if (step.bypassProxy != null) {
-                server.setBypassProxy(step.bypassProxy);
+                server.getArtifactoryServer().setBypassProxy(step.bypassProxy);
             }
             if (step.retry != null) {
-                server.getConnection().setRetry(step.retry);
+                server.getArtifactoryServer().getConnection().setRetry(step.retry);
             }
             if (step.timeout != null) {
-                server.getConnection().setTimeout(step.timeout);
+                server.getArtifactoryServer().getConnection().setTimeout(step.timeout);
             }
         }
     }
@@ -176,7 +199,7 @@ public class CreateServerStep extends AbstractStepImpl {
     public static final class DescriptorImpl extends AbstractStepDescriptorImpl {
 
         public DescriptorImpl() {
-            super(CreateServerStep.Execution.class);
+            super(CreateJFrogInstanceStep.Execution.class);
         }
 
         @Override
@@ -184,9 +207,10 @@ public class CreateServerStep extends AbstractStepImpl {
             return STEP_NAME;
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
-            return "Creates new Artifactory server";
+            return "Creates new JFrog instance";
         }
 
         @Override

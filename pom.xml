@@ -14,7 +14,9 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   ~test
-  --><project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
@@ -38,7 +40,7 @@
         <findbugs.failOnError>false</findbugs.failOnError>
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
         <skipITs>true</skipITs>
-      
+
         <buildinfo.version>2.27.x-SNAPSHOT</buildinfo.version>
         <buildinfo.gradle.version>4.24.x-SNAPSHOT</buildinfo.gradle.version>
     </properties>
@@ -249,6 +251,11 @@
                     <artifactId>xstream</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jfrog.filespecs</groupId>
+            <artifactId>file-specs-java</artifactId>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <!--
@@ -613,13 +620,13 @@
                 <repository>
                     <id>central</id>
                     <name>jfrog-dependencies</name>
-                    <url>https://oss.jfrog.org/artifactory/jfrog-dependencies</url>
+                    <url>https://releases.jfrog.io/artifactory/oss-releases</url>
                 </repository>
                 <repository>
-                    <snapshots />
+                    <snapshots/>
                     <id>snapshots</id>
                     <name>libs-snapshot</name>
-                    <url>https://oss.jfrog.org/artifactory/libs-snapshot</url>
+                    <url>https://releases.jfrog.io/artifactory/oss-snapshots</url>
                 </repository>
             </repositories>
             <pluginRepositories>
@@ -632,7 +639,7 @@
                     <url>https://oss.jfrog.org/artifactory/jfrog-dependencies</url>
                 </pluginRepository>
                 <pluginRepository>
-                    <snapshots />
+                    <snapshots/>
                     <id>snapshots</id>
                     <name>plugins-snapshot</name>
                     <url>https://oss.jfrog.org/artifactory/plugins-snapshot</url>

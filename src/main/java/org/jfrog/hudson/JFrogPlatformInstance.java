@@ -15,6 +15,7 @@ public class JFrogPlatformInstance {
     public static final int DEFAULT_DEPLOYMENT_THREADS_NUMBER = 3;
 
     private String url;
+    private String distributionUrl;
     private String id;
     private ArtifactoryServer artifactoryServer;
     private CredentialsConfig deployerCredentialsConfig;
@@ -25,7 +26,7 @@ public class JFrogPlatformInstance {
     private Integer deploymentThreads;
 
     @DataBoundConstructor
-    public JFrogPlatformInstance(String instanceId, String platformUrl, String artifactoryUrl, CredentialsConfig deployerCredentialsConfig,
+    public JFrogPlatformInstance(String instanceId, String platformUrl, String artifactoryUrl, String distributionUrl, CredentialsConfig deployerCredentialsConfig,
                                  CredentialsConfig resolverCredentialsConfig, int timeout, boolean bypassProxy, Integer connectionRetry, Integer deploymentThreads) {
         this.id = instanceId;
         this.url = StringUtils.isNotEmpty(platformUrl) ? StringUtils.removeEnd(platformUrl, "/") : null;
@@ -35,19 +36,28 @@ public class JFrogPlatformInstance {
         this.bypassProxy = bypassProxy;
         this.connectionRetry = connectionRetry != null ? connectionRetry : 3;
         this.deploymentThreads = deploymentThreads != null && deploymentThreads > 0 ? deploymentThreads : DEFAULT_DEPLOYMENT_THREADS_NUMBER;
+        this.distributionUrl = distributionUrl;
         artifactoryServer = new ArtifactoryServer(this.id, artifactoryUrl, this.deployerCredentialsConfig, this.resolverCredentialsConfig, this.timeout, this.bypassProxy, this.connectionRetry, this.deploymentThreads);
     }
 
     public JFrogPlatformInstance(ArtifactoryServer artifactoryServer) {
-        this(artifactoryServer.getServerId(), "", artifactoryServer.getArtifactoryUrl(), artifactoryServer.getDeployerCredentialsConfig(), artifactoryServer.getResolverCredentialsConfig(), artifactoryServer.getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnectionRetry(), artifactoryServer.getDeploymentThreads());
+        this(artifactoryServer.getServerId(), null, artifactoryServer.getArtifactoryUrl(), null, artifactoryServer.getDeployerCredentialsConfig(), artifactoryServer.getResolverCredentialsConfig(), artifactoryServer.getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnectionRetry(), artifactoryServer.getDeploymentThreads());
     }
 
     public JFrogPlatformInstance(org.jfrog.hudson.pipeline.common.types.ArtifactoryServer artifactoryServer) {
-        this("", "", artifactoryServer.getUrl(), artifactoryServer.createCredentialsConfig(), artifactoryServer.createCredentialsConfig(), artifactoryServer.getConnection().getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnection().getRetry(), artifactoryServer.getDeploymentThreads());
+        this(null, null, artifactoryServer.getUrl(), null, artifactoryServer.createCredentialsConfig(), artifactoryServer.createCredentialsConfig(), artifactoryServer.getConnection().getTimeout(), artifactoryServer.isBypassProxy(), artifactoryServer.getConnection().getRetry(), artifactoryServer.getDeploymentThreads());
     }
 
     public String getId() {
         return id;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     // Required by external plugins (JCasC).
@@ -60,14 +70,6 @@ public class JFrogPlatformInstance {
     @SuppressWarnings("unused")
     public void setInstanceId(String instanceId) {
         this.id = instanceId;
-    }
-
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
     }
 
     // Required by external plugins (JCasC).
@@ -197,5 +199,15 @@ public class JFrogPlatformInstance {
     @SuppressWarnings("unused")
     public void setDeploymentThreads(int deploymentThreads) {
         this.deploymentThreads = deploymentThreads;
+    }
+
+    // Required by external plugins (JCasC).
+    public String getDistributionUrl() {
+        return distributionUrl;
+    }
+
+    // Required by external plugins (JCasC).
+    public void setDistributionUrl(String distributionUrl) {
+        this.distributionUrl = distributionUrl;
     }
 }

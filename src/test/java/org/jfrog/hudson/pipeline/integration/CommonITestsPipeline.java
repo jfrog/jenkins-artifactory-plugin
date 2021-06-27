@@ -16,9 +16,13 @@ import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
 import org.jfrog.build.extractor.buildScanTable.BuildScanTableHelper;
+import org.jfrog.build.extractor.clientConfiguration.client.distribution.request.DeleteReleaseBundleRequest;
+import org.jfrog.build.extractor.clientConfiguration.client.distribution.response.DistributeReleaseBundleResponse;
+import org.jfrog.build.extractor.clientConfiguration.client.distribution.response.GetReleaseBundleStatusResponse;
 import org.jfrog.build.extractor.docker.DockerJavaWrapper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesServer;
+import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.trigger.ArtifactoryTrigger;
 import org.jfrog.hudson.util.RepositoriesUtils;
 import org.junit.Assert;
@@ -29,12 +33,15 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.model.JsonBody;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.isOneOf;
 import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
@@ -791,6 +798,40 @@ public class CommonITestsPipeline extends PipelineTestBase {
         } finally {
             deleteBuild(artifactoryClient, buildName1);
             deleteBuild(artifactoryClient, buildName2);
+        }
+    }
+
+    void rbCreateUpdateSign(String releaseBundleName) throws Exception {
+        String releaseBundleVersion = "1";
+        try {
+            runPipeline("rbCreateUpdateSign", false);
+            GetReleaseBundleStatusResponse status = distributionManager.getReleaseBundleStatus(releaseBundleName, releaseBundleVersion);
+            // Make sure release bundle updated
+            assertEquals("Update a release bundle", status.getDescription());
+            // Make sure release bundle is signed
+            assertThat(status.getState(), isOneOf(GetReleaseBundleStatusResponse.DistributionState.SIGNED, GetReleaseBundleStatusResponse.DistributionState.READY_FOR_DISTRIBUTION));
+        } finally {
+            distributionManager.deleteLocalReleaseBundle(releaseBundleName, "1");
+        }
+    }
+
+    void rbCreateDistDel(String releaseBundleName) throws Exception {
+        String releaseBundleVersion = "1";
+        try {
+            runPipeline("rbCreateDistDel", false);
+            GetReleaseBundleStatusResponse status = distributionManager.getReleaseBundleStatus(releaseBundleName, releaseBundleVersion);
+            assertNull(status);
+        } finally {
+            DeleteReleaseBundleRequest request = new DeleteReleaseBundleRequest() {{
+                setOnSuccess(DeleteReleaseBundleRequest.OnSuccess.delete);
+                setDistributionRules(Utils.createDistributionRules(new ArrayList<>(), "*", "*"));
+            }};
+            try {
+                DistributeReleaseBundleResponse response = distributionManager.deleteReleaseBundle("releaseBundleName", "1", false, request);
+                assertNull(response);
+            } catch (IOException ignore) {
+                // ignore
+            }
         }
     }
 }

@@ -20,6 +20,7 @@ import org.jfrog.artifactory.client.ArtifactoryRequest;
 import org.jfrog.artifactory.client.impl.ArtifactoryRequestImpl;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
+import org.jfrog.build.extractor.clientConfiguration.client.distribution.DistributionManager;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
@@ -59,7 +60,8 @@ public class PipelineTestBase {
 
     private static final String SLAVE_LABEL = "TestSlave";
     private static final String PLATFORM_URL = System.getenv("JENKINS_PLATFORM_URL");
-    private static final String ARTIFACTORY_URL = org.apache.commons.lang.StringUtils.removeEnd(PLATFORM_URL, "/") + "/artifactory";
+    private static final String ARTIFACTORY_URL = StringUtils.removeEnd(PLATFORM_URL, "/") + "/artifactory";
+    private static final String DISTRIBUTION_URL = StringUtils.removeEnd(PLATFORM_URL, "/") + "/distribution";
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_ARTIFACTORY_USERNAME");
     private static final String ARTIFACTORY_PASSWORD = System.getenv("JENKINS_ARTIFACTORY_PASSWORD");
     static final String JENKINS_XRAY_TEST_ENABLE = System.getenv("JENKINS_XRAY_TEST_ENABLE");
@@ -68,6 +70,7 @@ public class PipelineTestBase {
     private static long currentTime;
     private static StrSubstitutor pipelineSubstitution;
     static ArtifactoryManager artifactoryManager;
+    static DistributionManager distributionManager;
     static Artifactory artifactoryClient;
 
     private static final ClassLoader classLoader = PipelineTestBase.class.getClassLoader();
@@ -112,6 +115,7 @@ public class PipelineTestBase {
                 Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() != TestRepository.RepoType.VIRTUAL))
                 .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete());
         artifactoryManager.close();
+        distributionManager.close();
         artifactoryClient.close();
     }
 
@@ -165,6 +169,7 @@ public class PipelineTestBase {
      */
     private static void createClients() {
         artifactoryManager = new ArtifactoryManager(ARTIFACTORY_URL, ARTIFACTORY_USERNAME, ARTIFACTORY_PASSWORD, new NullLog());
+        distributionManager = new DistributionManager(DISTRIBUTION_URL, ARTIFACTORY_USERNAME, ARTIFACTORY_PASSWORD, new NullLog());
         artifactoryClient = ArtifactoryClientBuilder.create()
                 .setUrl(ARTIFACTORY_URL)
                 .setUsername(ARTIFACTORY_USERNAME)
@@ -185,7 +190,7 @@ public class PipelineTestBase {
         CredentialsConfig platformCred = new CredentialsConfig(ARTIFACTORY_USERNAME, ARTIFACTORY_PASSWORD, null);
         List<JFrogPlatformInstance> artifactoryServers = new ArrayList<JFrogPlatformInstance>() {{
             add(new JFrogPlatformInstance(new ArtifactoryServer("LOCAL", "http://127.0.0.1:8081/artifactory", cred, cred, 0, false, 3, null)));
-            add(new JFrogPlatformInstance("PLATFORM",PLATFORM_URL, ARTIFACTORY_URL, platformCred, platformCred, 0, false, 3, null));
+            add(new JFrogPlatformInstance("PLATFORM", PLATFORM_URL, ARTIFACTORY_URL, DISTRIBUTION_URL, platformCred, platformCred, 0, false, 3, null));
         }};
         artifactoryBuilder.setJfrogInstances(artifactoryServers);
     }

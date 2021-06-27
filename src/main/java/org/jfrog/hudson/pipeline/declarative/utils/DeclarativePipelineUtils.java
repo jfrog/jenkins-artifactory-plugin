@@ -13,10 +13,12 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.GetJFrogPlatformInstancesExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.ConanClient;
+import org.jfrog.hudson.pipeline.common.types.DistributionServer;
+import org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;
 import org.jfrog.hudson.pipeline.declarative.steps.BuildInfoStep;
-import org.jfrog.hudson.pipeline.declarative.steps.CreateServerStep;
+import org.jfrog.hudson.pipeline.declarative.steps.CreateJFrogInstanceStep;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 
 import java.io.File;
@@ -64,7 +66,7 @@ public class DeclarativePipelineUtils {
     }
 
     /**
-     * Get Artifactory server from global jfrog instances configuration or from previous rtServer{...} scope.
+     * Get Artifactory server from global jfrog instances configuration or from previous jfrogInstance{...} scope.
      *
      * @param build          - Step's build.
      * @param rootWs         - Step's root workspace.
@@ -73,11 +75,39 @@ public class DeclarativePipelineUtils {
      * @return Artifactory server.
      */
     public static ArtifactoryServer getArtifactoryServer(Run<?, ?> build, FilePath rootWs, String id, boolean throwIfMissing) throws IOException, InterruptedException {
+        JFrogPlatformInstance instance = getJFrogPlatformInstance(build, rootWs, id, throwIfMissing);
+        return instance != null ? instance.getArtifactoryServer() : null;
+    }
+
+    /**
+     * Get Distribution server from global jfrog instances configuration or from previous jfrogInstance{...} scope.
+     *
+     * @param build          - Step's build.
+     * @param rootWs         - Step's root workspace.
+     * @param id             - The Artifactory server id. Can be defined from global jfrog instances configuration or from previous rtServer{...} scope.
+     * @param throwIfMissing - Throw exception if server is missing.
+     * @return Artifactory server.
+     */
+    public static DistributionServer getDistributionServer(Run<?, ?> build, FilePath rootWs, String id, boolean throwIfMissing) throws IOException, InterruptedException {
+        JFrogPlatformInstance instance = getJFrogPlatformInstance(build, rootWs, id, throwIfMissing);
+        return instance != null ? instance.getDistributionServer() : null;
+    }
+
+    /**
+     * Get Artifactory server from global jfrog instances configuration or from previous rtServer{...} scope.
+     *
+     * @param build          - Step's build.
+     * @param rootWs         - Step's root workspace.
+     * @param id             - The Artifactory server id. Can be defined from global jfrog instances configuration or from previous rtServer{...} scope.
+     * @param throwIfMissing - Throw exception if server is missing.
+     * @return Artifactory server.
+     */
+    public static JFrogPlatformInstance getJFrogPlatformInstance(Run<?, ?> build, FilePath rootWs, String id, boolean throwIfMissing) throws IOException, InterruptedException {
         String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
-        BuildDataFile buildDataFile = readBuildDataFile(rootWs, buildNumber, CreateServerStep.STEP_NAME, id);
-        // If the server has not been configured as part of the declarative pipeline script, get its details from it.
+        BuildDataFile buildDataFile = readBuildDataFile(rootWs, buildNumber, CreateJFrogInstanceStep.STEP_NAME, id);
+        // If the inst has not been configured as part of the declarative pipeline script, get its details from it.
         if (buildDataFile == null) {
-            // This server ID has not been configured as part of the declarative pipeline script.
+            // This inst ID has not been configured as part of the declarative pipeline script.
             // Let's get it from the Jenkins configuration.
             GetJFrogPlatformInstancesExecutor getJFrogPlatformInstancesExecutor = new GetJFrogPlatformInstancesExecutor(build, id);
             try {
@@ -88,25 +118,54 @@ public class DeclarativePipelineUtils {
                 }
                 return null;
             }
-            return getJFrogPlatformInstancesExecutor.getJFrogPlatformInstance().getArtifactoryServer();
+            return getJFrogPlatformInstancesExecutor.getJFrogPlatformInstance();
         }
-        JsonNode jsonNode = buildDataFile.get(CreateServerStep.STEP_NAME);
-        ArtifactoryServer server = createMapper().treeToValue(jsonNode, ArtifactoryServer.class);
-        JsonNode credentialsId = jsonNode.get("credentialsId");
+        JsonNode jsonNode = buildDataFile.get(CreateJFrogInstanceStep.STEP_NAME);
+        JFrogPlatformInstance instance = createMapper().treeToValue(jsonNode, JFrogPlatformInstance.class);
+        populateArtifactoryServer(instance, jsonNode);
+        populateDistributionServer(instance, jsonNode);
+        return instance;
+    }
+
+    private static void populateArtifactoryServer(JFrogPlatformInstance instance, JsonNode jsonNode) {
+        JsonNode artifactoryNode = jsonNode.get("artifactoryServer");
+        if (artifactoryNode == null) {
+            return;
+        }
+        JsonNode credentialsId = artifactoryNode.get("credentialsId");
         if (credentialsId != null && !credentialsId.asText().isEmpty()) {
-            server.setCredentialsId(credentialsId.asText());
-            return server;
+            instance.getArtifactoryServer().setCredentialsId(credentialsId.asText());
+            return;
         }
-        JsonNode username = jsonNode.get("username");
+        JsonNode username = artifactoryNode.get("username");
         if (username != null) {
-            server.setUsername(username.asText());
+            instance.getArtifactoryServer().setUsername(username.asText());
         }
-        JsonNode password = jsonNode.get("password");
+        JsonNode password = artifactoryNode.get("password");
         if (password != null) {
-            server.setPassword(password.asText());
+            instance.getArtifactoryServer().setPassword(password.asText());
         }
 
-        return server;
+    }
+
+    private static void populateDistributionServer(JFrogPlatformInstance instance, JsonNode jsonNode) {
+        JsonNode distributionNode = jsonNode.get("distributionServer");
+        if (distributionNode == null) {
+            return;
+        }
+        JsonNode credentialsId = distributionNode.get("credentialsId");
+        if (credentialsId != null && !credentialsId.asText().isEmpty()) {
+            instance.getDistributionServer().setCredentialsId(credentialsId.asText());
+            return;
+        }
+        JsonNode username = distributionNode.get("username");
+        if (username != null) {
+            instance.getDistributionServer().setUsername(username.asText());
+        }
+        JsonNode password = distributionNode.get("password");
+        if (password != null) {
+            instance.getDistributionServer().setPassword(password.asText());
+        }
     }
 
     /**

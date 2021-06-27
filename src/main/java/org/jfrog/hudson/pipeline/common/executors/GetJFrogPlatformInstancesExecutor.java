@@ -4,6 +4,7 @@ import hudson.model.Run;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.hudson.JFrogPlatformInstance;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.DistributionServer;
 import org.jfrog.hudson.util.RepositoriesUtils;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ public class GetJFrogPlatformInstancesExecutor implements Executor {
 
     private final String jfrogInstancesID;
     private final Run<?, ?> build;
-    private org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance JFrogPlatformInstance;
+    private org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance jfrogPlatformInstance;
 
     public GetJFrogPlatformInstancesExecutor(Run<?, ?> build, String jfrogInstancesID) {
         this.jfrogInstancesID = jfrogInstancesID;
@@ -21,7 +22,7 @@ public class GetJFrogPlatformInstancesExecutor implements Executor {
     }
 
     public org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance getJFrogPlatformInstance() {
-        return JFrogPlatformInstance;
+        return jfrogPlatformInstance;
     }
 
     @Override
@@ -45,10 +46,11 @@ public class GetJFrogPlatformInstancesExecutor implements Executor {
         if (jfrogInstancesFound.size() > 1) {
             throw new ServerNotFoundException("Duplicate configured JFrog instance ID: " + jfrogInstancesID);
         }
-        JFrogPlatformInstance JFrogPlatformInstance = jfrogInstancesFound.get(0);
-        ArtifactoryServer artifactoryServer = new ArtifactoryServer(JFrogPlatformInstance.getArtifactory(), build.getParent());
-        this.JFrogPlatformInstance = new org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance(artifactoryServer, JFrogPlatformInstance.getUrl(), JFrogPlatformInstance.getId());
-        artifactoryServer.setPlatformUrl(this.JFrogPlatformInstance.getUrl());
+        JFrogPlatformInstance jfrogPlatformInstance = jfrogInstancesFound.get(0);
+        DistributionServer distributionServer = new DistributionServer(jfrogPlatformInstance, build.getParent());
+        ArtifactoryServer artifactoryServer = new ArtifactoryServer(jfrogPlatformInstance.getArtifactory(), build.getParent());
+        this.jfrogPlatformInstance = new org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance(artifactoryServer, distributionServer, jfrogPlatformInstance.getUrl(), jfrogPlatformInstance.getId());
+        artifactoryServer.setPlatformUrl(this.jfrogPlatformInstance.getUrl());
     }
 
     public static class ServerNotFoundException extends RuntimeException {

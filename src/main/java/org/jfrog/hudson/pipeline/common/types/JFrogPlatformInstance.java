@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.common.types;
 
 import org.apache.commons.lang.StringUtils;
+import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 
 import java.io.Serializable;
@@ -10,22 +11,39 @@ import java.io.Serializable;
  */
 public class JFrogPlatformInstance implements Serializable {
     private final ArtifactoryServer artifactoryServer;
+    private final DistributionServer distributionServer;
     private String id;
     private String url;
-    private CpsScript cpsScript;
 
-    public JFrogPlatformInstance(ArtifactoryServer artifactoryServer, String url, String id) {
+    public JFrogPlatformInstance() {
+        artifactoryServer = new ArtifactoryServer();
+        distributionServer = new DistributionServer();
+    }
+
+    public JFrogPlatformInstance(ArtifactoryServer artifactoryServer, DistributionServer distributionServer, String url, String id) {
         this.id = id;
         this.url = StringUtils.removeEnd(url, "/");
         this.artifactoryServer = artifactoryServer;
+        this.distributionServer = distributionServer;
     }
 
+    @Whitelisted
     public ArtifactoryServer getArtifactoryServer() {
         return artifactoryServer;
     }
 
+    @Whitelisted
+    public DistributionServer getDistributionServer() {
+        return distributionServer;
+    }
+
     public void setCpsScript(CpsScript cpsScript) {
-        this.cpsScript = cpsScript;
+        if (artifactoryServer != null) {
+            artifactoryServer.setCpsScript(cpsScript);
+        }
+        if (distributionServer != null) {
+            distributionServer.setCpsScript(cpsScript);
+        }
     }
 
     public String getUrl() {

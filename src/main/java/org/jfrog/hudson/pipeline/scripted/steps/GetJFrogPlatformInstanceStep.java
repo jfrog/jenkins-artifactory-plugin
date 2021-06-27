@@ -12,20 +12,20 @@ import org.jfrog.hudson.pipeline.common.executors.GetJFrogPlatformInstancesExecu
 import org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 
 public class GetJFrogPlatformInstanceStep extends AbstractStepImpl {
     static final String STEP_NAME = "getJFrogPlatformInstance";
-    private final String JFrogPlatformInstanceID;
-    private JFrogPlatformInstance JFrogPlatformInstance;
+    private final String instanceId;
 
     @DataBoundConstructor
-    public GetJFrogPlatformInstanceStep(String JFrogPlatformInstanceID) {
-        this.JFrogPlatformInstanceID = JFrogPlatformInstanceID;
+    public GetJFrogPlatformInstanceStep(String instanceId) {
+        this.instanceId = instanceId;
     }
 
-    private String getJFrogPlatformInstanceID() {
-        return JFrogPlatformInstanceID;
+    private String getInstanceId() {
+        return instanceId;
     }
 
     public static class Execution extends ArtifactorySynchronousStepExecution<JFrogPlatformInstance> {
@@ -40,16 +40,15 @@ public class GetJFrogPlatformInstanceStep extends AbstractStepImpl {
 
         @Override
         protected JFrogPlatformInstance runStep() throws Exception {
-            String JFrogPlatformInstanceID = step.getJFrogPlatformInstanceID();
+            String JFrogPlatformInstanceID = step.getInstanceId();
             GetJFrogPlatformInstancesExecutor getArtifactoryServerExecutor = new GetJFrogPlatformInstancesExecutor(build, JFrogPlatformInstanceID);
             getArtifactoryServerExecutor.execute();
-            step.JFrogPlatformInstance = getArtifactoryServerExecutor.getJFrogPlatformInstance();
-            return step.JFrogPlatformInstance;
+            return getArtifactoryServerExecutor.getJFrogPlatformInstance();
         }
 
         @Override
         public ArtifactoryServer getUsageReportServer() {
-            return Utils.prepareArtifactoryServer(step.getJFrogPlatformInstanceID(), null);
+            return Utils.prepareArtifactoryServer(step.getInstanceId(), null);
         }
 
         @Override
@@ -70,6 +69,7 @@ public class GetJFrogPlatformInstanceStep extends AbstractStepImpl {
             return STEP_NAME;
         }
 
+        @Nonnull
         @Override
         public String getDisplayName() {
             return "Get JFrog Platform instance from Jenkins config";

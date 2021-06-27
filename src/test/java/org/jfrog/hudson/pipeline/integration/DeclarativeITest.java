@@ -210,4 +210,14 @@ public class DeclarativeITest extends CommonITestsPipeline {
     public void buildAppendTest() throws Exception {
         super.buildAppendTest("declarative:buildAppend test");
     }
+
+    @Test
+    public void rbCreateUpdateSign() throws Exception {
+        super.rbCreateUpdateSign("declarative:createUpdateSign");
+    }
+
+    @Test
+    public void rbCreateDistDel() throws Exception {
+        super.rbCreateDistDel("declarative:createDistributeDelete");
+    }
 }
