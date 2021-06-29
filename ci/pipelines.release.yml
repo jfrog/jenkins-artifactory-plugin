@@ -22,7 +22,6 @@ pipelines:
           inputResources:
             - name: jenkinsReleaseGit
           integrations:
-            - name: ojo
             - name: jenkins_artifactory
             - name: github_generic
             - name: jenkins_id_rsa
@@ -54,11 +53,9 @@ pipelines:
             - curl -fL https://getcli.jfrog.io | sh && chmod +x jfrog
 
             # Configure JFrog CLI
-            - ./jfrog rt c jenkins_artifactory --url $int_jenkins_artifactory_rt_url --user=$int_jenkins_artifactory_rt_user --password=$int_jenkins_artifactory_rt_password --enc-password=false
-            - ./jfrog rt c ojo --url $int_ojo_rt_url --access-token=$int_ojo_rt_token
-            - ./jfrog rt mvnc
-              --server-id-resolve ojo --repo-resolve-releases jfrog-dependencies --repo-resolve-snapshots jfrog-dependencies
-              --server-id-deploy jenkins_artifactory --repo-deploy-releases releases --repo-deploy-snapshots snapshots
+            - ./jfrog c add jenkins_artifactory --url $int_jenkins_artifactory_rt_url --user=$int_jenkins_artifactory_rt_user --password=$int_jenkins_artifactory_rt_password --enc-password=false
+            - ./jfrog c add releases --artifactory-url=https://releases.jfrog.io/artifactory
+            - ./jfrog rt mvnc --server-id-deploy jenkins_artifactory --repo-deploy-releases releases --repo-deploy-snapshots snapshots
 
             # Sync changes with upstream
             - git pull upstream master
