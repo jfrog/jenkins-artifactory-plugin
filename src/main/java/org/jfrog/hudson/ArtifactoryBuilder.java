@@ -85,7 +85,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
          * @deprecated: Use org.jfrog.hudson.ArtifactoryBuilder.DescriptorImpl#getJFrogInstances()
          */
         @Deprecated
-        private List<ArtifactoryServer> artifactoryServers;
+        private transient List<ArtifactoryServer> artifactoryServers;
         private JFrogPipelinesServer jfrogPipelinesServer = new JFrogPipelinesServer();
 
         public DescriptorImpl() {
