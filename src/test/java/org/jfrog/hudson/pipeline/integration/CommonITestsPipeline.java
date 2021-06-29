@@ -803,16 +803,15 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void rbCreateUpdateSign(String releaseBundleName) throws Exception {
         String releaseBundleVersion = "1";
-        try {
-            runPipeline("rbCreateUpdateSign", false);
-            GetReleaseBundleStatusResponse status = distributionManager.getReleaseBundleStatus(releaseBundleName, releaseBundleVersion);
-            // Make sure release bundle updated
-            assertEquals("Update a release bundle", status.getDescription());
-            // Make sure release bundle is signed
-            assertThat(status.getState(), isOneOf(GetReleaseBundleStatusResponse.DistributionState.SIGNED, GetReleaseBundleStatusResponse.DistributionState.READY_FOR_DISTRIBUTION));
-        } finally {
-            distributionManager.deleteLocalReleaseBundle(releaseBundleName, "1");
-        }
+        runPipeline("rbCreateUpdateSign", false);
+
+        GetReleaseBundleStatusResponse status = distributionManager.getReleaseBundleStatus(releaseBundleName, releaseBundleVersion);
+        distributionManager.deleteLocalReleaseBundle(releaseBundleName, "1");
+
+        // Make sure release bundle updated
+        assertEquals("Update a release bundle", status.getDescription());
+        // Make sure release bundle is signed
+        assertThat(status.getState(), isOneOf(GetReleaseBundleStatusResponse.DistributionState.SIGNED, GetReleaseBundleStatusResponse.DistributionState.READY_FOR_DISTRIBUTION));
     }
 
     void rbCreateDistDel(String releaseBundleName) throws Exception {

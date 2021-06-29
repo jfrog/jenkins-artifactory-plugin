@@ -3,7 +3,6 @@ package org.jfrog.hudson.pipeline.scripted.steps.distribution;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.ReleaseBundleCreateExecutor;
@@ -13,45 +12,15 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
-public class CreateReleaseBundleStep extends AbstractStepImpl {
+public class CreateReleaseBundleStep extends CreateUpdateReleaseBundleStep {
     static final String STEP_NAME = "createReleaseBundle";
-
-    private final DistributionServer server;
-    private final String releaseNotesSyntax;
-    private final boolean signImmediately;
-    private final String releaseNotesPath;
-    private final String gpgPassphrase;
-    private final String storingRepo;
-    private final String description;
-    private final boolean dryRun;
-    private final String version;
-    private final String name;
-    private final String spec;
 
     @DataBoundConstructor
     public CreateReleaseBundleStep(DistributionServer server, String name, String version, String spec,
                                    String storingRepo, boolean signImmediately, boolean dryRun,
                                    String gpgPassphrase, String releaseNotesPath, String releaseNotesSyntax,
                                    String description) {
-        this.server = server;
-        this.name = name;
-        this.version = version;
-        this.spec = spec;
-        this.storingRepo = storingRepo;
-        this.signImmediately = signImmediately;
-        this.dryRun = dryRun;
-        this.gpgPassphrase = gpgPassphrase;
-        this.releaseNotesPath = releaseNotesPath;
-        this.releaseNotesSyntax = releaseNotesSyntax;
-        this.description = description;
-    }
-
-    public String getSpec() {
-        return spec;
-    }
-
-    public DistributionServer getServer() {
-        return server;
+        super(server, name, version, spec, storingRepo, signImmediately, dryRun, gpgPassphrase, releaseNotesPath, releaseNotesSyntax, description);
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {

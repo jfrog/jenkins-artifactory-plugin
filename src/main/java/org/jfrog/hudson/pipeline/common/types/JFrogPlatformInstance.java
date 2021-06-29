@@ -10,39 +10,39 @@ import java.io.Serializable;
  * Represents an instance of JFrog Platform from pipeline script.
  */
 public class JFrogPlatformInstance implements Serializable {
-    private final ArtifactoryServer artifactoryServer;
-    private final DistributionServer distributionServer;
+    private final ArtifactoryServer artifactory;
+    private final DistributionServer distribution;
     private String id;
     private String url;
 
     public JFrogPlatformInstance() {
-        artifactoryServer = new ArtifactoryServer();
-        distributionServer = new DistributionServer();
+        artifactory = new ArtifactoryServer();
+        distribution = new DistributionServer();
     }
 
-    public JFrogPlatformInstance(ArtifactoryServer artifactoryServer, DistributionServer distributionServer, String url, String id) {
+    public JFrogPlatformInstance(ArtifactoryServer artifactory, DistributionServer distribution, String url, String id) {
         this.id = id;
         this.url = StringUtils.removeEnd(url, "/");
-        this.artifactoryServer = artifactoryServer;
-        this.distributionServer = distributionServer;
+        this.artifactory = artifactory;
+        this.distribution = distribution;
     }
 
     @Whitelisted
-    public ArtifactoryServer getArtifactoryServer() {
-        return artifactoryServer;
+    public ArtifactoryServer getArtifactory() {
+        return artifactory;
     }
 
     @Whitelisted
-    public DistributionServer getDistributionServer() {
-        return distributionServer;
+    public DistributionServer getDistribution() {
+        return distribution;
     }
 
     public void setCpsScript(CpsScript cpsScript) {
-        if (artifactoryServer != null) {
-            artifactoryServer.setCpsScript(cpsScript);
+        if (artifactory != null) {
+            artifactory.setCpsScript(cpsScript);
         }
-        if (distributionServer != null) {
-            distributionServer.setCpsScript(cpsScript);
+        if (distribution != null) {
+            distribution.setCpsScript(cpsScript);
         }
     }
 

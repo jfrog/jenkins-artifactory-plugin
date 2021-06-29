@@ -76,7 +76,7 @@ public class DeclarativePipelineUtils {
      */
     public static ArtifactoryServer getArtifactoryServer(Run<?, ?> build, FilePath rootWs, String id, boolean throwIfMissing) throws IOException, InterruptedException {
         JFrogPlatformInstance instance = getJFrogPlatformInstance(build, rootWs, id, throwIfMissing);
-        return instance != null ? instance.getArtifactoryServer() : null;
+        return instance != null ? instance.getArtifactory() : null;
     }
 
     /**
@@ -90,7 +90,7 @@ public class DeclarativePipelineUtils {
      */
     public static DistributionServer getDistributionServer(Run<?, ?> build, FilePath rootWs, String id, boolean throwIfMissing) throws IOException, InterruptedException {
         JFrogPlatformInstance instance = getJFrogPlatformInstance(build, rootWs, id, throwIfMissing);
-        return instance != null ? instance.getDistributionServer() : null;
+        return instance != null ? instance.getDistribution() : null;
     }
 
     /**
@@ -105,9 +105,9 @@ public class DeclarativePipelineUtils {
     public static JFrogPlatformInstance getJFrogPlatformInstance(Run<?, ?> build, FilePath rootWs, String id, boolean throwIfMissing) throws IOException, InterruptedException {
         String buildNumber = BuildUniqueIdentifierHelper.getBuildNumber(build);
         BuildDataFile buildDataFile = readBuildDataFile(rootWs, buildNumber, CreateJFrogInstanceStep.STEP_NAME, id);
-        // If the inst has not been configured as part of the declarative pipeline script, get its details from it.
+        // If the instance has not been configured as part of the declarative pipeline script, get its details from it.
         if (buildDataFile == null) {
-            // This inst ID has not been configured as part of the declarative pipeline script.
+            // This instance ID has not been configured as part of the declarative pipeline script.
             // Let's get it from the Jenkins configuration.
             GetJFrogPlatformInstancesExecutor getJFrogPlatformInstancesExecutor = new GetJFrogPlatformInstancesExecutor(build, id);
             try {
@@ -128,43 +128,42 @@ public class DeclarativePipelineUtils {
     }
 
     private static void populateArtifactoryServer(JFrogPlatformInstance instance, JsonNode jsonNode) {
-        JsonNode artifactoryNode = jsonNode.get("artifactoryServer");
+        JsonNode artifactoryNode = jsonNode.get("artifactory");
         if (artifactoryNode == null) {
             return;
         }
         JsonNode credentialsId = artifactoryNode.get("credentialsId");
         if (credentialsId != null && !credentialsId.asText().isEmpty()) {
-            instance.getArtifactoryServer().setCredentialsId(credentialsId.asText());
+            instance.getArtifactory().setCredentialsId(credentialsId.asText());
             return;
         }
         JsonNode username = artifactoryNode.get("username");
         if (username != null) {
-            instance.getArtifactoryServer().setUsername(username.asText());
+            instance.getArtifactory().setUsername(username.asText());
         }
         JsonNode password = artifactoryNode.get("password");
         if (password != null) {
-            instance.getArtifactoryServer().setPassword(password.asText());
+            instance.getArtifactory().setPassword(password.asText());
         }
-
     }
 
     private static void populateDistributionServer(JFrogPlatformInstance instance, JsonNode jsonNode) {
-        JsonNode distributionNode = jsonNode.get("distributionServer");
+        JsonNode distributionNode = jsonNode.get("distribution");
         if (distributionNode == null) {
             return;
         }
         JsonNode credentialsId = distributionNode.get("credentialsId");
         if (credentialsId != null && !credentialsId.asText().isEmpty()) {
-            instance.getDistributionServer().setCredentialsId(credentialsId.asText());
+            instance.getDistribution().setCredentialsId(credentialsId.asText());
             return;
         }
         JsonNode username = distributionNode.get("username");
         if (username != null) {
-            instance.getDistributionServer().setUsername(username.asText());
+            instance.getDistribution().setUsername(username.asText());
         }
         JsonNode password = distributionNode.get("password");
         if (password != null) {
-            instance.getDistributionServer().setPassword(password.asText());
+            instance.getDistribution().setPassword(password.asText());
         }
     }
 

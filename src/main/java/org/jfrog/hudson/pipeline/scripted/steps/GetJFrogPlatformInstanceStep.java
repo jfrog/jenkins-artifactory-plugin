@@ -40,8 +40,8 @@ public class GetJFrogPlatformInstanceStep extends AbstractStepImpl {
 
         @Override
         protected JFrogPlatformInstance runStep() throws Exception {
-            String JFrogPlatformInstanceID = step.getInstanceId();
-            GetJFrogPlatformInstancesExecutor getArtifactoryServerExecutor = new GetJFrogPlatformInstancesExecutor(build, JFrogPlatformInstanceID);
+            String jfrogPlatformInstanceID = step.getInstanceId();
+            GetJFrogPlatformInstancesExecutor getArtifactoryServerExecutor = new GetJFrogPlatformInstancesExecutor(build, jfrogPlatformInstanceID);
             getArtifactoryServerExecutor.execute();
             return getArtifactoryServerExecutor.getJFrogPlatformInstance();
         }

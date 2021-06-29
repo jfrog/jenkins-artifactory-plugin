@@ -17,7 +17,8 @@ import java.io.IOException;
 /**
  * @author yahavi
  **/
-public class CreateReleaseBundleStep extends UpdateReleaseBundleStep {
+@SuppressWarnings("unused")
+public class CreateReleaseBundleStep extends CreateUpdateReleaseBundleStep {
     public static final String STEP_NAME = "dsCreateReleaseBundle";
 
     @DataBoundConstructor

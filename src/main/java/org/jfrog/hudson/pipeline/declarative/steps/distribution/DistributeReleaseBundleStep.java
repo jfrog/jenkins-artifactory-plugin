@@ -3,7 +3,6 @@ package org.jfrog.hudson.pipeline.declarative.steps.distribution;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.ReleaseBundleDistributeExecutor;
@@ -19,24 +18,12 @@ import java.util.List;
 /**
  * @author yahavi
  **/
-public class DistributeReleaseBundleStep extends AbstractStepImpl {
+public class DistributeReleaseBundleStep extends RemoteReleaseBundleStep {
     public static final String STEP_NAME = "dsDistributeReleaseBundle";
-    final String serverId;
-    final String version;
-    final String name;
-
-    List<String> countryCodes;
-    String distRules;
-    String siteName;
-    String cityName;
-    boolean dryRun;
-    boolean sync;
 
     @DataBoundConstructor
     public DistributeReleaseBundleStep(String serverId, String name, String version) {
-        this.serverId = serverId;
-        this.name = name;
-        this.version = version;
+        super(serverId, name, version);
     }
 
     @DataBoundSetter

@@ -44,7 +44,7 @@ public class ReleaseBundleUpdateExecutor implements Executor {
     private UpdateReleaseBundleRequest createRequest(String spec, String description, String storingRepo,
                                                      boolean signImmediately, boolean dryRun, String releaseNotesPath,
                                                      String releaseNotesSyntax) throws IOException {
-        return new UpdateReleaseBundleRequest.Builder<>()
+        return new UpdateReleaseBundleRequest.Builder()
                 .releaseNotes(createReleaseNotes(releaseNotesPath, releaseNotesSyntax))
                 .storingRepository(storingRepo)
                 .signImmediately(signImmediately)

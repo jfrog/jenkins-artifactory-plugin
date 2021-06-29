@@ -137,7 +137,7 @@ public class CreateJFrogInstanceStep extends AbstractStepImpl {
          * @throws IOException if there is an illegal step configuration.
          */
         private void checkInputs(JFrogPlatformInstance server) throws IOException {
-            if (isAllBlank(server.getUrl(), server.getArtifactoryServer().getUrl(), server.getDistributionServer().getUrl(),
+            if (isAllBlank(server.getUrl(), server.getArtifactory().getUrl(), server.getDistribution().getUrl(),
                     step.url, step.artifactoryUrl, step.distributionUrl)) {
                 throw new IOException("Server URL is missing");
             }
@@ -159,38 +159,40 @@ public class CreateJFrogInstanceStep extends AbstractStepImpl {
         private void overrideServerParameters(JFrogPlatformInstance server) {
             if (isNotBlank(step.url)) {
                 server.setUrl(step.url);
-                server.getArtifactoryServer().setUrl(StringUtils.appendIfMissing(step.url, "/") + "artifactory");
-                server.getDistributionServer().setUrl(StringUtils.appendIfMissing(step.url, "/") + "distribution");
+                server.getArtifactory().setUrl(StringUtils.appendIfMissing(step.url, "/") + "artifactory");
+                server.getDistribution().setUrl(StringUtils.appendIfMissing(step.url, "/") + "distribution");
             }
             if (isNotBlank(step.artifactoryUrl)) {
-                server.getArtifactoryServer().setUrl(step.artifactoryUrl);
+                server.getArtifactory().setUrl(step.artifactoryUrl);
             }
             if (isNotBlank(step.distributionUrl)) {
-                server.getDistributionServer().setUrl(step.distributionUrl);
+                server.getDistribution().setUrl(step.distributionUrl);
             }
             if (isNotBlank(step.credentialsId)) {
-                server.getArtifactoryServer().setCredentialsId(step.credentialsId);
-                server.getDistributionServer().setCredentialsId(step.credentialsId);
+                server.getArtifactory().setCredentialsId(step.credentialsId);
+                server.getDistribution().setCredentialsId(step.credentialsId);
             }
             if (isNotBlank(step.username)) {
-                server.getArtifactoryServer().setUsername(step.username);
-                server.getDistributionServer().setUsername(step.username);
+                server.getArtifactory().setUsername(step.username);
+                server.getDistribution().setUsername(step.username);
             }
             if (isNotBlank(step.password)) {
-                server.getArtifactoryServer().setPassword(step.password);
-                server.getDistributionServer().setPassword(step.password);
+                server.getArtifactory().setPassword(step.password);
+                server.getDistribution().setPassword(step.password);
             }
+
+            // The following fields does not exist in the Distribution server:
             if (step.deploymentThreads != null) {
-                server.getArtifactoryServer().setDeploymentThreads(step.deploymentThreads);
+                server.getArtifactory().setDeploymentThreads(step.deploymentThreads);
             }
             if (step.bypassProxy != null) {
-                server.getArtifactoryServer().setBypassProxy(step.bypassProxy);
+                server.getArtifactory().setBypassProxy(step.bypassProxy);
             }
             if (step.retry != null) {
-                server.getArtifactoryServer().getConnection().setRetry(step.retry);
+                server.getArtifactory().getConnection().setRetry(step.retry);
             }
             if (step.timeout != null) {
-                server.getArtifactoryServer().getConnection().setTimeout(step.timeout);
+                server.getArtifactory().getConnection().setTimeout(step.timeout);
             }
         }
     }

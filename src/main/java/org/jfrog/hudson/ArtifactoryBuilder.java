@@ -391,7 +391,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         /**
          * Autofill logic takes care whenever new JFrog instances are going to be saved, on the Jenkins configuration page.
          * Its main purpose to make sure that Artifactory & Distribution URLs were updated if JFrog platform URL changing.
-         * The following actions taking place:
+         * The following actions take place:
          * 1. If JFrog platform URL exists but Artifactory is missing -> autofill the missing fields with <platform-url>/artifactory (same for distribution)
          * 2. If JFrog platform URL updated but Artifactory hasn't, override it with the new Platform URL e.g. <new-platform-url>/artifactory (same for distribution)
          *
@@ -411,7 +411,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 if (StringUtils.isBlank(newInstance.getDistributionUrl())) {
                     setDefaultDistributionUrl(newInstance);
                 }
-                Optional<JFrogPlatformInstance> preSavedInstance = null;
+                Optional<JFrogPlatformInstance> preSavedInstance = Optional.empty();
                 // Check if Artifactory URL has a different prefix than platform URL.
                 if (!StringUtils.startsWithIgnoreCase(newInstance.getArtifactory().getArtifactoryUrl(), newInstance.getUrl())) {
                     // Search for previous saved JFrog instance.
@@ -426,8 +426,9 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                         setDefaultArtifactoryUrl(newInstance);
                     }
                 }
+                // Check if Distribution URL has a different prefix than platform URL.
                 if (!StringUtils.startsWithIgnoreCase(newInstance.getDistributionUrl(), newInstance.getUrl())) {
-                    if (preSavedInstance == null) {
+                    if (!preSavedInstance.isPresent()) {
                         preSavedInstance = getPreSavedInstance(newInstance.getId());
                     }
                     if (preSavedInstance.isPresent() && !isDistributionUrlChangedSinceLastSave(preSavedInstance.get(), newInstance)) {

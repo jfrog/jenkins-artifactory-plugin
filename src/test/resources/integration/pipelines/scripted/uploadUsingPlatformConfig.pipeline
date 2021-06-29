@@ -2,7 +2,7 @@ package integration.pipelines.scripted
 
 node("TestSlave") {
     stage "Configuration"
-    def artifactory = JFrog.instance('PLATFORM').getArtifactoryServer()
+    def artifactory = JFrog.instance('PLATFORM').artifactory
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.name = "scripted:platform upload test"
     buildInfo.number = "3"

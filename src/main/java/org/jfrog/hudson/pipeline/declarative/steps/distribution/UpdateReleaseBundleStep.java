@@ -2,10 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.steps.distribution;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
-import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.ReleaseBundleUpdateExecutor;
@@ -15,35 +12,18 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import org.kohsuke.stapler.DataBoundSetter;
 
 import javax.annotation.Nonnull;
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 /**
  * @author yahavi
  **/
-public class UpdateReleaseBundleStep extends AbstractStepImpl {
+@SuppressWarnings("unused")
+public class UpdateReleaseBundleStep extends CreateUpdateReleaseBundleStep {
     public static final String STEP_NAME = "dsUpdateReleaseBundle";
-    final String serverId;
-    final String version;
-    final String name;
-    final String spec;
-
-    String releaseNotesSyntax;
-    boolean signImmediately;
-    String releaseNotesPath;
-    String gpgPassphrase;
-    String storingRepo;
-    String description;
-    String specPath;
-    boolean dryRun;
 
     @DataBoundConstructor
     public UpdateReleaseBundleStep(String serverId, String name, String version, String spec) {
-        this.serverId = serverId;
-        this.name = name;
-        this.version = version;
-        this.spec = spec;
+        super(serverId, name, version, spec);
     }
 
     @DataBoundSetter
@@ -140,12 +120,5 @@ public class UpdateReleaseBundleStep extends AbstractStepImpl {
         public boolean isAdvanced() {
             return true;
         }
-    }
-
-    static String getSpec(String specPath, String specParameter) throws IOException {
-        if (StringUtils.isNotBlank(specPath)) {
-            return FileUtils.readFileToString(new File(specPath), StandardCharsets.UTF_8);
-        }
-        return specParameter;
     }
 }

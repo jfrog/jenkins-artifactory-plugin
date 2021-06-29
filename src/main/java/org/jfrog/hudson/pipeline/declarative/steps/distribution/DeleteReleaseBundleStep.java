@@ -18,7 +18,8 @@ import java.util.List;
 /**
  * @author yahavi
  **/
-public class DeleteReleaseBundleStep extends DistributeReleaseBundleStep {
+@SuppressWarnings("unused")
+public class DeleteReleaseBundleStep extends RemoteReleaseBundleStep {
     public static final String STEP_NAME = "dsDeleteReleaseBundle";
     private boolean deleteFromDist;
 

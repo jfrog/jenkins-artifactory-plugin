@@ -46,7 +46,7 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
             // JFrogInstancesID is the same as its ArtifactoryServerID
             GetJFrogPlatformInstancesExecutor getJFrogPlatformInstancesExecutor = new GetJFrogPlatformInstancesExecutor(build, artifactoryServerID);
             getJFrogPlatformInstancesExecutor.execute();
-            step.artifactoryServer = getJFrogPlatformInstancesExecutor.getJFrogPlatformInstance().getArtifactoryServer();
+            step.artifactoryServer = getJFrogPlatformInstancesExecutor.getJFrogPlatformInstance().getArtifactory();
             return step.artifactoryServer;
         }
 
