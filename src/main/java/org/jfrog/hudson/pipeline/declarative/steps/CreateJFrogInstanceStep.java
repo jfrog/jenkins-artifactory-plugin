@@ -159,9 +159,10 @@ public class CreateJFrogInstanceStep extends AbstractStepImpl {
         private void overrideServerParameters(JFrogPlatformInstance server) {
             if (isNotBlank(step.url)) {
                 server.setUrl(step.url);
-                server.getArtifactory().setPlatformUrl(StringUtils.removeEnd(step.url, "/"));
-                server.getArtifactory().setUrl(StringUtils.appendIfMissing(step.url, "/") + "artifactory");
-                server.getDistribution().setUrl(StringUtils.appendIfMissing(step.url, "/") + "distribution");
+                String urlWithoutSlash = StringUtils.removeEnd(step.url, "/");
+                server.getArtifactory().setPlatformUrl(urlWithoutSlash);
+                server.getArtifactory().setUrl(urlWithoutSlash + "/" + "artifactory");
+                server.getDistribution().setUrl(urlWithoutSlash + "/" + "distribution");
             }
             if (isNotBlank(step.artifactoryUrl)) {
                 server.getArtifactory().setUrl(step.artifactoryUrl);

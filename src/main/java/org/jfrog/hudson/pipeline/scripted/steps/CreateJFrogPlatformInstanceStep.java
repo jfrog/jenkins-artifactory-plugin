@@ -2,6 +2,7 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -72,8 +73,9 @@ public class CreateJFrogPlatformInstanceStep extends AbstractStepImpl {
             if (isAllBlank(step.url, step.artifactoryUrl, step.distributionUrl)) {
                 throw new IllegalArgumentException("At least one of the following is mandatory: 'url', 'artifactoryUrl', 'distributionUrl'");
             }
-            String artifactoryUrl = defaultIfBlank(step.artifactoryUrl, appendIfMissing(step.url, "/") + "artifactory");
-            String distributionUrl = defaultIfBlank(step.distributionUrl, appendIfMissing(step.url, "/") + "distribution");
+            String urlWithoutSlash = removeEnd(step.url, "/");
+            String artifactoryUrl = defaultIfBlank(step.artifactoryUrl, urlWithoutSlash + "/" + "artifactory");
+            String distributionUrl = defaultIfBlank(step.distributionUrl, urlWithoutSlash + "/" + "distribution");
 
             ArtifactoryServer artifactoryServer;
             DistributionServer distributionServer;
@@ -84,7 +86,7 @@ public class CreateJFrogPlatformInstanceStep extends AbstractStepImpl {
                 artifactoryServer = new ArtifactoryServer(artifactoryUrl, step.username, step.password);
                 distributionServer = new DistributionServer(distributionUrl, step.username, step.password);
             }
-            artifactoryServer.setPlatformUrl(step.url);
+            artifactoryServer.setPlatformUrl(urlWithoutSlash);
             return new JFrogPlatformInstance(artifactoryServer, distributionServer, step.url, "");
         }
     }
