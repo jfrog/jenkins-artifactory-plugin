@@ -45,6 +45,25 @@
         <buildinfo.gradle.version>4.24.9</buildinfo.gradle.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>central</id>
+            <name>central</name>
+            <url>https://repo.maven.apache.org/maven2</url>
+        </repository>
+        <repository>
+            <id>jenkins</id>
+            <name>jenkins-releases</name>
+            <url>https://repo.jenkins-ci.org/releases</url>
+        </repository>
+        <repository>
+            <snapshots/>
+            <id>snapshots</id>
+            <name>libs-snapshot</name>
+            <url>https://releases.jfrog.io/artifactory/oss-snapshots</url>
+        </repository>
+    </repositories>
+
     <developers>
         <developer>
             <id>eyalb</id>
@@ -609,42 +628,4 @@
         <developerConnection>scm:git:git@github.com:jenkinsci/artifactory-plugin.git</developerConnection>
         <url>https://github.com/jenkinsci/artifactory-plugin</url>
     </scm>
-
-    <profiles>
-        <profile>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <id>oss</id>
-            <repositories>
-                <repository>
-                    <id>jenkins</id>
-                    <name>jenkins-releases</name>
-                    <url>https://repo.jenkins-ci.org/releases</url>
-                </repository>
-                <repository>
-                    <snapshots/>
-                    <id>snapshots</id>
-                    <name>libs-snapshot</name>
-                    <url>https://releases.jfrog.io/artifactory/oss-snapshots</url>
-                </repository>
-            </repositories>
-            <pluginRepositories>
-                <pluginRepository>
-                    <snapshots>
-                        <enabled>false</enabled>
-                    </snapshots>
-                    <id>central</id>
-                    <name>jfrog-dependencies</name>
-                    <url>https://oss.jfrog.org/artifactory/jfrog-dependencies</url>
-                </pluginRepository>
-                <pluginRepository>
-                    <snapshots/>
-                    <id>snapshots</id>
-                    <name>plugins-snapshot</name>
-                    <url>https://oss.jfrog.org/artifactory/plugins-snapshot</url>
-                </pluginRepository>
-            </pluginRepositories>
-        </profile>
-    </profiles>
 </project>
