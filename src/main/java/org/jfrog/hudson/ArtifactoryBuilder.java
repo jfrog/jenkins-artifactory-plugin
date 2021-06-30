@@ -193,9 +193,9 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                         manager.setConnectionTimeout(Integer.parseInt(timeout));
                     }
                 });
-                String outputMessage = createTestConnectionMessage(artifactoryManager, targetArtUrl, "Artifactory");
+                String outputMessage = createTestConnectionMessage(artifactoryManager, targetArtUrl, "JFrog Artifactory");
                 if (StringUtils.isNotEmpty(targetDisUrl)) {
-                    outputMessage += String.format("\n%s", createTestConnectionMessage(distributionManager, targetDisUrl, "Distribution"));
+                    outputMessage += String.format("\n%s", createTestConnectionMessage(distributionManager, targetDisUrl, "JFrog Distribution"));
                 }
                 return FormValidation.ok(outputMessage);
             } finally {
@@ -206,13 +206,19 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         private String createTestConnectionMessage(ManagerBase manager, String targetUrl, String serverName) {
             try {
-                return String.format("Found JFrog %s version: %s on %s", serverName, manager.getVersion().toString(), targetUrl);
+                Version version = manager.getVersion();
+                if (version.isNotFound()) {
+                    return String.format("%s not found at %s", serverName, targetUrl);
+                } else {
+                    return String.format("Found %s %s at %s", serverName, manager.getVersion().toString(), targetUrl);
+                }
             } catch (ClientProtocolException e) {
                 // If http/https are missing, ClientProtocolException will be thrown.
                 // Since this kind of exception hold the error message inside 'cause' we must catch it to show a proper error message on Jenkins UI.
-                return String.format("%s not found: %s ", serverName, e.getCause().getMessage());
+                // an error occurred while connecting to JFrog Distribution
+                return String.format("An error occurred while connecting to %s: %s", serverName, e.getCause().getMessage());
             } catch (Exception e) {
-                return String.format("%s not found: %s ", serverName, e.getMessage());
+                return String.format("An error occurred while connecting to %s: %s", serverName, e.getMessage());
             }
         }
 
@@ -405,19 +411,20 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 if (StringUtils.isBlank(newInstance.getUrl())) {
                     continue;
                 }
-                if (StringUtils.isBlank(newInstance.getArtifactory().getArtifactoryUrl())) {
+                if (StringUtils.isBlank(newInstance.getArtifactoryUrl())) {
                     setDefaultArtifactoryUrl(newInstance);
                 }
                 if (StringUtils.isBlank(newInstance.getDistributionUrl())) {
                     setDefaultDistributionUrl(newInstance);
                 }
-                Optional<JFrogPlatformInstance> preSavedInstance = Optional.empty();
+                Optional<JFrogPlatformInstance> preSavedInstance = getPreSavedInstance(newInstance.getId());
+                if (!preSavedInstance.isPresent()) {
+                    continue;
+                }
                 // Check if Artifactory URL has a different prefix than platform URL.
-                if (!StringUtils.startsWithIgnoreCase(newInstance.getArtifactory().getArtifactoryUrl(), newInstance.getUrl())) {
-                    // Search for previous saved JFrog instance.
-                    preSavedInstance = getPreSavedInstance(newInstance.getId());
+                if (!StringUtils.startsWithIgnoreCase(newInstance.getArtifactoryUrl(), newInstance.getUrl())) {
                     // Check if the new Artifactory URL has changed since last time by comparing the URLs.
-                    if (preSavedInstance.isPresent() && !isArtifactoryUrlChangedSinceLastSave(preSavedInstance.get(), newInstance)) {
+                    if (!isArtifactoryUrlChangedSinceLastSave(preSavedInstance.get(), newInstance)) {
                         // At this point, the Platform URL is different than the Artifactory URL.
                         // Artifactory URL has a different prefix than Platform URL.
                         // Artifactory URL has not changed, compared to last time configuration.
@@ -428,10 +435,8 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 }
                 // Check if Distribution URL has a different prefix than platform URL.
                 if (!StringUtils.startsWithIgnoreCase(newInstance.getDistributionUrl(), newInstance.getUrl())) {
-                    if (!preSavedInstance.isPresent()) {
-                        preSavedInstance = getPreSavedInstance(newInstance.getId());
-                    }
-                    if (preSavedInstance.isPresent() && !isDistributionUrlChangedSinceLastSave(preSavedInstance.get(), newInstance)) {
+                    // Check if the new Distribution URL has changed since last time by comparing the URLs.
+                    if (!isDistributionUrlChangedSinceLastSave(preSavedInstance.get(), newInstance)) {
                         setDefaultDistributionUrl(newInstance);
                     }
                 }
