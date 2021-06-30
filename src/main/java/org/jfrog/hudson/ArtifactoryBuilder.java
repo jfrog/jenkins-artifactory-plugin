@@ -215,7 +215,6 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             } catch (ClientProtocolException e) {
                 // If http/https are missing, ClientProtocolException will be thrown.
                 // Since this kind of exception hold the error message inside 'cause' we must catch it to show a proper error message on Jenkins UI.
-                // an error occurred while connecting to JFrog Distribution
                 return String.format("An error occurred while connecting to %s:%s%s", serverName, System.lineSeparator(), e.getCause().getMessage());
             } catch (Exception e) {
                 return String.format("An error occurred while connecting to %s:%s%s", serverName, System.lineSeparator(), e.getMessage());
