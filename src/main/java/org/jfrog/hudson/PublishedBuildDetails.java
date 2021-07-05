@@ -35,9 +35,10 @@ public class PublishedBuildDetails implements Serializable {
 
     public String getBuildInfoUrl() throws ParseException {
         if (StringUtils.isNotBlank(platformUrl) && StringUtils.isNotBlank(startedTimeStamp)) {
-            return createBuildInfoUrl(platformUrl, buildName, buildNumber, startedTimeStamp, project);
+            // Encode already happened in BuildInfoResultAction#createBuildInfoIdentifier.
+            return createBuildInfoUrl(platformUrl, buildName, buildNumber, startedTimeStamp, project, false);
         }
-        return createBuildInfoUrl(this.artifactoryUrl, this.buildName, this.buildNumber);
+        return createBuildInfoUrl(this.artifactoryUrl, this.buildName, this.buildNumber, false);
     }
 
     public String getDisplayName() {
