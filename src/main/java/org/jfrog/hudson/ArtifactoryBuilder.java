@@ -452,6 +452,9 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         private Optional<JFrogPlatformInstance> getPreSavedInstance(String id) {
+            if (jfrogInstances == null) {
+                return Optional.empty();
+            }
             return this.jfrogInstances.stream().filter(inst -> inst.getId().equals(id)).findFirst();
         }
 
