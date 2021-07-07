@@ -455,7 +455,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             if (jfrogInstances == null) {
                 return Optional.empty();
             }
-            return this.jfrogInstances.stream().filter(inst -> inst.getId().equals(id)).findFirst();
+            return jfrogInstances.stream().filter(inst -> inst.getId().equals(id)).findFirst();
         }
 
         private boolean isArtifactoryUrlChangedSinceLastSave(JFrogPlatformInstance oldInstance, JFrogPlatformInstance newInstance) {
