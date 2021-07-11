@@ -31,8 +31,8 @@
                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-platform-url.html">
                         <f:textbox field="platformUrl" value="${instance.url}"/>
                     </f:entry>
-                    <f:section title="Advanced Artifactory configuration">
-                        <f:advanced>
+                    <f:advanced title="Advanced Configuration">
+                        <f:section title="Advanced Configuration">
                             <f:entry title="JFrog Artifactory URL"
                                      help="/plugin/artifactory/help/ArtifactoryBuilder/help-artifactory-url.html">
                                 <f:textbox field="artifactoryUrl" value="${instance.artifactoryUrl}"/>
@@ -69,8 +69,8 @@
                                              checked="${instance.bypassProxy}" inline="true"
                                              help="/plugin/artifactory/help/ArtifactoryBuilder/help-bypassproxy.html">
                             </f:optionalBlock>
-                        </f:advanced>
-                    </f:section>
+                        </f:section>
+                    </f:advanced>
 
                     <f:section title="Default Deployer Credentials" field="deployerCredentialsConfig"
                                name="deployerCredentialsConfig">
