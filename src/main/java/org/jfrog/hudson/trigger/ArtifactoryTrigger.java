@@ -45,7 +45,15 @@ public class ArtifactoryTrigger extends BaseTrigger<BuildableItem> {
 
         @Override
         public boolean isApplicable(Item item) {
-            return item instanceof BuildableItem && !(item instanceof MultiBranchProject);
+            if (!(item instanceof BuildableItem)) {
+                return false;
+            }
+            try {
+                return !(item instanceof MultiBranchProject);
+            } catch (NoClassDefFoundError ignore) {
+                // workflow-multibranch plugin is not installed
+                return true;
+            }
         }
 
         public List<JFrogPlatformInstance> getJfrogInstances() {
