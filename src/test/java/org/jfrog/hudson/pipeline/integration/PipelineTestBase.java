@@ -66,6 +66,7 @@ public class PipelineTestBase {
     private static final String ARTIFACTORY_PASSWORD = System.getenv("JENKINS_ARTIFACTORY_PASSWORD");
     static final String JENKINS_XRAY_TEST_ENABLE = System.getenv("JENKINS_XRAY_TEST_ENABLE");
     static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
+    public static final String BUILD_NUMBER = String.valueOf(System.currentTimeMillis());
 
     private static long currentTime;
     private static StrSubstitutor pipelineSubstitution;
@@ -101,7 +102,7 @@ public class PipelineTestBase {
     }
 
     @After
-    public void cleanRepos() {
+    public void afterTests() {
         // Remove the content of all local repositories
         Arrays.stream(TestRepository.values()).filter(repository -> repository.getRepoType() == TestRepository.RepoType.LOCAL)
                 .forEach(repository -> artifactoryClient.repository(getRepoKey(repository)).delete(StringUtils.EMPTY));
@@ -228,6 +229,7 @@ public class PipelineTestBase {
             put("PIP_VIRTUAL", getRepoKey(TestRepository.PIP_VIRTUAL));
             put("CONAN_LOCAL", getRepoKey(TestRepository.CONAN_LOCAL));
             put("NUGET_REMOTE", getRepoKey(TestRepository.NUGET_REMOTE));
+            put("BUILD_NUMBER", BUILD_NUMBER);
         }});
     }
 

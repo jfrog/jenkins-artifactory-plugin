@@ -13,7 +13,7 @@ node("TestSlave") {
     buildInfo.env.capture = true
     buildInfo.env.filter.addExclude("DONT_COLLECT")
     buildInfo.name = "scripted:dotnet test"
-    buildInfo.number = "13"
+    buildInfo.number = ${BUILD_NUMBER}
 
     stage "Configure .NET build"
     def rtDotnet = Artifactory.newDotnetBuild()

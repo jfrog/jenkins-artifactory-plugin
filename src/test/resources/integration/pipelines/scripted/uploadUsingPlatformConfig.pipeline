@@ -5,7 +5,7 @@ node("TestSlave") {
     def artifactory = JFrog.instance('PLATFORM').artifactory
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.name = "scripted:platform upload test"
-    buildInfo.number = "3"
+    buildInfo.number = ${BUILD_NUMBER}
 
     stage "Upload"
     def uploadSpec = """{

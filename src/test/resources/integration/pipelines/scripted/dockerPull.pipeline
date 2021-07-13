@@ -13,7 +13,7 @@ node("TestSlave") {
     def rtDocker = Artifactory.docker (rtServer, "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}")
     def buildInfo = rtDocker.pull imageName, sourceRepo
     buildInfo.name = "scripted:dockerPull test"
-    buildInfo.number = "1"
+    buildInfo.number = ${BUILD_NUMBER}
 
     stage "Publish Build Info"
     rtServer.publishBuildInfo buildInfo
