@@ -3,9 +3,9 @@ package integration.pipelines.declarative
 node("TestSlave") {
     def serverId = "Artifactory-1"
     def buildName1 = "declarative:buildAppend test-1"
-    def buildNumber1 = "1"
+    def buildNumber1 = "${BUILD_NUMBER}"
     def buildName2 = "declarative:buildAppend test-2"
-    def buildNumber2 = "2"
+    def buildNumber2 = "${BUILD_NUMBER}2"
 
     stage "Configuration"
     rtServer(

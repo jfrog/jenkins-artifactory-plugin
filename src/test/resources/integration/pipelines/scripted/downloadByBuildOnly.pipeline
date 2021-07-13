@@ -3,11 +3,14 @@ package integration.pipelines.scripted
 node("TestSlave") {
     stage "Configuration"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def firstBuildNumber = ${BUILD_NUMBER}1
+    def secondBuildNumber = ${BUILD_NUMBER}2
+    def thirdBuildNumber = ${BUILD_NUMBER}3
 
-    // First upload files with buildNumber = 3
+    // First upload files with buildNumber = firstBuildNumber
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.name = "scripted:downloadByBuildOnly test"
-    buildInfo.number = "3"
+    buildInfo.number = firstBuildNumber
 
     stage "Upload"
     def uploadSpec = """{
@@ -24,10 +27,10 @@ node("TestSlave") {
     stage "Publish Build Info"
     rtServer.publishBuildInfo buildInfo
 
-    // Then upload files with buildNumber = 4
+    // Then upload files with buildNumber = secondBuildNumber
     def buildInfo1 = Artifactory.newBuildInfo()
     buildInfo1.name = "scripted:downloadByBuildOnly test"
-    buildInfo1.number = "4"
+    buildInfo1.number = secondBuildNumber
 
     stage "Upload 1"
     def uploadSpec1 = """{
@@ -47,13 +50,13 @@ node("TestSlave") {
     // At last, download by build
     def buildInfo2 = Artifactory.newBuildInfo()
     buildInfo2.name = "scripted:downloadByBuildOnly test"
-    buildInfo2.number = "5"
+    buildInfo2.number = thirdBuildNumber
 
     stage "Download"
     def downloadSpec = """{
       "files": [
         {
-          "build": "scripted:downloadByBuildOnly test/3",
+          "build": "scripted:downloadByBuildOnly test/$firstBuildNumber",
           "target": "downloadByBuildOnly-test/"
         }
      ]

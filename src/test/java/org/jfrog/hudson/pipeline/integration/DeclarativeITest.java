@@ -108,17 +108,17 @@ public class DeclarativeITest extends CommonITestsPipeline {
 
     @Test
     public void npmInstallTest() throws Exception {
-        super.npmTest("npmInstall", "declarative:npm install test", "3", "package-name1:0.0.1");
+        super.npmTest("npmInstall", "declarative:npm install test", "package-name1:0.0.1");
     }
 
     @Test
     public void npmCiTest() throws Exception {
-        super.npmTest("npmCi", "declarative:npm ci test", "4", "package-name1:0.0.1");
+        super.npmTest("npmCi", "declarative:npm ci test", "package-name1:0.0.1");
     }
 
     @Test
     public void npmCustomModuleNameTest() throws Exception {
-        super.npmTest("npmCustomModuleName", "declarative:npmCustomModuleName test", "3", "my-npm-module");
+        super.npmTest("npmCustomModuleName", "declarative:npmCustomModuleName test", "my-npm-module");
     }
 
     @Test

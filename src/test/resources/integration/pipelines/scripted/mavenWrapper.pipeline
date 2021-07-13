@@ -13,7 +13,7 @@ node("TestSlave")  {
     buildInfo.env.capture = true
     buildInfo.env.filter.addExclude("DONT_COLLECT")
     buildInfo.name = "scripted:mavenWrapper test"
-    buildInfo.number = "3"
+    buildInfo.number = ${BUILD_NUMBER}
 
     stage "Configure Maven build"
     def rtMaven = Artifactory.newMavenBuild()

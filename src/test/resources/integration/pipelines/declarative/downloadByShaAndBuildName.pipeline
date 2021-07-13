@@ -12,7 +12,7 @@ node("TestSlave") {
     )
 
     def buildName = "declarative:downloadByShaAndBuildName test"
-    def buildNumber = "3"
+    def buildNumber = "${BUILD_NUMBER}1"
 
     stage "Upload"
     rtUpload(
@@ -38,7 +38,7 @@ node("TestSlave") {
     )
 
     def buildName1 = "declarative:downloadByShaAndBuildName test"
-    def buildNumber1 = "4"
+    def buildNumber1 = "${BUILD_NUMBER}2"
 
     stage "Upload 1"
     rtUpload(
@@ -64,7 +64,7 @@ node("TestSlave") {
     )
 
     def buildName2 = "declarative:downloadByShaAndBuildName test-second"
-    def buildNumber2 = "5"
+    def buildNumber2 = "${BUILD_NUMBER}3"
 
     stage "Upload 2"
     rtUpload(
@@ -90,7 +90,7 @@ node("TestSlave") {
     )
 
     def buildName3 = "declarative:downloadByShaAndBuildName test"
-    def buildNumber3 = "6"
+    def buildNumber3 = "${BUILD_NUMBER}4"
 
     stage "Download"
     rtDownload(

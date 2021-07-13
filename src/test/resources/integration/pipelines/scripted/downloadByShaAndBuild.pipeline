@@ -3,11 +3,15 @@ package integration.pipelines.scripted
 node("TestSlave") {
     stage "Configuration"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+    def firstBuildNumber = ${BUILD_NUMBER}1
+    def secondBuildNumber = ${BUILD_NUMBER}2
+    def thirdBuildNumber = ${BUILD_NUMBER}3
+    def forthBuildNumber = ${BUILD_NUMBER}4
 
-    // First upload files with buildNumber = 3
+    // First upload files with buildNumber = firstBuildNumber
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.name = "scripted:downloadByShaAndBuild test"
-    buildInfo.number = "3"
+    buildInfo.number = firstBuildNumber
 
     stage "Upload"
     def uploadSpec = """{
@@ -24,10 +28,10 @@ node("TestSlave") {
     stage "Publish Build Info"
     rtServer.publishBuildInfo buildInfo
 
-    // upload files with buildNumber = 4 and second build name
+    // upload files with buildNumber = secondBuildNumber and second build name
     def buildInfo1 = Artifactory.newBuildInfo()
     buildInfo1.name = "scripted:downloadByShaAndBuild test-second"
-    buildInfo1.number = "4"
+    buildInfo1.number = secondBuildNumber
 
     stage "Upload 1"
     def uploadSpec1 = """{
@@ -44,10 +48,10 @@ node("TestSlave") {
     stage "Publish Build Info 1"
     rtServer.publishBuildInfo buildInfo1
 
-    // Then upload files with buildNumber = 5 and second build name
+    // Then upload files with buildNumber = thirdBuildNumber and second build name
     def buildInfo2 = Artifactory.newBuildInfo()
     buildInfo2.name = "scripted:downloadByShaAndBuild test-second"
-    buildInfo2.number = "5"
+    buildInfo2.number = thirdBuildNumber
 
     stage "Upload 1"
     def uploadSpec2 = """{
@@ -67,7 +71,7 @@ node("TestSlave") {
     // At last, download by pattern and build name (without number)
     def buildInfo3 = Artifactory.newBuildInfo()
     buildInfo3.name = "scripted:downloadByShaAndBuild test"
-    buildInfo3.number = "6"
+    buildInfo3.number = forthBuildNumber
 
     stage "Download"
     def downloadSpec = """{
