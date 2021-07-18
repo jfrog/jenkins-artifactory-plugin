@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.isOneOf;
 import static org.jfrog.hudson.TestUtils.getAndAssertChild;
-import static org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor.failNoOpErrorMessage;
+import static org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor.FAIL_NO_OP_ERROR_MESSAGE;
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 import static org.junit.Assert.*;
@@ -144,10 +144,10 @@ public class CommonITestsPipeline extends PipelineTestBase {
             runPipeline("downloadNonExistingBuild", false);
             fail("Job expected to fail");
         } catch (AssertionError t) {
-            if (t.getMessage().contains(failNoOpErrorMessage)) {
+            if (t.getMessage().contains(FAIL_NO_OP_ERROR_MESSAGE)) {
                 success = true;
             } else {
-                fail("Job expected error message:'" + failNoOpErrorMessage + "' but actual got:" + t.getMessage());
+                fail("Job expected error message:'" + FAIL_NO_OP_ERROR_MESSAGE + "' but actual got:" + t.getMessage());
             }
         } finally {
             if (success) {
@@ -491,7 +491,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             runPipeline("downloadFailNoOp", false);
             fail("Job expected to fail");
         } catch (AssertionError t) {
-            assertTrue(t.getMessage().contains(failNoOpErrorMessage));
+            assertTrue(t.getMessage().contains(FAIL_NO_OP_ERROR_MESSAGE));
         }
     }
 
