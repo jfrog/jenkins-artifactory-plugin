@@ -28,6 +28,7 @@ public class GenericDownloadExecutor implements Executor {
     private TaskListener listener;
     private String spec;
     private String moduleName;
+    public static String failNoOpErrorMessage = "Fail-no-op: No files were affected in the download process.";
 
     public GenericDownloadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, String spec, boolean failNoOp, String moduleName) {
         this.build = build;
@@ -51,7 +52,7 @@ public class GenericDownloadExecutor implements Executor {
                 ws.act(new FilesResolverCallable(new JenkinsBuildInfoLog(listener),
                         resolverCredentials, server.getArtifactoryUrl(), spec, Utils.getProxyConfiguration(server)));
         if (failNoOp && resolvedDependencies.isEmpty()) {
-            throw new RuntimeException("Fail-no-op: No files were affected in the download process.");
+            throw new RuntimeException(failNoOpErrorMessage);
         }
         String moduleId = StringUtils.isNotBlank(moduleName) ? moduleName : buildInfo.getName();
         this.buildInfo.appendDependencies(resolvedDependencies, moduleId);

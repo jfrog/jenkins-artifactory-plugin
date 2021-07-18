@@ -12,7 +12,7 @@ node("TestSlave") {
     )
 
     def buildName = "declarative:downloadByPatternAndBuild test"
-    def buildNumber = "${BUILD_NUMBER}1"
+    def buildNumber = "${BUILD_NUMBER}-1"
 
     stage "Upload"
     rtUpload(
@@ -38,7 +38,7 @@ node("TestSlave") {
     )
 
     def buildName1 = "declarative:downloadByPatternAndBuild test"
-    def buildNumber1 = "${BUILD_NUMBER}2"
+    def buildNumber1 = "${BUILD_NUMBER}-2"
 
     stage "Upload"
     rtUpload(
@@ -64,7 +64,7 @@ node("TestSlave") {
     )
 
     def buildName2 = "declarative:downloadByPatternAndBuild test"
-    def buildNumber2 = "${BUILD_NUMBER}3"
+    def buildNumber2 = "${BUILD_NUMBER}-3"
 
     stage "Download"
     rtDownload(
@@ -75,7 +75,7 @@ node("TestSlave") {
               "files": [
                 {
                     "pattern": "${LOCAL_REPO1}/a*",
-                    "build": "declarative:downloadByPatternAndBuild test/${BUILD_NUMBER}1",
+                    "build": "declarative:downloadByPatternAndBuild test/${BUILD_NUMBER}-1",
                     "target": "downloadByPatternAndBuild-test/"
                 }
              ]

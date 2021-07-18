@@ -5,7 +5,7 @@ node("TestSlave") {
     def buildName1 = "declarative:buildAppend test-1"
     def buildNumber1 = "${BUILD_NUMBER}"
     def buildName2 = "declarative:buildAppend test-2"
-    def buildNumber2 = "${BUILD_NUMBER}2"
+    def buildNumber2 = "${BUILD_NUMBER}-2"
 
     stage "Configuration"
     rtServer(

@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.isOneOf;
 import static org.jfrog.hudson.TestUtils.getAndAssertChild;
+import static org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor.failNoOpErrorMessage;
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 import static org.junit.Assert.*;
@@ -96,7 +97,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void downloadByPatternAndBuildTest(String buildName) throws Exception {
         Set<String> expectedDependencies = Sets.newHashSet("a.in");
-        String buildNumber = BUILD_NUMBER + "3";
+        String buildNumber = BUILD_NUMBER + "-3";
         WorkflowRun pipelineResults = null;
 
         Set<String> unexpected = getTestFilesNamesByLayer(0);
@@ -112,7 +113,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleDependencies(module, expectedDependencies);
         } finally {
-            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER + "1", BUILD_NUMBER + "2", BUILD_NUMBER + "3");
+            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER + "-1", BUILD_NUMBER + "-2", BUILD_NUMBER + "-3");
         }
     }
 
@@ -129,11 +130,11 @@ public class CommonITestsPipeline extends PipelineTestBase {
             for (String fileName : unexpected) {
                 assertFalse(isExistInWorkspace(slave, pipelineResults, "downloadByBuildOnly-test", fileName));
             }
-            Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER + "3", null);
+            Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER + "-3", null);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleDependencies(module, expectedDependencies);
         } finally {
-            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER + "1", BUILD_NUMBER + "2", BUILD_NUMBER + "3");
+            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER + "-1", BUILD_NUMBER + "-2", BUILD_NUMBER + "-3");
         }
     }
 
@@ -143,10 +144,10 @@ public class CommonITestsPipeline extends PipelineTestBase {
             runPipeline("downloadNonExistingBuild", false);
             fail("Job expected to fail");
         } catch (AssertionError t) {
-            if (t.getMessage().contains("Fail-no-op: No files were affected in the download process.")) {
+            if (t.getMessage().contains(failNoOpErrorMessage)) {
                 success = true;
             } else {
-                fail("Job expected error message:'Fail-no-op: No files were affected in the download process.' but actual got:" + t.getMessage());
+                fail("Job expected error message:'" + failNoOpErrorMessage + "' but actual got:" + t.getMessage());
             }
         } finally {
             if (success) {
@@ -172,12 +173,12 @@ public class CommonITestsPipeline extends PipelineTestBase {
             for (String fileName : unexpected) {
                 assertFalse(isExistInWorkspace(slave, pipelineResults, "downloadByShaAndBuild-test", fileName));
             }
-            Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER + "4", null);
+            Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER + "-4", null);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleDependencies(module, expectedDependencies);
         } finally {
-            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER + "1", BUILD_NUMBER + "4");
-            cleanupBuilds(pipelineResults, buildName + "-second", null, BUILD_NUMBER + "2", BUILD_NUMBER + "3");
+            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER + "-1", BUILD_NUMBER + "-4");
+            cleanupBuilds(pipelineResults, buildName + "-second", null, BUILD_NUMBER + "-2", BUILD_NUMBER + "-3");
         }
     }
 
@@ -196,12 +197,12 @@ public class CommonITestsPipeline extends PipelineTestBase {
             for (String fileName : unexpected) {
                 assertFalse(isExistInWorkspace(slave, pipelineResults, "downloadByShaAndBuildName-test", fileName));
             }
-            Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER + "4", null);
+            Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER + "-4", null);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleDependencies(module, expectedDependencies);
         } finally {
-            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER + "1", BUILD_NUMBER + "2", BUILD_NUMBER + "4");
-            cleanupBuilds(pipelineResults, buildName + "-second", null, BUILD_NUMBER + "3");
+            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER + "-1", BUILD_NUMBER + "-2", BUILD_NUMBER + "-4");
+            cleanupBuilds(pipelineResults, buildName + "-second", null, BUILD_NUMBER + "-3");
         }
     }
 
@@ -490,7 +491,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             runPipeline("downloadFailNoOp", false);
             fail("Job expected to fail");
         } catch (AssertionError t) {
-            assertTrue(t.getMessage().contains("Fail-no-op: No files were affected in the download process."));
+            assertTrue(t.getMessage().contains(failNoOpErrorMessage));
         }
     }
 
@@ -792,7 +793,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         String buildName1 = buildName + "-1";
         String buildNumber1 = BUILD_NUMBER;
         String buildName2 = buildName + "-2";
-        String buildNumber2 = BUILD_NUMBER + "2";
+        String buildNumber2 = BUILD_NUMBER + "-2";
         // Clear older builds if exist
         deleteBuild(artifactoryClient, buildName1);
         deleteBuild(artifactoryClient, buildName2);

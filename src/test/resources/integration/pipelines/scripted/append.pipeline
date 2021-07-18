@@ -10,7 +10,7 @@ node {
         // Create another buildInfo
         def buildInfoUpload = Artifactory.newBuildInfo()
         buildInfoUpload.name = "buildInfo tmp"
-        buildInfoUpload.number = ${BUILD_NUMBER}2
+        buildInfoUpload.number = "${BUILD_NUMBER}-2"
 
         stage "Configuration"
             def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"

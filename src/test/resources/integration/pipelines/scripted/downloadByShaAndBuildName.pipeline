@@ -3,10 +3,10 @@ package integration.pipelines.scripted
 node("TestSlave") {
     stage "Configuration"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
-    def firstBuildNumber = ${BUILD_NUMBER}1
-    def secondBuildNumber = ${BUILD_NUMBER}2
-    def thirdBuildNumber = ${BUILD_NUMBER}3
-    def forthBuildNumber = ${BUILD_NUMBER}4
+    def firstBuildNumber = "${BUILD_NUMBER}-1"
+    def secondBuildNumber = "${BUILD_NUMBER}-2"
+    def thirdBuildNumber = "${BUILD_NUMBER}-3"
+    def forthBuildNumber = "${BUILD_NUMBER}-4"
 
     // First upload files with buildNumber = firstBuildNumber
     def buildInfo = Artifactory.newBuildInfo()

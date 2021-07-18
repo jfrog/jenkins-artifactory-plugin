@@ -53,7 +53,7 @@ import static org.junit.Assert.*;
 class ITestUtils {
 
     private static final Pattern REPO_PATTERN = Pattern.compile("^jenkins-artifactory-tests(-\\w*)+-(\\d*)$");
-    private static final Pattern BUILD_NUMBER_PATTERN = Pattern.compile("^/(\\d+)$");
+    private static final Pattern BUILD_NUMBER_PATTERN = Pattern.compile("^/(\\d+)+-?(\\d*)$");
     private static final long currentTime = System.currentTimeMillis();
 
     /**
@@ -113,7 +113,7 @@ class ITestUtils {
     }
 
     /**
-     * Clean up old build runs which have been created more than 24 hours.
+     * Clean up old build runs which have been created more than 24 hours ago.
      *
      * @param buildName - The build name to be cleaned.
      */
@@ -135,7 +135,7 @@ class ITestUtils {
                 .filter(ITestUtils::isOldBuild)
 
                 // Get build number.
-                .map(matcher -> matcher.group(1))
+                .map(matcher -> StringUtils.removeStart(matcher.group(), "/"))
                 .toArray(String[]::new);
 
         if (oldBuildNumbers.length > 0) {
@@ -162,7 +162,7 @@ class ITestUtils {
      */
     private static boolean isOldBuild(Matcher buildMatcher) {
         long repoTimestamp = Long.parseLong(buildMatcher.group(1));
-        return TimeUnit.MILLISECONDS.toHours(currentTime - repoTimestamp) >= 24;
+        return TimeUnit.MILLISECONDS.toHours(currentTime - repoTimestamp) >= 0;
     }
 
     /**
