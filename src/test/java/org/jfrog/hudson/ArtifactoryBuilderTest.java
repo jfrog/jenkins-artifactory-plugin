@@ -5,6 +5,7 @@ import org.junit.ClassRule;
 import org.junit.Test;
 import org.jvnet.hudson.test.JenkinsRule;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -54,5 +55,35 @@ public class ArtifactoryBuilderTest {
         assertEquals("www.new333.jfrog.platform.com", newJfrogPlatformInstance.getPlatformUrl());
         assertEquals("www.new444.jfrog.platform.com/artifactory", newJfrogPlatformInstance.getArtifactoryUrl());
         assertEquals("www.new555.jfrog.platform.com/distribution", newJfrogPlatformInstance.getDistributionUrl());
+    }
+
+    @Test
+    public void testMultipleAutoFillPlatformServers() {
+        // Init tests
+        ArtifactoryBuilder.DescriptorImpl testBuilder = ExtensionList.lookupSingleton(ArtifactoryBuilder.DescriptorImpl.class);
+        JFrogPlatformInstance firstJfrogPlatformInstance = new JFrogPlatformInstance("testInstance1", "www.jfrog.platform.com1", "abc", "abc", null, null, 0, false, 0, 0);
+        JFrogPlatformInstance secondJfrogPlatformInstance = new JFrogPlatformInstance("testInstance2", "www.jfrog.platform.com2", "def", "def", null, null, 0, false, 0, 0);
+        JFrogPlatformInstance thirdJfrogPlatformInstance = new JFrogPlatformInstance("testInstance3", "www.jfrog.platform.com3", "jkl", "jkl", null, null, 0, false, 0, 0);
+        testBuilder.setJfrogInstances(Arrays.asList(firstJfrogPlatformInstance, secondJfrogPlatformInstance, thirdJfrogPlatformInstance));
+
+        // Check auto fill on instance id only for changing platform url,
+        JFrogPlatformInstance newSecondJfrogPlatformInstance = new JFrogPlatformInstance("testInstance2", "www.jfrog.platform.com2", "ghi", "ghi", null, null, 0, false, 0, 0);
+        JFrogPlatformInstance newthirdJfrogPlatformInstance = new JFrogPlatformInstance("testInstance3", "www.jfrog.platform.com33", "jkl", "jkl", null, null, 0, false, 0, 0);
+        testBuilder.autoFillPlatformServers(Arrays.asList(firstJfrogPlatformInstance, newSecondJfrogPlatformInstance, newthirdJfrogPlatformInstance));
+        assertEquals("www.jfrog.platform.com1", firstJfrogPlatformInstance.getPlatformUrl());
+        assertEquals("abc", firstJfrogPlatformInstance.getArtifactoryUrl());
+        assertEquals("abc", firstJfrogPlatformInstance.getDistributionUrl());
+
+        assertEquals("www.jfrog.platform.com2", secondJfrogPlatformInstance.getPlatformUrl());
+        assertEquals("def", secondJfrogPlatformInstance.getArtifactoryUrl());
+        assertEquals("def", secondJfrogPlatformInstance.getDistributionUrl());
+
+        assertEquals("www.jfrog.platform.com2", newSecondJfrogPlatformInstance.getPlatformUrl());
+        assertEquals("ghi", newSecondJfrogPlatformInstance.getArtifactoryUrl());
+        assertEquals("ghi", newSecondJfrogPlatformInstance.getDistributionUrl());
+
+        assertEquals("www.jfrog.platform.com33", newthirdJfrogPlatformInstance.getPlatformUrl());
+        assertEquals("www.jfrog.platform.com33/artifactory", newthirdJfrogPlatformInstance.getArtifactoryUrl());
+        assertEquals("www.jfrog.platform.com33/distribution", newthirdJfrogPlatformInstance.getDistributionUrl());
     }
 }

@@ -420,6 +420,9 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 if (!preSavedInstance.isPresent()) {
                     continue;
                 }
+                if (!isPlatformUrlChangedSinceLastSave(preSavedInstance.get(), newInstance)) {
+                    continue;
+                }
                 // Check if Artifactory URL has a different prefix than platform URL.
                 if (!StringUtils.startsWithIgnoreCase(newInstance.getArtifactoryUrl(), newInstance.getUrl())) {
                     // Check if the new Artifactory URL has changed since last time by comparing the URLs.
@@ -460,6 +463,10 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
 
         private boolean isArtifactoryUrlChangedSinceLastSave(JFrogPlatformInstance oldInstance, JFrogPlatformInstance newInstance) {
             return !oldInstance.getArtifactory().getArtifactoryUrl().equals(newInstance.getArtifactory().getArtifactoryUrl());
+        }
+
+        private boolean isPlatformUrlChangedSinceLastSave(JFrogPlatformInstance oldInstance, JFrogPlatformInstance newInstance) {
+            return !oldInstance.getUrl().equals(newInstance.getUrl());
         }
 
         private boolean isDistributionUrlChangedSinceLastSave(JFrogPlatformInstance oldInstance, JFrogPlatformInstance newInstance) {
