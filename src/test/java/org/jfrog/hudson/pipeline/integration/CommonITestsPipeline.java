@@ -818,7 +818,11 @@ public class CommonITestsPipeline extends PipelineTestBase {
         // Make sure release bundle updated
         assertEquals("Update a release bundle", status.getDescription());
         // Make sure release bundle is signed
-        assertThat(status.getState(), isOneOf(GetReleaseBundleStatusResponse.DistributionState.SIGNED, GetReleaseBundleStatusResponse.DistributionState.READY_FOR_DISTRIBUTION));
+        assertThat(status.getState(), isOneOf(
+                GetReleaseBundleStatusResponse.DistributionState.SIGNED,
+                GetReleaseBundleStatusResponse.DistributionState.STORED,
+                GetReleaseBundleStatusResponse.DistributionState.READY_FOR_DISTRIBUTION)
+        );
     }
 
     void rbCreateDistDel(String releaseBundleName) throws Exception {
