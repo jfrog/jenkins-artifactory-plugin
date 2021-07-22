@@ -68,8 +68,8 @@ public class ArtifactoryBuilderTest {
 
         // Check auto fill on instance id only for changing platform url,
         JFrogPlatformInstance newSecondJfrogPlatformInstance = new JFrogPlatformInstance("testInstance2", "www.jfrog.platform.com2", "ghi", "ghi", null, null, 0, false, 0, 0);
-        JFrogPlatformInstance newthirdJfrogPlatformInstance = new JFrogPlatformInstance("testInstance3", "www.jfrog.platform.com33", "jkl", "jkl", null, null, 0, false, 0, 0);
-        testBuilder.autoFillPlatformServers(Arrays.asList(firstJfrogPlatformInstance, newSecondJfrogPlatformInstance, newthirdJfrogPlatformInstance));
+        JFrogPlatformInstance newThirdJfrogPlatformInstance = new JFrogPlatformInstance("testInstance3", "www.jfrog.platform.com33", "jkl", "jkl", null, null, 0, false, 0, 0);
+        testBuilder.autoFillPlatformServers(Arrays.asList(firstJfrogPlatformInstance, newSecondJfrogPlatformInstance, newThirdJfrogPlatformInstance));
         assertEquals("www.jfrog.platform.com1", firstJfrogPlatformInstance.getPlatformUrl());
         assertEquals("abc", firstJfrogPlatformInstance.getArtifactoryUrl());
         assertEquals("abc", firstJfrogPlatformInstance.getDistributionUrl());
@@ -82,8 +82,8 @@ public class ArtifactoryBuilderTest {
         assertEquals("ghi", newSecondJfrogPlatformInstance.getArtifactoryUrl());
         assertEquals("ghi", newSecondJfrogPlatformInstance.getDistributionUrl());
 
-        assertEquals("www.jfrog.platform.com33", newthirdJfrogPlatformInstance.getPlatformUrl());
-        assertEquals("www.jfrog.platform.com33/artifactory", newthirdJfrogPlatformInstance.getArtifactoryUrl());
-        assertEquals("www.jfrog.platform.com33/distribution", newthirdJfrogPlatformInstance.getDistributionUrl());
+        assertEquals("www.jfrog.platform.com33", newThirdJfrogPlatformInstance.getPlatformUrl());
+        assertEquals("www.jfrog.platform.com33/artifactory", newThirdJfrogPlatformInstance.getArtifactoryUrl());
+        assertEquals("www.jfrog.platform.com33/distribution", newThirdJfrogPlatformInstance.getDistributionUrl());
     }
 }

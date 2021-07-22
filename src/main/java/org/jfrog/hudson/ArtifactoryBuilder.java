@@ -466,6 +466,10 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         private boolean isPlatformUrlChangedSinceLastSave(JFrogPlatformInstance oldInstance, JFrogPlatformInstance newInstance) {
+            String oldUrl = oldInstance.getUrl();
+            if(StringUtils.isEmpty(oldUrl)){
+                return StringUtils.isNotEmpty(newInstance.getUrl());
+            }
             return !oldInstance.getUrl().equals(newInstance.getUrl());
         }
 
