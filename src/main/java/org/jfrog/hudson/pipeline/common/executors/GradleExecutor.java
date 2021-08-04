@@ -24,6 +24,8 @@ import org.jfrog.hudson.util.ExtractorUtils;
 import java.io.IOException;
 import java.util.Objects;
 
+import static org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer.addDeployedGradleArtifactsActionFromModules;
+
 public class GradleExecutor implements Executor {
 
     private EnvVars env, extendedEnv;
@@ -66,8 +68,15 @@ public class GradleExecutor implements Executor {
         envExtractor.execute();
         ArgumentListBuilder args = getGradleExecutor();
         Utils.launch("Gradle", launcher, args, extendedEnv, listener, ws);
+
         String generatedBuildPath = extendedEnv.get(BuildInfoFields.GENERATED_BUILD_INFO);
-        buildInfo.append(Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath));
+        org.jfrog.build.api.Build generatedBuild = Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath);
+        // Add action only if artifacts were actually deployed.
+        if (deployer.isDeployArtifacts()) {
+            addDeployedGradleArtifactsActionFromModules(this.build, deployer.getArtifactoryServer().getArtifactoryUrl(), generatedBuild.getModules());
+        }
+        buildInfo.append(generatedBuild);
+
         ActionableHelper.deleteFilePath(tempDir, initScriptPath);
         // Read the deployable artifacts map from the 'json' file in the agent and append them to the buildInfo object.
         buildInfo.getAndAppendDeployableArtifactsByModule(extendedEnv.get(BuildInfoFields.DEPLOYABLE_ARTIFACTS),

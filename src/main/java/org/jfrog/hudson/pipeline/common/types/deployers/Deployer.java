@@ -8,6 +8,8 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
+import org.apache.commons.compress.utils.Lists;
+import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.util.FileChecksumCalculator;
@@ -21,6 +23,8 @@ import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.DeployerOverrider;
 import org.jfrog.hudson.ServerDetails;
+import org.jfrog.hudson.pipeline.action.DeployedGradleArtifact;
+import org.jfrog.hudson.pipeline.action.DeployedMavenArtifact;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.Filter;
@@ -39,6 +43,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 import static org.jfrog.build.extractor.ModuleParallelDeployHelper.DEFAULT_DEPLOYMENT_THREADS;
+import static org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer.addDeployedGradleArtifactsToAction;
+import static org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer.addDeployedMavenArtifactsToAction;
 
 /**
  * Created by Tamirh on 04/08/2016.
@@ -211,11 +217,37 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
             }
             if (!deployableArtifactsByModule.isEmpty()) {
                 ws.act(new LateDeployCallable(listener, deployableArtifactsByModule, artifactoryServer, credentials, proxy, getThreads()));
-                MavenDeployer.addDeployedArtifactsActionFromDetails(build, artifactoryServer.getArtifactoryUrl(), deployableArtifactsByModule);
+                addDeployedArtifactsActionFromDetails(build, artifactoryServer.getArtifactoryUrl(), deployableArtifactsByModule);
             }
         } else {
             throw new RuntimeException("Cannot deploy the files from agent: " + agentName + " since they were built on agent: " + buildInfo.getAgentName());
         }
+    }
+
+    /**
+     * Adds artifacts from the provided DeployDetails map to the Deployed Artifacts Summary Action.
+     */
+    public static void addDeployedArtifactsActionFromDetails(Run build, String artifactoryUrl, Map<String, Set<DeployDetails>> deployableArtifactsByModule) {
+        deployableArtifactsByModule.forEach((module, detailsSet) -> {
+            List<DeployedMavenArtifact> curMavenArtifacts = Lists.newArrayList();
+            List<DeployedGradleArtifact> curGradleArtifacts = Lists.newArrayList();
+            for (DeployDetails curDetails : detailsSet) {
+                switch (curDetails.getPackageType()) {
+                    case MAVEN:
+                        curMavenArtifacts.add(new DeployedMavenArtifact(artifactoryUrl, curDetails.getTargetRepository(),
+                                curDetails.getArtifactPath(), FilenameUtils.getName(curDetails.getArtifactPath())));
+                        break;
+                    case GRADLE:
+                        curGradleArtifacts.add(new DeployedGradleArtifact(artifactoryUrl, curDetails.getTargetRepository(),
+                                curDetails.getArtifactPath(), FilenameUtils.getName(curDetails.getArtifactPath())));
+                        break;
+                    default:
+                        return;
+                }
+            }
+            addDeployedMavenArtifactsToAction(build, curMavenArtifacts);
+            addDeployedGradleArtifactsToAction(build, curGradleArtifacts);
+        });
     }
 
     public static class DeployDetailsCallable extends MasterToSlaveFileCallable<Map<String, Set<DeployDetails>>> {
