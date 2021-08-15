@@ -3,9 +3,9 @@
         <st:include it="${it.build}" page="sidepanel.jelly"/>
         <l:main-panel>
             <h1> Maven Artifacts </h1>
-            <f:section title="Deployed" name="deployedMavenArtifacts">
+            <f:section title="Deployed" name="deployedArtifacts">
                 <ul>
-                    <j:forEach var="artifact" items="${it.deployedMavenArtifacts}">
+                    <j:forEach var="artifact" items="${it.deployedArtifacts}">
                         <li><a href="${artifact.url}">${artifact.name}</a></li>
                     </j:forEach>
                 </ul>

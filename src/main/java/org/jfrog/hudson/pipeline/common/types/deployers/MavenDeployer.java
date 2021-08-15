@@ -2,16 +2,13 @@ package org.jfrog.hudson.pipeline.common.types.deployers;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import hudson.model.Run;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
-import org.jfrog.build.api.Artifact;
-import org.jfrog.build.api.Module;
 import org.jfrog.build.extractor.clientConfiguration.util.DeploymentUrlUtils;
 import org.jfrog.hudson.RepositoryConf;
 import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.pipeline.action.DeployedMavenArtifact;
+import org.jfrog.hudson.pipeline.action.DeployedArtifact;
 import org.jfrog.hudson.pipeline.action.DeployedMavenArtifactsAction;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.util.publisher.PublisherContext;
@@ -113,27 +110,10 @@ public class MavenDeployer extends Deployer {
     }
 
     /**
-     * Adds artifacts from the provided modules to the Deployed Maven Artifacts Summary Action.
-     */
-    public static void addDeployedMavenArtifactsActionFromModules(Run build, String artifactoryUrl, List<Module> modules) {
-        List<DeployedMavenArtifact> curArtifacts = Lists.newArrayList();
-        for (Module module : modules) {
-            if (module.getArtifacts() == null) {
-                continue;
-            }
-            for (Artifact artifact : module.getArtifacts()) {
-                curArtifacts.add(new DeployedMavenArtifact(artifactoryUrl, module.getRepository(),
-                        artifact.getRemotePath(), artifact.getName()));
-            }
-        }
-        addDeployedMavenArtifactsToAction(build, curArtifacts);
-    }
-
-    /**
      * Adds the provided artifacts to the Deployed Maven Artifacts Summary Action.
      * If such action was not initialized yet, initialize a new one.
      */
-    public static void addDeployedMavenArtifactsToAction(Run build, List<DeployedMavenArtifact> mavenArtifacts) {
+    public static void addDeployedMavenArtifactsToAction(Run build, List<DeployedArtifact> mavenArtifacts) {
         if (mavenArtifacts.isEmpty()) {
             return;
         }
@@ -144,7 +124,7 @@ public class MavenDeployer extends Deployer {
                 action = new DeployedMavenArtifactsAction(build);
                 build.addAction(action);
             }
-            action.appendDeployedMavenArtifacts(mavenArtifacts);
+            action.appendDeployedArtifacts(mavenArtifacts);
         }
     }
 }

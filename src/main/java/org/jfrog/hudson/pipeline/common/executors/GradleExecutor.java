@@ -24,7 +24,7 @@ import org.jfrog.hudson.util.ExtractorUtils;
 import java.io.IOException;
 import java.util.Objects;
 
-import static org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer.addDeployedGradleArtifactsActionFromModules;
+import static org.jfrog.hudson.pipeline.common.types.deployers.Deployer.addDeployedArtifactsActionFromModules;
 
 public class GradleExecutor implements Executor {
 
@@ -73,7 +73,7 @@ public class GradleExecutor implements Executor {
         org.jfrog.build.api.Build generatedBuild = Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath);
         // Add action only if artifacts were actually deployed.
         if (deployer.isDeployArtifacts()) {
-            addDeployedGradleArtifactsActionFromModules(this.build, deployer.getArtifactoryServer().getArtifactoryUrl(), generatedBuild.getModules());
+            addDeployedArtifactsActionFromModules(this.build, deployer.getArtifactoryServer().getArtifactoryUrl(), generatedBuild.getModules(), DeployDetails.PackageType.GRADLE);
         }
         buildInfo.append(generatedBuild);
 

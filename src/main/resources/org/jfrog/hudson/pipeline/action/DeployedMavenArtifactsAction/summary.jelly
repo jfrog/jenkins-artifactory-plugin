@@ -1,9 +1,9 @@
 <j:jelly xmlns:j="jelly:core"
          xmlns:t="/lib/hudson">
-    <j:if test="${!empty it.deployedMavenArtifacts}">
+    <j:if test="${!empty it.deployedArtifacts}">
         <t:summary icon="${it.iconFileName}"> Deployed Maven Artifacts
             <ul>
-                <j:forEach var="artifact" items="${it.deployedMavenArtifacts}">
+                <j:forEach var="artifact" items="${it.deployedArtifacts}">
                     <li><a href="${artifact.url}">${artifact.name}</a></li>
                 </j:forEach>
             </ul>

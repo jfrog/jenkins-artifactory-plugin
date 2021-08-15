@@ -17,7 +17,7 @@ import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
 import org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer;
 import org.jfrog.hudson.util.ExtractorUtils;
 
-import static org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer.addDeployedMavenArtifactsActionFromModules;
+import static org.jfrog.hudson.pipeline.common.types.deployers.Deployer.addDeployedArtifactsActionFromModules;
 
 public class MavenExecutor implements Executor {
 
@@ -75,7 +75,7 @@ public class MavenExecutor implements Executor {
         org.jfrog.build.api.Build generatedBuild = Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath);
         // Add action only if artifacts were actually deployed.
         if (deployer.isDeployArtifacts()) {
-            addDeployedMavenArtifactsActionFromModules(this.build, deployer.getArtifactoryServer().getArtifactoryUrl(), generatedBuild.getModules());
+            addDeployedArtifactsActionFromModules(this.build, deployer.getArtifactoryServer().getArtifactoryUrl(), generatedBuild.getModules(), DeployDetails.PackageType.MAVEN);
         }
         buildInfo.append(generatedBuild);
 

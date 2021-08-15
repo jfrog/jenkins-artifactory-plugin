@@ -12,6 +12,8 @@ import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
+import org.jfrog.build.api.Artifact;
+import org.jfrog.build.api.Module;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
@@ -23,8 +25,7 @@ import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.DeployerOverrider;
 import org.jfrog.hudson.ServerDetails;
-import org.jfrog.hudson.pipeline.action.DeployedGradleArtifact;
-import org.jfrog.hudson.pipeline.action.DeployedMavenArtifact;
+import org.jfrog.hudson.pipeline.action.DeployedArtifact;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.Filter;
@@ -229,25 +230,46 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
      */
     public static void addDeployedArtifactsActionFromDetails(Run build, String artifactoryUrl, Map<String, Set<DeployDetails>> deployableArtifactsByModule) {
         deployableArtifactsByModule.forEach((module, detailsSet) -> {
-            List<DeployedMavenArtifact> curMavenArtifacts = Lists.newArrayList();
-            List<DeployedGradleArtifact> curGradleArtifacts = Lists.newArrayList();
+            List<DeployedArtifact> curArtifacts = Lists.newArrayList();
+            DeployDetails.PackageType packageType = DeployDetails.PackageType.MAVEN;
             for (DeployDetails curDetails : detailsSet) {
-                switch (curDetails.getPackageType()) {
-                    case MAVEN:
-                        curMavenArtifacts.add(new DeployedMavenArtifact(artifactoryUrl, curDetails.getTargetRepository(),
-                                curDetails.getArtifactPath(), FilenameUtils.getName(curDetails.getArtifactPath())));
-                        break;
-                    case GRADLE:
-                        curGradleArtifacts.add(new DeployedGradleArtifact(artifactoryUrl, curDetails.getTargetRepository(),
-                                curDetails.getArtifactPath(), FilenameUtils.getName(curDetails.getArtifactPath())));
-                        break;
-                    default:
-                        return;
-                }
+                DeployedArtifact deployedArtifact = new DeployedArtifact(artifactoryUrl, curDetails.getTargetRepository(),
+                        curDetails.getArtifactPath(), FilenameUtils.getName(curDetails.getArtifactPath()));
+                packageType = curDetails.getPackageType();
+                curArtifacts.add(deployedArtifact);
             }
-            addDeployedMavenArtifactsToAction(build, curMavenArtifacts);
-            addDeployedGradleArtifactsToAction(build, curGradleArtifacts);
+            addDeployedArtifactsToAction(build, curArtifacts, packageType);
         });
+    }
+
+    /**
+     * Adds artifacts from the provided modules to the Deployed Artifacts Summary Action.
+     * All modules are expected to be of the same package type.
+     */
+    public static void addDeployedArtifactsActionFromModules(Run build, String artifactoryUrl, List<Module> modules, DeployDetails.PackageType packageType) {
+        List<DeployedArtifact> curArtifacts = Lists.newArrayList();
+        for (Module module : modules) {
+            if (module.getArtifacts() == null) {
+                continue;
+            }
+            for (Artifact artifact : module.getArtifacts()) {
+                curArtifacts.add(new DeployedArtifact(artifactoryUrl, module.getRepository(),
+                        artifact.getRemotePath(), artifact.getName()));
+            }
+        }
+        addDeployedArtifactsToAction(build, curArtifacts, packageType);
+
+    }
+
+    public static void addDeployedArtifactsToAction(Run build, List<DeployedArtifact> artifacts, DeployDetails.PackageType packageType) {
+        switch (packageType) {
+            case MAVEN:
+                addDeployedMavenArtifactsToAction(build, artifacts);
+                break;
+            case GRADLE:
+                addDeployedGradleArtifactsToAction(build, artifacts);
+                break;
+        }
     }
 
     public static class DeployDetailsCallable extends MasterToSlaveFileCallable<Map<String, Set<DeployDetails>>> {

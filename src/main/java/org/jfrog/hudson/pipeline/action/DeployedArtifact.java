@@ -2,7 +2,10 @@ package org.jfrog.hudson.pipeline.action;
 
 import java.io.Serializable;
 
-public abstract class DeployedArtifact implements Serializable {
+/**
+ * Deployed artifact to display as part of the pipeline's summary.
+ */
+public class DeployedArtifact implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String artifactoryUrl;
