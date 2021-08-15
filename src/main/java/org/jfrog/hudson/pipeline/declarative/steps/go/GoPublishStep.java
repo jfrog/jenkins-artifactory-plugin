@@ -35,6 +35,7 @@ public class GoPublishStep extends AbstractStepImpl {
     private String customBuildName;
     private String project;
     private String deployerId;
+    private String javaArgs; // Added to allow java remote debugging
     private String path;
     private String module;
     private String version;
@@ -62,6 +63,11 @@ public class GoPublishStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setDeployerId(String deployerId) {
         this.deployerId = deployerId;
+    }
+
+    @DataBoundSetter
+    public void setJavaArgs(String javaArgs) {
+        this.javaArgs = javaArgs;
     }
 
     @DataBoundSetter
@@ -93,7 +99,7 @@ public class GoPublishStep extends AbstractStepImpl {
         protected Void runStep() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
             setDeployer(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            GoPublishExecutor goPublishExecutor = new GoPublishExecutor(getContext(), buildInfo, step.goBuild, step.path, step.version, step.module, ws, listener, build);
+            GoPublishExecutor goPublishExecutor = new GoPublishExecutor(listener, buildInfo, launcher, step.goBuild, step.javaArgs, step.path, step.module, ws, env, build, step.version);
             goPublishExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(goPublishExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;

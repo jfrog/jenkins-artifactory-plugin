@@ -409,8 +409,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         try {
             pipelineResults = runPipeline(pipelineName, false);
             Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
-            // TODO - uncomment after making the Go step running in a new Java process:
-            // assertFilteredProperties(buildInfo);
+            assertFilteredProperties(buildInfo);
             Module module = getAndAssertModule(buildInfo, moduleName);
             assertModuleDependencies(module, expectedDependencies);
             assertModuleArtifacts(module, expectedArtifact);

@@ -2,10 +2,12 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.common.executors.GoRunExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.executors.GoRunExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
 import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
@@ -21,14 +23,16 @@ public class GoRunStep extends AbstractStepImpl {
     private String path;
     private String goCmdArgs;
     private String module;
+    private String javaArgs; // Added to allow java remote debugging
 
     @DataBoundConstructor
-    public GoRunStep(BuildInfo buildInfo, GoBuild goBuild, String path, String goCmdArgs, String args, String module) {
+    public GoRunStep(BuildInfo buildInfo, GoBuild goBuild, String path, String goCmdArgs, String args, String module, String javaArgs) {
         this.buildInfo = buildInfo;
         this.goBuild = goBuild;
         this.path = path;
         this.goCmdArgs = goCmdArgs;
         this.module = module;
+        this.javaArgs = javaArgs;
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<BuildInfo> {
@@ -43,7 +47,7 @@ public class GoRunStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo runStep() throws Exception {
-            GoRunExecutor goRunExecutor = new GoRunExecutor(getContext(), step.buildInfo, step.goBuild, step.path, step.goCmdArgs, step.module, ws, listener, env, build);
+            GoRunExecutor goRunExecutor = new GoRunExecutor(step.buildInfo, launcher, step.goBuild, step.javaArgs, step.goCmdArgs, ws, step.path, step.module, env, listener, build);
             goRunExecutor.execute();
             return goRunExecutor.getBuildInfo();
         }

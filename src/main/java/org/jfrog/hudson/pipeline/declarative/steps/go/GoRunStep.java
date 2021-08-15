@@ -35,6 +35,7 @@ public class GoRunStep extends AbstractStepImpl {
     private String customBuildName;
     private String project;
     private String resolverId;
+    private String javaArgs; // Added to allow java remote debugging
     private String path;
     private String args;
     private String module;
@@ -62,6 +63,11 @@ public class GoRunStep extends AbstractStepImpl {
     @DataBoundSetter
     public void setResolverId(String resolverId) {
         this.resolverId = resolverId;
+    }
+
+    @DataBoundSetter
+    public void setJavaArgs(String javaArgs) {
+        this.javaArgs = javaArgs;
     }
 
     @DataBoundSetter
@@ -93,7 +99,7 @@ public class GoRunStep extends AbstractStepImpl {
         protected Void runStep() throws Exception {
             BuildInfo buildInfo = DeclarativePipelineUtils.getBuildInfo(rootWs, build, step.customBuildName, step.customBuildNumber, step.project);
             setResolver(BuildUniqueIdentifierHelper.getBuildNumber(build));
-            GoRunExecutor goRunExecutor = new GoRunExecutor(getContext(), buildInfo, step.goBuild, step.path, step.args, step.module, ws, listener, env, build);
+            GoRunExecutor goRunExecutor = new GoRunExecutor(buildInfo, launcher, step.goBuild, step.javaArgs, step.args, ws, step.path, step.module, env, listener, build);
             goRunExecutor.execute();
             DeclarativePipelineUtils.saveBuildInfo(goRunExecutor.getBuildInfo(), rootWs, build, new JenkinsBuildInfoLog(listener));
             return null;

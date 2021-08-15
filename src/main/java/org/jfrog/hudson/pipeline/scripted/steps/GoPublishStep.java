@@ -2,10 +2,12 @@ package org.jfrog.hudson.pipeline.scripted.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.common.executors.GoPublishExecutor;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.common.executors.GoPublishExecutor;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
 import org.jfrog.hudson.pipeline.common.types.deployers.Deployer;
@@ -21,14 +23,16 @@ public class GoPublishStep extends AbstractStepImpl {
     private String path;
     private String version;
     private String module;
+    private String javaArgs; // Added to allow java remote debugging
 
     @DataBoundConstructor
-    public GoPublishStep(BuildInfo buildInfo, GoBuild goBuild, String path, String version, String args, String module) {
+    public GoPublishStep(BuildInfo buildInfo, GoBuild goBuild, String path, String version, String args, String module, String javaArgs) {
         this.buildInfo = buildInfo;
         this.goBuild = goBuild;
         this.path = path;
         this.version = version;
         this.module = module;
+        this.javaArgs = javaArgs;
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<BuildInfo> {
@@ -43,7 +47,7 @@ public class GoPublishStep extends AbstractStepImpl {
 
         @Override
         protected BuildInfo runStep() throws Exception {
-            GoPublishExecutor goPublishExecutor = new GoPublishExecutor(getContext(), step.buildInfo, step.goBuild, step.path, step.version, step.module, ws, listener, build);
+            GoPublishExecutor goPublishExecutor = new GoPublishExecutor(listener, step.buildInfo, launcher, step.goBuild, step.javaArgs, step.path, step.module, ws, env, build, step.version);
             goPublishExecutor.execute();
             return goPublishExecutor.getBuildInfo();
         }
