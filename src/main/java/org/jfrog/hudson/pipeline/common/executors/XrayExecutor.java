@@ -53,7 +53,7 @@ public class XrayExecutor implements Executor {
             addXrayResultAction(xrayScanResult.getScanUrl(), xrayScanConfig.getBuildName(), xrayScanConfig.getBuildNumber());
 
             if (xrayScanConfig.getPrintTable()) {
-                new BuildScanTableHelper().PrintTable(buildScanResult, log);
+                new BuildScanTableHelper().printTable(buildScanResult, log);
             }
 
             if (xrayScanConfig.getFailBuild()) {

@@ -15,7 +15,6 @@ import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.Build;
 import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.Module;
-import org.jfrog.build.extractor.buildScanTable.BuildScanTableHelper;
 import org.jfrog.build.extractor.clientConfiguration.client.distribution.request.DeleteReleaseBundleRequest;
 import org.jfrog.build.extractor.clientConfiguration.client.distribution.response.GetReleaseBundleStatusResponse;
 import org.jfrog.build.extractor.docker.DockerJavaWrapper;
@@ -41,6 +40,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.isOneOf;
+import static org.jfrog.build.extractor.buildScanTable.LicenseViolationsTable.LICENSE_VIOLATIONS_TABLE_HEADLINE;
+import static org.jfrog.build.extractor.buildScanTable.SecurityViolationsTable.SECURITY_VIOLATIONS_TABLE_HEADLINE;
 import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor.FAIL_NO_OP_ERROR_MESSAGE;
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
@@ -621,23 +622,28 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     private void xrayScanTest(String buildName, String pipelineJobName, boolean failBuild, boolean printTable) throws Exception {
         WorkflowRun pipelineResults = null;
+        String logs = "";
         try {
             pipelineResults = runPipeline(pipelineJobName, false);
             if (failBuild) {
                 fail("Job expected to fail");
             }
         } catch (AssertionError t) {
+            logs = t.getMessage();
             String expecting = "Violations were found by Xray:";
             assertTrue("Expecting message to include: " + expecting + ". Found: " + t.getMessage(),
                     t.getMessage().contains(expecting));
-
             expecting = "Build " + pipelineType.toString() + ":" + pipelineJobName
-                    + " test number 3 was scanned by Xray and 1 Alerts were generated";
+                    + " test number " + BUILD_NUMBER + " was scanned by Xray and 1 Alerts were generated";
             assertTrue("Expecting message to include: " + expecting + ". Found: " + t.getMessage(),
                     t.getMessage().contains(expecting));
         } finally {
-            String expecting = new BuildScanTableHelper().TABLE_HEADLINE;
-            assertEquals(printTable, pipelineResults.getLog().contains(expecting));
+            if (!failBuild) {
+                assertNotNull(pipelineResults);
+                logs = pipelineResults.getLog();
+            }
+            assertEquals(printTable, logs.contains(SECURITY_VIOLATIONS_TABLE_HEADLINE));
+            assertEquals(printTable, logs.contains(LICENSE_VIOLATIONS_TABLE_HEADLINE));
             cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
         }
     }
