@@ -6,7 +6,7 @@ import java.nio.file.Paths
 
 node("TestSlave") {
     stage "Configure Artifactory"
-    def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_PLATFORM_ACCESS_TOKEN}"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_PLATFORM_USERNAME}", password: "${env.JENKINS_PLATFORM_ADMIN_TOKEN}"
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.name = "scripted:gradle-ci test"
     buildInfo.number = ${BUILD_NUMBER}

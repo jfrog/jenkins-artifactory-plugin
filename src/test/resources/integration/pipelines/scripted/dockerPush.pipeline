@@ -9,7 +9,7 @@ node("TestSlave") {
     }
     def imageName = domainName + "jfrog_artifactory_jenkins_tests:2"
     def targetRepo = "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO}"
-    def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_PLATFORM_ACCESS_TOKEN}"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_PLATFORM_USERNAME}", password: "${env.JENKINS_PLATFORM_ADMIN_TOKEN}"
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.env.capture = true
     buildInfo.env.filter.addExclude("DONT_COLLECT")

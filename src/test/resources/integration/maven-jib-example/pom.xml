@@ -77,15 +77,15 @@
                     <from>
                         <image>${env.JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN}/adoptopenjdk:8-jdk-hotspot</image>
                         <auth>
-                            <username>${env.JENKINS_ARTIFACTORY_USERNAME}</username>
-                            <password>${env.JENKINS_PLATFORM_ACCESS_TOKEN}</password>
+                            <username>${env.JENKINS_PLATFORM_USERNAME}</username>
+                            <password>${env.JENKINS_PLATFORM_ADMIN_TOKEN}</password>
                         </auth>
                     </from>
                     <to>
                         <image>${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN}/${project.artifactId}</image>
                         <auth>
-                            <username>${env.JENKINS_ARTIFACTORY_USERNAME}</username>
-                            <password>${env.JENKINS_PLATFORM_ACCESS_TOKEN}</password>
+                            <username>${env.JENKINS_PLATFORM_USERNAME}</username>
+                            <password>${env.JENKINS_PLATFORM_ADMIN_TOKEN}</password>
                         </auth>
                     </to>
                 </configuration>

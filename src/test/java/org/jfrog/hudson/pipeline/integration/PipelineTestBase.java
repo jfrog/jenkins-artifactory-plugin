@@ -64,8 +64,8 @@ public class PipelineTestBase {
     private static final String ARTIFACTORY_URL = StringUtils.removeEnd(PLATFORM_URL, "/") + "/artifactory";
     private static final String DISTRIBUTION_URL = StringUtils.removeEnd(PLATFORM_URL, "/") + "/distribution";
     private static final String ACCESS_URL = StringUtils.removeEnd(PLATFORM_URL, "/") + "/access";
-    private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_ARTIFACTORY_USERNAME");
-    private static final String ACCESS_TOKEN = System.getenv("JENKINS_PLATFORM_ACCESS_TOKEN");
+    private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_PLATFORM_USERNAME");
+    private static final String ACCESS_TOKEN = System.getenv("JENKINS_PLATFORM_ADMIN_TOKEN");
     static final String JENKINS_XRAY_TEST_ENABLE = System.getenv("JENKINS_XRAY_TEST_ENABLE");
     static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
     public static final String BUILD_NUMBER = String.valueOf(System.currentTimeMillis());
@@ -330,10 +330,10 @@ public class PipelineTestBase {
             throw new IllegalArgumentException("JENKINS_PLATFORM_URL is not set");
         }
         if (StringUtils.isBlank(ARTIFACTORY_USERNAME)) {
-            throw new IllegalArgumentException("JENKINS_ARTIFACTORY_USERNAME is not set");
+            throw new IllegalArgumentException("JENKINS_PLATFORM_USERNAME is not set");
         }
         if (StringUtils.isBlank(ACCESS_TOKEN)) {
-            throw new IllegalArgumentException("JENKINS_PLATFORM_ACCESS_TOKEN is not set");
+            throw new IllegalArgumentException("JENKINS_PLATFORM_ADMIN_TOKEN is not set");
         }
     }
 

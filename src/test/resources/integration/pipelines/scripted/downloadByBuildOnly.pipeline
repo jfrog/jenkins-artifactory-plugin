@@ -2,7 +2,7 @@ package integration.pipelines.scripted
 
 node("TestSlave") {
     stage "Configuration"
-    def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_PLATFORM_ACCESS_TOKEN}"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_PLATFORM_USERNAME}", password: "${env.JENKINS_PLATFORM_ADMIN_TOKEN}"
     def firstBuildNumber = "${BUILD_NUMBER}-1"
     def secondBuildNumber = "${BUILD_NUMBER}-2"
     def thirdBuildNumber = "${BUILD_NUMBER}-3"
