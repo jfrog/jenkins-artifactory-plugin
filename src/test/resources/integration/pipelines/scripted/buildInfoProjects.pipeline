@@ -4,21 +4,19 @@ node("TestSlave") {
     stage "Configuration"
     def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_ARTIFACTORY_USERNAME}", password: "${env.JENKINS_PLATFORM_ACCESS_TOKEN}"
 
-    stage "Create 1st Build Info"
+    stage "Create 1st Build Info Without Project"
     def buildInfo1 = Artifactory.newBuildInfo()
-    buildInfo1.name = "scripted:buildAppend test-1"
+    buildInfo1.name = "scripted:buildInfoProjects-1"
     buildInfo1.number = ${BUILD_NUMBER}
 
     stage "Publish 1st Build Info"
     rtServer.publishBuildInfo buildInfo1
 
-    stage "Create 2nd Build Info"
+    stage "Create 2nd Build Info With Project"
     def buildInfo2 = Artifactory.newBuildInfo()
-    buildInfo2.name = "scripted:buildAppend test-2"
+    buildInfo2.name = "scripted:buildInfoProjects-2"
     buildInfo2.number = "${BUILD_NUMBER}-2"
-
-    stage "Append build 1 to build 2"
-    rtServer.buildAppend(buildInfo2, buildInfo1.name, buildInfo1.number)
+    buildInfo2.project = "${PROJECT_KEY}"
 
     stage "Publish 2nd Build Info"
     rtServer.publishBuildInfo buildInfo2

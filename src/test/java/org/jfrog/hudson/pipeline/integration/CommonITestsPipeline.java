@@ -850,4 +850,44 @@ public class CommonITestsPipeline extends PipelineTestBase {
             }
         }
     }
+
+    void buildInfoProjects(String buildName) throws Exception {
+        String buildName1 = buildName + "-1";
+        String buildNumber1 = BUILD_NUMBER;
+        String buildName2 = buildName + "-2";
+        String buildNumber2 = BUILD_NUMBER + "-2";
+        // Clear older builds if exist
+        deleteBuild(artifactoryClient, buildName1);
+        deleteBuild(artifactoryClient, buildName2);
+        try {
+            runPipeline("buildInfoProjects", false);
+            Build buildInfo1 = artifactoryManager.getBuildInfo(buildName1, buildNumber1, null);
+            Build buildInfo2 = artifactoryManager.getBuildInfo(buildName2, buildNumber2, PROJECT_KEY);
+            assertNotNull(buildInfo1);
+            assertNotNull(buildInfo2);
+        } finally {
+            artifactoryManager.deleteBuilds(buildName1, null, true, buildNumber1);
+            artifactoryManager.deleteBuilds(buildName2, PROJECT_KEY, true, buildNumber2);
+        }
+    }
+
+    void buildRetention(String buildName) throws Exception {
+        String buildNumber1 = BUILD_NUMBER;
+        String buildNumber2 = BUILD_NUMBER + "-2";
+        String buildNumber3 = BUILD_NUMBER + "-3";
+        // Clear older builds if exist
+        deleteBuild(artifactoryClient, buildName);
+        try {
+            runPipeline("buildRetention", false);
+            artifactoryManager.getBuildInfo(buildName, buildNumber2, null);
+            fail("expected build 2 not to exist");
+        } catch (IOException e) {
+            Build buildInfo1 = artifactoryManager.getBuildInfo(buildName, buildNumber1, null);
+            assertNotNull(buildInfo1);
+            Build buildInfo3 = artifactoryManager.getBuildInfo(buildName, buildNumber3, null);
+            assertNotNull(buildInfo3);
+        } finally {
+            deleteBuild(artifactoryClient, buildName);
+        }
+    }
 }

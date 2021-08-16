@@ -2,10 +2,10 @@ package integration.pipelines.declarative
 
 node("TestSlave") {
     def serverId = "Artifactory-1"
-    def buildName1 = "declarative:buildAppend test-1"
+    def buildName = "declarative:buildRetention"
     def buildNumber1 = "${BUILD_NUMBER}"
-    def buildName2 = "declarative:buildAppend test-2"
     def buildNumber2 = "${BUILD_NUMBER}-2"
+    def buildNumber3 = "${BUILD_NUMBER}-3"
 
     stage "Configuration"
     rtServer(
@@ -17,36 +17,43 @@ node("TestSlave") {
 
     stage "Create 1st Build Info"
     rtBuildInfo(
-            buildName: buildName1,
+            buildName: buildName,
             buildNumber: buildNumber1
     )
 
     stage "Publish 1st Build Info"
     rtPublishBuildInfo(
             serverId: serverId,
-            buildName: buildName1,
+            buildName: buildName,
             buildNumber: buildNumber1
     )
 
     stage "Create 2nd Build Info"
     rtBuildInfo(
-            buildName: buildName2,
+            buildName: buildName,
             buildNumber: buildNumber2
-    )
-
-    stage "Append build 1 to build 2"
-    rtBuildAppend(
-            serverId: serverId,
-            buildName: buildName2,
-            buildNumber: buildNumber2,
-            appendBuildName: buildName1,
-            appendBuildNumber: buildNumber1
     )
 
     stage "Publish 2nd Build Info"
     rtPublishBuildInfo(
             serverId: serverId,
-            buildName: buildName2,
+            buildName: buildName,
             buildNumber: buildNumber2
+    )
+
+    stage "Create 3rd Build Info"
+    rtBuildInfo(
+            buildName: buildName,
+            buildNumber: buildNumber3,
+            maxBuilds: 1,
+            doNotDiscardBuilds: [buildNumber1],
+            deleteBuildArtifacts: true
+    )
+
+    stage "Publish 3rd Build Info"
+    rtPublishBuildInfo(
+            serverId: serverId,
+            buildName: buildName,
+            buildNumber: buildNumber3
     )
 }

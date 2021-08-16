@@ -16,7 +16,7 @@ node("TestSlave") {
             id: serverId,
             url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory',
             username: "${env.JENKINS_ARTIFACTORY_USERNAME}",
-            password: "${env.JENKINS_ARTIFACTORY_PASSWORD}"
+            password: "${env.JENKINS_PLATFORM_ACCESS_TOKEN}"
     )
 
     stage "Configure Maven build"

@@ -2,9 +2,9 @@ package integration.pipelines.declarative
 
 node("TestSlave") {
     def serverId = "Artifactory-1"
-    def buildName1 = "declarative:buildAppend test-1"
+    def buildName1 = "declarative:buildInfoProjects-1"
     def buildNumber1 = "${BUILD_NUMBER}"
-    def buildName2 = "declarative:buildAppend test-2"
+    def buildName2 = "declarative:buildInfoProjects-2"
     def buildNumber2 = "${BUILD_NUMBER}-2"
 
     stage "Configuration"
@@ -15,7 +15,7 @@ node("TestSlave") {
             password: "${env.JENKINS_PLATFORM_ACCESS_TOKEN}"
     )
 
-    stage "Create 1st Build Info"
+    stage "Create 1st Build Info Without Project"
     rtBuildInfo(
             buildName: buildName1,
             buildNumber: buildNumber1
@@ -28,25 +28,18 @@ node("TestSlave") {
             buildNumber: buildNumber1
     )
 
-    stage "Create 2nd Build Info"
+    stage "Create 2nd Build Info With Project"
     rtBuildInfo(
             buildName: buildName2,
-            buildNumber: buildNumber2
-    )
-
-    stage "Append build 1 to build 2"
-    rtBuildAppend(
-            serverId: serverId,
-            buildName: buildName2,
             buildNumber: buildNumber2,
-            appendBuildName: buildName1,
-            appendBuildNumber: buildNumber1
+            project: "${PROJECT_KEY}"
     )
 
     stage "Publish 2nd Build Info"
     rtPublishBuildInfo(
             serverId: serverId,
             buildName: buildName2,
-            buildNumber: buildNumber2
+            buildNumber: buildNumber2,
+            project: "${PROJECT_KEY}"
     )
 }

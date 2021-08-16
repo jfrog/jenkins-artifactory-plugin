@@ -215,4 +215,14 @@ public class ScriptedITest extends CommonITestsPipeline {
     public void rbCreateDistDel() throws Exception {
         super.rbCreateDistDel("scripted:createDistributeDelete");
     }
+
+    @Test
+    public void buildInfoProjects() throws Exception {
+        super.buildInfoProjects("scripted:buildInfoProjects");
+    }
+
+    @Test
+    public void buildRetention() throws Exception {
+        super.buildRetention("scripted:buildRetention");
+    }
 }

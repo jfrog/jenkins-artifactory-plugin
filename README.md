@@ -35,7 +35,7 @@ Before running the integration tests, set the following environment variables.
 
 *JENKINS_PLATFORM_URL*<br>
 *JENKINS_ARTIFACTORY_USERNAME*<br>
-*JENKINS_ARTIFACTORY_PASSWORD*<br>
+*JENKINS_PLATFORM_ACCESS_TOKEN*<br>
 *JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN* (For example, server-docker-local.jfrog.io)<br>
 *JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN* (For example, server-docker-remote.jfrog.io)<br>
 *JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO* (For example, docker-local)<br>

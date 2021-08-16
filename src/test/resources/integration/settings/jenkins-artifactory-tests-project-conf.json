@@ -1,0 +1,2 @@
+{"display_name":"Jenkins Test Project ${PROJECT_KEY}","description":"Project created by tests suite",
+  "admin_privileges":{"manage_members":true,"manage_resources":true,"index_resources":true},"storage_quota_bytes":1073741825,"project_key":"${PROJECT_KEY}"}

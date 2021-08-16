@@ -14,7 +14,7 @@
 # = Override credentials in Appveyor in case of a fork =
 #   1. In the project at Appveyor - Go to settings -> Environment.
 #   2. Override 'JENKINS_PLATFORM_URL' and 'JENKINS_ARTIFACTORY_USERNAME'.
-#   3. Override 'JENKINS_ARTIFACTORY_PASSWORD' with variable encryption.
+#   3. Override 'JENKINS_PLATFORM_ACCESS_TOKEN'.
 
 stack: jdk 8, node 8, python 3.9
 skip_tags: true
@@ -34,8 +34,8 @@ environment:
 services:
   - docker
 before_test:
-  - cmd: "choco install maven --version 3.3.9.2 -i -s %JENKINS_PLATFORM_URL%/artifactory/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
-  - cmd: "choco install gradle --version 6.5.1 -i -s %JENKINS_PLATFORM_URL%/artifactory/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_ARTIFACTORY_PASSWORD%"
+  - cmd: "choco install maven --version 3.3.9.2 -i -s %JENKINS_PLATFORM_URL%/artifactory/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_PLATFORM_ACCESS_TOKEN%"
+  - cmd: "choco install gradle --version 6.5.1 -i -s %JENKINS_PLATFORM_URL%/artifactory/api/nuget/choco -u %JENKINS_ARTIFACTORY_USERNAME% -p %JENKINS_PLATFORM_ACCESS_TOKEN%"
   - cmd: refreshenv
   - cmd: pip install conan -q
   - cmd: "C:\\Python37-x64\\python -m venv pip-venv"

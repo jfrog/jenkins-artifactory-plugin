@@ -6,7 +6,7 @@ node("TestSlave") {
 
     stage "Create 1st Build Info"
     def buildInfo1 = Artifactory.newBuildInfo()
-    buildInfo1.name = "scripted:buildAppend test-1"
+    buildInfo1.name = "scripted:buildRetention"
     buildInfo1.number = ${BUILD_NUMBER}
 
     stage "Publish 1st Build Info"
@@ -14,12 +14,18 @@ node("TestSlave") {
 
     stage "Create 2nd Build Info"
     def buildInfo2 = Artifactory.newBuildInfo()
-    buildInfo2.name = "scripted:buildAppend test-2"
+    buildInfo2.name = "scripted:buildRetention"
     buildInfo2.number = "${BUILD_NUMBER}-2"
-
-    stage "Append build 1 to build 2"
-    rtServer.buildAppend(buildInfo2, buildInfo1.name, buildInfo1.number)
 
     stage "Publish 2nd Build Info"
     rtServer.publishBuildInfo buildInfo2
+
+    stage "Create 3nd Build Info"
+    def buildInfo3 = Artifactory.newBuildInfo()
+    buildInfo3.name = "scripted:buildRetention"
+    buildInfo3.number = "${BUILD_NUMBER}-3"
+    buildInfo3.retention maxBuilds: 1, doNotDiscardBuilds: [${BUILD_NUMBER}], deleteBuildArtifacts: true
+
+    stage "Publish 3nd Build Info"
+    rtServer.publishBuildInfo buildInfo3
 }

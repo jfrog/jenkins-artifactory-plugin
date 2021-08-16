@@ -220,4 +220,14 @@ public class DeclarativeITest extends CommonITestsPipeline {
     public void rbCreateDistDel() throws Exception {
         super.rbCreateDistDel("declarative:createDistributeDelete");
     }
+
+    @Test
+    public void buildInfoProjects() throws Exception {
+        super.buildInfoProjects("declarative:buildInfoProjects");
+    }
+
+    @Test
+    public void buildRetention() throws Exception {
+        super.buildRetention("declarative:buildRetention");
+    }
 }
