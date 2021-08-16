@@ -32,6 +32,7 @@ To run unit tests execute the following command:
 ### Integration tests
 #### Running integration tests
 Before running the integration tests, set the following environment variables.
+See [here](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens#AccessTokens-GeneratingAdminTokens) how to generate a Platform Admin Token.
 
 *JENKINS_PLATFORM_URL*<br>
 *JENKINS_PLATFORM_USERNAME*<br>
