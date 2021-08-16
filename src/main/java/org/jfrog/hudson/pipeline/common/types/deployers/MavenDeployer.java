@@ -113,10 +113,7 @@ public class MavenDeployer extends Deployer {
      * Adds the provided artifacts to the Deployed Maven Artifacts Summary Action.
      * If such action was not initialized yet, initialize a new one.
      */
-    public static void addDeployedMavenArtifactsToAction(Run build, List<DeployedArtifact> mavenArtifacts) {
-        if (mavenArtifacts.isEmpty()) {
-            return;
-        }
+    public static void addDeployedMavenArtifactsToAction(Run<?, ?> build, List<DeployedArtifact> mavenArtifacts) {
         synchronized (build.getAllActions()) {
             DeployedMavenArtifactsAction action = build.getAction(DeployedMavenArtifactsAction.class);
             // Initialize action if we haven't done so yet.

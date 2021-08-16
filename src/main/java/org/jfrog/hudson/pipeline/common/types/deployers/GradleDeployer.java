@@ -193,10 +193,7 @@ public class GradleDeployer extends Deployer {
      * Adds the provided artifacts to the Deployed Gradle Artifacts Summary Action.
      * If such action was not initialized yet, initialize a new one.
      */
-    public static void addDeployedGradleArtifactsToAction(Run build, List<DeployedArtifact> gradleArtifacts) {
-        if (gradleArtifacts.isEmpty()) {
-            return;
-        }
+    public static void addDeployedGradleArtifactsToAction(Run<?, ?> build, List<DeployedArtifact> gradleArtifacts) {
         synchronized (build.getAllActions()) {
             DeployedGradleArtifactsAction action = build.getAction(DeployedGradleArtifactsAction.class);
             // Initialize action if we haven't done so yet.

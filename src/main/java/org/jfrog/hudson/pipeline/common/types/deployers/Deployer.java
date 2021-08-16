@@ -228,7 +228,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
     /**
      * Adds artifacts from the provided DeployDetails map to the Deployed Artifacts Summary Action.
      */
-    public static void addDeployedArtifactsActionFromDetails(Run build, String artifactoryUrl, Map<String, Set<DeployDetails>> deployableArtifactsByModule) {
+    public static void addDeployedArtifactsActionFromDetails(Run<?, ?> build, String artifactoryUrl, Map<String, Set<DeployDetails>> deployableArtifactsByModule) {
         deployableArtifactsByModule.forEach((module, detailsSet) -> {
             List<DeployedArtifact> curArtifacts = Lists.newArrayList();
             DeployDetails.PackageType packageType = DeployDetails.PackageType.MAVEN;
@@ -246,7 +246,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
      * Adds artifacts from the provided modules to the Deployed Artifacts Summary Action.
      * All modules are expected to be of the same package type.
      */
-    public static void addDeployedArtifactsActionFromModules(Run build, String artifactoryUrl, List<Module> modules, DeployDetails.PackageType packageType) {
+    public static void addDeployedArtifactsActionFromModules(Run<?, ?> build, String artifactoryUrl, List<Module> modules, DeployDetails.PackageType packageType) {
         List<DeployedArtifact> curArtifacts = Lists.newArrayList();
         for (Module module : modules) {
             if (module.getArtifacts() == null) {
@@ -261,7 +261,10 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
 
     }
 
-    public static void addDeployedArtifactsToAction(Run build, List<DeployedArtifact> artifacts, DeployDetails.PackageType packageType) {
+    public static void addDeployedArtifactsToAction(Run<?, ?> build, List<DeployedArtifact> artifacts, DeployDetails.PackageType packageType) {
+        if (artifacts.isEmpty()) {
+            return;
+        }
         switch (packageType) {
             case MAVEN:
                 addDeployedMavenArtifactsToAction(build, artifacts);

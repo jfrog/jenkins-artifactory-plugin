@@ -8,14 +8,16 @@ import javax.annotation.Nonnull;
  * Adds a list of the deployed gradle artifacts in the summary of a pipeline job.
  */
 public class DeployedGradleArtifactsAction extends DeployedArtifactsAction {
-    public DeployedGradleArtifactsAction(@Nonnull Run build) {
+    public DeployedGradleArtifactsAction(@Nonnull Run<?, ?> build) {
         super(build);
     }
 
+    @Override
     public String getDisplayName() {
         return "Gradle Artifacts";
     }
 
+    @Override
     public String getUrlName() {
         return "artifactory_gradle_artifacts";
     }

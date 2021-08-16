@@ -16,7 +16,7 @@ public abstract class DeployedArtifactsAction implements RunAction2 {
 
     private Run build;
 
-    public DeployedArtifactsAction(@Nonnull Run build) {
+    public DeployedArtifactsAction(@Nonnull Run<?, ?> build) {
         this.build = build;
     }
 
