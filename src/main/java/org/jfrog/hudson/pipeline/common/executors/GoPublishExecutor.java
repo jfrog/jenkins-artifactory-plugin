@@ -14,7 +14,7 @@ import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 public class GoPublishExecutor extends GoExecutor {
     private final String version;
 
-    public GoPublishExecutor(TaskListener listener, BuildInfo buildInfo, Launcher launcher, GoBuild goBuild, String javaArgs, String path, String module, FilePath ws, EnvVars env, Run build, String version) {
+    public GoPublishExecutor(TaskListener listener, BuildInfo buildInfo, Launcher launcher, GoBuild goBuild, String javaArgs, String path, String module, FilePath ws, EnvVars env, Run<?, ?> build, String version) {
         super(buildInfo, launcher, goBuild, javaArgs, ws, path, module, env, listener, build);
         this.version = StringUtils.defaultIfEmpty(version, "");
     }
