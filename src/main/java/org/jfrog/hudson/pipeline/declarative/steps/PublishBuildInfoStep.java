@@ -2,6 +2,8 @@ package org.jfrog.hudson.pipeline.declarative.steps;
 
 import com.google.inject.Inject;
 import hudson.Extension;
+import hudson.FilePath;
+import org.apache.commons.lang3.ObjectUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
@@ -61,7 +63,12 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
                 throw new RuntimeException("Build " + DeclarativePipelineUtils.createBuildInfoId(build, step.buildName, step.buildNumber, step.project) + " does not exist!");
             }
             ArtifactoryServer server = DeclarativePipelineUtils.getArtifactoryServer(build, rootWs, step.serverId, true);
-            new PublishBuildInfoExecutor(build, listener, buildInfo, server, ws).execute();
+            /* If the user runs rtPublishBuildInfo on the master, there may be no workspace.
+             * In that case, we would prefer to try to collect the VCS from the root workspace of the job.
+             * Caveat - if the Git repository does not in the root workspace, the extract VCS will return an empty VCS object.
+             */
+            FilePath vcsWorkspace = ObjectUtils.defaultIfNull(ws, rootWs);
+            new PublishBuildInfoExecutor(build, listener, buildInfo, server, vcsWorkspace).execute();
             return null;
         }
 
