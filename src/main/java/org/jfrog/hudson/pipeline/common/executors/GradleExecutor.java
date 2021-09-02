@@ -10,6 +10,7 @@ import hudson.plugins.gradle.Gradle;
 import hudson.plugins.gradle.GradleInstallation;
 import hudson.util.ArgumentListBuilder;
 import jenkins.model.Jenkins;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
@@ -71,8 +72,9 @@ public class GradleExecutor implements Executor {
 
         String generatedBuildPath = extendedEnv.get(BuildInfoFields.GENERATED_BUILD_INFO);
         org.jfrog.build.api.Build generatedBuild = Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath);
-        // Add action only if artifacts were actually deployed.
-        if (deployer.isDeployArtifacts()) {
+        // Add action only if artifacts were actually deployed and the build info was generated.
+        // The build info gets generated only after running the "artifactoryPublish" task.
+        if (deployer.isDeployArtifacts() && CollectionUtils.isNotEmpty(generatedBuild.getModules())) {
             addDeployedArtifactsActionFromModules(this.build, deployer.getArtifactoryServer().getArtifactoryUrl(), generatedBuild.getModules(), DeployDetails.PackageType.GRADLE);
         }
         buildInfo.append(generatedBuild);
