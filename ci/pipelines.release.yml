@@ -50,11 +50,11 @@ pipelines:
             - test -n "$NEXT_DEVELOPMENT_VERSION" -a "$NEXT_DEVELOPMENT_VERSION" != "0.0.0"
 
             # Download JFrog CLI
-            - curl -fL https://getcli.jfrog.io | sh && chmod +x jfrog
+            - curl -fL https://getcli.jfrog.io | bash -s v2
 
             # Configure JFrog CLI
             - ./jfrog c add jenkins_artifactory --artifactory-url $int_jenkins_artifactory_rt_url --user=$int_jenkins_artifactory_rt_user --password=$int_jenkins_artifactory_rt_password --enc-password=false
-            - ./jfrog rt mvnc --server-id-deploy jenkins_artifactory --repo-deploy-releases releases --repo-deploy-snapshots snapshots
+            - ./jfrog rt mvnc --repo-deploy-releases releases --repo-deploy-snapshots snapshots
 
             # Sync changes with upstream
             - git pull upstream master

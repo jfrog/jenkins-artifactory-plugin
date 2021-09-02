@@ -17,8 +17,6 @@ pipelines:
         configuration:
           inputResources:
             - name: jenkinsSnapshotGit
-          integrations:
-            - name: ojo
         execution:
           onStart:
             - *UPDATE_COMMIT_STATUS
@@ -33,13 +31,13 @@ pipelines:
             - export JFROG_CLI_BUILD_NUMBER=$run_number
 
             # Download JFrog CLI
-            - curl -fL https://getcli.jfrog.io | sh && chmod +x jfrog
+            - curl -fL https://getcli.jfrog.io | bash -s v2
 
             # Configure JFrog CLI
-            - ./jfrog rt c ojo --url $int_ojo_rt_url --access-token=$int_ojo_rt_token
+            - ./jfrog c add releases --artifactory-url https://releases.jfrog.io/artifactory --access-token=$int_releases_temp_token
             - ./jfrog rt mvnc
-              --server-id-resolve ojo --repo-resolve-releases libs-release --repo-resolve-snapshots libs-snapshot
-              --server-id-deploy ojo --repo-deploy-releases oss-release-local --repo-deploy-snapshots oss-snapshot-local
+              --repo-resolve-releases libs-release --repo-resolve-snapshots libs-snapshot
+              --repo-deploy-releases oss-release-local --repo-deploy-snapshots oss-snapshot-local
 
             # Run install and publish
             - >
