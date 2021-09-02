@@ -74,7 +74,7 @@ public class GradleExecutor implements Executor {
         org.jfrog.build.api.Build generatedBuild = Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath);
         // Add action only if artifacts were actually deployed and the build info was generated.
         // The build info gets generated only after running the "artifactoryPublish" task.
-        if (deployer.isDeployArtifacts() && CollectionUtils.isNotEmpty(generatedBuild.getModules())) {
+        if (deployer.isDeployArtifacts() && !deployer.isEmpty() && CollectionUtils.isNotEmpty(generatedBuild.getModules())) {
             addDeployedArtifactsActionFromModules(this.build, deployer.getArtifactoryServer().getArtifactoryUrl(), generatedBuild.getModules(), DeployDetails.PackageType.GRADLE);
         }
         buildInfo.append(generatedBuild);
