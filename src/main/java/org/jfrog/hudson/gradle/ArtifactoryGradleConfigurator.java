@@ -29,7 +29,7 @@ import hudson.plugins.gradle.Gradle;
 import hudson.tasks.BuildWrapper;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.gradle.plugin.artifactory.task.ArtifactoryTask;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;

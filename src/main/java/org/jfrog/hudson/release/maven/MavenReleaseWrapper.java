@@ -29,7 +29,7 @@ import hudson.model.listeners.RunListener;
 import hudson.tasks.BuildWrapper;
 import hudson.util.ListBoxModel;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.maven.transformer.SnapshotNotAllowedException;
 import org.jfrog.hudson.AbstractBuildWrapperDescriptor;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;

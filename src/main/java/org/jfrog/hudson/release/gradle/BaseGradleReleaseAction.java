@@ -23,7 +23,7 @@ import hudson.Util;
 import hudson.model.AbstractProject;
 import hudson.plugins.gradle.Gradle;
 import hudson.tasks.Builder;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.PluginSettings;
 import org.jfrog.hudson.gradle.ArtifactoryGradleConfigurator;

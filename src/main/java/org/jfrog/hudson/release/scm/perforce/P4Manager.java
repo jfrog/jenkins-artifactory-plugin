@@ -5,7 +5,7 @@ import com.perforce.p4java.server.IOptionsServer;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.TaskListener;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.jenkinsci.plugins.p4.PerforceScm;
 import org.jenkinsci.plugins.p4.client.ClientHelper;

@@ -6,7 +6,7 @@ import jenkins.model.Jenkins;
 import jenkins.model.ParameterizedJobMixIn;
 import jenkins.model.TransientActionFactory;
 import jenkins.util.TimeDuration;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jfrog.hudson.jfpipelines.JFrogPipelinesParameter;

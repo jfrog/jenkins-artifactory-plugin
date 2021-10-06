@@ -24,7 +24,7 @@ import hudson.model.*;
 import hudson.remoting.Which;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.listener.ArtifactoryBuildListener;
 import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;

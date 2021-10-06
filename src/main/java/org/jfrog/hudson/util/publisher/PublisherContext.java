@@ -16,7 +16,7 @@
 
 package org.jfrog.hudson.util.publisher;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.DeployerOverrider;
 import org.jfrog.hudson.ServerDetails;

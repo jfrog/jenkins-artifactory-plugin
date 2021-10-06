@@ -31,7 +31,7 @@ import hudson.util.DescribableList;
 import jenkins.MasterToSlaveFileCallable;
 import jenkins.model.Jenkins;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.hudson.DeployerOverrider;
 import org.jfrog.hudson.ResolverOverrider;
 import org.jfrog.hudson.util.publisher.PublisherFindImpl;

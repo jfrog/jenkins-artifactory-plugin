@@ -2,7 +2,7 @@ package org.jfrog.hudson;
 
 import hudson.model.BuildBadgeAction;
 import hudson.model.Run;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 public class XrayScanResultAction implements BuildBadgeAction {
 

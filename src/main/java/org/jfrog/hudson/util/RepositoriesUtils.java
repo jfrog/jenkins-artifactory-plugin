@@ -7,7 +7,7 @@ import hudson.model.BuildListener;
 import hudson.model.Hudson;
 import hudson.model.Item;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.*;

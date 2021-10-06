@@ -10,7 +10,7 @@ import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.api.Artifact;
 import org.jfrog.build.api.BuildInfoFields;
 import org.jfrog.build.api.builder.ArtifactBuilder;

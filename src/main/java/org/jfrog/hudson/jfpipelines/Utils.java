@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import hudson.FilePath;
 import hudson.model.*;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.jfpipelines.payloads.JobStartedPayload;
 import org.jfrog.hudson.pipeline.declarative.BuildDataFile;

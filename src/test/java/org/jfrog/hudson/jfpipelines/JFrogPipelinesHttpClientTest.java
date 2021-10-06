@@ -2,7 +2,7 @@ package org.jfrog.hudson.jfpipelines;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import hudson.model.Result;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;

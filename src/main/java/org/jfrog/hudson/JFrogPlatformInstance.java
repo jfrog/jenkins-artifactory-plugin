@@ -1,6 +1,6 @@
 package org.jfrog.hudson;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.util.ArrayList;

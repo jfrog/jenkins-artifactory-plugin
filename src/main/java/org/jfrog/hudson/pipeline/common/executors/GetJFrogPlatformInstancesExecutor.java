@@ -1,7 +1,7 @@
 package org.jfrog.hudson.pipeline.common.executors;
 
 import hudson.model.Run;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.hudson.JFrogPlatformInstance;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.DistributionServer;

@@ -3,7 +3,7 @@ package org.jfrog.hudson.util;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.hudson.SpecConfiguration;
 
 import java.io.IOException;

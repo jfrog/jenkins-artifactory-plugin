@@ -20,7 +20,7 @@ import com.google.common.collect.Lists;
 import hudson.model.Item;
 import hudson.model.TaskListener;
 import hudson.util.XStream2;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.api.util.NullLog;

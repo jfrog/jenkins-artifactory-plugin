@@ -28,7 +28,7 @@ import hudson.model.*;
 import hudson.tasks.BuildWrapper;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.hudson.ArtifactoryPlugin;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.PluginSettings;

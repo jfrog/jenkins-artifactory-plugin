@@ -3,7 +3,7 @@ package org.jfrog.hudson.pipeline.declarative.steps.maven;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
 import hudson.Extension;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.executors.MavenExecutor;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;

@@ -5,7 +5,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.jenkinsci.plugins.workflow.steps.*;

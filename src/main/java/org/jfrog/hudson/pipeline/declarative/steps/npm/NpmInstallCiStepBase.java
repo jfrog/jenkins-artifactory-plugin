@@ -2,7 +2,7 @@ package org.jfrog.hudson.pipeline.declarative.steps.npm;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Inject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;

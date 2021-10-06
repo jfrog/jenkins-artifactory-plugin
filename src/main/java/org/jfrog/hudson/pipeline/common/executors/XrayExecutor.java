@@ -3,7 +3,7 @@ package org.jfrog.hudson.pipeline.common.executors;
 import hudson.Util;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.client.artifactoryXrayResponse.ArtifactoryXrayResponse;

@@ -3,7 +3,7 @@ package org.jfrog.hudson.util;
 import com.google.common.base.Strings;
 import hudson.Util;
 import hudson.util.FormValidation;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.regex.Matcher;

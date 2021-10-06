@@ -26,7 +26,7 @@ import hudson.model.BuildListener;
 import hudson.model.TaskListener;
 import hudson.tasks.Maven;
 import jenkins.security.MasterToSlaveCallable;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.artifact.versioning.ComparableVersion;
 import org.jfrog.hudson.maven3.MavenVersionCallable;
 

@@ -1,6 +1,6 @@
 package org.jfrog.hudson.pipeline.common.types;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 
 import java.io.Serializable;

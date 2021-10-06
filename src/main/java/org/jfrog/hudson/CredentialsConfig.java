@@ -3,7 +3,7 @@ package org.jfrog.hudson;
 import hudson.model.Item;
 import hudson.util.Secret;
 import hudson.util.XStream2;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jfrog.hudson.util.Credentials;
 import org.jfrog.hudson.util.converters.CredentialsConfigConverter;
