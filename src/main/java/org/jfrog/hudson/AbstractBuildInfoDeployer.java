@@ -28,7 +28,7 @@ import java.util.*;
 /**
  * Handles build info creation and deployment
  *
- * @author Shay Yaakov.
+ * @author Shay Yaakov
  */
 public class AbstractBuildInfoDeployer {
     protected Run build;
