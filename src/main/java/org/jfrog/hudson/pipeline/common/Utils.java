@@ -53,7 +53,7 @@ import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.*;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
