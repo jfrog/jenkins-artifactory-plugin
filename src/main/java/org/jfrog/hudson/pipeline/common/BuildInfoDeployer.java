@@ -4,9 +4,12 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.api.*;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
+import org.jfrog.build.api.ci.BuildInfoProperties;
+import org.jfrog.build.api.ci.BuildRetention;
+import org.jfrog.build.api.ci.Module;
+import org.jfrog.build.api.ci.Vcs;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.AbstractBuildInfoDeployer;
 import org.jfrog.hudson.BuildInfoResultAction;
@@ -28,7 +31,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
     private final Map<String, String> sysVars;
     private final Map<String, String> envVars;
     private ArtifactoryConfigurator configurator;
-    private Build buildInfo;
+    private org.jfrog.build.api.ci.BuildInfo buildInfo;
     private boolean asyncBuildRetention;
     private final String platformUrl;
 

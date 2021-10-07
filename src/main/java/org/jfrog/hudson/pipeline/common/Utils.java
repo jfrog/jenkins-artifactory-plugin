@@ -1,13 +1,18 @@
 package org.jfrog.hudson.pipeline.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Maps;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.*;
+import hudson.model.Cause;
+import hudson.model.Computer;
+import hudson.model.Node;
+import hudson.model.ParameterValue;
+import hudson.model.ParametersAction;
+import hudson.model.Run;
+import hudson.model.TaskListener;
 import hudson.plugins.git.util.BuildData;
 import hudson.remoting.Channel;
 import hudson.remoting.LocalChannel;
@@ -18,7 +23,6 @@ import jenkins.model.Jenkins;
 import jenkins.plugins.nodejs.NodeJSConstants;
 import jenkins.plugins.nodejs.tools.NodeJSInstallation;
 import jenkins.security.MasterToSlaveCallable;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -31,31 +35,47 @@ import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jfrog.build.api.BuildInfoFields;
-import org.jfrog.build.api.Vcs;
+import org.jfrog.build.api.ci.BuildInfoFields;
+import org.jfrog.build.api.ci.Vcs;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
-import org.jfrog.build.extractor.clientConfiguration.client.distribution.request.DistributeReleaseBundleRequest;
 import org.jfrog.build.extractor.clientConfiguration.client.distribution.types.DistributionRules;
 import org.jfrog.build.extractor.clientConfiguration.client.distribution.types.ReleaseNotes;
 import org.jfrog.build.extractor.clientConfiguration.util.GitUtils;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.pipeline.common.types.*;
+import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
+import org.jfrog.hudson.pipeline.common.types.ConanClient;
+import org.jfrog.hudson.pipeline.common.types.DistributionConfig;
+import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
+import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.util.*;
+import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
+import org.jfrog.hudson.util.ExtractorUtils;
+import org.jfrog.hudson.util.IncludesExcludes;
+import org.jfrog.hudson.util.JenkinsBuildInfoLog;
+import org.jfrog.hudson.util.ProxyUtils;
+import org.jfrog.hudson.util.RepositoriesUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.*;
+import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.BUILD_NAME;
+import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.BUILD_NUMBER;
+import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.PROJECT;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
 /**
@@ -229,7 +249,7 @@ public class Utils {
         return result;
     }
 
-    public static org.jfrog.build.api.Build getGeneratedBuildInfo(Run build, TaskListener listener, Launcher launcher, String jsonBuildPath) {
+    public static org.jfrog.build.api.ci.BuildInfo getGeneratedBuildInfo(Run build, TaskListener listener, Launcher launcher, String jsonBuildPath) {
         ObjectMapper mapper = createMapper();
         FilePath generatedBuildInfoFilePath = null;
         InputStream inputStream = null;
@@ -240,9 +260,9 @@ public class Utils {
             IOUtils.copy(inputStream, writer, "UTF-8");
             String buildInfoFileContent = writer.toString();
             if (isBlank(buildInfoFileContent)) {
-                return new org.jfrog.build.api.Build();
+                return new org.jfrog.build.api.ci.BuildInfo();
             }
-            return mapper.readValue(buildInfoFileContent, org.jfrog.build.api.Build.class);
+            return mapper.readValue(buildInfoFileContent, org.jfrog.build.api.ci.BuildInfo.class);
         } catch (Exception e) {
             listener.error("Couldn't read generated build info at : " + jsonBuildPath);
             throw new Run.RunnerAbortedException();

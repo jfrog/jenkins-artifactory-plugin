@@ -7,10 +7,14 @@ import hudson.model.Cause;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.api.*;
+import org.apache.commons.lang.StringUtils;
 import org.jfrog.build.api.builder.BuildInfoBuilder;
 import org.jfrog.build.api.builder.PromotionStatusBuilder;
+import org.jfrog.build.api.ci.Agent;
+import org.jfrog.build.api.ci.BuildAgent;
+import org.jfrog.build.api.ci.BuildInfo;
+import org.jfrog.build.api.ci.BuildInfoProperties;
+import org.jfrog.build.api.ci.Vcs;
 import org.jfrog.build.api.release.Promotion;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
@@ -23,7 +27,11 @@ import org.jfrog.hudson.util.IncludesExcludes;
 import org.jfrog.hudson.util.IssuesTrackerHelper;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Handles build info creation and deployment
@@ -46,7 +54,7 @@ public class AbstractBuildInfoDeployer {
         this.env = build.getEnvironment(listener);
     }
 
-    protected Build createBuildInfo(String buildAgentName, String buildAgentVersion) {
+    protected BuildInfo createBuildInfo(String buildAgentName, String buildAgentVersion) {
         String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build);
         BuildInfoBuilder builder = new BuildInfoBuilder(buildName)
                 .number(BuildUniqueIdentifierHelper.getBuildNumber(build))
@@ -122,7 +130,7 @@ public class AbstractBuildInfoDeployer {
                     .ciUser(userCause).user(artifactoryPrincipal).build());
         }
 
-        Build buildInfo = builder.build();
+        BuildInfo buildInfo = builder.build();
         // for backwards compatibility for Artifactory 2.2.3
         if (parent != null) {
             buildInfo.setParentName(parent.getUpstreamProject());

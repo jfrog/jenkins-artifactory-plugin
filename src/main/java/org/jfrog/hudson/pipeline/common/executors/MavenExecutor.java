@@ -72,7 +72,7 @@ public class MavenExecutor implements Executor {
         maven3Builder.perform(build, launcher, listener, extendedEnv, ws, tempDir);
 
         String generatedBuildPath = extendedEnv.get(BuildInfoFields.GENERATED_BUILD_INFO);
-        org.jfrog.build.api.Build generatedBuild = Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath);
+        org.jfrog.build.api.ci.BuildInfo generatedBuild = Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath);
         // Add action only if artifacts were actually deployed.
         if (deployer.isDeployArtifacts()) {
             addDeployedArtifactsActionFromModules(this.build, deployer.getArtifactoryServer().getArtifactoryUrl(), generatedBuild.getModules(), DeployDetails.PackageType.MAVEN);

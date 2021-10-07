@@ -48,7 +48,7 @@ public class CollectIssuesExecutor implements Executor {
         ArtifactoryManagerBuilder artifactoryManagerBuilder = getArtifactoryManagerBuilder(pipelineServer, build, listener);
 
         // Collect issues
-        org.jfrog.build.api.Issues newIssues = ws.act(new CollectIssuesCallable(new JenkinsBuildInfoLog(listener), config, artifactoryManagerBuilder, buildName, ws, listener, project));
+        org.jfrog.build.api.ci.Issues newIssues = ws.act(new CollectIssuesCallable(new JenkinsBuildInfoLog(listener), config, artifactoryManagerBuilder, buildName, ws, listener, project));
 
         // Convert and append Issues
         this.issues.convertAndAppend(newIssues);
@@ -61,7 +61,7 @@ public class CollectIssuesExecutor implements Executor {
                 ProxyUtils.createProxyConfiguration(), new JenkinsBuildInfoLog(listener));
     }
 
-    public static class CollectIssuesCallable extends MasterToSlaveFileCallable<org.jfrog.build.api.Issues> {
+    public static class CollectIssuesCallable extends MasterToSlaveFileCallable<org.jfrog.build.api.ci.Issues> {
         private Log logger;
         private String config;
         private ArtifactoryManagerBuilder artifactoryManagerBuilder;
@@ -81,7 +81,7 @@ public class CollectIssuesExecutor implements Executor {
             this.listener = listener;
         }
 
-        public org.jfrog.build.api.Issues invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
+        public org.jfrog.build.api.ci.Issues invoke(File file, VirtualChannel virtualChannel) throws IOException, InterruptedException {
             IssuesCollector issuesCollector = new IssuesCollector();
             return issuesCollector.collectIssues(file, logger, config, artifactoryManagerBuilder, buildName, Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)), project);
         }

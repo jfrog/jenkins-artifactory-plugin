@@ -18,8 +18,8 @@ package org.jfrog.hudson;
 
 import hudson.model.BuildBadgeAction;
 import hudson.model.Run;
-import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.api.Build;
+import org.apache.commons.lang.StringUtils;
+import org.jfrog.build.api.ci.BuildInfo;
 import org.jfrog.build.extractor.clientConfiguration.client.JFrogService;
 import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 
@@ -58,7 +58,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         publishedBuildsDetails.add(createBuildInfoIdentifier(artifactoryUrl, buildName, buildNumber, "", "", ""));
     }
 
-    public void addBuildInfoResults(String artifactoryUrl, String platformUrl, Build buildInfo) {
+    public void addBuildInfoResults(String artifactoryUrl, String platformUrl, BuildInfo buildInfo) {
         publishedBuildsDetails.add(createBuildInfoIdentifier(artifactoryUrl, build, buildInfo, platformUrl));
     }
 
@@ -98,7 +98,7 @@ public class BuildInfoResultAction implements BuildBadgeAction {
         return new PublishedBuildDetails(artifactoryUrl, JFrogService.encodeUrl(buildName), JFrogService.encodeUrl(buildNumber), platformUrl, startedBuildTimestamp, project);
     }
 
-    private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, Run build, Build buildInfo, String platformUrl) {
+    private PublishedBuildDetails createBuildInfoIdentifier(String artifactoryUrl, Run build, BuildInfo buildInfo, String platformUrl) {
         String buildName;
         String buildNumber;
         if (StringUtils.isNotEmpty(buildInfo.getName())) {

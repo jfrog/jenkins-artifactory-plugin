@@ -19,10 +19,10 @@ import org.jfrog.artifactory.client.impl.ArtifactoryRequestImpl;
 import org.jfrog.artifactory.client.model.LightweightRepository;
 import org.jfrog.artifactory.client.model.RepoPath;
 import org.jfrog.artifactory.client.model.RepositoryType;
-import org.jfrog.build.api.Artifact;
-import org.jfrog.build.api.Build;
-import org.jfrog.build.api.Dependency;
-import org.jfrog.build.api.Module;
+import org.jfrog.build.api.ci.Artifact;
+import org.jfrog.build.api.ci.BuildInfo;
+import org.jfrog.build.api.ci.Dependency;
+import org.jfrog.build.api.ci.Module;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.client.response.GetAllBuildNumbersResponse;
@@ -36,16 +36,26 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.jfrog.artifactory.client.model.impl.RepositoryTypeImpl.*;
+import static org.jfrog.artifactory.client.model.impl.RepositoryTypeImpl.LOCAL;
+import static org.jfrog.artifactory.client.model.impl.RepositoryTypeImpl.REMOTE;
+import static org.jfrog.artifactory.client.model.impl.RepositoryTypeImpl.VIRTUAL;
 import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.pipeline.integration.PipelineTestBase.artifactoryManager;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author yahavi
@@ -223,7 +233,7 @@ class ITestUtils {
      * @param buildNumber        - Build number
      * @return build info for the specified build name and number
      */
-    static Build getBuildInfo(ArtifactoryManager artifactoryManager, String buildName, String buildNumber, String project) throws IOException {
+    static BuildInfo getBuildInfo(ArtifactoryManager artifactoryManager, String buildName, String buildNumber, String project) throws IOException {
         return artifactoryManager.getBuildInfo(buildName, buildNumber, project);
     }
 
@@ -232,7 +242,7 @@ class ITestUtils {
      *
      * @param buildInfo - Build-info object
      */
-    static void assertFilteredProperties(Build buildInfo) {
+    static void assertFilteredProperties(BuildInfo buildInfo) {
         Properties properties = buildInfo.getProperties();
         assertNotNull(properties);
         String[] unfiltered = properties.keySet().stream()
@@ -297,7 +307,7 @@ class ITestUtils {
      * @param moduleName - Module name
      * @return module from the build-info
      */
-    static Module getAndAssertModule(Build buildInfo, String moduleName) {
+    static Module getAndAssertModule(BuildInfo buildInfo, String moduleName) {
         assertNotNull(buildInfo);
         assertNotNull(buildInfo.getModules());
         Module module = buildInfo.getModule(moduleName);
@@ -311,7 +321,7 @@ class ITestUtils {
      * @param buildInfo  - Build info object
      * @param moduleName - Module name
      */
-    static void assertModuleContainsArtifactsAndDependencies(Build buildInfo, String moduleName) {
+    static void assertModuleContainsArtifactsAndDependencies(BuildInfo buildInfo, String moduleName) {
         Module module = getAndAssertModule(buildInfo, moduleName);
         assertTrue(CollectionUtils.isNotEmpty(module.getArtifacts()));
         assertTrue(CollectionUtils.isNotEmpty(module.getDependencies()));
@@ -323,7 +333,7 @@ class ITestUtils {
      * @param buildInfo  - Build info object
      * @param moduleName - Module name
      */
-    static void assertModuleContainsArtifacts(Build buildInfo, String moduleName) {
+    static void assertModuleContainsArtifacts(BuildInfo buildInfo, String moduleName) {
         Module module = getAndAssertModule(buildInfo, moduleName);
         assertTrue(CollectionUtils.isNotEmpty(module.getArtifacts()));
     }

@@ -19,11 +19,11 @@ package org.jfrog.hudson.generic;
 import com.google.common.collect.Lists;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import org.jfrog.build.api.Artifact;
-import org.jfrog.build.api.Build;
-import org.jfrog.build.api.BuildRetention;
-import org.jfrog.build.api.Dependency;
 import org.jfrog.build.api.builder.ModuleBuilder;
+import org.jfrog.build.api.ci.Artifact;
+import org.jfrog.build.api.ci.BuildInfo;
+import org.jfrog.build.api.ci.BuildRetention;
+import org.jfrog.build.api.ci.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.retention.Utils;
@@ -44,7 +44,7 @@ public class GenericBuildInfoDeployer extends AbstractBuildInfoDeployer {
 
     private final Run build;
     private ArtifactoryGenericConfigurator configurator;
-    private Build buildInfo;
+    private BuildInfo buildInfo;
 
     public GenericBuildInfoDeployer(ArtifactoryGenericConfigurator configurator, ArtifactoryManager artifactoryManager,
                                     Run build, TaskListener listener, List<Artifact> deployedArtifacts,

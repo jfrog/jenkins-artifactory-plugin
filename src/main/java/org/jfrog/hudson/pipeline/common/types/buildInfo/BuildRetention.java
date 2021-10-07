@@ -24,8 +24,8 @@ public class BuildRetention implements Serializable {
         clear();
     }
 
-    public org.jfrog.build.api.BuildRetention createBuildRetention() {
-        org.jfrog.build.api.BuildRetention buildRetention = new org.jfrog.build.api.BuildRetention();
+    public org.jfrog.build.api.ci.BuildRetention createBuildRetention() {
+        org.jfrog.build.api.ci.BuildRetention buildRetention = new org.jfrog.build.api.ci.BuildRetention();
         buildRetention.setCount(Math.max(maxBuilds, -1));
 
         if (maxDays > -1) {

@@ -26,14 +26,18 @@ import hudson.maven.reporters.MavenArtifactRecord;
 import hudson.model.Result;
 import hudson.model.TaskListener;
 import hudson.tasks.Fingerprinter;
-import org.jfrog.build.api.Artifact;
-import org.jfrog.build.api.Build;
-import org.jfrog.build.api.Module;
 import org.jfrog.build.api.builder.ArtifactBuilder;
 import org.jfrog.build.api.builder.DependencyBuilder;
 import org.jfrog.build.api.builder.ModuleBuilder;
+import org.jfrog.build.api.ci.Artifact;
+import org.jfrog.build.api.ci.BuildInfo;
+import org.jfrog.build.api.ci.Module;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
-import org.jfrog.hudson.*;
+import org.jfrog.hudson.AbstractBuildInfoDeployer;
+import org.jfrog.hudson.BuildInfoAwareConfigurator;
+import org.jfrog.hudson.JFrogPlatformInstance;
+import org.jfrog.hudson.MavenDependenciesRecord;
+import org.jfrog.hudson.MavenDependency;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.util.RepositoriesUtils;
 
@@ -49,7 +53,7 @@ import java.util.Set;
  */
 public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
 
-    private final Build buildInfo;
+    private final BuildInfo buildInfo;
     private BuildInfoAwareConfigurator configurator;
 
     public MavenBuildInfoDeployer(BuildInfoAwareConfigurator configurator, ArtifactoryManager artifactoryManager,
