@@ -41,8 +41,8 @@
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
         <skipITs>true</skipITs>
 
-        <buildinfo.version>2.30.2</buildinfo.version>
-        <buildinfo.gradle.version>4.24.18</buildinfo.gradle.version>
+        <buildinfo.version>2.31.1</buildinfo.version>
+        <buildinfo.gradle.version>4.24.20</buildinfo.gradle.version>
     </properties>
 
     <repositories>
@@ -279,7 +279,7 @@
         <dependency>
             <groupId>org.jfrog.filespecs</groupId>
             <artifactId>file-specs-java</artifactId>
-            <version>1.0.2</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <!--
