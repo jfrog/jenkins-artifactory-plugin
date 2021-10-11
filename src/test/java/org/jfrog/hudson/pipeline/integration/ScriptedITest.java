@@ -17,6 +17,16 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
+    public void downloadDuplicationsPart1Test() throws Exception {
+        super.downloadDuplications("scripted:downloadDuplicationsPart1 test","downloadDuplicationsPart1");
+    }
+
+    @Test
+    public void downloadDuplicationsPart2Test() throws Exception {
+        super.downloadDuplications("scripted:downloadDuplicationsPart2 test","downloadDuplicationsPart2");
+    }
+
+    @Test
     public void downloadByAqlTest() throws Exception {
         super.downloadByAqlTest("scripted:downloadByAql test");
     }
@@ -49,6 +59,16 @@ public class ScriptedITest extends CommonITestsPipeline {
     @Test
     public void uploadTest() throws Exception {
         super.uploadTest("scripted:upload test", null, "upload");
+    }
+
+    @Test
+    public void uploadDuplicationsPart1Test() throws Exception {
+        super.uploadDuplicationsTest("scripted:uploadDuplicationsPart1 test", null, "uploadDuplicationsPart1");
+    }
+
+    @Test
+    public void uploadDuplicationsPart2Test() throws Exception {
+        super.uploadDuplicationsTest("scripted:uploadDuplicationsPart2 test", null, "uploadDuplicationsPart2");
     }
 
     @Test

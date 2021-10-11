@@ -1,0 +1,28 @@
+package integration.pipelines.scripted
+
+node("TestSlave") {
+    stage "Configuration"
+    def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_PLATFORM_USERNAME}", password: "${env.JENKINS_PLATFORM_ADMIN_TOKEN}"
+    def buildInfo = Artifactory.newBuildInfo()
+    buildInfo.name = "scripted:uploadDuplicationsPart2 test"
+    buildInfo.number = ${BUILD_NUMBER}
+
+    stage "Upload"
+    def uploadSpec = """{
+      "files": [
+        {
+          "pattern": "${FILES_DIR}",
+          "target": "${LOCAL_REPO1}/folder-1/",
+          "recursive": "false"
+        },     {
+          "pattern": "${FILES_DIR}",
+          "target": "${LOCAL_REPO1}/folder-2/",
+          "recursive": "false"
+        }
+     ]
+    }"""
+    rtServer.upload spec: uploadSpec, buildInfo: buildInfo
+
+    stage "Publish Build Info"
+    rtServer.publishBuildInfo buildInfo
+}

@@ -77,6 +77,27 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
+    void downloadDuplications(String buildName, String scriptName) throws Exception {
+        Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
+        WorkflowRun pipelineResults = null;
+
+        Files.list(FILES_PATH).filter(Files::isRegularFile)
+                .forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
+        try {
+            pipelineResults = runPipeline(scriptName, false);
+            for (int i = 1; i < 2; i++) {
+                for (String fileName : expectedDependencies) {
+                    assertTrue(isExistInWorkspace(slave, pipelineResults, scriptName+"-test-" + i, fileName));
+                }
+            }
+            Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertModuleDependencies(module, expectedDependencies);
+        } finally {
+            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
+        }
+    }
+
     void downloadByAqlTest(String buildName) throws Exception {
         Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
         WorkflowRun pipelineResults = null;
@@ -217,6 +238,18 @@ public class CommonITestsPipeline extends PipelineTestBase {
             Build buildInfo = getBuildInfo(artifactoryManager, buildName, BUILD_NUMBER, project);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleArtifacts(module, expectedArtifacts);
+        } finally {
+            cleanupBuilds(pipelineResults, buildName, project, BUILD_NUMBER);
+        }
+    }
+
+    void uploadDuplicationsTest(String buildName, String project, String pipelineName) throws Exception {
+        WorkflowRun pipelineResults = null;
+        try {
+            pipelineResults = runPipeline(pipelineName, false);
+            Build buildInfo = getBuildInfo(artifactoryManager, buildName, BUILD_NUMBER, project);
+            Module module = getAndAssertModule(buildInfo, buildName);
+            assertEquals(module.getArtifacts().size(), 6);
         } finally {
             cleanupBuilds(pipelineResults, buildName, project, BUILD_NUMBER);
         }
