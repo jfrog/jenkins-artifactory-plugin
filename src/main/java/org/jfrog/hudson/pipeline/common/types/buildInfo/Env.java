@@ -6,7 +6,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
-import org.jfrog.build.api.ci.BuildInfoProperties;
+import org.jfrog.build.extractor.ci.BuildInfoProperties;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.hudson.pipeline.common.Utils;

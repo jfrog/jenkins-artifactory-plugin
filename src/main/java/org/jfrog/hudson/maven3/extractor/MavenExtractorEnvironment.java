@@ -31,7 +31,7 @@ import hudson.remoting.Which;
 import hudson.scm.NullChangeLogParser;
 import hudson.scm.NullSCM;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.build.api.ci.BuildInfoConfigProperties;
+import org.jfrog.build.extractor.ci.BuildInfoConfigProperties;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
 import org.jfrog.build.extractor.maven.BuildInfoRecorder;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;

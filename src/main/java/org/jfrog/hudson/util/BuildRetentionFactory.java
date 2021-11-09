@@ -4,7 +4,7 @@ import hudson.matrix.MatrixRun;
 import hudson.model.Run;
 import hudson.tasks.LogRotator;
 import jenkins.model.BuildDiscarder;
-import org.jfrog.build.api.ci.BuildRetention;
+import org.jfrog.build.extractor.ci.BuildRetention;
 
 import java.util.Calendar;
 import java.util.Date;

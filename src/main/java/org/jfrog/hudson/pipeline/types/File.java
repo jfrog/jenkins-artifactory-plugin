@@ -2,7 +2,7 @@ package org.jfrog.hudson.pipeline.types;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
-import org.jfrog.build.api.ci.BaseBuildFileBean;
+import org.jfrog.build.extractor.ci.BaseBuildFileBean;
 
 import java.io.Serializable;
 import java.util.Objects;

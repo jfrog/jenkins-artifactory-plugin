@@ -20,7 +20,7 @@ import hudson.EnvVars;
 import hudson.Util;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
-import org.jfrog.build.api.ci.Dependency;
+import org.jfrog.build.extractor.ci.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;

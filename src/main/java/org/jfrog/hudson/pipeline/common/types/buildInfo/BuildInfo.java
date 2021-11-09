@@ -11,14 +11,14 @@ import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
-import org.jfrog.build.api.builder.BuildInfoBuilder;
-import org.jfrog.build.api.builder.ModuleBuilder;
-import org.jfrog.build.api.ci.Artifact;
-import org.jfrog.build.api.ci.BaseBuildFileBean;
-import org.jfrog.build.api.ci.BuildInfoProperties;
-import org.jfrog.build.api.ci.Dependency;
-import org.jfrog.build.api.ci.Module;
-import org.jfrog.build.api.ci.Vcs;
+import org.jfrog.build.extractor.builder.BuildInfoBuilder;
+import org.jfrog.build.extractor.builder.ModuleBuilder;
+import org.jfrog.build.extractor.ci.Artifact;
+import org.jfrog.build.extractor.ci.BaseBuildFileBean;
+import org.jfrog.build.extractor.ci.BuildInfoProperties;
+import org.jfrog.build.extractor.ci.Dependency;
+import org.jfrog.build.extractor.ci.Module;
+import org.jfrog.build.extractor.ci.Vcs;
 import org.jfrog.build.client.DeployableArtifactDetail;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
@@ -158,8 +158,8 @@ public class BuildInfo implements Serializable {
         this.append(other.convertToBuild());
     }
 
-    public void append(org.jfrog.build.api.ci.BuildInfo other) {
-        org.jfrog.build.api.ci.BuildInfo appendedBuild = this.convertToBuild();
+    public void append(org.jfrog.build.extractor.ci.BuildInfo other) {
+        org.jfrog.build.extractor.ci.BuildInfo appendedBuild = this.convertToBuild();
         appendedBuild.append(other);
 
         this.setModules(appendedBuild.getModules());
@@ -262,7 +262,7 @@ public class BuildInfo implements Serializable {
         return env.getSysVars();
     }
 
-    public org.jfrog.build.api.ci.Issues getConvertedIssues() {
+    public org.jfrog.build.extractor.ci.Issues getConvertedIssues() {
         return this.issues.convertFromPipelineIssues();
     }
 
@@ -420,7 +420,7 @@ public class BuildInfo implements Serializable {
         return vcs;
     }
 
-    private org.jfrog.build.api.ci.BuildInfo convertToBuild() {
+    private org.jfrog.build.extractor.ci.BuildInfo convertToBuild() {
         BuildInfoBuilder builder = new BuildInfoBuilder(name)
                 .number(number)
                 .started(Long.toString(startDate.getTime()))

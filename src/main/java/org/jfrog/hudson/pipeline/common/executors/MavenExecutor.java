@@ -6,8 +6,8 @@ import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.build.api.ci.BuildInfoConfigProperties;
-import org.jfrog.build.api.ci.BuildInfoFields;
+import org.jfrog.build.extractor.ci.BuildInfoConfigProperties;
+import org.jfrog.build.extractor.ci.BuildInfoFields;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
 import org.jfrog.hudson.maven3.Maven3Builder;
 import org.jfrog.hudson.pipeline.common.Utils;
@@ -72,7 +72,7 @@ public class MavenExecutor implements Executor {
         maven3Builder.perform(build, launcher, listener, extendedEnv, ws, tempDir);
 
         String generatedBuildPath = extendedEnv.get(BuildInfoFields.GENERATED_BUILD_INFO);
-        org.jfrog.build.api.ci.BuildInfo generatedBuild = Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath);
+        org.jfrog.build.extractor.ci.BuildInfo generatedBuild = Utils.getGeneratedBuildInfo(build, listener, launcher, generatedBuildPath);
         // Add action only if artifacts were actually deployed.
         if (deployer.isDeployArtifacts()) {
             addDeployedArtifactsActionFromModules(this.build, deployer.getArtifactoryServer().getArtifactoryUrl(), generatedBuild.getModules(), DeployDetails.PackageType.MAVEN);

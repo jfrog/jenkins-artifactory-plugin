@@ -9,8 +9,8 @@ import hudson.remoting.VirtualChannel;
 import hudson.util.ArgumentListBuilder;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang.StringUtils;
-import org.jfrog.build.api.ci.BuildInfoFields;
-import org.jfrog.build.api.ci.Vcs;
+import org.jfrog.build.extractor.ci.BuildInfoFields;
+import org.jfrog.build.extractor.ci.Vcs;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.ExtractorUtils;
@@ -97,7 +97,7 @@ public class ConanExecutor implements Executor {
         persistBuildProperties(conanHomeDirectory);
         execute();
         FilePath logFilePath = collectConanBuildInfo(env);
-        org.jfrog.build.api.ci.BuildInfo regularBuildInfo = Utils.getGeneratedBuildInfo(build, listener, launcher, logFilePath.getRemote());
+        org.jfrog.build.extractor.ci.BuildInfo regularBuildInfo = Utils.getGeneratedBuildInfo(build, listener, launcher, logFilePath.getRemote());
         buildInfo.append(regularBuildInfo);
     }
 

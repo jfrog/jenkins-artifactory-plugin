@@ -25,7 +25,7 @@ import hudson.util.ArgumentListBuilder;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
 import org.apache.commons.io.output.TeeOutputStream;
-import org.jfrog.build.api.ci.BuildInfoConfigProperties;
+import org.jfrog.build.extractor.ci.BuildInfoConfigProperties;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.util.PluginDependencyHelper;

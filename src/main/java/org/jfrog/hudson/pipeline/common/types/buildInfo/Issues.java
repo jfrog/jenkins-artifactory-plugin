@@ -3,7 +3,7 @@ package org.jfrog.hudson.pipeline.common.types.buildInfo;
 import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
-import org.jfrog.build.api.ci.IssueTracker;
+import org.jfrog.build.extractor.ci.IssueTracker;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 
 import java.io.Serializable;
@@ -47,14 +47,14 @@ public class Issues implements Serializable {
         }
     }
 
-    public void convertAndAppend(org.jfrog.build.api.ci.Issues issuesToAppend) {
+    public void convertAndAppend(org.jfrog.build.extractor.ci.Issues issuesToAppend) {
         append(toPipelineIssues(issuesToAppend));
     }
 
     /**
-     * Converts Issues of type org.jfrog.build.api.ci.Issues to pipeline Issues
+     * Converts Issues of type org.jfrog.build.extractor.ci.Issues to pipeline Issues
      */
-    static Issues toPipelineIssues(org.jfrog.build.api.ci.Issues issuesToConvert) {
+    static Issues toPipelineIssues(org.jfrog.build.extractor.ci.Issues issuesToConvert) {
         if (issuesToConvert == null) {
             return null;
         }
@@ -66,12 +66,12 @@ public class Issues implements Serializable {
         newIssues.setAggregateBuildIssues(issuesToConvert.isAggregateBuildIssues());
         newIssues.setAggregationBuildStatus(issuesToConvert.getAggregationBuildStatus());
 
-        Set<org.jfrog.build.api.ci.Issue> affectedIssuesToConvert = issuesToConvert.getAffectedIssues();
+        Set<org.jfrog.build.extractor.ci.Issue> affectedIssuesToConvert = issuesToConvert.getAffectedIssues();
         if (affectedIssuesToConvert == null) {
             return newIssues;
         }
         Set<Issues.Issue> convertedAffectedIssues = new HashSet<>();
-        for (org.jfrog.build.api.ci.Issue issueToConvert : affectedIssuesToConvert) {
+        for (org.jfrog.build.extractor.ci.Issue issueToConvert : affectedIssuesToConvert) {
             convertedAffectedIssues.add(new Issues.Issue(issueToConvert.getKey(), issueToConvert.getUrl(), issueToConvert.getSummary()));
         }
         newIssues.setAffectedIssues(convertedAffectedIssues);
@@ -79,23 +79,23 @@ public class Issues implements Serializable {
     }
 
     /**
-     * Converts pipeline Issues to type org.jfrog.build.api.ci.Issues
+     * Converts pipeline Issues to type org.jfrog.build.extractor.ci.Issues
      */
-    org.jfrog.build.api.ci.Issues convertFromPipelineIssues(Issues this) {
+    org.jfrog.build.extractor.ci.Issues convertFromPipelineIssues(Issues this) {
         IssueTracker tracker = new IssueTracker(this.getTrackerName());
 
         Set<Issue> affectedIssuesToConvert = this.getAffectedIssues();
         if (affectedIssuesToConvert == null) {
-            return new org.jfrog.build.api.ci.Issues(tracker,
+            return new org.jfrog.build.extractor.ci.Issues(tracker,
                     this.isAggregateBuildIssues(), this.getAggregationBuildStatus(), null);
         }
 
-        Set<org.jfrog.build.api.ci.Issue> convertedAffectedIssues = new HashSet<>();
+        Set<org.jfrog.build.extractor.ci.Issue> convertedAffectedIssues = new HashSet<>();
         for (Issue issueToConvert : affectedIssuesToConvert) {
-            convertedAffectedIssues.add(new org.jfrog.build.api.ci.Issue(issueToConvert.getKey(), issueToConvert.getUrl(), issueToConvert.getSummary()));
+            convertedAffectedIssues.add(new org.jfrog.build.extractor.ci.Issue(issueToConvert.getKey(), issueToConvert.getUrl(), issueToConvert.getSummary()));
         }
 
-        return new org.jfrog.build.api.ci.Issues(tracker,
+        return new org.jfrog.build.extractor.ci.Issues(tracker,
                 this.isAggregateBuildIssues(), this.getAggregationBuildStatus(), convertedAffectedIssues);
     }
 

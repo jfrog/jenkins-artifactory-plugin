@@ -4,7 +4,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
-import org.jfrog.build.api.builder.ModuleBuilder;
+import org.jfrog.build.extractor.builder.ModuleBuilder;
 import org.jfrog.build.api.builder.ModuleType;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.hudson.CredentialsConfig;
@@ -82,7 +82,7 @@ public class BuildAppendExecutor implements Executor {
      */
     private long getBuildTimestamp(org.jfrog.hudson.ArtifactoryServer server, Credentials credentials) throws IOException, ParseException {
         try (ArtifactoryManager artifactoryManager = server.createArtifactoryManagerBuilder(credentials, createProxyConfiguration(), new JenkinsBuildInfoLog(listener)).build()) {
-            org.jfrog.build.api.ci.BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, buildNumber, this.buildInfo.getProject());
+            org.jfrog.build.extractor.ci.BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, buildNumber, this.buildInfo.getProject());
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
             Date date = format.parse(buildInfo.getStarted());
             return date.getTime();

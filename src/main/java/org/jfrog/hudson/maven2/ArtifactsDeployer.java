@@ -31,7 +31,7 @@ import hudson.model.Result;
 import hudson.util.VersionNumber;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
-import org.jfrog.build.api.ci.BuildInfoFields;
+import org.jfrog.build.extractor.ci.BuildInfoFields;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;

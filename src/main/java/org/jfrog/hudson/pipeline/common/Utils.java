@@ -35,8 +35,8 @@ import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jfrog.build.api.ci.BuildInfoFields;
-import org.jfrog.build.api.ci.Vcs;
+import org.jfrog.build.extractor.ci.BuildInfoFields;
+import org.jfrog.build.extractor.ci.Vcs;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
@@ -249,7 +249,7 @@ public class Utils {
         return result;
     }
 
-    public static org.jfrog.build.api.ci.BuildInfo getGeneratedBuildInfo(Run build, TaskListener listener, Launcher launcher, String jsonBuildPath) {
+    public static org.jfrog.build.extractor.ci.BuildInfo getGeneratedBuildInfo(Run build, TaskListener listener, Launcher launcher, String jsonBuildPath) {
         ObjectMapper mapper = createMapper();
         FilePath generatedBuildInfoFilePath = null;
         InputStream inputStream = null;
@@ -260,9 +260,9 @@ public class Utils {
             IOUtils.copy(inputStream, writer, "UTF-8");
             String buildInfoFileContent = writer.toString();
             if (isBlank(buildInfoFileContent)) {
-                return new org.jfrog.build.api.ci.BuildInfo();
+                return new org.jfrog.build.extractor.ci.BuildInfo();
             }
-            return mapper.readValue(buildInfoFileContent, org.jfrog.build.api.ci.BuildInfo.class);
+            return mapper.readValue(buildInfoFileContent, org.jfrog.build.extractor.ci.BuildInfo.class);
         } catch (Exception e) {
             listener.error("Couldn't read generated build info at : " + jsonBuildPath);
             throw new Run.RunnerAbortedException();
