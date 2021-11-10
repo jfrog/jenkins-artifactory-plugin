@@ -76,8 +76,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
             cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
         }
     }
-
-    void downloadDuplications(String buildName, String scriptName) throws Exception {
+    // Download a single artifact from different paths in Artifactory must be included only once in the build-info.
+    void downloadDuplicationsTest(String buildName, String scriptName) throws Exception {
         Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
         WorkflowRun pipelineResults = null;
 
@@ -242,7 +242,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             cleanupBuilds(pipelineResults, buildName, project, BUILD_NUMBER);
         }
     }
-
+    // Upload a single artifact to different paths in Artifactory must include all of them in the build info.
     void uploadDuplicationsTest(String buildName, String project, String pipelineName) throws Exception {
         WorkflowRun pipelineResults = null;
         try {
