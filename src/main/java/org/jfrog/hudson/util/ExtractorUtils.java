@@ -488,6 +488,11 @@ public class ExtractorUtils {
                 Properties properties = new Properties();
                 properties.putAll(configuration.getAllRootConfig());
                 properties.putAll(configuration.getAllProperties());
+			    // Properties that have the 'artifactory.' prefix are deprecated.
+				// For backward compatibility reasons, both will be added to the props map.
+                for (String key : properties.stringPropertyNames()) {
+                    properties.put("artifactory." + key, properties.getProperty(key));
+                }
                 OutputStream os = propertiesFile.write();
                 try {
                     properties.store(os, "");
