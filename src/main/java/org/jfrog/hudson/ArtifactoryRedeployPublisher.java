@@ -16,10 +16,6 @@
 
 package org.jfrog.hudson;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -53,6 +49,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -377,11 +374,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
     private boolean isBuildFromM2ReleasePlugin(AbstractBuild<?, ?> build) {
         List<Cause> causes = build.getCauses();
-        return !causes.isEmpty() && Iterables.any(causes, new Predicate<Cause>() {
-            public boolean apply(Cause input) {
-                return "org.jvnet.hudson.plugins.m2release.ReleaseCause".equals(input.getClass().getName());
-            }
-        });
+        return !causes.isEmpty() && causes.stream().anyMatch(input -> "org.jvnet.hudson.plugins.m2release.ReleaseCause".equals(input.getClass().getName()));
     }
 
     private boolean isM2Build(AbstractBuild<?, ?> build) {
@@ -394,7 +387,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     protected List<MavenAbstractArtifactRecord> getArtifactRecordActions(MavenModuleSetBuild build) {
-        List<MavenAbstractArtifactRecord> actions = Lists.newArrayList();
+        List<MavenAbstractArtifactRecord> actions = new ArrayList<>();
         for (MavenBuild moduleBuild : build.getModuleLastBuilds().values()) {
             MavenAbstractArtifactRecord action = moduleBuild.getAction(MavenAbstractArtifactRecord.class);
             if (action != null) {
@@ -473,7 +466,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
             ArrayList<PluginSettings> list = new ArrayList<PluginSettings>(pluginInfoList.size());
             for (UserPluginInfo p : pluginInfoList) {
-                Map<String, String> paramsMap = Maps.newHashMap();
+                Map<String, String> paramsMap = new HashMap<>();
                 List<UserPluginInfoParam> params = p.getPluginParams();
                 for (UserPluginInfoParam param : params) {
                     paramsMap.put(((String) param.getKey()), ((String) param.getDefaultValue()));

@@ -1,6 +1,5 @@
 package org.jfrog.hudson.generic;
 
-import com.google.common.collect.Lists;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.lang3.StringUtils;
@@ -13,6 +12,7 @@ import org.jfrog.hudson.util.Credentials;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,7 +40,7 @@ public class FilesResolverCallable extends MasterToSlaveFileCallable<List<Depend
 
     public List<Dependency> invoke(File file, VirtualChannel channel) throws IOException {
         if (StringUtils.isEmpty(downloadSpec)) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
         SpecsHelper specsHelper = new SpecsHelper(log);
         ArtifactoryManager artifactoryManager = new ArtifactoryManager(serverUrl, username, password, accessToken, log);

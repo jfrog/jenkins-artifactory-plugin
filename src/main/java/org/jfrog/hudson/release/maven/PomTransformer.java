@@ -16,13 +16,13 @@
 
 package org.jfrog.hudson.release.maven;
 
-import com.google.common.collect.Maps;
 import hudson.maven.ModuleName;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -63,7 +63,7 @@ public class PomTransformer extends MasterToSlaveFileCallable<Boolean> {
         org.jfrog.build.extractor.maven.reader.ModuleName current = new org.jfrog.build.extractor.maven.reader.ModuleName(
                 currentModule.groupId, currentModule.artifactId);
 
-        Map<org.jfrog.build.extractor.maven.reader.ModuleName, String> modules = Maps.newLinkedHashMap();
+        Map<org.jfrog.build.extractor.maven.reader.ModuleName, String> modules = new LinkedHashMap<>();
         for (Map.Entry<ModuleName, String> entry : versionsByModule.entrySet()) {
             modules.put(new org.jfrog.build.extractor.maven.reader.ModuleName(
                     entry.getKey().groupId, entry.getKey().artifactId), entry.getValue());

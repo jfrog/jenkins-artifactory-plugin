@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.common.types.buildInfo;
 
-import com.google.common.collect.Maps;
 import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -14,6 +13,7 @@ import org.jfrog.hudson.pipeline.common.Utils;
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -101,7 +101,7 @@ public class Env implements Serializable {
 
     @Whitelisted
     public void collect() {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("env", this);
 
         // Throws CpsCallableInvocation - Must be the last line in this method

@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.util.converters;
 
-import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.util.XStream2;
 import org.apache.commons.lang3.StringUtils;
@@ -29,6 +28,7 @@ import org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator;
 import org.jfrog.hudson.util.Credentials;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 @SuppressWarnings("deprecation")
 public class DeployerResolverOverriderConverter<T> extends XStream2.PassthruConverter<T> {
     Logger logger = Logger.getLogger(DeployerResolverOverriderConverter.class.getName());
-    List<String> converterErrors = Lists.newArrayList();
+    List<String> converterErrors = new ArrayList<>();
     // List of configurators that contain the useMavenPatterns parameter to be overridden
     List<String> useMavenPatternsOverrideList = Arrays.asList(ArtifactoryGradleConfigurator.class.getSimpleName(),
             ArtifactoryIvyConfigurator.class.getSimpleName(), ArtifactoryIvyFreeStyleConfigurator.class.getSimpleName());

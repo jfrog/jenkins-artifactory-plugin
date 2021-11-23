@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.maven3.extractor;
 
-import com.google.common.collect.Lists;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.FilePath;
@@ -52,6 +51,7 @@ import org.jfrog.hudson.util.publisher.PublisherFlexible;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -235,7 +235,7 @@ public class MavenExtractorEnvironment extends Environment {
             FilePath dependenciesDirectory = PluginDependencyHelper.getActualDependencyDirectory(maven3ExtractorJar, context.getBuiltOn().getRootPath());
 
             FilePath[] files = dependenciesDirectory.list(INCLUDED_FILES, EXCLUDED_FILES);
-            List<FilePath> jars = Lists.newArrayList();
+            List<FilePath> jars = new ArrayList<>();
             Collections.addAll(jars, files);
 
             return PlexusModuleContributor.of(jars);

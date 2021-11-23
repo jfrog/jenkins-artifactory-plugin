@@ -17,7 +17,6 @@
 package org.jfrog.hudson.util;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import hudson.EnvVars;
@@ -444,7 +443,7 @@ public class ExtractorUtils {
      * Get the list of build numbers that are to be kept forever.
      */
     public static List<String> getBuildNumbersNotToBeDeleted(Run build) {
-        List<String> notToDelete = Lists.newArrayList();
+        List<String> notToDelete = new ArrayList<>();
         List<? extends Run<?, ?>> builds = build.getParent().getBuilds();
         for (Run<?, ?> run : builds) {
             if (run.isKeepLog()) {

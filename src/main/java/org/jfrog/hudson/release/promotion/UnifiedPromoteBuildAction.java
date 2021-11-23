@@ -237,12 +237,12 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
     public List<String> getRepositoryKeys() throws IOException {
         final BuildInfoAwareConfigurator configurator = getFirstConfigurator();
         if (configurator == null) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
 
         ArtifactoryServer artifactoryServer = configurator.getArtifactoryServer();
         if (artifactoryServer == null) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
         List<String> repos = artifactoryServer.
                 getReleaseRepositoryKeysFirst((DeployerOverrider) configurator, build.getParent());
@@ -330,7 +330,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
             String pluginName = pluginSettings.getString("pluginName");
             if (!UserPluginInfo.NO_PLUGIN_KEY.equals(pluginName)) {
                 PluginSettings settings = new PluginSettings();
-                Map<String, String> paramMap = Maps.newHashMap();
+                Map<String, String> paramMap = new HashMap<>();
                 settings.setPluginName(pluginName);
                 Map<String, Object> filteredPluginSettings = Maps.filterKeys(pluginSettings,
                         input -> StringUtils.isNotBlank(input) && !"pluginName".equals(input));

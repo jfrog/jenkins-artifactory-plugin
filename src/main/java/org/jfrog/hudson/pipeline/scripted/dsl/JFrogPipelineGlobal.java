@@ -1,12 +1,12 @@
 package org.jfrog.hudson.pipeline.scripted.dsl;
 
-import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class JFrogPipelineGlobal implements Serializable {
@@ -25,7 +25,7 @@ public class JFrogPipelineGlobal implements Serializable {
 
     @Whitelisted
     public JFrogPlatformInstance instance(String instanceId) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("instanceId", instanceId);
         JFrogPlatformInstance instance = (JFrogPlatformInstance) cpsScript.invokeMethod("getJFrogPlatformInstance", stepVariables);
         instance.setCpsScript(cpsScript);

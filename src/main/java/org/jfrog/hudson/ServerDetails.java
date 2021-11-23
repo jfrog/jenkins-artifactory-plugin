@@ -16,12 +16,12 @@
 
 package org.jfrog.hudson;
 
-import com.google.common.collect.Maps;
 import hudson.util.XStream2;
 import org.apache.commons.lang3.StringUtils;
 import org.jfrog.hudson.util.converters.ServerDetailsConverter;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -167,7 +167,7 @@ public class ServerDetails {
             stagingPlugin.setPluginName(userPluginKey);
         }
         if (userPluginParams != null) {
-            Map<String, String> paramsMap = Maps.newHashMap();
+            Map<String, String> paramsMap = new HashMap<>();
             String[] params = userPluginParams.split(" ");
             for (String param : params) {
                 String[] keyValue = param.split("=");

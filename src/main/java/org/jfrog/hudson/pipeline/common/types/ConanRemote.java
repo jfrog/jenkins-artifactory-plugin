@@ -1,11 +1,11 @@
 package org.jfrog.hudson.pipeline.common.types;
 
-import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.pipeline.common.Utils;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -45,7 +45,7 @@ public class ConanRemote implements Serializable {
 
     private Map<String, Object> getAddRemoteExecutionArguments(ArtifactoryServer server, String serverName, String repo, boolean force, boolean verifySSL) {
         String serverUrl = Utils.buildConanRemoteUrl(server, repo);
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("serverUrl", serverUrl);
         stepVariables.put("serverName", serverName);
         stepVariables.put("conanHome", conanHome);
@@ -55,7 +55,7 @@ public class ConanRemote implements Serializable {
     }
 
     private Map<String, Object> getAddUserExecutionArguments(ArtifactoryServer server, String serverName) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("server", server);
         stepVariables.put("serverName", serverName);
         stepVariables.put("conanHome", conanHome);

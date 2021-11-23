@@ -2,10 +2,7 @@ package org.jfrog.hudson.generic;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
@@ -40,6 +37,9 @@ import org.jfrog.hudson.util.SpecUtils;
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -60,7 +60,7 @@ public class GenericArtifactsDeployer {
     private BuildListener listener;
     private CredentialsConfig credentialsConfig;
     private EnvVars env;
-    private List<Artifact> artifactsToDeploy = Lists.newArrayList();
+    private List<Artifact> artifactsToDeploy = new ArrayList<>();
 
     public GenericArtifactsDeployer(Run build, ArtifactoryGenericConfigurator configurator,
                                     BuildListener listener, CredentialsConfig credentialsConfig)
@@ -170,7 +170,7 @@ public class GenericArtifactsDeployer {
             }
 
             // Option 2. Generic deploy - Fetch the artifacts details from workspace by using 'patternPairs'.
-            Set<DeployDetails> artifactsToDeploy = Sets.newHashSet();
+            Set<DeployDetails> artifactsToDeploy = new HashSet<>();
             Multimap<String, File> targetPathToFilesMap = buildTargetPathToFiles(workspace);
             for (Map.Entry<String, File> entry : targetPathToFilesMap.entries()) {
                 artifactsToDeploy.addAll(buildDeployDetailsFromFileEntry(entry));
@@ -182,7 +182,7 @@ public class GenericArtifactsDeployer {
         }
 
         private List<Artifact> convertDeployDetailsToArtifacts(Set<DeployDetails> details) {
-            List<Artifact> result = Lists.newArrayList();
+            List<Artifact> result = new ArrayList<>();
             for (DeployDetails detail : details) {
                 String ext = FilenameUtils.getExtension(detail.getFile().getName());
                 Artifact artifact = new ArtifactBuilder(detail.getFile().getName()).md5(detail.getMd5())
@@ -224,7 +224,7 @@ public class GenericArtifactsDeployer {
 
         private Set<DeployDetails> buildDeployDetailsFromFileEntry(Map.Entry<String, File> fileEntry)
                 throws IOException {
-            Set<DeployDetails> result = Sets.newHashSet();
+            Set<DeployDetails> result = new HashSet<>();
             String targetPath = fileEntry.getKey();
             File artifactFile = fileEntry.getValue();
             String path;
@@ -236,7 +236,7 @@ public class GenericArtifactsDeployer {
             path = StringUtils.replace(path, "//", "/");
 
             // calculate the sha1 checksum that is not given by Jenkins and add it to the deploy artifactsToDeploy
-            Map<String, String> checksums = Maps.newHashMap();
+            Map<String, String> checksums = new HashMap<>();
             try {
                 checksums = FileChecksumCalculator.calculateChecksums(artifactFile, SHA1, MD5);
             } catch (NoSuchAlgorithmException e) {

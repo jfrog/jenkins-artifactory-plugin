@@ -1,11 +1,10 @@
 package org.jfrog.hudson.util;
 
-import com.google.common.collect.Lists;
-
+import java.util.ArrayList;
 import java.util.List;
 
 public class ErrorResponse {
-    List<Error> errors = Lists.newArrayList();
+    List<Error> errors = new ArrayList<>();
 
     public ErrorResponse(int status, String message) {
         errors.add(new Error(status, message != null ? message : ""));

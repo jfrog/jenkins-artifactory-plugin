@@ -1,6 +1,5 @@
 package org.jfrog.hudson.util.converters;
 
-import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.util.XStream2;
 import org.jfrog.hudson.ArtifactoryBuilder;
@@ -14,7 +13,7 @@ import java.util.logging.Logger;
 
 public class ArtifactoryBuilderConverter extends XStream2.PassthruConverter<ArtifactoryBuilder.DescriptorImpl> {
     Logger logger = Logger.getLogger(ArtifactoryBuilderConverter.class.getName());
-    List<String> converterErrors = Lists.newArrayList();
+    List<String> converterErrors = new ArrayList<>();
 
     public ArtifactoryBuilderConverter(XStream2 xstream) {
         super(xstream);

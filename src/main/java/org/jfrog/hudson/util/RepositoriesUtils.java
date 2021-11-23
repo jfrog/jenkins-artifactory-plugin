@@ -1,7 +1,5 @@
 package org.jfrog.hudson.util;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.Hudson;
@@ -13,7 +11,9 @@ import org.jfrog.build.extractor.clientConfiguration.client.artifactory.Artifact
 import org.jfrog.hudson.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
@@ -24,7 +24,7 @@ public abstract class RepositoriesUtils {
 
     public static List<String> getReleaseRepositoryKeysFirst(DeployerOverrider deployer, ArtifactoryServer server) throws IOException {
         if (server == null) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
 
         return server.getReleaseRepositoryKeysFirst(deployer, null);
@@ -32,7 +32,7 @@ public abstract class RepositoriesUtils {
 
     public static List<String> getSnapshotRepositoryKeysFirst(DeployerOverrider deployer, ArtifactoryServer server) throws IOException {
         if (server == null) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
 
         return server.getSnapshotRepositoryKeysFirst(deployer, null);
@@ -42,7 +42,7 @@ public abstract class RepositoriesUtils {
                                                                    DeployerOverrider deployerOverrider,
                                                                    ArtifactoryServer server) {
         if (server == null) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
 
         return server.getVirtualRepositoryKeys(resolverOverrider, null);
@@ -52,11 +52,7 @@ public abstract class RepositoriesUtils {
         List<VirtualRepository> virtualRepositories;
 
         List<String> keys = artifactoryManager.getVirtualRepositoriesKeys();
-        virtualRepositories = Lists.newArrayList(Lists.transform(keys, new Function<String, VirtualRepository>() {
-            public VirtualRepository apply(String from) {
-                return new VirtualRepository(from, from);
-            }
-        }));
+        virtualRepositories = keys.stream().map(from -> new VirtualRepository(from, from)).collect(Collectors.toList());
 
         return virtualRepositories;
     }
@@ -161,7 +157,7 @@ public abstract class RepositoriesUtils {
     }
 
     public static List<Repository> createRepositoriesList(List<String> repositoriesValueList) {
-        List<Repository> repositories = Lists.newArrayList();
+        List<Repository> repositories = new ArrayList<>();
         for (String repositoryKey : repositoriesValueList) {
             Repository repository = new Repository(repositoryKey);
             repositories.add(repository);
@@ -171,7 +167,7 @@ public abstract class RepositoriesUtils {
 
     public static List<VirtualRepository> collectVirtualRepositories(List<VirtualRepository> repositories, String repoKey) {
         if (repositories == null) {
-            repositories = Lists.newArrayList();
+            repositories = new ArrayList<>();
         }
         if (StringUtils.isNotBlank(repoKey)) {
             for (VirtualRepository vr : repositories) {
@@ -186,7 +182,7 @@ public abstract class RepositoriesUtils {
     }
 
     public static List<Repository> collectRepositories(String repoKey) {
-        List<Repository> repositories = Lists.newArrayList();
+        List<Repository> repositories = new ArrayList<>();
         if (StringUtils.isNotBlank(repoKey)) {
             Repository r = new Repository(repoKey);
             repositories.add(r);

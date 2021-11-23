@@ -40,6 +40,7 @@ import org.jfrog.hudson.util.publisher.PublisherFlexible;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -135,7 +136,7 @@ public abstract class ActionableHelper implements Serializable {
      * @return A list of builders that answer the class definition that are attached to the project.
      */
     public static <T extends Builder> List<T> getBuilder(Project<?, ?> project, Class<T> type) {
-        List<T> result = Lists.newArrayList();
+        List<T> result = new ArrayList<>();
         DescribableList<Builder, Descriptor<Builder>> builders = project.getBuildersList();
         for (Builder builder : builders) {
             if (type.isInstance(builder)) {

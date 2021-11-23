@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.release.gradle;
 
-import com.google.common.collect.Maps;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -31,9 +30,10 @@ import org.jfrog.hudson.release.scm.git.GitCoordinator;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Map;
 
 /**
  * A release wrapper for Gradle projects. Allows performing release steps on Gradle. This class is not a direct {@link
@@ -223,7 +223,7 @@ public class GradleReleaseWrapper {
         FilePath root = release.getModuleRoot(build.getEnvironment(listener));
         debuggingLogger.fine("Root directory is: " + root.getRemote());
         String[] modules = release.getReleaseProperties();
-        Map<String, String> modulesByName = Maps.newHashMap();
+        Map<String, String> modulesByName = new HashMap<>();
         for (String module : modules) {
             String version = releaseVersion ? release.getReleaseVersionFor(module) :
                     release.getCurrentVersionFor(module);

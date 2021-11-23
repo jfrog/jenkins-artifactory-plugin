@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.common.types.builds;
 
-import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
@@ -8,6 +7,7 @@ import org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.GradleResolver;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
@@ -66,7 +66,7 @@ public class GradleBuild extends PackageManagerBuild {
     }
 
     private Map<String, Object> getRunArguments(String buildFile, String tasks, String switches, String rootDir, BuildInfo buildInfo) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("gradleBuild", this);
         stepVariables.put("rootDir", rootDir);
         stepVariables.put("buildFile", buildFile);

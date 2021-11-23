@@ -1,11 +1,11 @@
 package org.jfrog.hudson.pipeline.common.types;
 
-import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static org.jfrog.hudson.pipeline.common.Utils.appendBuildInfo;
@@ -62,7 +62,7 @@ public class ConanClient implements Serializable {
     }
 
     private Map<String, Object> getRunCommandExecutionArguments(String command, BuildInfo buildInfo) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("command", command);
         stepVariables.put("conanHome", getUserPath());
         stepVariables.put("buildInfo", buildInfo);

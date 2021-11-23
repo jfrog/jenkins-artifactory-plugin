@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.gradle;
 
-import com.google.common.base.Charsets;
 import hudson.EnvVars;
 import hudson.FilePath;
 import org.apache.commons.io.IOUtils;
@@ -25,6 +24,7 @@ import org.jfrog.hudson.util.PluginDependencyHelper;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -50,7 +50,7 @@ public class GradleInitScriptWriter {
     public String generateInitScript(EnvVars env) throws IOException, InterruptedException {
         StringBuilder initScript = new StringBuilder();
         InputStream templateStream = getClass().getResourceAsStream("/initscripttemplate.gradle");
-        String templateAsString = IOUtils.toString(templateStream, Charsets.UTF_8.name());
+        String templateAsString = IOUtils.toString(templateStream, StandardCharsets.UTF_8.name());
         File extractorJar = PluginDependencyHelper.getExtractorJar(env);
         FilePath dependencyDir = PluginDependencyHelper.getActualDependencyDirectory(extractorJar, rootPath);
         String absoluteDependencyDirPath = dependencyDir.getRemote();

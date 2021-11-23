@@ -1,6 +1,5 @@
 package org.jfrog.hudson;
 
-import com.google.common.collect.Maps;
 import com.tikal.jenkins.plugins.multijob.MultiJobProject;
 import hudson.matrix.MatrixProject;
 import hudson.model.AbstractProject;
@@ -19,6 +18,7 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -155,7 +155,7 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
 
         ArrayList<PluginSettings> list = new ArrayList<>(pluginInfoList.size());
         for (UserPluginInfo p : pluginInfoList) {
-            Map<String, String> paramsMap = Maps.newHashMap();
+            Map<String, String> paramsMap = new HashMap<>();
             List<UserPluginInfoParam> params = p.getPluginParams();
             for (UserPluginInfoParam param : params) {
                 paramsMap.put(((String) param.getKey()), ((String) param.getDefaultValue()));

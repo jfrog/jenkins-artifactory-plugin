@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.common.types;
 
-import com.google.common.collect.Maps;
 import hudson.model.Item;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -13,6 +12,7 @@ import org.jfrog.hudson.util.plugins.PluginsUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -108,7 +108,7 @@ public class ArtifactoryServer implements Serializable {
             throw new IllegalArgumentException("Only the following arguments are allowed, " + keysAsList.toString());
         }
 
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap(arguments);
+        Map<String, Object> stepVariables = new LinkedHashMap<>(arguments);
         stepVariables.put(SERVER, this);
         return stepVariables;
     }
@@ -139,7 +139,7 @@ public class ArtifactoryServer implements Serializable {
 
     @Whitelisted
     public void download(String spec, BuildInfo buildInfo, boolean failNoOp) {
-        Map<String, Object> downloadArguments = Maps.newLinkedHashMap();
+        Map<String, Object> downloadArguments = new LinkedHashMap<>();
         downloadArguments.put(SPEC, spec);
         downloadArguments.put(BUILD_INFO, buildInfo);
         downloadArguments.put(FAIL_NO_OP, failNoOp);
@@ -172,7 +172,7 @@ public class ArtifactoryServer implements Serializable {
 
     @Whitelisted
     public void upload(String spec, BuildInfo buildInfo, boolean failNoOp) {
-        Map<String, Object> uploadArguments = Maps.newLinkedHashMap();
+        Map<String, Object> uploadArguments = new LinkedHashMap<>();
         uploadArguments.put(SPEC, spec);
         uploadArguments.put(BUILD_INFO, buildInfo);
         uploadArguments.put(FAIL_NO_OP, failNoOp);
@@ -189,7 +189,7 @@ public class ArtifactoryServer implements Serializable {
             throw new IllegalArgumentException("Only the following arguments are allowed, " + keysAsList.toString());
         }
 
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap(arguments);
+        Map<String, Object> stepVariables = new LinkedHashMap<>(arguments);
         stepVariables.put(SERVER, this);
         return stepVariables;
     }
@@ -210,7 +210,7 @@ public class ArtifactoryServer implements Serializable {
 
     @Whitelisted
     public void setProps(String spec, String props, boolean failNoOp) {
-        Map<String, Object> propsArguments = Maps.newLinkedHashMap();
+        Map<String, Object> propsArguments = new LinkedHashMap<>();
         propsArguments.put(SPEC, spec);
         propsArguments.put(PROPERTIES, props);
         propsArguments.put(FAIL_NO_OP, failNoOp);
@@ -233,7 +233,7 @@ public class ArtifactoryServer implements Serializable {
 
     @Whitelisted
     public void deleteProps(String spec, String props, boolean failNoOp) {
-        Map<String, Object> propsArguments = Maps.newLinkedHashMap();
+        Map<String, Object> propsArguments = new LinkedHashMap<>();
         propsArguments.put(SPEC, spec);
         propsArguments.put(PROPERTIES, props);
         propsArguments.put(FAIL_NO_OP, failNoOp);
@@ -243,7 +243,7 @@ public class ArtifactoryServer implements Serializable {
 
     @Whitelisted
     public void publishBuildInfo(BuildInfo buildInfo) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put(BUILD_INFO, buildInfo);
         stepVariables.put(SERVER, this);
 
@@ -253,7 +253,7 @@ public class ArtifactoryServer implements Serializable {
 
     @Whitelisted
     public void buildAppend(BuildInfo buildInfo, String buildName, String buildNumber) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put(BUILD_INFO, buildInfo);
         stepVariables.put(BUILD_NAME, buildName);
         stepVariables.put(BUILD_NUMBER, buildNumber);
@@ -265,7 +265,7 @@ public class ArtifactoryServer implements Serializable {
 
     @Whitelisted
     public void promote(Map<String, Object> promotionParams) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("promotionConfig", Utils.createPromotionConfig(promotionParams, true));
         stepVariables.put(SERVER, this);
 
@@ -275,7 +275,7 @@ public class ArtifactoryServer implements Serializable {
 
     @Whitelisted
     public void distribute(Map<String, Object> distributionParams) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("distributionConfig", Utils.createDistributionConfig(distributionParams));
         stepVariables.put(SERVER, this);
 
@@ -285,7 +285,7 @@ public class ArtifactoryServer implements Serializable {
 
     @Whitelisted
     public void xrayScan(Map<String, Object> xrayScanParams) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("xrayScanConfig", Utils.createXrayScanConfig(xrayScanParams));
         stepVariables.put(SERVER, this);
 
@@ -299,7 +299,7 @@ public class ArtifactoryServer implements Serializable {
         if (!arguments.keySet().containsAll(mandatoryParams)) {
             throw new IllegalArgumentException(mandatoryParams.toString() + " are mandatory arguments");
         }
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put(SERVER, this);
         stepVariables.put(PATHS, arguments.get(PATHS));
         stepVariables.put(SPEC, arguments.get(SPEC));

@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.release.maven;
 
-import com.google.common.collect.Maps;
 import hudson.maven.MavenModule;
 import hudson.maven.MavenModuleSet;
 import hudson.maven.ModuleName;
@@ -35,6 +34,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -100,8 +100,8 @@ public abstract class BaseMavenReleaseAction extends ReleaseAction<MavenModuleSe
 
     @Override
     protected void doPerModuleVersioning(StaplerRequest req) {
-        releaseVersionPerModule = Maps.newHashMap();
-        nextVersionPerModule = Maps.newHashMap();
+        releaseVersionPerModule = new HashMap<>();
+        nextVersionPerModule = new HashMap<>();
         Enumeration params = req.getParameterNames();
         while (params.hasMoreElements()) {
             String key = (String) params.nextElement();
@@ -117,8 +117,8 @@ public abstract class BaseMavenReleaseAction extends ReleaseAction<MavenModuleSe
 
     @Override
     protected void doPerModuleVersioning(Map<String, VersionedModule> defaultModules) {
-        releaseVersionPerModule = Maps.newHashMap();
-        nextVersionPerModule = Maps.newHashMap();
+        releaseVersionPerModule = new HashMap<>();
+        nextVersionPerModule = new HashMap<>();
 
         for (Map.Entry<String, VersionedModule> entry : defaultModules.entrySet()) {
             VersionedModule versionedModule = entry.getValue();
@@ -174,7 +174,7 @@ public abstract class BaseMavenReleaseAction extends ReleaseAction<MavenModuleSe
 
     @Override
     protected void prepareBuilderSpecificDefaultModules() {
-        defaultModules = Maps.newHashMap();
+        defaultModules = new HashMap<>();
         if (project != null) {
             List<MavenModule> modules = project.getDisabledModules(false);
             for (MavenModule mavenModule : modules) {

@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.common.types.buildInfo;
 
-import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.extractor.ci.IssueTracker;
@@ -8,6 +7,7 @@ import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -115,7 +115,7 @@ public class Issues implements Serializable {
      * */
     @Whitelisted
     public void collect(ArtifactoryServer server, String config) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("issues", this);
         stepVariables.put("server", server);
         stepVariables.put("config", config);

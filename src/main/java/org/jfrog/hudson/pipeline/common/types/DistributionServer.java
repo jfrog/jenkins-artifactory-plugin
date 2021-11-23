@@ -1,6 +1,5 @@
 package org.jfrog.hudson.pipeline.common.types;
 
-import com.google.common.collect.Maps;
 import hudson.model.Item;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -280,7 +279,7 @@ public class DistributionServer implements Serializable {
         if (!allArgs.containsAll(actualArgs.keySet())) {
             throw new IllegalArgumentException("Only the following arguments are allowed: " + String.join(", ", allArgs));
         }
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap(actualArgs);
+        Map<String, Object> stepVariables = new LinkedHashMap<>(actualArgs);
         stepVariables.put(SERVER, this);
         return stepVariables;
     }

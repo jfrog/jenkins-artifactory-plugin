@@ -1,6 +1,5 @@
 package org.jfrog.hudson.util.converters;
 
-import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.util.XStream2;
 import org.apache.commons.lang3.StringUtils;
@@ -10,6 +9,7 @@ import org.jfrog.hudson.util.Credentials;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  */
 public class ArtifactoryServerConverter extends XStream2.PassthruConverter<ArtifactoryServer> {
     Logger logger = Logger.getLogger(ArtifactoryServerConverter.class.getName());
-    List<String> converterErrors = Lists.newArrayList();
+    List<String> converterErrors = new ArrayList<>();
 
     public ArtifactoryServerConverter(XStream2 xstream) {
         super(xstream);

@@ -1,12 +1,12 @@
 package org.jfrog.hudson.pipeline.common.types.builds;
 
-import com.google.common.collect.Maps;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.CommonDeployer;
 import org.jfrog.hudson.pipeline.common.types.resolvers.CommonResolver;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -76,7 +76,7 @@ public class NpmBuild extends PackageManagerBuild {
     }
 
     private Map<String, Object> getRunArguments(String path, BuildInfo buildInfo) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put(NPM_BUILD, this);
         stepVariables.put(PATH, path);
         stepVariables.put(BUILD_INFO, buildInfo);

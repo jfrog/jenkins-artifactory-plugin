@@ -1,7 +1,5 @@
 package org.jfrog.hudson.generic;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
@@ -136,11 +134,7 @@ public class DependenciesDownloaderImpl implements DependenciesDownloader {
     }
 
     private boolean isResolvedOrParentOfResolvedFile(Set<String> resolvedFiles, final String path) {
-        return Iterables.any(resolvedFiles, new Predicate<String>() {
-            public boolean apply(String filePath) {
-                return StringUtils.equals(filePath, path) || StringUtils.startsWith(filePath, path);
-            }
-        });
+        return resolvedFiles.stream().anyMatch(filePath -> StringUtils.equals(filePath, path) || StringUtils.startsWith(filePath, path));
     }
 
     private static class DownloadFileCallable extends MasterToSlaveFileCallable<Map<String, String>> {

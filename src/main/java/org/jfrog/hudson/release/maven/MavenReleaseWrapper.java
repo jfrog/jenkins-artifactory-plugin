@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.release.maven;
 
-import com.google.common.collect.Maps;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -250,7 +249,7 @@ public class MavenReleaseWrapper extends BuildWrapper {
         // get the active modules only
         Collection<MavenModule> modules = mavenBuild.getProject().getDisabledModules(false);
 
-        Map<ModuleName, String> modulesByName = Maps.newHashMap();
+        Map<ModuleName, String> modulesByName = new HashMap<>();
         for (MavenModule module : modules) {
             String version = releaseVersion ? release.getReleaseVersionFor(module.getModuleName()) :
                     release.getNextVersionFor(module.getModuleName());

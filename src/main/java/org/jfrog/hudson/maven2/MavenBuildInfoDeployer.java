@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.maven2;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import hudson.maven.MavenBuild;
 import hudson.maven.MavenModule;
@@ -42,6 +41,7 @@ import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.util.RepositoriesUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +72,7 @@ public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
 
     private void gatherModuleAndDependencyInfo(MavenModuleSetBuild mavenModulesBuild) {
         Map<MavenModule, MavenBuild> mavenBuildMap = mavenModulesBuild.getModuleLastBuilds();
-        List<Module> modules = Lists.newArrayList();
+        List<Module> modules = new ArrayList<>();
         for (Map.Entry<MavenModule, MavenBuild> moduleBuild : mavenBuildMap.entrySet()) {
             MavenModule mavenModule = moduleBuild.getKey();
             MavenBuild mavenBuild = moduleBuild.getValue();

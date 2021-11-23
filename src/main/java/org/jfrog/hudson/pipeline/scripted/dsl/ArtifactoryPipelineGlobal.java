@@ -1,7 +1,6 @@
 package org.jfrog.hudson.pipeline.scripted.dsl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -31,7 +30,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public ArtifactoryServer server(String serverName) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("artifactoryServerID", serverName);
         ArtifactoryServer server = (ArtifactoryServer) cpsScript.invokeMethod("getArtifactoryServer", stepVariables);
         server.setCpsScript(cpsScript);
@@ -45,7 +44,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public Docker docker(ArtifactoryServer server, String host) {
-        Map<String, Object> dockerArguments = Maps.newLinkedHashMap();
+        Map<String, Object> dockerArguments = new LinkedHashMap<>();
         dockerArguments.put("server", server);
         if (host != null && !host.isEmpty()) {
             dockerArguments.put("host", host);
@@ -75,7 +74,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public ArtifactoryServer newServer(String url, String username, String password) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         stepVariables.put("url", url);
         stepVariables.put("username", username);
         stepVariables.put("password", password);
@@ -98,7 +97,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public BuildInfo newBuildInfo() {
-        BuildInfo buildInfo = (BuildInfo) cpsScript.invokeMethod("newBuildInfo", Maps.newLinkedHashMap());
+        BuildInfo buildInfo = (BuildInfo) cpsScript.invokeMethod("newBuildInfo", new LinkedHashMap<>());
         buildInfo.setCpsScript(cpsScript);
         return buildInfo;
     }
@@ -119,49 +118,49 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public MavenBuild newMavenBuild() {
-        MavenBuild mavenBuild = (MavenBuild) cpsScript.invokeMethod("newMavenBuild", Maps.newLinkedHashMap());
+        MavenBuild mavenBuild = (MavenBuild) cpsScript.invokeMethod("newMavenBuild", new LinkedHashMap<>());
         mavenBuild.setCpsScript(cpsScript);
         return mavenBuild;
     }
 
     @Whitelisted
     public GradleBuild newGradleBuild() {
-        GradleBuild gradleBuild = (GradleBuild) cpsScript.invokeMethod("newGradleBuild", Maps.newLinkedHashMap());
+        GradleBuild gradleBuild = (GradleBuild) cpsScript.invokeMethod("newGradleBuild", new LinkedHashMap<>());
         gradleBuild.setCpsScript(cpsScript);
         return gradleBuild;
     }
 
     @Whitelisted
     public NpmBuild newNpmBuild() {
-        NpmBuild npmBuild = (NpmBuild) cpsScript.invokeMethod("newNpmBuild", Maps.newLinkedHashMap());
+        NpmBuild npmBuild = (NpmBuild) cpsScript.invokeMethod("newNpmBuild", new LinkedHashMap<>());
         npmBuild.setCpsScript(cpsScript);
         return npmBuild;
     }
 
     @Whitelisted
     public GoBuild newGoBuild() {
-        GoBuild goBuild = (GoBuild) cpsScript.invokeMethod("newGoBuild", Maps.newLinkedHashMap());
+        GoBuild goBuild = (GoBuild) cpsScript.invokeMethod("newGoBuild", new LinkedHashMap<>());
         goBuild.setCpsScript(cpsScript);
         return goBuild;
     }
 
     @Whitelisted
     public PipBuild newPipBuild() {
-        PipBuild pipBuild = (PipBuild) cpsScript.invokeMethod("newPipBuild", Maps.newLinkedHashMap());
+        PipBuild pipBuild = (PipBuild) cpsScript.invokeMethod("newPipBuild", new LinkedHashMap<>());
         pipBuild.setCpsScript(cpsScript);
         return pipBuild;
     }
 
     @Whitelisted
     public NugetBuild newNugetBuild() {
-        NugetBuild nugetBuild = (NugetBuild) cpsScript.invokeMethod("newNugetBuild", Maps.newLinkedHashMap());
+        NugetBuild nugetBuild = (NugetBuild) cpsScript.invokeMethod("newNugetBuild", new LinkedHashMap<>());
         nugetBuild.setCpsScript(cpsScript);
         return nugetBuild;
     }
 
     @Whitelisted
     public NugetBuild newDotnetBuild() {
-        NugetBuild dotnetCliBuild = (NugetBuild) cpsScript.invokeMethod("newNugetBuild", Maps.newLinkedHashMap());
+        NugetBuild dotnetCliBuild = (NugetBuild) cpsScript.invokeMethod("newNugetBuild", new LinkedHashMap<>());
         dotnetCliBuild.setCpsScript(cpsScript);
         dotnetCliBuild.SetUseDotnetCli(true);
         return dotnetCliBuild;
@@ -176,7 +175,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
         }
         client.setUserPath(userPath);
         client.setCpsScript(cpsScript);
-        LinkedHashMap<String, Object> args = Maps.newLinkedHashMap();
+        LinkedHashMap<String, Object> args = new LinkedHashMap<>();
         args.put("client", client);
         cpsScript.invokeMethod("initConanClient", args);
         return client;
@@ -186,7 +185,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
     public ConanClient newConanClient() {
         ConanClient client = new ConanClient();
         client.setCpsScript(cpsScript);
-        LinkedHashMap<String, Object> args = Maps.newLinkedHashMap();
+        LinkedHashMap<String, Object> args = new LinkedHashMap<>();
         args.put("client", client);
         cpsScript.invokeMethod("initConanClient", args);
         return client;
@@ -201,7 +200,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
 
     @Whitelisted
     public void addInteractivePromotion(Map<String, Object> promotionArguments) {
-        Map<String, Object> stepVariables = Maps.newLinkedHashMap();
+        Map<String, Object> stepVariables = new LinkedHashMap<>();
         List<String> mandatoryParams = Arrays.asList(ArtifactoryServer.SERVER, "promotionConfig");
         List<String> allowedParams = Arrays.asList(ArtifactoryServer.SERVER, "promotionConfig", "displayName");
         if (!promotionArguments.keySet().containsAll(mandatoryParams)) {

@@ -1,8 +1,5 @@
 package org.jfrog.hudson;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import java.util.*;
 
 /**
@@ -21,7 +18,7 @@ public class UserPluginInfo {
         pluginName = stagingPluginInfo.get("name").toString();
         Object params = stagingPluginInfo.get("params");
         if (params == null) {
-            pluginParams = Maps.newHashMap();
+            pluginParams = new HashMap<>();
         } else {
             pluginParams = (Map) params;
         }
@@ -29,7 +26,7 @@ public class UserPluginInfo {
 
     private UserPluginInfo(String name) {
         pluginName = name;
-        pluginParams = Maps.newHashMap();
+        pluginParams = new HashMap<>();
     }
 
     public String getPluginName() {
@@ -37,7 +34,7 @@ public class UserPluginInfo {
     }
 
     public List<UserPluginInfoParam> getPluginParams() {
-        List<UserPluginInfoParam> pluginParamList = Lists.newArrayList();
+        List<UserPluginInfoParam> pluginParamList = new ArrayList<>();
         for (Map.Entry paramEntry : ((Set<Map.Entry>) pluginParams.entrySet())) {
             pluginParamList.add(new UserPluginInfoParam(paramEntry.getKey(), paramEntry.getValue()));
         }

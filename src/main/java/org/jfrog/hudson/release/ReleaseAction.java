@@ -20,7 +20,6 @@ import com.cloudbees.plugins.credentials.common.StandardCredentials;
 import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.google.common.collect.Maps;
 import hudson.Util;
 import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.MatrixProject;
@@ -44,6 +43,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -587,7 +587,7 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
             if (stagingStrategy.containsKey("moduleVersionsMap")) {
                 Map<String, ? extends Map<String, String>> moduleVersionsMap =
                         (Map<String, ? extends Map<String, String>>) stagingStrategy.get("moduleVersionsMap");
-                defaultModules = Maps.newHashMap();
+                defaultModules = new HashMap<>();
                 if (!moduleVersionsMap.isEmpty()) {
                     for (Map<String, String> moduleVersion : moduleVersionsMap.values()) {
                         String moduleId = moduleVersion.get("moduleId");

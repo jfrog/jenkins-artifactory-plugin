@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.ivy;
 
-import com.google.common.collect.Iterables;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -398,7 +397,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private Ant getLastAntBuild(AbstractProject project) {
         if (project instanceof Project) {
             List<Ant> ants = ActionableHelper.getBuilder((Project) project, Ant.class);
-            return Iterables.getLast(ants, null);
+            return ants.stream().reduce((first, second) -> second).orElse(null);
         }
         return null;
     }

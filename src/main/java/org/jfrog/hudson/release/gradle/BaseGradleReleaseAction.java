@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.release.gradle;
 
-import com.google.common.collect.Maps;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
@@ -103,7 +102,7 @@ public abstract class BaseGradleReleaseAction extends ReleaseAction<AbstractProj
             throw new IllegalStateException("Couldn't find workspace");
         }
 
-        Map<String, String> workspaceEnv = Maps.newHashMap();
+        Map<String, String> workspaceEnv = new HashMap<>();
         workspaceEnv.put("WORKSPACE", someWorkspace.getRemote());
 
         for (Builder builder : getBuilders()) {
@@ -229,8 +228,8 @@ public abstract class BaseGradleReleaseAction extends ReleaseAction<AbstractProj
 
     @Override
     protected void doPerModuleVersioning(StaplerRequest req) {
-        releaseVersionPerModule = Maps.newHashMap();
-        nextVersionPerModule = Maps.newHashMap();
+        releaseVersionPerModule = new HashMap<>();
+        nextVersionPerModule = new HashMap<>();
         Enumeration params = req.getParameterNames();
         while (params.hasMoreElements()) {
             String key = (String) params.nextElement();
@@ -244,8 +243,8 @@ public abstract class BaseGradleReleaseAction extends ReleaseAction<AbstractProj
 
     @Override
     protected void doPerModuleVersioning(Map<String, VersionedModule> defaultModules) {
-        releaseVersionPerModule = Maps.newHashMap();
-        nextVersionPerModule = Maps.newHashMap();
+        releaseVersionPerModule = new HashMap<>();
+        nextVersionPerModule = new HashMap<>();
 
         for (Map.Entry<String, VersionedModule> entry : defaultModules.entrySet()) {
             VersionedModule versionedModule = entry.getValue();
@@ -266,7 +265,7 @@ public abstract class BaseGradleReleaseAction extends ReleaseAction<AbstractProj
 
     @Override
     protected void prepareBuilderSpecificDefaultModules() {
-        defaultModules = Maps.newHashMap();
+        defaultModules = new HashMap<>();
 
         for (String releaseProperties : getReleaseProperties()) {
             defaultModules.put(releaseProperties, new VersionedModule(releaseProperties,

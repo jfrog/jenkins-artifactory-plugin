@@ -1,6 +1,5 @@
 package org.jfrog.hudson.generic;
 
-import com.google.common.collect.Lists;
 import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -51,6 +50,7 @@ import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -360,7 +360,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
     public List<Repository> getReleaseRepositoryList() {
         if (legacyDeployerDetails.getDeploySnapshotRepository() == null) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
         return RepositoriesUtils.collectRepositories(legacyDeployerDetails.getDeploySnapshotRepository().getKeyFromSelect());
     }

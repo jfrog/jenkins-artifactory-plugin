@@ -17,7 +17,6 @@
 package org.jfrog.hudson;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.google.common.collect.Lists;
 import hudson.Extension;
 import hudson.model.BuildableItem;
 import hudson.model.BuildableItemWithBuildWrappers;
@@ -54,6 +53,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -297,7 +297,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         private void configureJFrogInstances(StaplerRequest req, JSONObject o) throws FormException {
-            List<JFrogPlatformInstance> jfrogInstances = Lists.newArrayList();
+            List<JFrogPlatformInstance> jfrogInstances = new ArrayList<>();
             Object jfrogInstancesObj = o.get("jfrogInstances"); // an array or single object
             if (!JSONNull.getInstance().equals(jfrogInstancesObj)) {
                 jfrogInstances = req.bindJSONToList(JFrogPlatformInstance.class, jfrogInstancesObj);

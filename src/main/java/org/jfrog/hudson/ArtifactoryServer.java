@@ -38,6 +38,7 @@ import org.jfrog.hudson.util.converters.ArtifactoryServerConverter;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -168,7 +169,7 @@ public class ArtifactoryServer implements Serializable {
         CredentialsConfig credentialsConfig = CredentialManager.getPreferredDeployer(deployerOverrider, this);
         List<String> repositoryKeys = getLocalRepositoryKeys(credentialsConfig.provideCredentials(item));
         if (repositoryKeys == null || repositoryKeys.isEmpty()) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
         Collections.sort(repositoryKeys, new RepositoryComparator());
         return repositoryKeys;
@@ -178,7 +179,7 @@ public class ArtifactoryServer implements Serializable {
         CredentialsConfig credentialsConfig = CredentialManager.getPreferredDeployer(deployerOverrider, this);
         List<String> repositoryKeys = getLocalRepositoryKeys(credentialsConfig.provideCredentials(item));
         if (repositoryKeys == null || repositoryKeys.isEmpty()) {
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
         Collections.sort(repositoryKeys, Collections.reverseOrder(new RepositoryComparator()));
         return repositoryKeys;
@@ -205,7 +206,7 @@ public class ArtifactoryServer implements Serializable {
                 log.log(Level.WARNING,
                         "Could not obtain virtual repositories list from '" + url + "': " + e.getMessage());
             }
-            return Lists.newArrayList();
+            return new ArrayList<>();
         }
 
         return virtualRepositories;

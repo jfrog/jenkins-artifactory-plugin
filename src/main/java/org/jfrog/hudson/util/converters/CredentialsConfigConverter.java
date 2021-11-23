@@ -1,6 +1,5 @@
 package org.jfrog.hudson.util.converters;
 
-import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import hudson.util.XStream2;
 
@@ -9,11 +8,12 @@ import org.jfrog.hudson.util.Credentials;
 
 import java.lang.reflect.Field;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 public class CredentialsConfigConverter extends XStream2.PassthruConverter<CredentialsConfig> {
     Logger logger = Logger.getLogger(CredentialsConfigConverter.class.getName());
-    List<String> converterErrors = Lists.newArrayList();
+    List<String> converterErrors = new ArrayList<>();
 
     public CredentialsConfigConverter(XStream2 xstream) {
         super(xstream);

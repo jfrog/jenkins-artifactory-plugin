@@ -1,6 +1,5 @@
 package org.jfrog.hudson.util;
 
-import com.google.common.base.Strings;
 import hudson.Util;
 import hudson.util.FormValidation;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +26,7 @@ public abstract class FormValidations {
      * @return {@link hudson.util.FormValidation.ok()} if valid or empty, error otherwise
      */
     public static FormValidation validateEmails(String emails) {
-        if (!Strings.isNullOrEmpty(emails)) {
+        if (emails != null && !emails.isEmpty()) {
             String[] recipients = StringUtils.split(emails, " ");
             for (String email : recipients) {
                 FormValidation validation = validateInternetAddress(email);
@@ -46,7 +45,7 @@ public abstract class FormValidations {
      * @return {@link hudson.util.FormValidation.ok()} if valid or empty, error otherwise
      */
     public static FormValidation validateInternetAddress(String address) {
-        if (Strings.isNullOrEmpty(address)) {
+        if (address == null || address.isEmpty()) {
             return FormValidation.ok();
         }
         Matcher matcher = VALID_EMAIL_PATTERN.matcher(address);
@@ -68,4 +67,5 @@ public abstract class FormValidations {
 
         return FormValidation.ok();
     }
+
 }
