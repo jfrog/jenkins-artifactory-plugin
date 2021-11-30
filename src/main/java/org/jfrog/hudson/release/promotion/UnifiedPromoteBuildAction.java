@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
@@ -246,6 +247,14 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         }
         List<String> repos = artifactoryServer.
                 getReleaseRepositoryKeysFirst((DeployerOverrider) configurator, build.getParent());
+
+        List<String> virtualRepos = artifactoryServer.getVirtualRepositoryKeys((ResolverOverrider) configurator, build.getParent())
+            .stream()
+            .map(virtual -> virtual.getValue())
+            .sorted()
+            .collect(Collectors.toList());
+
+        repos.addAll(virtualRepos);
         repos.add(0, "");  // option not to move
         return repos;
     }
