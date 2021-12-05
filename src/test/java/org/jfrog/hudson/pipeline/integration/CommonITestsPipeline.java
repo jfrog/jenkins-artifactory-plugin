@@ -116,7 +116,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
                     assertTrue(isExistInWorkspace(slave, pipelineResults, scriptName+"-test-" + i, fileName));
                 }
             }
-            Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
+            BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleDependencies(module, expectedDependencies);
         } finally {
@@ -273,7 +273,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline(pipelineName, false);
-            Build buildInfo = getBuildInfo(artifactoryManager, buildName, BUILD_NUMBER, project);
+            BuildInfo buildInfo = getBuildInfo(artifactoryManager, buildName, BUILD_NUMBER, project);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertEquals(module.getArtifacts().size(), 6);
         } finally {

@@ -5,7 +5,7 @@ import com.google.common.collect.Iterables;
 import hudson.FilePath;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.ci.Dependency;
 import org.jfrog.build.api.dependency.DownloadableArtifact;
 import org.jfrog.build.api.util.FileChecksumCalculator;

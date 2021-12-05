@@ -15,7 +15,7 @@ import hudson.tasks.BuildWrapper;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.ci.Artifact;
 import org.jfrog.build.extractor.ci.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;

@@ -4,7 +4,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import jenkins.model.Jenkins;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.build.extractor.builder.BuildInfoBuilder;
 import org.jfrog.build.extractor.ci.BuildInfoProperties;
 import org.jfrog.build.extractor.ci.BuildRetention;
