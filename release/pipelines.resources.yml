@@ -3,21 +3,16 @@ resources:
     type: GitRepo
     configuration:
       path: jfrog/jenkins-artifactory-plugin
-      gitProvider: github
-      buildOn:
-        pullRequestCreate: true
+      gitProvider: il_automation
       branches:
         include: master
-      cancelPendingRunsOn:
-        pullRequestUpdate: true
 
   - name: jenkinsReleaseGit
     type: GitRepo
     configuration:
       path: jfrog/jenkins-artifactory-plugin
-      gitProvider: github
+      gitProvider: il_automation
       buildOn:
         commit: false
       branches:
         include: master
-

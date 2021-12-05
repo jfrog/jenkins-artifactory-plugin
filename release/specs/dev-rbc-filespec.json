@@ -1,0 +1,8 @@
+{
+  "files": [
+    {
+      "pattern": "ecosys-oss-snapshot-local/(org/jenkins-ci/plugins/artifactory/*/artifactory-*)",
+      "target": "oss-snapshot-local/{1}"
+    }
+  ]
+}

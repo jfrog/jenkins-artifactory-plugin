@@ -1,7 +1,7 @@
 updateCommitStatus: &UPDATE_COMMIT_STATUS update_commit_status jenkinsReleaseGit --context "$step_name"
 
 pipelines:
-  - name: build_jenkins
+  - name: release_jenkins
     configuration:
       runtime:
         type: image
@@ -22,25 +22,24 @@ pipelines:
           inputResources:
             - name: jenkinsReleaseGit
           integrations:
+            - name: il_automation
+            - name: entplus_deployer
             - name: jenkins_artifactory
-            - name: github_generic
             - name: jenkins_id_rsa
         execution:
-          onStart:
-            - *UPDATE_COMMIT_STATUS
-#            - restore_cache_files m2_home ${HOME}/.m2
           onExecute:
             - cd $res_jenkinsReleaseGit_resourcePath
 
             # Set env
             - export CI=true
-            - MVN_PATH=`which mvn` && export M2_HOME=`readlink -f $MVN_PATH | xargs dirname | xargs dirname`
-            - export JFROG_CLI_BUILD_NAME=artifactory-jenkins-plugin
+            - export JFROG_BUILD_STATUS=PASS
+            - export JFROG_CLI_BUILD_NAME=ecosystem-artifactory-jenkins-plugin-release
             - export JFROG_CLI_BUILD_NUMBER=$run_number
+            - export JFROG_CLI_BUILD_PROJECT=ecosys
 
             # Configure git
             - git checkout master
-            - git remote set-url origin https://$int_github_generic_token@github.com/jfrog/jenkins-artifactory-plugin.git
+            - git remote set-url origin https://$int_il_automation_token@github.com/jfrog/jenkins-artifactory-plugin.git
             - eval "$(ssh-agent)" && ssh-add ~/.ssh/jenkins_id_rsa
             - git remote add upstream git@github.com:jenkinsci/artifactory-plugin.git
 
@@ -49,15 +48,12 @@ pipelines:
             - test -n "$NEXT_VERSION" -a "$NEXT_VERSION" != "0.0.0"
             - test -n "$NEXT_DEVELOPMENT_VERSION" -a "$NEXT_DEVELOPMENT_VERSION" != "0.0.0"
 
-            # Download JFrog CLI
-            - curl -fL https://getcli.jfrog.io | bash -s v2
-
             # Configure JFrog CLI
-            - ./jfrog c add jenkins_artifactory --artifactory-url $int_jenkins_artifactory_rt_url --user=$int_jenkins_artifactory_rt_user --password=$int_jenkins_artifactory_rt_password --enc-password=false
-            - ./jfrog rt mvnc --repo-deploy-releases releases --repo-deploy-snapshots snapshots
-
-            # Sync changes with upstream
-            - git pull upstream master
+            - curl -fL https://getcli.jfrog.io/v2-jf | sh && chmod +x jf
+            - ./jf c rm --quiet
+            - ./jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
+            - ./jf c add jenkins --url=$int_jenkins_artifactory_url --user=$int_jenkins_artifactory_user --password=$int_jenkins_artifactory_apikey
+            - ./jf mvnc --repo-resolve-releases ecosys-jenkins-repos --repo-deploy-releases ecosys-oss-release-local
 
             # Update version
             - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
@@ -71,15 +67,27 @@ pipelines:
               env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
-              ./jfrog rt mvn clean install -U -B
-            - ./jfrog rt bag
-            - ./jfrog rt bp
+              JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
+              ./jf rt mvn clean install -U -B
+            - ./jf rt bag && ./jf rt bce
+            - ./jf rt bp
+            # - ./jf bs --fail=false
+
+            # Distribute release bundle
+            - ./jf ds rbc artifactory-jenkins-plugin $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+            - ./jf ds rbd artifactory-jenkins-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
+
+            # Upload plugin to Jenkins Artifactory server
+            - ./jf mvnc --server-id-deploy jenkins --repo-deploy-releases releases --repo-deploy-snapshots snapshots
+            - >
+              env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME
+              ./jf mvn clean install -U -B
 
             # Update next development version
             - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -B
             - git commit -am "[artifactory-release] Next development version [skipRun]"
 
-            # Push changes to JFrog and Jenkins Git
+            # Push changes
             - git push
             - git push upstream master
             - git push upstream master --tags
@@ -89,6 +97,3 @@ pipelines:
             - save_tests $res_jenkinsReleaseGit_resourcePath/target/surefire-reports/
 
             - *UPDATE_COMMIT_STATUS
-
-            # Save .m2 cache
-#            - add_cache_files ${HOME}/.m2 m2_home

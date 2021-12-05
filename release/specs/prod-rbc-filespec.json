@@ -1,0 +1,8 @@
+{
+  "files": [
+    {
+      "pattern": "ecosys-oss-release-local/(org/jenkins-ci/plugins/artifactory/${version}/artifactory-${version})",
+      "target": "oss-release-local/{1}"
+    }
+  ]
+}
