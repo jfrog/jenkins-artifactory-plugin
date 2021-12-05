@@ -8,7 +8,6 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
-import org.apache.commons.compress.utils.Lists;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -230,7 +229,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
      */
     public static void addDeployedArtifactsActionFromDetails(Run<?, ?> build, String artifactoryUrl, Map<String, Set<DeployDetails>> deployableArtifactsByModule) {
         deployableArtifactsByModule.forEach((module, detailsSet) -> {
-            List<DeployedArtifact> curArtifacts = Lists.newArrayList();
+            List<DeployedArtifact> curArtifacts = new ArrayList<>();
             DeployDetails.PackageType packageType = DeployDetails.PackageType.MAVEN;
             for (DeployDetails curDetails : detailsSet) {
                 DeployedArtifact deployedArtifact = new DeployedArtifact(artifactoryUrl, curDetails.getTargetRepository(),
@@ -247,7 +246,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
      * All modules are expected to be of the same package type.
      */
     public static void addDeployedArtifactsActionFromModules(Run<?, ?> build, String artifactoryUrl, List<Module> modules, DeployDetails.PackageType packageType) {
-        List<DeployedArtifact> curArtifacts = Lists.newArrayList();
+        List<DeployedArtifact> curArtifacts = new ArrayList<>();
         for (Module module : modules) {
             if (module.getArtifacts() == null) {
                 continue;
@@ -340,10 +339,10 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
          * Late deploy for build tools' deployable artifacts.
          * Artifacts that were not deployed during the build phase (deployArtifacts set to false at the deployer), can
          * be deployed in a later stage using this callable through the dedicated step.
-         * */
+         */
         public LateDeployCallable(TaskListener listener, Map<String, Set<DeployDetails>> deployableArtifactsByModule,
-                                         org.jfrog.hudson.ArtifactoryServer server, Credentials credentials,
-                                         ProxyConfiguration proxyConfiguration, int threads) {
+                                  org.jfrog.hudson.ArtifactoryServer server, Credentials credentials,
+                                  ProxyConfiguration proxyConfiguration, int threads) {
             this.listener = listener;
             this.deployableArtifactsByModule = deployableArtifactsByModule;
             this.server = server;
