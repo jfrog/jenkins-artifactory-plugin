@@ -45,7 +45,7 @@ node("TestSlave") {
             path: 'declarative-pip-example',
             resolverId: "PIP_RESOLVER",
             args: "-r " + Paths.get(pwd(), "declarative-pip-example", "requirements.txt").toString() + " --no-cache-dir --force-reinstall",
-            envActivation: "${env.JENKINS_PIP_ENV_INIT}".toString(),
+            envActivation: System.getenv("JENKINS_PIP_ENV_INIT") ?: "",
             module: "my-pip-module"
     )
 

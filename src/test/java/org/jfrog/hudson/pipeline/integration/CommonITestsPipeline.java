@@ -363,9 +363,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
             pipelineResults = runPipeline("gradle", false);
             Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
             assertFilteredProperties(buildInfo);
-            assertEquals(4, buildInfo.getModules().size());
+            assertEquals(3, buildInfo.getModules().size());
 
-            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:services:1.0-SNAPSHOT");
             assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.example.gradle:api:1.0-SNAPSHOT");
             assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:shared:1.0-SNAPSHOT");
             assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.example.gradle:webservice:1.0-SNAPSHOT");
@@ -375,7 +374,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void gradleCiServerTest(String buildName) throws Exception {
-        Set<String> expectedArtifacts = Sets.newHashSet(pipelineType.toString() + "-gradle-example-ci-server-1.0.jar", "ivy-1.0.xml", pipelineType.toString() + "-gradle-example-ci-server-1.0.pom");
+        Set<String> expectedArtifacts = Sets.newHashSet(pipelineType.toString() + "-gradle-example-ci-server-1.0.jar", pipelineType.toString() + "-gradle-example-ci-server-1.0.module", pipelineType.toString() + "-gradle-example-ci-server-1.0.pom");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline("gradleCiServer", false);
@@ -458,7 +457,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
             Module module = getAndAssertModule(buildInfo, "DownloadOnly");
             assertTrue(module.getDependencies().size() > 0);
-            module = getAndAssertModule(buildInfo, "zlib/1.2.11@conan/stable");
+            module = getAndAssertModule(buildInfo, "fmt/8.0.1");
             assertTrue(module.getArtifacts().size() > 0);
         } finally {
             cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
@@ -574,7 +573,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void dockerPushTest(String buildName) throws Exception {
-        Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS);
+        Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS || Boolean.parseBoolean(JENKINS_DOCKER_TEST_DISABLE));
         WorkflowRun pipelineResults = null;
 
         try {
@@ -614,7 +613,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     void dockerPullTest(String buildName) throws Exception {
         WorkflowRun pipelineResults = null;
         try {
-            Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS);
+            Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS || Boolean.parseBoolean(JENKINS_DOCKER_TEST_DISABLE));
             // Assert 'JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN' environment variable exist
             String domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN");
             if (StringUtils.isBlank(domainName)) {
@@ -666,7 +665,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertTrue("Expecting message to include: " + expecting + ". Found: " + t.getMessage(),
                     t.getMessage().contains(expecting));
             expecting = "Build " + pipelineType.toString() + ":" + pipelineJobName
-                    + " test number " + BUILD_NUMBER + " was scanned by Xray and 1 Alerts were generated";
+                    + " test number " + BUILD_NUMBER + " was scanned by Xray";
             assertTrue("Expecting message to include: " + expecting + ". Found: " + t.getMessage(),
                     t.getMessage().contains(expecting));
         } finally {
@@ -847,11 +846,11 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void rbCreateUpdateSign(String releaseBundleName) throws Exception {
-        String releaseBundleVersion = "1";
+        String releaseBundleVersion = BUILD_NUMBER;
         runPipeline("rbCreateUpdateSign", false);
 
         GetReleaseBundleStatusResponse status = distributionManager.getReleaseBundleStatus(releaseBundleName, releaseBundleVersion);
-        distributionManager.deleteLocalReleaseBundle(releaseBundleName, "1");
+        distributionManager.deleteLocalReleaseBundle(releaseBundleName, BUILD_NUMBER);
 
         // Make sure release bundle updated
         assertEquals("Update a release bundle", status.getDescription());
@@ -864,7 +863,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void rbCreateDistDel(String releaseBundleName) throws Exception {
-        String releaseBundleVersion = "1";
+        String releaseBundleVersion = BUILD_NUMBER;
         try {
             runPipeline("rbCreateDistDel", false);
             GetReleaseBundleStatusResponse status = distributionManager.getReleaseBundleStatus(releaseBundleName, releaseBundleVersion);
@@ -875,7 +874,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
                 setDistributionRules(Utils.createDistributionRules(new ArrayList<>(), "*", "*"));
             }};
             try {
-                distributionManager.deleteReleaseBundle(releaseBundleName, "1", false, request);
+                distributionManager.deleteReleaseBundle(releaseBundleName, BUILD_NUMBER, false, request);
                 fail("Pipeline 'rbCreateDistDel' failed to delete release bundle '" + releaseBundleName + "'");
             } catch (IOException ignore) {
                 // ignore

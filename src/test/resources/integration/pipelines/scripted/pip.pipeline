@@ -24,7 +24,7 @@ node("TestSlave") {
 
     stage "Install pip"
     String installPath = Paths.get(pwd(), "scripted-pip-example", "requirements.txt").toString()
-    String pipInitScript = "${env.JENKINS_PIP_ENV_INIT}".toString()
+    String pipInitScript =  System.getenv("JENKINS_PIP_ENV_INIT") ?: ""
     rtPip.install buildInfo: buildInfo, args: "-r " + installPath + " --no-cache-dir --force-reinstall", envActivation: pipInitScript, module: "my-pip-module"
 
     stage "Publish build info"

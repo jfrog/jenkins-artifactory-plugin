@@ -1,0 +1,92 @@
+name: Artifactory-Jenkins-Plugin Tests
+on:
+  push:
+  # Triggers the workflow on labeled PRs only.
+  pull_request_target:
+    types: [labeled]
+# Ensures that only the latest commit is running for each PR at a time.
+# Ignores this rule for push events.
+concurrency:
+  group: ${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  Artifactory-Jenkins-Plugin-Tests:
+    if: contains(github.event.pull_request.labels.*.name, 'safe to test') || github.event_name == 'push'
+    name: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.x
+
+      - name: Install npm
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+
+      - name: Install Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: "8"
+          distribution: "adopt"
+
+      - name: Install NuGet
+        uses: nuget/setup-nuget@v1
+        with:
+          nuget-version: 5.x
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.x"
+
+      - name: Setup Python virtual environment
+        run: pip install virtualenv && python -m virtualenv venv
+
+      - name: Activate Python virtual env on Windows
+        if: ${{ runner.os == 'Windows' }}
+        run: . venv\Scripts\activate.ps1
+
+      - name: Activate Python virtual env on Posix
+        if: ${{ runner.os == 'Linux' }}
+        run: source venv/bin/activate
+
+      - name: Install Conan
+        run: pip install conan -q
+
+      - name: maven home on Linux
+        if: ${{ runner.os == 'Linux' }}
+        run: echo "MAVEN_HOME=$(whereis mvn)" >> $GITHUB_ENV
+
+      - name: maven home on Windows
+        if: ${{ runner.os == 'Windows' }}
+        run: echo "MAVEN_HOME=$(which.exe mvn)" >> $GITHUB_ENV
+
+      - name: Disable docker on MacOS
+        if: ${{ runner.os == 'macOS' }}
+        run: |
+          echo "JENKINS_DOCKER_TEST_DISABLE=true" >> $GITHUB_ENV
+          echo "MAVEN_HOME=$(which mvn)" >> $GITHUB_ENV
+          echo "GRADLE_HOME=$(brew info gradle | grep /usr/local/Cellar/gradle | awk '{print $1}')" >> $GITHUB_ENV
+
+      - name: Run tests
+        env:
+          JENKINS_PLATFORM_URL: ${{ secrets.JENKINS_PLATFORM_URL }}
+          JENKINS_PLATFORM_USERNAME: ${{ secrets.JENKINS_PLATFORM_USERNAME }}
+          JENKINS_PLATFORM_ADMIN_TOKEN: ${{ secrets.JENKINS_PLATFORM_ADMIN_TOKEN }}
+          JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN: ${{ secrets.JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN }}
+          JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN: ${{ secrets.JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN }}
+          JENKINS_ARTIFACTORY_DOCKER_PULL_REPO: ${{ secrets.JENKINS_ARTIFACTORY_DOCKER_PULL_REPO }}
+          JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO: ${{ secrets.JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO }}
+        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=false

@@ -5,9 +5,9 @@ env.COLLECT='BAR'
 node("TestSlave") {
     def buildName = "declarative:dockerPush test"
     def buildNumber = "${BUILD_NUMBER}"
-    def host = "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}"
+    def host = System.getenv("JENKINS_ARTIFACTORY_DOCKER_HOST") ?: ""
     def serverId = "Artifactory-1"
-    def domainName = "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN}"
+    def domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN") ?: ""
     if (!domainName.endsWith("/")) {
         domainName += "/"
     }

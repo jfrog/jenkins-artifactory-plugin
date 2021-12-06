@@ -6,7 +6,7 @@ node("TestSlave") {
     def rtServer = jfrogInstance.artifactory
     def dsServer = jfrogInstance.distribution
     def releaseBundleName = "scripted:createUpdateSign"
-    def releaseBundleVersion = "1"
+    def releaseBundleVersion = "${BUILD_NUMBER}"
 
     stage "Upload"
     def uploadSpec = """{

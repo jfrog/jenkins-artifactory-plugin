@@ -3,7 +3,7 @@ package integration.pipelines.scripted
 env.DONT_COLLECT='FOO'
 env.COLLECT='BAR'
 node("TestSlave") {
-    def domainName = "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN}"
+    def domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN") ?: ""
     if (!domainName.endsWith("/")) {
         domainName += "/"
     }

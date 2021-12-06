@@ -67,6 +67,7 @@ public class PipelineTestBase {
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_PLATFORM_USERNAME");
     private static final String ACCESS_TOKEN = System.getenv("JENKINS_PLATFORM_ADMIN_TOKEN");
     static final String JENKINS_XRAY_TEST_ENABLE = System.getenv("JENKINS_XRAY_TEST_ENABLE");
+    static final String JENKINS_DOCKER_TEST_DISABLE = System.getenv("JENKINS_DOCKER_TEST_DISABLE");
     static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
     public static final String BUILD_NUMBER = String.valueOf(System.currentTimeMillis());
     public static final String PROJECT_KEY = "j" + StringUtils.right(String.valueOf(System.currentTimeMillis()), 5);
@@ -251,6 +252,7 @@ public class PipelineTestBase {
             put("GRADLE_CI_PUBLICATION_PROJECT_PATH", getProjectPath("gradle-example-ci-publications"));
             put("NPM_PROJECT_PATH", getProjectPath("npm-example"));
             put("GO_PROJECT_PATH", getProjectPath("go-example"));
+            put("CONAN_PROJECT_PATH", getProjectPath("conana-example"));
             put("PIP_PROJECT_PATH", getProjectPath("pip-example"));
             put("CONAN_PROJECT_PATH", getProjectPath("conan-example"));
             put("DOCKER_PROJECT_PATH", getProjectPath("docker-example"));
