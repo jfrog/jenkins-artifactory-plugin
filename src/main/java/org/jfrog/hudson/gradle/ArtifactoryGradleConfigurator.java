@@ -603,7 +603,9 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private Gradle getLastGradleBuild(AbstractProject project) {
         if (project instanceof Project) {
             List<Gradle> gradles = ActionableHelper.getBuilder((Project) project, Gradle.class);
-            return gradles.stream().reduce((first, second) -> second).orElse(null);
+           if (gradles != null && !gradles.isEmpty()) {
+                return gradles.get(gradles.size()-1);
+            }
         }
         return null;
     }

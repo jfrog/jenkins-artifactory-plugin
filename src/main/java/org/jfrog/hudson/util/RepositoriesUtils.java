@@ -52,6 +52,9 @@ public abstract class RepositoriesUtils {
         List<VirtualRepository> virtualRepositories;
 
         List<String> keys = artifactoryManager.getVirtualRepositoriesKeys();
+        if (keys == null) {
+            return new ArrayList<>();
+        }
         virtualRepositories = keys.stream().map(from -> new VirtualRepository(from, from)).collect(Collectors.toList());
 
         return virtualRepositories;
