@@ -1,4 +1,4 @@
-name: Artifactory-Jenkins-Plugin Tests
+name: Tests
 on:
   push:
   # Triggers the workflow on labeled PRs only.
@@ -65,15 +65,15 @@ jobs:
       - name: Install Conan
         run: pip install conan -q
 
-      - name: maven home on Linux
+      - name: Configure Linux runner
         if: ${{ runner.os == 'Linux' }}
         run: echo "MAVEN_HOME=$(whereis mvn)" >> $GITHUB_ENV
 
-      - name: maven home on Windows
+      - name: Configure Windows runner
         if: ${{ runner.os == 'Windows' }}
         run: echo "MAVEN_HOME=$(which.exe mvn)" >> $GITHUB_ENV
 
-      - name: Disable docker on MacOS
+      - name: Configure MacOS runner
         if: ${{ runner.os == 'macOS' }}
         run: |
           echo "JENKINS_DOCKER_TEST_DISABLE=true" >> $GITHUB_ENV

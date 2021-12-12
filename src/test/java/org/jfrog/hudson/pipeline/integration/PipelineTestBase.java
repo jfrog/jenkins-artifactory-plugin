@@ -252,7 +252,6 @@ public class PipelineTestBase {
             put("GRADLE_CI_PUBLICATION_PROJECT_PATH", getProjectPath("gradle-example-ci-publications"));
             put("NPM_PROJECT_PATH", getProjectPath("npm-example"));
             put("GO_PROJECT_PATH", getProjectPath("go-example"));
-            put("CONAN_PROJECT_PATH", getProjectPath("conana-example"));
             put("PIP_PROJECT_PATH", getProjectPath("pip-example"));
             put("CONAN_PROJECT_PATH", getProjectPath("conan-example"));
             put("DOCKER_PROJECT_PATH", getProjectPath("docker-example"));

@@ -15,7 +15,8 @@ node("TestSlave") {
     def rtGradle = Artifactory.newGradleBuild()
     rtGradle.deployer releaseRepo: "${LOCAL_REPO1}", snapshotRepo: "{LOCAL_REPO1}", server: rtServer
     rtGradle.resolver repo: "${JCENTER_REMOTE_REPO}", server: rtServer
-
+    rtGradle.useWrapper = true
+    
     stage "Copy project example"
     FileUtils.copyDirectory(Paths.get("${GRADLE_CI_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-gradle-example-ci-server").toFile())
 

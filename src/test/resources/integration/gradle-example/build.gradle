@@ -38,7 +38,7 @@ allprojects {
 artifactoryPublish.skip = true
 
 subprojects {
-  apply plugin: 'maven-publish'
+  apply plugin: 'maven'
 
   if (project.plugins.hasPlugin('java')) {
     //manifest.mainAttributes(provider: 'gradle')
@@ -49,7 +49,7 @@ subprojects {
       published
     }
     dependencies {
-      testImplementation 'junit:junit:4.7'
+      testCompile 'junit:junit:4.7'
     }
     task sourceJar(type: Jar) {
       from sourceSets.main.allSource

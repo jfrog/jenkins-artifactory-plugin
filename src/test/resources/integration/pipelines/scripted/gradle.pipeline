@@ -20,7 +20,7 @@ node("TestSlave") {
     rtGradle.deployer repo: "${LOCAL_REPO1}", server: rtServer
     rtGradle.resolver repo: "${JCENTER_REMOTE_REPO}", server: rtServer
     rtGradle.usesPlugin = true
-
+    rtGradle.useWrapper = true
     stage "Copy project example"
     FileUtils.copyDirectory(Paths.get("${GRADLE_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-gradle-example").toFile())
 

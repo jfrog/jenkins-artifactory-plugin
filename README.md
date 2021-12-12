@@ -1,4 +1,4 @@
-[![Artifactory-Jenkins-Plugin Tests](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml)
+[![Tests](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml)
 # Artifactory Plugin for Jenkins
 
 ## General

@@ -42,7 +42,8 @@ node("TestSlave") {
             buildFile: 'build.gradle',
             tasks: 'clean artifactoryPublish',
             deployerId: "GRADLE_DEPLOYER",
-            resolverId: "GRADLE_RESOLVER"
+            resolverId: "GRADLE_RESOLVER",
+            useWrapper: true
     )
 
     stage "Publish build info"

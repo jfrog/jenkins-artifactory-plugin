@@ -23,7 +23,7 @@ buildscript {
 
 allprojects {
   apply plugin: 'java'
-  apply plugin: 'maven-publish'
+  apply plugin: 'maven'
 
   group = 'org.jfrog.example.gradle'
   version = '1.0'
