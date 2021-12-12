@@ -364,7 +364,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             Build buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
             assertFilteredProperties(buildInfo);
             assertEquals(4, buildInfo.getModules().size());
-
+            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.example.gradle:api:1.0-SNAPSHOT");
             assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:services:1.0-SNAPSHOT");
             assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:shared:1.0-SNAPSHOT");
             assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.example.gradle:webservice:1.0-SNAPSHOT");
