@@ -1,5 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/01cimn54er7nna82?svg=true)](https://ci.appveyor.com/project/jfrog-ecosystem/jenkins-artifactory-plugin)
-
+[![Artifactory-Jenkins-Plugin Tests](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml)
 # Artifactory Plugin for Jenkins
 
 ## General
