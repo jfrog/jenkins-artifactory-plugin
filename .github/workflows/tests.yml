@@ -59,7 +59,7 @@ jobs:
         run: . venv\Scripts\activate.ps1
 
       - name: Activate Python virtual env on Posix
-        if: ${{ runner.os == 'Linux' }}
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: source venv/bin/activate
 
       - name: Install Conan
