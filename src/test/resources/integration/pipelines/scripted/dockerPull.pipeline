@@ -10,7 +10,7 @@ node("TestSlave") {
     def rtServer = Artifactory.newServer url: "${env.JENKINS_PLATFORM_URL}".replaceFirst('/*$', '')+'/artifactory', username: "${env.JENKINS_PLATFORM_USERNAME}", password: "${env.JENKINS_PLATFORM_ADMIN_TOKEN}"
 
     stage "dockerPull"
-    def rtDocker = Artifactory.docker (rtServer, "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}")
+    def rtDocker = Artifactory.docker (rtServer, System.getenv("env.JENKINS_ARTIFACTORY_DOCKER_HOST") ?: "")
     def buildInfo = rtDocker.pull imageName, sourceRepo
     buildInfo.name = "scripted:dockerPull test"
     buildInfo.number = ${BUILD_NUMBER}
