@@ -3,7 +3,7 @@ package integration.pipelines.scripted
 env.DONT_COLLECT='FOO'
 env.COLLECT='BAR'
 node("TestSlave") {
-    def domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN") ?: ""
+    def domainName = "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN}"
     if (!domainName.endsWith("/")) {
         domainName += "/"
     }
@@ -17,7 +17,7 @@ node("TestSlave") {
     buildInfo.number = ${BUILD_NUMBER}
 
     stage "dockerPush"
-    def rtDocker = Artifactory.docker (rtServer, System.getenv("env.JENKINS_ARTIFACTORY_DOCKER_HOST") ?: "")
+    def rtDocker = Artifactory.docker (rtServer, "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}")
     rtDocker.push imageName, targetRepo, buildInfo
 
     stage "Publish Build Info"
