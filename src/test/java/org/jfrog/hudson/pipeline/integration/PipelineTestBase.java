@@ -6,11 +6,9 @@ import hudson.model.Slave;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -40,6 +38,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
 
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
@@ -53,7 +52,7 @@ public class PipelineTestBase {
     @ClassRule // The Jenkins instance
     public static JenkinsRule jenkins = new JenkinsRule();
     static Slave slave;
-    private static final Logger log = LogManager.getRootLogger();
+    private static final Logger log = Logger.getLogger(PipelineTestBase.class.getName());
     @Rule
     public TestName testName = new TestName();
     @ClassRule
