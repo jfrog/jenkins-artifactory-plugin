@@ -5,13 +5,7 @@ import com.google.common.collect.ArrayListMultimap;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.Cause;
-import hudson.model.Computer;
-import hudson.model.Node;
-import hudson.model.ParameterValue;
-import hudson.model.ParametersAction;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.plugins.git.util.BuildData;
 import hudson.remoting.Channel;
 import hudson.remoting.LocalChannel;
@@ -34,48 +28,34 @@ import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jfrog.build.extractor.ci.BuildInfoFields;
-import org.jfrog.build.extractor.ci.Vcs;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.extractor.ci.BuildInfoFields;
+import org.jfrog.build.extractor.ci.Vcs;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.client.distribution.types.DistributionRules;
 import org.jfrog.build.extractor.clientConfiguration.client.distribution.types.ReleaseNotes;
 import org.jfrog.build.extractor.clientConfiguration.util.GitUtils;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.common.types.ConanClient;
-import org.jfrog.hudson.pipeline.common.types.DistributionConfig;
-import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
-import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
+import org.jfrog.hudson.pipeline.common.types.*;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
-import org.jfrog.hudson.util.ExtractorUtils;
-import org.jfrog.hudson.util.IncludesExcludes;
-import org.jfrog.hudson.util.JenkinsBuildInfoLog;
-import org.jfrog.hudson.util.ProxyUtils;
-import org.jfrog.hudson.util.RepositoriesUtils;
+import org.jfrog.hudson.util.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.BUILD_NAME;
 import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.BUILD_NUMBER;
 import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.PROJECT;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.*;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
 /**
@@ -189,21 +169,6 @@ public class Utils {
         }
 
         return buildVariables;
-    }
-
-    public static List<Vcs> extractVcsBuildData(Run build) {
-        List<Vcs> result = new ArrayList<Vcs>();
-        List<BuildData> buildData = build.getActions(BuildData.class);
-        if (buildData != null) {
-            for (BuildData data : buildData) {
-                String sha1 = data.getLastBuiltRevision().getSha1String();
-                Iterator<String> iterator = data.getRemoteUrls().iterator();
-                if (iterator.hasNext()) {
-                    result.add(new Vcs(iterator.next(), sha1));
-                }
-            }
-        }
-        return result;
     }
 
     public static Vcs extractVcs(FilePath filePath, Log log) throws IOException, InterruptedException {
@@ -457,6 +422,14 @@ public class Utils {
         String gitUrl = ExtractorUtils.getVcsUrl(env);
         if (isNotBlank(gitUrl)) {
             properties.put(BuildInfoFields.VCS_URL, gitUrl);
+        }
+        String gitBranch = ExtractorUtils.getVcsBranch(env);
+        if (isNotBlank(gitBranch)) {
+            properties.put(BuildInfoFields.VCS_BRANCH, gitBranch);
+        }
+        String gitMessage = ExtractorUtils.getVcsMessage(env);
+        if (isNotBlank(gitMessage)) {
+            properties.put(BuildInfoFields.VCS_MESSAGE, gitMessage);
         }
     }
 

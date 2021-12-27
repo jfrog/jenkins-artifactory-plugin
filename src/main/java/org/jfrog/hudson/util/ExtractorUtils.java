@@ -80,6 +80,8 @@ public class ExtractorUtils {
     public static final String EXTRACTOR_USED = "extractor.used";
     public static final String GIT_COMMIT = "GIT_COMMIT";
     public static final String GIT_URL = "GIT_URL";
+    public static final String GIT_BRANCH = "GIT_BRANCH";
+    public static final String GIT_MESSAGE = "GIT_MESSAGE";
 
     private ExtractorUtils() {
         // utility class
@@ -122,10 +124,34 @@ public class ExtractorUtils {
         return url;
     }
 
+    /**
+     * Get the git branch from the Jenkins build environment.
+     *
+     * @param env Th Jenkins build environment.
+     * @return The vcs branch for git.
+     */
+    public static String getVcsBranch(Map<String, String> env) {
+        String branch = env.get(GIT_BRANCH);
+        return branch != null ? branch : "";
+    }
+
+    /**
+     * Get the git message from the Jenkins build environment.
+     *
+     * @param env The Jenkins build environment.
+     * @return The vcs message for git.
+     */
+    public static String getVcsMessage(Map<String, String> env) {
+        String message = env.get(GIT_MESSAGE);
+        return message != null ? message : "";
+    }
+
     public static void addVcsDetailsToEnv(FilePath filePath, EnvVars env, TaskListener listener) throws IOException, InterruptedException {
         Vcs vcs = Utils.extractVcs(filePath, new JenkinsBuildInfoLog(listener));
         env.put(GIT_COMMIT, StringUtils.defaultIfEmpty(vcs.getRevision(), ""));
         env.put(GIT_URL, StringUtils.defaultIfEmpty(vcs.getUrl(), ""));
+        env.put(GIT_BRANCH, StringUtils.defaultIfEmpty(vcs.getBranch(), ""));
+        env.put(GIT_MESSAGE, StringUtils.defaultIfEmpty(vcs.getMessage(), ""));
     }
 
     /*
@@ -307,6 +333,18 @@ public class ExtractorUtils {
         if (StringUtils.isNotBlank(vcsUrl)) {
             configuration.info.setVcsUrl(vcsUrl);
             configuration.publisher.addMatrixParam(BuildInfoFields.VCS_URL, vcsUrl);
+        }
+
+        String vcsBranch = getVcsBranch(env);
+        if (StringUtils.isNotBlank(vcsBranch)) {
+            configuration.info.setVcsBranch(vcsBranch);
+            configuration.publisher.addMatrixParam(BuildInfoFields.VCS_BRANCH, vcsBranch);
+        }
+
+        String vcsMessage = getVcsMessage(env);
+        if (StringUtils.isNotBlank(vcsMessage)) {
+            configuration.info.setVcsBranch(vcsMessage);
+            configuration.publisher.addMatrixParam(BuildInfoFields.VCS_MESSAGE, vcsMessage);
         }
 
         if (StringUtils.isNotBlank(context.getArtifactsPattern())) {

@@ -36,7 +36,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
     private final String platformUrl;
 
     public BuildInfoDeployer(ArtifactoryConfigurator configurator, ArtifactoryManager artifactoryManager,
-                             Run build, TaskListener listener, BuildInfo deployedBuildInfo,  String platformUrl) throws IOException, InterruptedException {
+                             Run build, TaskListener listener, BuildInfo deployedBuildInfo, String platformUrl) throws IOException, InterruptedException {
         super(configurator, build, listener, artifactoryManager);
         this.configurator = configurator;
         this.build = build;
@@ -67,28 +67,17 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
             buildInfo.setIssues(deployedBuildInfo.getConvertedIssues());
         }
 
-        addVcsDataToBuild(build, deployedBuildInfo);
+        addVcsDataToBuild(deployedBuildInfo);
     }
 
-    private void addVcsDataToBuild(Run build, BuildInfo deployedBuildInfo) {
-        List<Vcs> vcsList = getVcsFromGitPlugin(build);
-
-        // If collected VCS in a different flow
-        if (CollectionUtils.isNotEmpty(deployedBuildInfo.getVcs())) {
-            vcsList.addAll(deployedBuildInfo.getVcs());
+    private void addVcsDataToBuild(BuildInfo deployedBuildInfo) {
+        if (CollectionUtils.isEmpty(deployedBuildInfo.getVcs())) {
+            return;
         }
-
+        List<Vcs> vcsList = deployedBuildInfo.getVcs();
         // Keep only distinct values
         vcsList = vcsList.stream().distinct().collect(Collectors.toList());
         buildInfo.setVcs(vcsList);
-    }
-
-    private List<Vcs> getVcsFromGitPlugin(Run build) {
-        if (Jenkins.get().getPlugin(PluginsUtils.GIT_PLUGIN_ID) == null) {
-            return new ArrayList<>();
-        }
-        List<Vcs> vcsList = Utils.extractVcsBuildData(build);
-        return vcsList;
     }
 
     public void deploy() throws IOException {

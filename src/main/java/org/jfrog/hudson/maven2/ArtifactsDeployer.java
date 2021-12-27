@@ -193,6 +193,14 @@ public class ArtifactsDeployer {
         if (StringUtils.isNotBlank(url)) {
             builder.addProperty(BuildInfoFields.VCS_URL, url);
         }
+        String branch = ExtractorUtils.getVcsBranch(env);
+        if (StringUtils.isNotBlank(branch)) {
+            builder.addProperty(BuildInfoFields.VCS_BRANCH, branch);
+        }
+        String message = ExtractorUtils.getVcsMessage(env);
+        if (StringUtils.isNotBlank(url)) {
+            builder.addProperty(BuildInfoFields.VCS_MESSAGE, message);
+        }
         addDeploymentProperties(builder);
         DeployDetails deployDetails = builder.build();
         logDeploymentPath(deployDetails, artifactPath);
