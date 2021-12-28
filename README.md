@@ -43,7 +43,7 @@ See [here](https://www.jfrog.com/confluence/display/JFROG/Access+Tokens#AccessTo
 *JENKINS_ARTIFACTORY_DOCKER_HOST* - Optional address of the docker daemon (For example, tcp://127.0.0.1:1234)<br>
 *JENKINS_PIP_ENV_INIT* - Optional command to activate pip virtual-environment for tests execution (For example, source /Users/user/jenkins-venv/bin/activate)<br>
 *MAVEN_HOME* - The local maven installation path.<br>
-*GRADLE_HOME* - The local gradle installation path).<br>
+*GRADLE_HOME* - The local gradle installation path.<br>
 
 To disable build scan with Xray integration tests, set *JENKINS_XRAY_TEST_ENABLE* to *false*.
 Go tests require Go v1.14 or above.
