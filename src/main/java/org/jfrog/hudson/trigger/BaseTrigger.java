@@ -1,6 +1,7 @@
 package org.jfrog.hudson.trigger;
 
 import antlr.ANTLRException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.BuildableItem;
 import hudson.triggers.Trigger;
 import hudson.triggers.TriggerDescriptor;
@@ -56,6 +57,7 @@ public abstract class BaseTrigger<JobType extends BuildableItem> extends Trigger
         return this.paths;
     }
 
+    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH", justification = "job will be set by jenkins")
     public void run() {
         if (job == null) {
             return;

@@ -4,12 +4,7 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.matrix.MatrixConfiguration;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.Item;
-import hudson.model.Result;
+import hudson.model.*;
 import hudson.tasks.BuildWrapper;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
@@ -53,6 +48,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
@@ -452,7 +448,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
 
                     return true;
                 } catch (Exception e) {
-                    e.printStackTrace(listener.error(e.getMessage()));
+                    listener.getLogger().println(e);
                 }
 
                 // failed

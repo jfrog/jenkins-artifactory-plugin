@@ -8,6 +8,7 @@ import java.io.Serializable;
  * Created by yahavi on 29/03/2017.
  */
 public class PromotionConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String id;
     private String buildName;

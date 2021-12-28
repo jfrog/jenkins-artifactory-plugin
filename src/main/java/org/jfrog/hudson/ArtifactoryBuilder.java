@@ -195,7 +195,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 });
                 String outputMessage = createTestConnectionMessage(artifactoryManager, targetArtUrl, "JFrog Artifactory");
                 if (StringUtils.isNotEmpty(targetDisUrl)) {
-                    outputMessage += String.format("\n%s", createTestConnectionMessage(distributionManager, targetDisUrl, "JFrog Distribution"));
+                    outputMessage += String.format("%n%s", createTestConnectionMessage(distributionManager, targetDisUrl, "JFrog Distribution"));
                 }
                 return FormValidation.ok(outputMessage);
             } finally {

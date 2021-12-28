@@ -136,6 +136,10 @@ public class PublisherContext {
         return threads;
     }
 
+    public int getConnectionRetry() {
+        return connectionRetry;
+    }
+
     public final String getArtifactoryName() {
         return serverDetails != null ? serverDetails.artifactoryName : null;
     }

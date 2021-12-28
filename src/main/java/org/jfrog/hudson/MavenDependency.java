@@ -26,6 +26,8 @@ import java.io.Serializable;
  * @author Yossi Shaul
  */
 public class MavenDependency implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String id;
     private String groupId;
     private String artifactId;

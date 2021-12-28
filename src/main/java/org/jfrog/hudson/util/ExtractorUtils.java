@@ -642,8 +642,9 @@ public class ExtractorUtils {
             public FilePath call() {
                 final FilePath tempDir = ws.sibling(ws.getName() + Objects.toString(workspaceList, "@") + "tmp").child("artifactory");
                 File tempDirFile = new File(tempDir.getRemote());
-                tempDirFile.mkdirs();
-                tempDirFile.deleteOnExit();
+                if (tempDirFile.mkdirs()) {
+                    tempDirFile.deleteOnExit();
+                }
                 return tempDir;
             }
         });

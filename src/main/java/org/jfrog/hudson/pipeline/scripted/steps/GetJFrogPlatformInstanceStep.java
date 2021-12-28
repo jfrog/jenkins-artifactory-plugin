@@ -29,7 +29,7 @@ public class GetJFrogPlatformInstanceStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousStepExecution<JFrogPlatformInstance> {
-
+        protected static final long serialVersionUID = 1L;
         private transient final GetJFrogPlatformInstanceStep step;
 
         @Inject

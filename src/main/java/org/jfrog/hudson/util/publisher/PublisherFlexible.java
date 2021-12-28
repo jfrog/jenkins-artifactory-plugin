@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class PublisherFlexible<T extends Publisher> implements PublisherFind<T> {
 
-    public static String FLEXIBLE_PUBLISH_PLUGIN = "flexible-publish";
+    public final static String FLEXIBLE_PUBLISH_PLUGIN = "flexible-publish";
 
     /**
      * Gets the publisher wrapped by the specofoed FlexiblePublisher.

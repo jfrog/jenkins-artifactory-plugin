@@ -23,6 +23,8 @@ import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -61,8 +63,8 @@ public class DeclarativePipelineUtils {
         return createAndGetTempDir(rootWs).act(new ReadBuildDataFileCallable(buildNumber, stepName, stepId));
     }
 
-    static String getBuildDataFileName(String stepName, String stepId) {
-        return stepName + "_" + Base64.encodeBase64URLSafeString(stepId.getBytes());
+    static String getBuildDataFileName(String stepName, String stepId) throws UnsupportedEncodingException {
+        return stepName + "_" + Base64.encodeBase64URLSafeString(stepId.getBytes(StandardCharsets.UTF_8.name()));
     }
 
     /**

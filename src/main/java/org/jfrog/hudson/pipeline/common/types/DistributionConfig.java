@@ -7,6 +7,8 @@ import java.util.List;
  * Created by yahavi on 12/04/2017.
  */
 public class DistributionConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private String buildName;
     private String buildNumber;
     private boolean publish = true;

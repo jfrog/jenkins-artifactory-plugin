@@ -32,7 +32,7 @@ public class PublishBuildInfoStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Boolean> {
-
+    protected static final long serialVersionUID = 1L;
         private transient PublishBuildInfoStep step;
 
         @Inject

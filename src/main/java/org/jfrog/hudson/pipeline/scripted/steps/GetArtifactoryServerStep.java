@@ -31,7 +31,7 @@ public class GetArtifactoryServerStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousStepExecution<ArtifactoryServer> {
-
+        protected static final long serialVersionUID = 1L;
         private transient final GetArtifactoryServerStep step;
 
         @Inject

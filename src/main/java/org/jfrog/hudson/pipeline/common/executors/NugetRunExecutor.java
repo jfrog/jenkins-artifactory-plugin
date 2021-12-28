@@ -15,16 +15,14 @@ import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
 public class NugetRunExecutor extends BuildInfoProcessRunner {
 
-    private NugetBuild nugetBuild;
-    private String nugetArgs;
-    private Log logger;
+    private final NugetBuild nugetBuild;
+    private final String nugetArgs;
 
     public NugetRunExecutor(BuildInfo buildInfo, Launcher launcher, NugetBuild nugetBuild, String javaArgs, String nugetArgs, FilePath ws, String module, EnvVars env, TaskListener listener, Run build) {
         // For NuGet command the path parameter is irrelevant, so an empty string is passed.
         super(buildInfo, launcher, javaArgs, ws, StringUtils.EMPTY, module, env, listener, build);
         this.nugetBuild = nugetBuild;
         this.nugetArgs = nugetArgs;
-        this.logger = new JenkinsBuildInfoLog(listener);
     }
 
     @Override

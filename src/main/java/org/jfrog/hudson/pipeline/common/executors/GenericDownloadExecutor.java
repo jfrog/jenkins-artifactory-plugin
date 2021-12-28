@@ -28,7 +28,7 @@ public class GenericDownloadExecutor implements Executor {
     private TaskListener listener;
     private String spec;
     private String moduleName;
-    public static String FAIL_NO_OP_ERROR_MESSAGE = "Fail-no-op: No files were affected in the download process.";
+    public final static String FAIL_NO_OP_ERROR_MESSAGE = "Fail-no-op: No files were affected in the download process.";
 
     public GenericDownloadExecutor(ArtifactoryServer server, TaskListener listener, Run build, FilePath ws, BuildInfo buildInfo, String spec, boolean failNoOp, String moduleName) {
         this.build = build;

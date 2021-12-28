@@ -46,12 +46,9 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.bind.JavaScriptMethod;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * {@link Publisher} for {@link hudson.maven.MavenModuleSetBuild} to deploy artifacts to Artifactory only after a build
@@ -305,7 +302,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     @Override
     public boolean perform(AbstractBuild build, Launcher launcher, BuildListener listener)
             throws InterruptedException, IOException {
-        if (build.getResult().isWorseThan(getTreshold())) {
+        if (build.getResult().isWorseThan(getThreshold())) {
             return true;    // build failed. Don't publish
         }
         if (isBuildFromM2ReleasePlugin(build)) {
@@ -358,7 +355,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
             }
             return true;
         } catch (Exception e) {
-            e.printStackTrace(listener.error(e.getMessage()));
+            listener.getLogger().println(e);
         }
         // failed
         build.setResult(Result.FAILURE);
@@ -410,7 +407,8 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         return RepositoriesUtils.getArtifactoryServer(getArtifactoryName());
     }
 
-    private Result getTreshold() {
+    @Nonnull
+    private Result getThreshold() {
         if (evenIfUnstable) {
             return Result.UNSTABLE;
         } else {

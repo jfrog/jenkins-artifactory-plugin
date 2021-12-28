@@ -14,6 +14,8 @@ import java.util.Arrays;
  * Created by romang on 12/22/16.
  */
 public class XrayScanResult implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private ArtifactoryXrayResponse scanResult;
 
     public XrayScanResult(ArtifactoryXrayResponse result) {

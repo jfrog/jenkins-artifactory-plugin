@@ -9,6 +9,7 @@ import java.io.Serializable;
  * Created by romang on 4/21/16.
  */
 public class PromotionConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String buildName;
     private String buildNumber;

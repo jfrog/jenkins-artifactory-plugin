@@ -136,11 +136,11 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
 
     @JsonIgnore
     public CredentialsConfig getDeployerCredentialsConfig() {
-        try {
-            return getArtifactoryServer().getDeployerCredentialsConfig();
-        } catch (NullPointerException e) {
+        org.jfrog.hudson.ArtifactoryServer server = getArtifactoryServer();
+        if (server == null) {
             throw new IllegalStateException("Artifactory server is missing.");
         }
+        return server.getDeployerCredentialsConfig();
     }
 
     public boolean isDeployBuildInfo() {

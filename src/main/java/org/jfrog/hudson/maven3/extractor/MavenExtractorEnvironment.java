@@ -108,7 +108,8 @@ public class MavenExtractorEnvironment extends Environment {
                 return;
             }
         } catch (Exception e) {
-            e.printStackTrace(buildListener.error("Unable to determine Maven version"));
+            buildListener.error("Unable to determine Maven version");
+            buildListener.getLogger().println(e);
             return;
         }
 

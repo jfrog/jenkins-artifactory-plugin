@@ -17,6 +17,8 @@ import java.util.*;
  * Represents an instance of Distribution configuration from pipeline script.
  */
 public class DistributionServer implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private static final String RELEASE_NOTES_SYNTAX = "releaseNotesSyntax";
     private static final String RELEASE_NOTES_PATH = "releaseNotesPath";
     private static final String SIGN_IMMEDIATELY = "signImmediately";

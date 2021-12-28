@@ -10,6 +10,8 @@ import java.io.Serializable;
  * @author Noam Y. Tenne
  */
 public class IncludesExcludes implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final String includePatterns;
     private final String excludePatterns;
 

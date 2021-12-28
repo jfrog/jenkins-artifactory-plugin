@@ -16,6 +16,7 @@
 
 package org.jfrog.hudson;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.util.XStream2;
 import org.apache.commons.lang3.StringUtils;
 import org.jfrog.hudson.util.converters.ServerDetailsConverter;
@@ -73,10 +74,12 @@ public class ServerDetails {
     /**
      * Display name of repository to use to download snapshots artifacts
      */
+    @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "written by jelly")
     private String downloadSnapshotRepositoryDisplayName;
     /**
      * Display name of repository to use to download artifacts
      */
+    @SuppressFBWarnings(value = "UWF_UNWRITTEN_FIELD", justification = "written by jelly")
     private String downloadReleaseRepositoryDisplayName;
     private PluginSettings stagingPlugin;
     private String userPluginKey;

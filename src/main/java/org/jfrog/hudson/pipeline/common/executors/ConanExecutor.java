@@ -16,10 +16,8 @@ import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.util.ExtractorUtils;
 import org.jfrog.hudson.util.JenkinsBuildInfoLog;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 public class ConanExecutor implements Executor {
     private static final String CONAN_CLIENT_EXEC = "conan";
@@ -152,7 +150,7 @@ public class ConanExecutor implements Executor {
         }
 
         public Boolean invoke(File conanProperties, VirtualChannel channel) throws IOException, InterruptedException {
-            try (PrintWriter pw = new PrintWriter(new FileWriter(conanProperties.getCanonicalFile()));) {
+            try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(new FileOutputStream(conanProperties.getCanonicalFile()), StandardCharsets.UTF_8.name()))) {
                 pw.println(String.format("%s=%s", PROPS_PREFIX + BuildInfoFields.BUILD_NAME, buildInfo.getName()));
                 pw.println(String.format("%s=%s", PROPS_PREFIX + BuildInfoFields.BUILD_NUMBER, buildInfo.getNumber()));
                 pw.println(String.format("%s=%s", PROPS_PREFIX + BuildInfoFields.BUILD_TIMESTAMP, String.valueOf(startTime)));

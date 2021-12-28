@@ -17,6 +17,7 @@ package org.jfrog.hudson.release.promotion;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.*;
 import hudson.security.ACL;
 import hudson.security.Permission;
@@ -108,6 +109,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
      * @return JSON string representation of the LoadBuildsResponse class.
      */
     @SuppressWarnings({"UnusedDeclaration"})
+    @SuppressFBWarnings(value = "INFORMATION_EXPOSURE_THROUGH_AN_ERROR_MESSAGE")
     public String getBuildsData() {
         try {
             return createMapper().writeValueAsString(loadBuilds());
@@ -419,7 +421,8 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                 }
                 workerThread = null;
             } catch (Throwable e) {
-                e.printStackTrace(listener.error(e.getMessage()));
+                listener.error(e.getMessage());
+                listener.getLogger().println(e);
             }
         }
 

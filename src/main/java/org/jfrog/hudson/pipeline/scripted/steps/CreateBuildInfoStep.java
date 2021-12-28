@@ -20,7 +20,7 @@ public class CreateBuildInfoStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousStepExecution<BuildInfo> {
-
+        protected static final long serialVersionUID = 1L;
         private transient CreateBuildInfoStep step;
 
         @Inject

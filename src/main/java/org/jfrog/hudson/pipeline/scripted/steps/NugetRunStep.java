@@ -33,7 +33,7 @@ public class NugetRunStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<BuildInfo> {
-
+    protected static final long serialVersionUID = 1L;
         private transient NugetRunStep step;
 
         @Inject

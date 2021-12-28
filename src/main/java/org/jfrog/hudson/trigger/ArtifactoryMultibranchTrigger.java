@@ -1,6 +1,7 @@
 package org.jfrog.hudson.trigger;
 
 import antlr.ANTLRException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.Extension;
 import hudson.model.BuildableItem;
 import hudson.model.Item;
@@ -30,6 +31,7 @@ public class ArtifactoryMultibranchTrigger extends BaseTrigger<MultiBranchProjec
 
     @Override
     @SuppressWarnings("ConstantConditions")
+    @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH", justification = "job will be set by jenkins")
     List<BuildableItem> getJobsToTrigger() {
         return getJobsToTrigger(job.getAllJobs());
     }

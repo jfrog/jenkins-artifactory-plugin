@@ -6,6 +6,7 @@ import java.io.Serializable;
  * @author Noam Y. Tenne
  */
 public class PromotionConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private String targetRepository;
     private String comment;

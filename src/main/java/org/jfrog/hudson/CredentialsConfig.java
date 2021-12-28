@@ -20,6 +20,7 @@ import java.io.Serializable;
  * @author Aviad Shikloshi
  */
 public class CredentialsConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     public static final CredentialsConfig EMPTY_CREDENTIALS_CONFIG =
             new CredentialsConfig(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY, false);
@@ -47,7 +48,7 @@ public class CredentialsConfig implements Serializable {
      */
     @DataBoundConstructor
     public CredentialsConfig(String username, String password, String credentialsId, Boolean overridingCredentials) {
-        this.overridingCredentials = overridingCredentials == null ? false : overridingCredentials;
+        this.overridingCredentials = overridingCredentials != null && overridingCredentials;
         if (overridingCredentials == null || overridingCredentials.equals(Boolean.TRUE)) {
             this.username = Secret.fromString(username);
             this.password = Secret.fromString(password);

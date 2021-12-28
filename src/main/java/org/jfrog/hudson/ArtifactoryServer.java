@@ -56,6 +56,8 @@ import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
  * @author Yossi Shaul
  */
 public class ArtifactoryServer implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private static final Logger log = Logger.getLogger(ArtifactoryServer.class.getName());
 
     private String url;

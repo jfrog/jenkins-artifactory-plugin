@@ -81,7 +81,7 @@ public class CreateServerStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
-
+protected static final long serialVersionUID = 1L;
         private transient final CreateServerStep step;
 
         @Inject

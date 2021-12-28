@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class JFrogPipelineGlobal implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private static final String CREDENTIALS_ID = "credentialsId";
     private static final String DS_URL = "distributionUrl";
     private static final String RT_URL = "artifactoryUrl";

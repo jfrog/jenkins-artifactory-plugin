@@ -6,6 +6,7 @@ import java.io.Serializable;
  * @author Noam Y. Tenne
  */
 public class VcsConfig implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private boolean useReleaseBranch;
     private String releaseBranchName;

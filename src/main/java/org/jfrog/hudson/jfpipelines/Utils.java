@@ -1,6 +1,7 @@
 package org.jfrog.hudson.jfpipelines;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.FilePath;
 import hudson.model.*;
 import jenkins.model.Jenkins;
@@ -133,6 +134,7 @@ public class Utils {
      * @param build - The build
      * @return Job info map.
      */
+    @SuppressFBWarnings(value = "SE_BAD_FIELD")
     public static Map<String, String> createJobInfo(Run<?, ?> build) {
         Cause.UserIdCause cause = build.getCause(Cause.UserIdCause.class);
         return new HashMap<String, String>() {{

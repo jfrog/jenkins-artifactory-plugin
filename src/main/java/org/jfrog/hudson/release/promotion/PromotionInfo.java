@@ -1,5 +1,6 @@
 package org.jfrog.hudson.release.promotion;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.jfrog.hudson.BuildInfoAwareConfigurator;
 
 import java.io.Serializable;
@@ -7,7 +8,9 @@ import java.io.Serializable;
 /**
  * Created by yahavi on 14/03/2017.
  */
+@SuppressFBWarnings(value = "SE_BAD_FIELD")
 public class PromotionInfo implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private PromotionConfig promotionConfig;
     private BuildInfoAwareConfigurator configurator;

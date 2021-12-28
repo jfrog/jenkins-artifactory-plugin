@@ -10,6 +10,8 @@ import java.io.Serializable;
  */
 @SuppressWarnings("unused")
 public class Filter implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     protected IncludeExcludePatterns patternFilter;
 
     public Filter() {

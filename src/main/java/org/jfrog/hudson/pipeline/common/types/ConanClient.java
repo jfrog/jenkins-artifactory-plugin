@@ -11,6 +11,8 @@ import java.util.Map;
 import static org.jfrog.hudson.pipeline.common.Utils.appendBuildInfo;
 
 public class ConanClient implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public final static String CONAN_LOG_FILE = "conan_log.log";
     private transient CpsScript cpsScript;
     private String userPath;
