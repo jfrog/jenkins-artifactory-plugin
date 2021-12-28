@@ -92,4 +92,4 @@ jobs:
           JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN: ${{ secrets.JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN }}
           JENKINS_ARTIFACTORY_DOCKER_PULL_REPO: ${{ secrets.JENKINS_ARTIFACTORY_DOCKER_PULL_REPO }}
           JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO: ${{ secrets.JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO }}
-        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=false -Dfindbugs.failOnError=false
+        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=false "-Dfindbugs.failOnError=false"

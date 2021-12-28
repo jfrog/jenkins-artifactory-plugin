@@ -16,5 +16,5 @@ jobs:
       - name: Configure Linux runner
         run: echo "MAVEN_HOME=$(whereis mvn)" >> $GITHUB_ENV
 
-      - name: Run tests
-        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=true -Dfindbugs.failOnError=true
+      - name: Run Analysis
+        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=true "-Dfindbugs.failOnError=true"
