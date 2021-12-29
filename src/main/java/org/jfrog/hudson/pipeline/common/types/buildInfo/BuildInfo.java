@@ -409,10 +409,7 @@ public class BuildInfo implements Serializable {
                 }
             }
             // For backward computability, returns the necessary build info props if no props exists in DeployableArtifactDetail
-            if (properties.isEmpty()) {
-                return propertiesMap;
-            }
-            return properties;
+            return !properties.isEmpty() ? properties : propertiesMap;
         }
 
         private ArrayListMultimap<String, String> getBuildPropertiesMap(BuildInfo buildInfo) {
