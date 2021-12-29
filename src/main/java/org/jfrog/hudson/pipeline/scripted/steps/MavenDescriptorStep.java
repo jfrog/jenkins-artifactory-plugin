@@ -13,6 +13,7 @@ import org.jfrog.build.extractor.maven.reader.ModuleName;
 import org.jfrog.build.extractor.maven.transformer.PomTransformer;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.BufferedReader;
@@ -63,7 +64,7 @@ public class MavenDescriptorStep extends AbstractStepImpl {
         return versionPerModule;
     }
 
-    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Boolean> {
+    public static class Execution extends ArtifactorySynchronousStepExecution<Boolean> {
 
         private transient MavenDescriptorStep step;
         private String pomFile;
