@@ -404,7 +404,7 @@ public class BuildInfo implements Serializable {
 
         private ArrayListMultimap<String, String> getDeployableArtifactPropertiesMap(DeployableArtifactDetail artifact) {
             ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
-            if (MapUtils.isEmpty(artifact.getProperties())){
+            if (MapUtils.isEmpty(artifact.getProperties())) {
                 // For backward computability, returns the necessary build info props if no props exists
                 // in DeployableArtifactDetail
                 return propertiesMap;
