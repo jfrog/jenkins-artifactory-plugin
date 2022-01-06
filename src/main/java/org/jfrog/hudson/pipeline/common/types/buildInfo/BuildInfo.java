@@ -8,6 +8,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -403,13 +404,17 @@ public class BuildInfo implements Serializable {
 
         private ArrayListMultimap<String, String> getDeployableArtifactPropertiesMap(DeployableArtifactDetail artifact) {
             ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+            if (MapUtils.isEmpty(artifact.getProperties())){
+                // For backward computability, returns the necessary build info props if no props exists
+                // in DeployableArtifactDetail
+                return propertiesMap;
+            }
             for (String propKey : artifact.getProperties().keySet()) {
                 for (String propVal : artifact.getProperties().get(propKey)) {
                     properties.put(propKey, propVal);
                 }
             }
-            // For backward computability, returns the necessary build info props if no props exists in DeployableArtifactDetail
-            return !properties.isEmpty() ? properties : propertiesMap;
+            return properties;
         }
 
         private ArrayListMultimap<String, String> getBuildPropertiesMap(BuildInfo buildInfo) {
