@@ -14,6 +14,7 @@ public class File implements Serializable {
     private String remotePath;
     private String md5;
     private String sha1;
+    private String sha256;
 
     public File() {
     }
@@ -23,6 +24,7 @@ public class File implements Serializable {
         this.remotePath = baseBuildFileBean.getRemotePath();
         this.md5 = baseBuildFileBean.getMd5();
         this.sha1 = baseBuildFileBean.getSha1();
+        this.sha256 = baseBuildFileBean.getSha256();
     }
 
     @Whitelisted
@@ -43,6 +45,11 @@ public class File implements Serializable {
     @Whitelisted
     public String getSha1() {
         return sha1;
+    }
+
+    @Whitelisted
+    public String getSha256() {
+        return sha256;
     }
 
     @Override
@@ -67,6 +74,7 @@ public class File implements Serializable {
         return "{localPath='" + localPath + "\', " +
                 "remotePath='" + remotePath + "\', " +
                 "md5=" + md5 + ", " +
+                "sha256=" + sha256 + ", " +
                 "sha1=" + sha1 + "}";
     }
 }
