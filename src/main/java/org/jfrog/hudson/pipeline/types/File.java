@@ -71,8 +71,8 @@ public class File implements Serializable {
 
     @Override
     public String toString() {
-        return "{localPath='" + localPath + "\', " +
-                "remotePath='" + remotePath + "\', " +
+        return "{localPath='" + localPath + "', " +
+                "remotePath='" + remotePath + "', " +
                 "md5=" + md5 + ", " +
                 "sha256=" + sha256 + ", " +
                 "sha1=" + sha1 + "}";
