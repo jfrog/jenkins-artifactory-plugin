@@ -270,17 +270,18 @@ public class Utils {
      * @param ws       - The workspace
      */
     public static void launch(String taskName, Launcher launcher, ArgumentListBuilder args, EnvVars env, TaskListener listener, FilePath ws) {
-        boolean failed;
+
         try {
             int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(ws).join();
-            failed = (exitValue != 0);
+            if (exitValue != 0) {
+                throw new RuntimeException(taskName + " build failed with exit code " + exitValue);
+            }
         } catch (Exception e) {
-            listener.error("Couldn't execute " + taskName + " task. " + ExceptionUtils.getMessage(e));
-            failed = true;
+            String errorMessage = "Couldn't execute " + taskName + " task. " + ExceptionUtils.getMessage(e);
+            listener.error(errorMessage);
+            throw new RuntimeException(taskName + " build failed. " + errorMessage, e);
         }
-        if (failed) {
-            throw new RuntimeException(taskName + " build failed");
-        }
+
     }
 
     public static String getJavaPathBuilder(String jdkBinPath, Launcher launcher) {
