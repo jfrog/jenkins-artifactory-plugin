@@ -12,6 +12,7 @@ public class PromotionConfig implements Serializable {
     private String id;
     private String buildName;
     private String buildNumber;
+    private String project;
     private String targetRepo;
     private String sourceRepo;
     private String status;
@@ -42,6 +43,14 @@ public class PromotionConfig implements Serializable {
 
     public void setBuildNumber(String buildNumber) {
         this.buildNumber = buildNumber;
+    }
+
+    public String getProject() {
+        return project;
+    }
+
+    public void setProject(String project) {
+        this.project = project;
     }
 
     public String getTargetRepo() {

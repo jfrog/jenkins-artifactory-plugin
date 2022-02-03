@@ -339,9 +339,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                     paramMap.put(key, pluginSettings.getString(key));
                 }
                 paramMap.put("ciUser", ciUser);
-                if (!paramMap.isEmpty()) {
-                    settings.setParamMap(paramMap);
-                }
+                settings.setParamMap(paramMap);
                 setPromotionPlugin(settings);
             }
         }
@@ -407,7 +405,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                             .copy(useCopy)
                             .failFast(failFast);
 
-                    PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), artifactoryManager, listener, buildName, buildNumber);
+                    PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), artifactoryManager, listener, buildName, buildNumber, promotionCandidate.getProject());
                 }
 
                 build.save();

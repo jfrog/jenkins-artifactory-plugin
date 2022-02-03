@@ -25,9 +25,9 @@ public class PromotionExecutor implements Executor {
     private final TaskListener listener;
     private final PromotionConfig promotionConfig;
     private final StepContext context;
-    private Run build;
+    private final Run<?, ?> build;
 
-    public PromotionExecutor(ArtifactoryServer server, Run build, TaskListener listener, StepContext context,
+    public PromotionExecutor(ArtifactoryServer server, Run<?, ?> build, TaskListener listener, StepContext context,
                              PromotionConfig promotionConfig) {
         this.server = server;
         this.build = build;
@@ -54,14 +54,13 @@ public class PromotionExecutor implements Executor {
         logInfo();
 
         boolean status = PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), artifactoryManager, listener,
-                promotionConfig.getBuildName(), promotionConfig.getBuildNumber());
+                promotionConfig.getBuildName(), promotionConfig.getBuildNumber(), promotionConfig.getProject());
         if (!status) {
             context.onFailure(new Exception("Build promotion failed"));
         }
     }
 
     private void logInfo() {
-
         StringBuilder strBuilder = new StringBuilder()
                 .append("Promoting '").append(promotionConfig.getBuildName()).append("' ")
                 .append("#").append(promotionConfig.getBuildNumber())
@@ -91,6 +90,6 @@ public class PromotionExecutor implements Executor {
             strBuilder.append(", failing on first error");
         }
 
-        listener.getLogger().println(strBuilder.append(".").toString());
+        listener.getLogger().println(strBuilder.append("."));
     }
 }
