@@ -46,6 +46,14 @@ pipelines:
             - test -n "$NEXT_VERSION" -a "$NEXT_VERSION" != "0.0.0"
             - test -n "$NEXT_DEVELOPMENT_VERSION" -a "$NEXT_DEVELOPMENT_VERSION" != "0.0.0"
 
+            # Install docker-java
+            - git clone https://github.com/docker-java/docker-java.git
+            - cd docker-java
+            - git checkout 8e77a694
+            - ./mvnw versions:set -DnewVersion=3.2.x-8e77a694
+            - ./mvnw install -DskipTests
+            - cd ..
+
             # Configure JFrog CLI
             - curl -fL https://install-cli.jfrog.io | sh
             - jf c rm --quiet

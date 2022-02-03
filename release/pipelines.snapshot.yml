@@ -31,6 +31,14 @@ pipelines:
             - export JFROG_CLI_BUILD_NUMBER=$run_number
             - export JFROG_CLI_BUILD_PROJECT=ecosys
 
+            # Install docker-java
+            - git clone https://github.com/docker-java/docker-java.git
+            - cd docker-java
+            - git checkout 8e77a694
+            - ./mvnw versions:set -DnewVersion=3.2.x-8e77a694
+            - ./mvnw install -DskipTests
+            - cd ..
+
             # Configure JFrog CLI
             - curl -fL https://install-cli.jfrog.io | sh
             - jf c rm --quiet
