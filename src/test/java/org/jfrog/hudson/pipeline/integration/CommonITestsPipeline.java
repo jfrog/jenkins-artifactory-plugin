@@ -459,7 +459,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
             Module module = getAndAssertModule(buildInfo, "DownloadOnly");
             assertTrue(module.getDependencies().size() > 0);
-            module = getAndAssertModule(buildInfo, "fmt/8.0.1");
+            module = getAndAssertModule(buildInfo, "fmt/8.1.1");
             assertTrue(module.getArtifacts().size() > 0);
         } finally {
             cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
