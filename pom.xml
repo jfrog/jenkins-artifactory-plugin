@@ -41,8 +41,8 @@
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
         <skipITs>true</skipITs>
 
-        <buildinfo.version>2.33.3</buildinfo.version>
-        <buildinfo.gradle.version>4.26.3</buildinfo.gradle.version>
+        <buildinfo.version>2.34.0</buildinfo.version>
+        <buildinfo.gradle.version>4.27.0</buildinfo.gradle.version>
     </properties>
 
     <repositories>
@@ -60,6 +60,12 @@
             <id>jenkins-public</id>
             <name>jenkins-public</name>
             <url>https://repo.jenkins-ci.org/public</url>
+        </repository>
+        <repository>
+            <snapshots/>
+            <id>releases</id>
+            <name>libs-releases</name>
+            <url>https://releases.jfrog.io/artifactory/oss-releases</url>
         </repository>
         <repository>
             <snapshots/>
