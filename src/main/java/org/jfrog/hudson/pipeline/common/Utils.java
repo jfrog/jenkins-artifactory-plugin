@@ -304,7 +304,7 @@ public class Utils {
     public static PromotionConfig createPromotionConfig(Map<String, Object> promotionParams, boolean isTargetRepositoryMandatory) {
         final String targetRepository = "targetRepo";
         List<String> mandatoryParams = new ArrayList<>(Arrays.asList(BUILD_NAME, BUILD_NUMBER));
-        List<String> allowedParams = Arrays.asList(BUILD_NAME, BUILD_NUMBER, targetRepository, "sourceRepo", "status", "comment", "includeDependencies", "copy", "failFast");
+        List<String> allowedParams = Arrays.asList(BUILD_NAME, BUILD_NUMBER, "project", targetRepository, "sourceRepo", "status", "comment", "includeDependencies", "copy", "failFast");
 
         if (isTargetRepositoryMandatory) {
             mandatoryParams.add(targetRepository);

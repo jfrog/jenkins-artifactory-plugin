@@ -73,7 +73,12 @@ public class DeclarativeITest extends CommonITestsPipeline {
 
     @Test
     public void promotionTest() throws Exception {
-        super.promotionTest("declarative:promotion test");
+        super.promotionTest("promote", "declarative:promotion test", "");
+    }
+
+    @Test
+    public void promotionProjectTest() throws Exception {
+        super.promotionTest("promoteProject", "declarative:promotionProject test", PROJECT_KEY);
     }
 
     @Test

@@ -44,35 +44,9 @@ import static org.jfrog.build.extractor.buildScanTable.LicenseViolationsTable.LI
 import static org.jfrog.build.extractor.buildScanTable.SecurityViolationsTable.SECURITY_VIOLATIONS_TABLE_HEADLINE;
 import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor.FAIL_NO_OP_ERROR_MESSAGE;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertArtifactsInRepo;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertDockerModuleProperties;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertFilteredProperties;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertModuleArtifacts;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertModuleContainsArtifacts;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertModuleContainsArtifactsAndDependencies;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertModuleDependencies;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertNoArtifactsInRepo;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.checkArtifactoryTrigger;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.checkJenkinsJobInfo;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.cleanOldBuilds;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.cleanupBuilds;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.deleteBuild;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.getAndAssertModule;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.getBuildInfo;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.getImageId;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.getIntegrationDir;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.isExistInArtifactory;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.isExistInWorkspace;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.uploadFile;
+import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author yahavi
@@ -102,6 +76,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
         }
     }
+
     // Download a single artifact from different paths in Artifactory must be included only once in the build-info.
     void downloadDuplicationsTest(String buildName, String scriptName) throws Exception {
         Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
@@ -113,7 +88,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             pipelineResults = runPipeline(scriptName, false);
             for (int i = 1; i < 2; i++) {
                 for (String fileName : expectedDependencies) {
-                    assertTrue(isExistInWorkspace(slave, pipelineResults, scriptName+"-test-" + i, fileName));
+                    assertTrue(isExistInWorkspace(slave, pipelineResults, scriptName + "-test-" + i, fileName));
                 }
             }
             BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
@@ -268,6 +243,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             cleanupBuilds(pipelineResults, buildName, project, BUILD_NUMBER);
         }
     }
+
     // Upload a single artifact to different paths in Artifactory must include all of them in the build info.
     void uploadDuplicationsTest(String buildName, String project, String pipelineName) throws Exception {
         WorkflowRun pipelineResults = null;
@@ -308,17 +284,17 @@ public class CommonITestsPipeline extends PipelineTestBase {
         }
     }
 
-    void promotionTest(String buildName) throws Exception {
+    void promotionTest(String pipelineName, String buildName, String project) throws Exception {
         Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
         WorkflowRun pipelineResults = null;
         Files.list(FILES_PATH).filter(Files::isRegularFile)
                 .forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
         try {
-            pipelineResults = runPipeline("promote", false);
+            pipelineResults = runPipeline(pipelineName, false);
             for (String fileName : expectedDependencies) {
                 assertTrue(isExistInWorkspace(slave, pipelineResults, "promotion-test", fileName));
             }
-            BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
+            BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, project);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleDependencies(module, expectedDependencies);
             // In this tests, the expected dependencies and artifacts are equal
@@ -326,7 +302,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertNoArtifactsInRepo(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1));
             assertArtifactsInRepo(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO2), expectedDependencies);
         } finally {
-            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
+            cleanupBuilds(pipelineResults, buildName, project, BUILD_NUMBER);
         }
     }
 
