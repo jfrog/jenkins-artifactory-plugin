@@ -5,6 +5,7 @@
 # Jenkins Artifactory Plugin
 
 [![Tests](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml)
+[![](https://img.shields.io/badge/Docs-%F0%9F%93%96-blue)](https://www.jfrog.com/confluence/display/JFROG/Jenkins+Artifactory+Plug-in)
 
 </div>
 
