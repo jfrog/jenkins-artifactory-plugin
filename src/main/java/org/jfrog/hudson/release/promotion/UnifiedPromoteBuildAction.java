@@ -63,7 +63,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         this.build = build;
     }
 
-    public UnifiedPromoteBuildAction(Run<?, ?> build, BuildInfoAwareConfigurator configurator) {
+    public UnifiedPromoteBuildAction(Run<?, ?> build, BuildInfoAwareConfigurator configurator, String project) {
         this(build);
         String buildName = BuildUniqueIdentifierHelper.
                 getBuildNameConsiderOverride(configurator, build);
@@ -71,6 +71,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         PromotionConfig promotionConfig = new PromotionConfig();
         promotionConfig.setBuildName(buildName);
         promotionConfig.setBuildNumber(buildNumber);
+        promotionConfig.setProject(project);
         addPromotionCandidate(promotionConfig, configurator, null);
     }
 

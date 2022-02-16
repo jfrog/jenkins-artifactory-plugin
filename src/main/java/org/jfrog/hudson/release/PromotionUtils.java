@@ -1,6 +1,7 @@
 package org.jfrog.hudson.release;
 
 import hudson.model.TaskListener;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jfrog.build.api.release.Promotion;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 
@@ -25,6 +26,7 @@ public class PromotionUtils {
                 artifactoryManager.stageBuild(buildName, buildNumber, project, promotion);
                 listener.getLogger().println("Dry run finished successfully.\nPerforming promotion ...");
             } catch (IOException e) {
+                listener.error(ExceptionUtils.getRootCauseMessage(e));
                 onPromotionFailFast(true, promotion.isFailFast());
                 return false;
             }

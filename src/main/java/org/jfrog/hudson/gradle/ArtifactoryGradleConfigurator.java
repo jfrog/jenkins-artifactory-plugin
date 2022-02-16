@@ -533,13 +533,13 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 if (result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
                     if (isDeployBuildInfo()) {
                         String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGradleConfigurator.this, build);
-                        build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+                        build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, ""));
                         ArtifactoryGradleConfigurator configurator =
                                 ActionableHelper.getBuildWrapper(build.getProject(),
                                         ArtifactoryGradleConfigurator.class);
                         if (configurator != null) {
                             if (isAllowPromotionOfNonStagedBuilds()) {
-                                build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryGradleConfigurator.this));
+                                build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryGradleConfigurator.this, ""));
                             }
                         }
                     }
@@ -603,8 +603,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private Gradle getLastGradleBuild(AbstractProject project) {
         if (project instanceof Project) {
             List<Gradle> gradles = ActionableHelper.getBuilder((Project) project, Gradle.class);
-           if (gradles != null && !gradles.isEmpty()) {
-                return gradles.get(gradles.size()-1);
+            if (gradles != null && !gradles.isEmpty()) {
+                return gradles.get(gradles.size() - 1);
             }
         }
         return null;
@@ -730,7 +730,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
             if (!wrapper.isAllowPromotionOfNonStagedBuilds()) {
                 if (successRun) {
                     // add a stage action
-                    run.addAction(new UnifiedPromoteBuildAction(run, wrapper));
+                    run.addAction(new UnifiedPromoteBuildAction(run, wrapper, ""));
                 }
             }
 

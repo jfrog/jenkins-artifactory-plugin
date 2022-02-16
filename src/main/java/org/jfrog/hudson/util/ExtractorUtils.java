@@ -22,22 +22,18 @@ import com.google.common.collect.Maps;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.Cause;
-import hudson.model.Computer;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.slaves.SlaveComputer;
 import hudson.util.IOUtils;
 import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
+import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.ci.BuildInfoConfigProperties;
 import org.jfrog.build.extractor.ci.BuildInfoFields;
 import org.jfrog.build.extractor.ci.BuildRetention;
 import org.jfrog.build.extractor.ci.Vcs;
-import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.ClientProperties;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
@@ -56,17 +52,8 @@ import org.jfrog.hudson.util.plugins.MultiConfigurationUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 
 /**
  * @author Tomer Cohen
@@ -225,23 +212,41 @@ public class ExtractorUtils {
         return configuration;
     }
 
-    private static void setPublisherResolverInfo(Map<String, String> env, Run build, ArtifactoryClientConfiguration configuration,
+    private static void setPublisherResolverInfo(Map<String, String> env, Run<?, ?> build, ArtifactoryClientConfiguration configuration,
                                                  PublisherContext publisherContext, ResolverContext resolverContext, BuildInfo pipelineBuildInfo) throws IOException {
         String buildName = pipelineBuildInfo != null ? pipelineBuildInfo.getName() : BuildUniqueIdentifierHelper.getBuildName(build);
         configuration.info.setBuildName(buildName);
         String buildNumber = pipelineBuildInfo != null ? pipelineBuildInfo.getNumber() : BuildUniqueIdentifierHelper.getBuildNumber(build);
         configuration.info.setBuildNumber(buildNumber);
-        String project = pipelineBuildInfo != null ? pipelineBuildInfo.getProject() : null;
+        String project = getProject(publisherContext, pipelineBuildInfo);
         configuration.info.setProject(project);
 
         if (publisherContext != null) {
-            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration, buildName, buildNumber);
+            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration, buildName, buildNumber, project);
             publisherContext.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
         }
 
         if (resolverContext != null) {
             setResolverInfo(configuration, build, resolverContext, env);
         }
+    }
+
+    /**
+     * In pipeline steps - get the project key from the input pipelineBuildInfo object.
+     * In UI jobs - get the project key from the publisher.
+     *
+     * @param publisherContext  - The publisher
+     * @param pipelineBuildInfo - The buildInfo pipeline object
+     * @return project key or null.
+     */
+    private static String getProject(PublisherContext publisherContext, BuildInfo pipelineBuildInfo) {
+        if (pipelineBuildInfo != null) {
+            return pipelineBuildInfo.getProject();
+        }
+        if (publisherContext != null) {
+            return publisherContext.getProject();
+        }
+        return null;
     }
 
     private static boolean shouldBypassProxy(ResolverContext resolverContext, PublisherContext publisherContext) {
@@ -306,8 +311,8 @@ public class ExtractorUtils {
     /**
      * Set all the parameters relevant for publishing artifacts and build info
      */
-    private static void setPublisherInfo(Map<String, String> env, Run build, BuildInfo pipelineBuildInfo, PublisherContext context,
-                                         ArtifactoryClientConfiguration configuration, String buildName, String buildNumber) throws IOException {
+    private static void setPublisherInfo(Map<String, String> env, Run<?, ?> build, BuildInfo pipelineBuildInfo, PublisherContext context,
+                                         ArtifactoryClientConfiguration configuration, String buildName, String buildNumber, String project) throws IOException {
         configuration.setActivateRecorder(Boolean.TRUE);
 
         if (pipelineBuildInfo == null && context.isOverrideBuildName()) {
@@ -316,6 +321,7 @@ public class ExtractorUtils {
         }
         configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_NAME, buildName);
         configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_NUMBER, buildNumber);
+        configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_PROJECT, project);
         configuration.info.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
 
         Date buildStartDate = build.getTimestamp().getTime();
