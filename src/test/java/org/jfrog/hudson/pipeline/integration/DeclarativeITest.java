@@ -58,7 +58,7 @@ public class DeclarativeITest extends CommonITestsPipeline {
 
     @Test
     public void uploadUsingProjectTest() throws Exception {
-        super.uploadTest("declarative:project upload test", "jit", "uploadWithProject");
+        super.uploadTest("declarative:project upload test", PROJECT_KEY, "uploadWithProject");
     }
 
     @Test

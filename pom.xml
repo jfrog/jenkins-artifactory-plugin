@@ -33,7 +33,7 @@
 
     <properties>
         <!-- Minimal version required by Pipeline dependencies in 2.14.0 -->
-        <jenkins.version>2.159</jenkins.version>
+        <jenkins.version>2.303.3</jenkins.version>
         <java.level>8</java.level>
         <!-- TODO: enforcer is full of upper bound dependency issues, including real ones -->
         <enforcer.skip>true</enforcer.skip>
@@ -108,7 +108,7 @@
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>maven-plugin</artifactId>
-            <version>3.4</version>
+            <version>3.9</version>
             <exclusions>
                 <exclusion>
                     <artifactId>httpcore</artifactId>
@@ -126,9 +126,9 @@
             </exclusions>
         </dependency>
         <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>junit</artifactId>
-            <version>1.28</version>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.13</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -137,41 +137,20 @@
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>token-macro</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>apache-httpcomponents-client-4-api</artifactId>
-            <version>4.5.5-3.0</version>
-            <exclusions>
-                <!-- An updated version of httpcomponents is received from the buildinfo dependency -->
-                <exclusion>
-                    <artifactId>httpcore</artifactId>
-                    <groupId>org.apache.httpcomponents</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>httpclient</artifactId>
-                    <groupId>org.apache.httpcomponents</groupId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>config-file-provider</artifactId>
-            <version>2.16.4</version>
+            <version>3.8.2</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>subversion</artifactId>
-            <version>2.12.2</version>
+            <version>2.15.2</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <!-- The git plugin is set as optional due to HAP-771 -->
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
-            <version>2.5.0</version>
+            <version>4.8.3</version>
             <optional>true</optional>
             <exclusions>
                 <exclusion>
@@ -183,12 +162,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-job</artifactId>
-            <version>2.32</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jenkins-ci.plugins</groupId>
-            <artifactId>mailer</artifactId>
-            <version>1.24</version>
+            <version>2.41</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -199,17 +173,17 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>ivy</artifactId>
-            <version>1.28</version>
+            <version>2.1</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>matrix-project</artifactId>
-            <version>1.14</version>
+            <version>1.20</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>ant</artifactId>
-            <version>1.2</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
@@ -219,23 +193,23 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>flexible-publish</artifactId>
-            <version>0.15.2</version>
+            <version>0.16.1</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>credentials</artifactId>
-            <version>2.2.1</version>
+            <version>2.3.19</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>plain-credentials</artifactId>
-            <version>1.3</version>
+            <version>1.7</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>nodejs</artifactId>
-            <version>1.2.7</version>
+            <version>1.3.11</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -388,18 +362,6 @@
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-docker</artifactId>
             <version>${buildinfo.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.github.docker-java</groupId>
-                    <artifactId>docker-java</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <!-- Warning - this is a temporary workaround supposed to be removed after the next release of docker-java -->
-            <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java</artifactId>
-            <version>3.2.x-8e77a694</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
@@ -437,7 +399,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>18.0</version>
+            <version>30.0-jre</version>
         </dependency>
         <dependency>
             <groupId>org.jdom</groupId>
@@ -452,13 +414,13 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>jira</artifactId>
-            <version>3.0.6</version>
+            <version>3.4</version>
             <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>jenkins-multijob-plugin</artifactId>
-            <version>1.13</version>
+            <version>1.26</version>
             <exclusions>
                 <exclusion>
                     <artifactId>maven-plugin</artifactId>
@@ -470,17 +432,17 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-step-api</artifactId>
-            <version>2.19</version>
+            <version>2.23</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-cps</artifactId>
-            <version>2.13</version>
+            <version>2.92.1</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-multibranch</artifactId>
-            <version>2.17</version>
+            <version>2.23.1</version>
             <optional>true</optional>
         </dependency>
         <dependency>
@@ -492,14 +454,14 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.4.12</version>
+            <version>2.4.21</version>
             <scope>provided</scope>
         </dependency>
         <!--Tests-->
         <dependency>
             <groupId>org.jenkins-ci.main</groupId>
             <artifactId>jenkins-test-harness</artifactId>
-            <version>2.44</version>
+            <version>2.72</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -511,13 +473,27 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins.workflow</groupId>
             <artifactId>workflow-aggregator</artifactId>
-            <version>2.0</version>
+            <version>2.6</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jenkins-ci.plugins.workflow</groupId>
+                    <artifactId>workflow-cps</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jenkins-ci.plugins</groupId>
+                    <artifactId>git-server</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.jenkins-ci.plugins.workflow</groupId>
+                    <artifactId>workflow-step-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.jfrog.artifactory.client</groupId>
             <artifactId>artifactory-java-client-services</artifactId>
-            <version>2.6.2</version>
+            <version>2.11.1</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -529,8 +505,19 @@
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty</artifactId>
-            <version>5.10.0</version>
+            <version>5.12.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>structs</artifactId>
+            <version>1.24</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jenkins-ci.plugins</groupId>
+            <artifactId>git-server</artifactId>
+            <version>1.10</version>
         </dependency>
         <!--/Tests-->
     </dependencies>

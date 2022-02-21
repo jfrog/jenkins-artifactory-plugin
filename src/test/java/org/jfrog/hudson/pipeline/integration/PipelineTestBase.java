@@ -302,7 +302,7 @@ public class PipelineTestBase {
             throw new Exception("Slave workspace not found");
         }
         slaveWs.mkdirs();
-        project.setDefinition(new CpsFlowDefinition(readPipeline(name)));
+        project.setDefinition(new CpsFlowDefinition(readPipeline(name), false));
         return jenkins.buildAndAssertSuccess(project);
     }
 

@@ -78,7 +78,7 @@ public class ScriptedITest extends CommonITestsPipeline {
 
     @Test
     public void uploadWithProjectTest() throws Exception {
-        super.uploadTest("scripted:project upload test", "jit", "uploadWithProject");
+        super.uploadTest("scripted:project upload test", PROJECT_KEY, "uploadWithProject");
     }
 
     @Test

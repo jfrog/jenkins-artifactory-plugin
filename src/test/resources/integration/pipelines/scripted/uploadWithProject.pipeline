@@ -6,7 +6,7 @@ node("TestSlave") {
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.name = "scripted:project upload test"
     buildInfo.number = ${BUILD_NUMBER}
-    buildInfo.project = "jit"
+    buildInfo.project = ${PROJECT_KEY}
 
     stage "Upload"
     def uploadSpec = """{
