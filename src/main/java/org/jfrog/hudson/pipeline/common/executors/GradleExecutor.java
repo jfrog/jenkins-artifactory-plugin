@@ -32,6 +32,7 @@ public class GradleExecutor implements Executor {
     private final GradleBuild gradleBuild;
     private final TaskListener listener;
     private final Launcher launcher;
+    @Deprecated
     private final String buildFile;
     private final String switches;
     private final Run<?, ?> build;
@@ -114,6 +115,10 @@ public class GradleExecutor implements Executor {
         }
         if (StringUtils.isNotBlank(buildFile)) {
             args.add("-b", buildFile);
+            listener.getLogger().println("[DEPRECATION]: The \"buildFile\" parameter is deprecated because its value " +
+                    "is used for the -b option of Gradle. This option has been declared as deprecated by Gradle and " +
+                    "will no longer work since Gradle 8. Please use the \"rootDir\" parameter only. " +
+                    "Its value should be the path to the directory which includes the build.gradle file.");
         }
         if (!launcher.isUnix()) {
             args = args.toWindowsCommand();
