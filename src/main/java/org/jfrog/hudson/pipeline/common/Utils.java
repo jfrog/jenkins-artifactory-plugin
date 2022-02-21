@@ -270,7 +270,6 @@ public class Utils {
      * @param ws       - The workspace
      */
     public static void launch(String taskName, Launcher launcher, ArgumentListBuilder args, EnvVars env, TaskListener listener, FilePath ws) {
-
         try {
             int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(ws).join();
             if (exitValue != 0) {
