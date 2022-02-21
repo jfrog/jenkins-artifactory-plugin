@@ -79,10 +79,10 @@ public class Utils {
      * @throws InterruptedException if context.get fails.
      */
     public static FilePath extractRootWorkspace(StepContext context, WorkflowRun build, FilePath cwd) throws IOException, InterruptedException {
-        // get the current node from context
+        // Get the current node from context
         Node node = context.get(Node.class);
 
-        // get the workspace from the flow (if it matches the context's node)
+        // Get the workspace from the flow (if it matches the context's node)
         FilePath flowWorkspace = extractRootWorkspaceFromFlow(build.getExecution(), node);
         if (flowWorkspace != null) {
             return flowWorkspace;
@@ -99,8 +99,8 @@ public class Utils {
      * Walk all flow nodes and find the top most workspace action. This
      * action would represent the root workspace for the workflow run.
      *
-     * @param execution the execution of the workflow run.
-     * @param contextNode Node for the current step context or null.
+     * @param execution   - The execution of the workflow run.
+     * @param contextNode - Node for the current step context or null.
      * @return the root workspace from the flow node tree, or null if none exist.
      */
     private static FilePath extractRootWorkspaceFromFlow(FlowExecution execution, Node contextNode) {
@@ -111,7 +111,7 @@ public class Utils {
         FilePath rootPath = null;
         for (FlowNode node : flowWalker) {
             WorkspaceAction workspaceAction = node.getAction(WorkspaceAction.class);
-            // stay on the contextNode if not null
+            // Stay on the contextNode if not null
             if (workspaceAction != null && ((contextNode != null && contextNode.getNodeName() == workspaceAction.getNode()) || contextNode == null)) {
                 FilePath rootWorkspace = workspaceAction.getWorkspace();
                 if (rootWorkspace != null) {
