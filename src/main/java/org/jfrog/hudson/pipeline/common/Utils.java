@@ -280,7 +280,6 @@ public class Utils {
             listener.error(errorMessage);
             throw new RuntimeException(taskName + " build failed. " + errorMessage, e);
         }
-
     }
 
     public static String getJavaPathBuilder(String jdkBinPath, Launcher launcher) {
