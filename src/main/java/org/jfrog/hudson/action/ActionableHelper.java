@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.action;
 
-import com.google.common.collect.Lists;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.matrix.MatrixConfiguration;
@@ -211,7 +210,9 @@ public abstract class ActionableHelper implements Serializable {
             String artifactoryServerName, AbstractProject project) {
         if (shouldReturnEmptyList(artifactoryServerName, project)) return Collections.emptyList();
 
-        return Lists.newArrayList(new ArtifactoryProjectAction(artifactoryServerName, project));
+        List<ArtifactoryProjectAction> projectActionList = new ArrayList<>();
+        projectActionList.add(new ArtifactoryProjectAction(artifactoryServerName, project));
+        return projectActionList;
     }
 
     private static boolean shouldReturnEmptyList(String artifactoryServerName, AbstractProject project) {
@@ -240,7 +241,9 @@ public abstract class ActionableHelper implements Serializable {
             return Collections.emptyList();
         }
 
-        return Lists.newArrayList(new ArtifactoryProjectAction(artifactoryServerName, buildName));
+        List<ArtifactoryProjectAction> projectActionList = new ArrayList<>();
+        projectActionList.add(new ArtifactoryProjectAction(artifactoryServerName, buildName));
+        return projectActionList;
     }
 
     /**
