@@ -112,7 +112,7 @@ public class Utils {
         for (FlowNode node : flowWalker) {
             WorkspaceAction workspaceAction = node.getAction(WorkspaceAction.class);
             // Stay on the contextNode if not null
-            if (workspaceAction != null && ((contextNode != null && contextNode.getNodeName() == workspaceAction.getNode()) || contextNode == null)) {
+            if (workspaceAction != null && (contextNode == null || StringUtils.equals(contextNode.getNodeName(), workspaceAction.getNode()))) {
                 FilePath rootWorkspace = workspaceAction.getWorkspace();
                 if (rootWorkspace != null) {
                     rootPath = rootWorkspace;
