@@ -276,7 +276,7 @@ public class Utils {
                 throw new RuntimeException(taskName + " build failed with exit code " + exitValue);
             }
         } catch (Exception e) {
-            String errorMessage = "Couldn't execute " + taskName + " task. " + ExceptionUtils.getMessage(e);
+            String errorMessage = "Couldn't execute " + taskName + " task. " + ExceptionUtils.getRootCauseMessage(e);
             listener.error(errorMessage);
             throw new RuntimeException(taskName + " build failed. " + errorMessage, e);
         }
