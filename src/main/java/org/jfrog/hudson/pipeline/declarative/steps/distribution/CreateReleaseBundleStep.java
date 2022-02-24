@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.ReleaseBundleCreateExecutor;
 import org.jfrog.hudson.pipeline.common.types.DistributionServer;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -66,7 +66,7 @@ public class CreateReleaseBundleStep extends CreateUpdateReleaseBundleStep {
         this.dryRun = dryRun;
     }
 
-    public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
         private final transient CreateReleaseBundleStep step;
 
@@ -88,7 +88,7 @@ public class CreateReleaseBundleStep extends CreateUpdateReleaseBundleStep {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws Exception {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() {
             return null;
         }
 

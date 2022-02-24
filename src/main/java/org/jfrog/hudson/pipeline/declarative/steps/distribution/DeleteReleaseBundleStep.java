@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.ReleaseBundleDeleteExecutor;
 import org.jfrog.hudson.pipeline.common.types.DistributionServer;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -63,7 +63,7 @@ public class DeleteReleaseBundleStep extends RemoteReleaseBundleStep {
         this.sync = sync;
     }
 
-    public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
         private final transient DeleteReleaseBundleStep step;
 
@@ -83,7 +83,7 @@ public class DeleteReleaseBundleStep extends RemoteReleaseBundleStep {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws Exception {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() {
             return null;
         }
 

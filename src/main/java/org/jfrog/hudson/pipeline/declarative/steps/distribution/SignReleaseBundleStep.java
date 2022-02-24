@@ -5,7 +5,7 @@ import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.executors.ReleaseBundleSignExecutor;
 import org.jfrog.hudson.pipeline.common.types.DistributionServer;
 import org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUtils;
@@ -44,7 +44,7 @@ public class SignReleaseBundleStep extends AbstractStepImpl {
         this.storingRepo = storingRepo;
     }
 
-    public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
+    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
 
         private final transient SignReleaseBundleStep step;
 
@@ -64,7 +64,7 @@ public class SignReleaseBundleStep extends AbstractStepImpl {
         }
 
         @Override
-        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() throws Exception {
+        public org.jfrog.hudson.ArtifactoryServer getUsageReportServer() {
             return null;
         }
 
