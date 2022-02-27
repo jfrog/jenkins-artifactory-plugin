@@ -31,6 +31,7 @@ import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONNull;
 import net.sf.json.JSONObject;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
@@ -53,11 +54,7 @@ import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
@@ -282,7 +279,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         public boolean configure(StaplerRequest req, JSONObject o) throws FormException {
             Jenkins jenkins = Jenkins.getInstanceOrNull();
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
-                boolean useCredentialsPlugin = (Boolean) o.get("useCredentialsPlugin");
+                boolean useCredentialsPlugin = BooleanUtils.isTrue((Boolean) o.get("useCredentialsPlugin"));
                 configureJFrogInstances(req, o);
                 configureJFrogPipelinesServer(o);
                 if (useCredentialsPlugin && !this.useCredentialsPlugin) {
@@ -319,7 +316,11 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         }
 
         private void configureJFrogPipelinesServer(JSONObject o) {
-            String credentialsId = ((JSONObject) o.get("credentialsConfig")).optString("credentialsId");
+            JSONObject credentialsConfigJson = (JSONObject) o.get("credentialsConfig");
+            if (credentialsConfigJson == null) {
+                return;
+            }
+            String credentialsId = credentialsConfigJson.optString("credentialsId");
             CredentialsConfig credentialsConfig = new CredentialsConfig("", "", credentialsId);
             credentialsConfig.setIgnoreCredentialPluginDisabled(true);
             JFrogPipelinesServer jfrogPipelinesServer = new JFrogPipelinesServer(o.getString("pipelinesIntegrationUrl"),
