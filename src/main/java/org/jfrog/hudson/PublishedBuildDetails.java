@@ -3,9 +3,8 @@ package org.jfrog.hudson;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.text.ParseException;
 
-import static org.jfrog.build.extractor.clientConfiguration.client.artifactory.services.PublishBuildInfo.createBuildInfoUrl;
+import static org.jfrog.build.extractor.BuildInfoExtractorUtils.createBuildInfoUrl;
 
 /**
  * Created by yahavi on 28/03/2017.
@@ -13,11 +12,12 @@ import static org.jfrog.build.extractor.clientConfiguration.client.artifactory.s
 public class PublishedBuildDetails implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private String artifactoryUrl;
-    private String buildName;
-    private String buildNumber;
-    private String platformUrl;
+    private final String artifactoryUrl;
+    private final String buildNumber;
+    private final String buildName;
+
     private String startedTimeStamp;
+    private String platformUrl;
     private String project;
 
     public PublishedBuildDetails(String artifactoryUrl, String buildName, String buildNumber) {
@@ -33,15 +33,19 @@ public class PublishedBuildDetails implements Serializable {
         this.project = project;
     }
 
-    public String getBuildInfoUrl() throws ParseException {
-        if (StringUtils.isNotBlank(platformUrl) && StringUtils.isNotBlank(startedTimeStamp)) {
-            // Encode already happened in BuildInfoResultAction#createBuildInfoIdentifier.
-            return createBuildInfoUrl(platformUrl, buildName, buildNumber, startedTimeStamp, project, false);
-        }
-        return createBuildInfoUrl(this.artifactoryUrl, this.buildName, this.buildNumber, false);
+    /**
+     * Get the build info URL.
+     * We use encode=false since an encoding already happened in BuildInfoResultAction#createBuildInfoIdentifier.
+     *
+     * @return build info URL
+     */
+    public String getBuildInfoUrl() {
+        boolean isPlatformUrl = StringUtils.isNotBlank(platformUrl);
+        String url = isPlatformUrl ? platformUrl : artifactoryUrl;
+        return createBuildInfoUrl(url, buildName, buildNumber, startedTimeStamp, project, false, isPlatformUrl);
     }
 
     public String getDisplayName() {
-        return this.buildName + " / " + this.buildNumber;
+        return buildName + " / " + buildNumber;
     }
 }

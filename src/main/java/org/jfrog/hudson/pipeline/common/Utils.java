@@ -74,11 +74,15 @@ public class Utils {
      * @throws InterruptedException if context.get fails.
      */
     public static FilePath extractRootWorkspace(StepContext context, WorkflowRun build, FilePath cwd) throws IOException, InterruptedException {
-        FilePath flowWorkspace = extractRootWorkspaceFromFlow(build.getExecution());
+        // Get the current node from context
+        Node node = context.get(Node.class);
+
+        // Get the workspace from the flow (if it matches the context's node)
+        FilePath flowWorkspace = extractRootWorkspaceFromFlow(build.getExecution(), node);
         if (flowWorkspace != null) {
             return flowWorkspace;
         }
-        Node node = context.get(Node.class);
+
         if (node == null) {
             return cwd;
         }
@@ -90,10 +94,11 @@ public class Utils {
      * Walk all flow nodes and find the top most workspace action. This
      * action would represent the root workspace for the workflow run.
      *
-     * @param execution the execution of the workflow run.
+     * @param execution   - The execution of the workflow run.
+     * @param contextNode - Node for the current step context or null.
      * @return the root workspace from the flow node tree, or null if none exist.
      */
-    private static FilePath extractRootWorkspaceFromFlow(FlowExecution execution) {
+    private static FilePath extractRootWorkspaceFromFlow(FlowExecution execution, Node contextNode) {
         if (execution == null) {
             return null;
         }
@@ -101,7 +106,8 @@ public class Utils {
         FilePath rootPath = null;
         for (FlowNode node : flowWalker) {
             WorkspaceAction workspaceAction = node.getAction(WorkspaceAction.class);
-            if (workspaceAction != null) {
+            // Stay on the contextNode if not null
+            if (workspaceAction != null && (contextNode == null || StringUtils.equals(contextNode.getNodeName(), workspaceAction.getNode()))) {
                 FilePath rootWorkspace = workspaceAction.getWorkspace();
                 if (rootWorkspace != null) {
                     rootPath = rootWorkspace;
@@ -265,16 +271,15 @@ public class Utils {
      * @param ws       - The workspace
      */
     public static void launch(String taskName, Launcher launcher, ArgumentListBuilder args, EnvVars env, TaskListener listener, FilePath ws) {
-        boolean failed;
         try {
             int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(ws).join();
-            failed = (exitValue != 0);
+            if (exitValue != 0) {
+                throw new RuntimeException(taskName + " build failed with exit code " + exitValue);
+            }
         } catch (Exception e) {
-            listener.error("Couldn't execute " + taskName + " task. " + ExceptionUtils.getMessage(e));
-            failed = true;
-        }
-        if (failed) {
-            throw new RuntimeException(taskName + " build failed");
+            String errorMessage = "Couldn't execute " + taskName + " task. " + ExceptionUtils.getRootCauseMessage(e);
+            listener.error(errorMessage);
+            throw new RuntimeException(taskName + " build failed. " + errorMessage, e);
         }
     }
 
