@@ -36,6 +36,10 @@ public class PromotionInfo implements Serializable {
         return this.promotionConfig.getBuildNumber();
     }
 
+    public String getProject() {
+        return this.promotionConfig.getProject();
+    }
+
     public BuildInfoAwareConfigurator getConfigurator() {
         return this.configurator;
     }

@@ -60,6 +60,7 @@ public class PublisherContext {
     private boolean overrideBuildName;
     private int connectionRetry;
     private List<String> gradlePublications;
+    private String project;
 
     private PublisherContext() {
     }
@@ -190,6 +191,10 @@ public class PublisherContext {
 
     public List<String> getGradlePublications() {
         return this.gradlePublications;
+    }
+
+    public String getProject() {
+        return this.project;
     }
 
     public static class Builder {
@@ -327,23 +332,28 @@ public class PublisherContext {
             return this;
         }
 
-        public Builder artifactoryPluginVersion(String artifactoryPluginVersion){
+        public Builder artifactoryPluginVersion(String artifactoryPluginVersion) {
             publisher.artifactoryPluginVersion = artifactoryPluginVersion;
             return this;
         }
 
-        public Builder customBuildName(String customBuildName){
+        public Builder customBuildName(String customBuildName) {
             publisher.customBuildName = customBuildName;
             return this;
         }
 
-        public Builder connectionRetry(int connectionRetry){
+        public Builder connectionRetry(int connectionRetry) {
             publisher.connectionRetry = connectionRetry;
             return this;
         }
 
         public Builder publications(List<String> publications) {
             publisher.gradlePublications = publications;
+            return this;
+        }
+
+        public Builder project(String project) {
+            publisher.project = project;
             return this;
         }
     }

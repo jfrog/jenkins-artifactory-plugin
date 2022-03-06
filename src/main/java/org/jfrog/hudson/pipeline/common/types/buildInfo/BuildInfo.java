@@ -8,6 +8,7 @@ import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
+import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
@@ -90,8 +91,8 @@ public class BuildInfo implements Serializable {
 
     @Whitelisted
     public void setProject(String project) {
-            this.project = project;
-            this.issues.setProject(project);
+        this.project = project;
+        this.issues.setProject(project);
     }
 
     @Whitelisted
@@ -337,7 +338,7 @@ public class BuildInfo implements Serializable {
         addDefaultModule(defaultModule, moduleId);
     }
 
-    private void addDefaultModule(Module defaultModule, String moduleId){
+    private void addDefaultModule(Module defaultModule, String moduleId) {
         Module currentModule = this.getModules().stream()
                 // Check if the default module already exists.
                 .filter(module -> StringUtils.equals(module.getId(), moduleId))
@@ -354,7 +355,7 @@ public class BuildInfo implements Serializable {
         this.getEnv().filter();
     }
 
-    public void captureVariables(EnvVars envVars, Run build, TaskListener listener)  {
+    public void captureVariables(EnvVars envVars, Run build, TaskListener listener) {
         if (env.isCapture()) {
             env.collectVariables(envVars, build, listener);
         }
@@ -390,7 +391,7 @@ public class BuildInfo implements Serializable {
                     DeployDetails.Builder builder = new DeployDetails.Builder()
                             .file(new File(artifact.getSourcePath()))
                             .artifactPath(artifact.getArtifactDest())
-                            .addProperties(propertiesMap)
+                            .addProperties(getDeployableArtifactPropertiesMap(artifact))
                             .targetRepository("empty_repo")
                             .sha1(artifact.getSha1())
                             .packageType(packageType);
@@ -405,6 +406,21 @@ public class BuildInfo implements Serializable {
             if (file.exists() && !file.delete()) {
                 listener.getLogger().println("failed deleting file at path: " + filePath);
             }
+        }
+
+        private ArrayListMultimap<String, String> getDeployableArtifactPropertiesMap(DeployableArtifactDetail artifact) {
+            ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+            if (MapUtils.isEmpty(artifact.getProperties())) {
+                // For backward computability, returns the necessary build info props if no props exists
+                // in DeployableArtifactDetail
+                return propertiesMap;
+            }
+            for (String propKey : artifact.getProperties().keySet()) {
+                for (String propVal : artifact.getProperties().get(propKey)) {
+                    properties.put(propKey, propVal);
+                }
+            }
+            return properties;
         }
 
         private ArrayListMultimap<String, String> getBuildPropertiesMap(BuildInfo buildInfo) {

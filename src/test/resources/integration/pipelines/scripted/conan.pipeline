@@ -24,7 +24,7 @@ node("TestSlave") {
     conanClient.run(command: "install ./scripted-conan-example --build missing", buildInfo: buildInfo)
 
     stage "Conan Upload"
-    conanClient.run(command: "upload fmt/8.0.1 --all -r " + remoteName + " --confirm", buildInfo: buildInfo)
+    conanClient.run(command: "upload fmt/8.1.1 --all -r " + remoteName + " --confirm", buildInfo: buildInfo)
 
     stage "Publish build info"
     rtServer.publishBuildInfo buildInfo

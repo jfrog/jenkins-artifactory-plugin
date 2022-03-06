@@ -29,24 +29,28 @@ import static org.jfrog.hudson.pipeline.common.types.deployers.Deployer.addDeplo
 
 public class GradleExecutor implements Executor {
 
-    private EnvVars env, extendedEnv;
-    private GradleBuild gradleBuild;
-    private TaskListener listener;
-    private FilePath tempDir, ws;
-    private BuildInfo buildInfo;
-    private Launcher launcher;
-    private String initScriptPath;
-    private String buildFile;
-    private String switches;
-    private String rootDir;
-    private String tasks;
-    private Run build;
+    private final GradleBuild gradleBuild;
+    private final TaskListener listener;
+    private final Launcher launcher;
+    @Deprecated
+    private final String buildFile;
+    private final String switches;
+    private final Run<?, ?> build;
+    private final String rootDir;
+    private final String tasks;
+    private final EnvVars env;
+    private final FilePath ws;
 
-    public GradleExecutor(Run build, GradleBuild gradleBuild, String tasks, String buildFile, String rootDir, String switches, BuildInfo buildInfo, EnvVars env, FilePath ws, TaskListener listener, Launcher launcher) {
+    private String initScriptPath;
+    private EnvVars extendedEnv;
+    private BuildInfo buildInfo;
+    private FilePath tempDir;
+
+    public GradleExecutor(Run<?, ?> build, GradleBuild gradleBuild, String tasks, String buildFile, String rootDir, String switches, BuildInfo buildInfo, EnvVars env, FilePath ws, TaskListener listener, Launcher launcher) {
         this.build = build;
         this.gradleBuild = gradleBuild;
         this.tasks = Objects.toString(tasks, "artifactoryPublish");
-        this.buildFile = StringUtils.defaultIfEmpty(buildFile, "build.gradle");
+        this.buildFile = buildFile;
         this.rootDir = Objects.toString(rootDir, "");
         this.switches = Objects.toString(switches, "");
         this.buildInfo = buildInfo;
@@ -105,25 +109,21 @@ public class GradleExecutor implements Executor {
             }
         }
         args.addTokenized(getSwitches()).
-                addTokenized(tasks).
-                add("-b", getBuildFileFullPath());
+                addTokenized(tasks);
+        if (StringUtils.isNotBlank(rootDir)) {
+            args.add("-p", rootDir);
+        }
+        if (StringUtils.isNotBlank(buildFile)) {
+            args.add("-b", buildFile);
+            listener.getLogger().println("[DEPRECATION]: The \"buildFile\" parameter is deprecated because its value " +
+                    "is used for the -b option of Gradle. This option has been declared as deprecated by Gradle and " +
+                    "will no longer work since Gradle 8. Please use the \"rootDir\" parameter only. " +
+                    "Its value should be the path to the directory which includes the build.gradle file.");
+        }
         if (!launcher.isUnix()) {
             args = args.toWindowsCommand();
         }
         return args;
-    }
-
-    private String getBuildFileFullPath() {
-        StringBuilder buildFile = new StringBuilder();
-        if (StringUtils.isNotEmpty(rootDir)) {
-            String pathsDelimiter = launcher.isUnix() ? "/" : "\\";
-            buildFile.append(rootDir);
-            if (!StringUtils.endsWith(rootDir, pathsDelimiter)) {
-                buildFile.append(pathsDelimiter);
-            }
-        }
-        buildFile.append(this.buildFile);
-        return buildFile.toString();
     }
 
     private String getSwitches() {

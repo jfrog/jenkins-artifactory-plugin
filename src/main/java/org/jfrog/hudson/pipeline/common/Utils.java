@@ -5,14 +5,7 @@ import com.google.common.collect.ArrayListMultimap;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
-import hudson.model.Cause;
-import hudson.model.Computer;
-import hudson.model.Node;
-import hudson.model.ParameterValue;
-import hudson.model.ParametersAction;
-import hudson.model.Run;
-import hudson.model.TaskListener;
-import hudson.plugins.git.util.BuildData;
+import hudson.model.*;
 import hudson.remoting.Channel;
 import hudson.remoting.LocalChannel;
 import hudson.remoting.VirtualChannel;
@@ -34,48 +27,30 @@ import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
-import org.jfrog.build.extractor.ci.BuildInfoFields;
-import org.jfrog.build.extractor.ci.Vcs;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.extractor.ci.BuildInfoFields;
+import org.jfrog.build.extractor.ci.Vcs;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.client.distribution.types.DistributionRules;
 import org.jfrog.build.extractor.clientConfiguration.client.distribution.types.ReleaseNotes;
 import org.jfrog.build.extractor.clientConfiguration.util.GitUtils;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.action.ActionableHelper;
-import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.common.types.ConanClient;
-import org.jfrog.hudson.pipeline.common.types.DistributionConfig;
-import org.jfrog.hudson.pipeline.common.types.PromotionConfig;
-import org.jfrog.hudson.pipeline.common.types.XrayScanConfig;
+import org.jfrog.hudson.pipeline.common.types.*;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
-import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
-import org.jfrog.hudson.util.ExtractorUtils;
-import org.jfrog.hudson.util.IncludesExcludes;
-import org.jfrog.hudson.util.JenkinsBuildInfoLog;
-import org.jfrog.hudson.util.ProxyUtils;
-import org.jfrog.hudson.util.RepositoriesUtils;
+import org.jfrog.hudson.util.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.BUILD_NAME;
-import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.BUILD_NUMBER;
-import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.PROJECT;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.jfrog.hudson.pipeline.common.types.ArtifactoryServer.*;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
 /**
@@ -99,11 +74,15 @@ public class Utils {
      * @throws InterruptedException if context.get fails.
      */
     public static FilePath extractRootWorkspace(StepContext context, WorkflowRun build, FilePath cwd) throws IOException, InterruptedException {
-        FilePath flowWorkspace = extractRootWorkspaceFromFlow(build.getExecution());
+        // Get the current node from context
+        Node node = context.get(Node.class);
+
+        // Get the workspace from the flow (if it matches the context's node)
+        FilePath flowWorkspace = extractRootWorkspaceFromFlow(build.getExecution(), node);
         if (flowWorkspace != null) {
             return flowWorkspace;
         }
-        Node node = context.get(Node.class);
+
         if (node == null) {
             return cwd;
         }
@@ -115,10 +94,11 @@ public class Utils {
      * Walk all flow nodes and find the top most workspace action. This
      * action would represent the root workspace for the workflow run.
      *
-     * @param execution the execution of the workflow run.
+     * @param execution   - The execution of the workflow run.
+     * @param contextNode - Node for the current step context or null.
      * @return the root workspace from the flow node tree, or null if none exist.
      */
-    private static FilePath extractRootWorkspaceFromFlow(FlowExecution execution) {
+    private static FilePath extractRootWorkspaceFromFlow(FlowExecution execution, Node contextNode) {
         if (execution == null) {
             return null;
         }
@@ -126,7 +106,8 @@ public class Utils {
         FilePath rootPath = null;
         for (FlowNode node : flowWalker) {
             WorkspaceAction workspaceAction = node.getAction(WorkspaceAction.class);
-            if (workspaceAction != null) {
+            // Stay on the contextNode if not null
+            if (workspaceAction != null && (contextNode == null || StringUtils.equals(contextNode.getNodeName(), workspaceAction.getNode()))) {
                 FilePath rootWorkspace = workspaceAction.getWorkspace();
                 if (rootWorkspace != null) {
                     rootPath = rootWorkspace;
@@ -189,21 +170,6 @@ public class Utils {
         }
 
         return buildVariables;
-    }
-
-    public static List<Vcs> extractVcsBuildData(Run build) {
-        List<Vcs> result = new ArrayList<Vcs>();
-        List<BuildData> buildData = build.getActions(BuildData.class);
-        if (buildData != null) {
-            for (BuildData data : buildData) {
-                String sha1 = data.getLastBuiltRevision().getSha1String();
-                Iterator<String> iterator = data.getRemoteUrls().iterator();
-                if (iterator.hasNext()) {
-                    result.add(new Vcs(iterator.next(), sha1));
-                }
-            }
-        }
-        return result;
     }
 
     public static Vcs extractVcs(FilePath filePath, Log log) throws IOException, InterruptedException {
@@ -308,16 +274,15 @@ public class Utils {
      * @param ws       - The workspace
      */
     public static void launch(String taskName, Launcher launcher, ArgumentListBuilder args, EnvVars env, TaskListener listener, FilePath ws) {
-        boolean failed;
         try {
             int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(ws).join();
-            failed = (exitValue != 0);
+            if (exitValue != 0) {
+                throw new RuntimeException(taskName + " build failed with exit code " + exitValue);
+            }
         } catch (Exception e) {
-            listener.error("Couldn't execute " + taskName + " task. " + ExceptionUtils.getMessage(e));
-            failed = true;
-        }
-        if (failed) {
-            throw new RuntimeException(taskName + " build failed");
+            String errorMessage = "Couldn't execute " + taskName + " task. " + ExceptionUtils.getRootCauseMessage(e);
+            listener.error(errorMessage);
+            throw new RuntimeException(taskName + " build failed. " + errorMessage, e);
         }
     }
 
@@ -347,7 +312,7 @@ public class Utils {
     public static PromotionConfig createPromotionConfig(Map<String, Object> promotionParams, boolean isTargetRepositoryMandatory) {
         final String targetRepository = "targetRepo";
         List<String> mandatoryParams = new ArrayList<>(Arrays.asList(BUILD_NAME, BUILD_NUMBER));
-        List<String> allowedParams = Arrays.asList(BUILD_NAME, BUILD_NUMBER, targetRepository, "sourceRepo", "status", "comment", "includeDependencies", "copy", "failFast");
+        List<String> allowedParams = Arrays.asList(BUILD_NAME, BUILD_NUMBER, "project", targetRepository, "sourceRepo", "status", "comment", "includeDependencies", "copy", "failFast");
 
         if (isTargetRepositoryMandatory) {
             mandatoryParams.add(targetRepository);
@@ -368,6 +333,7 @@ public class Utils {
         org.jfrog.hudson.release.promotion.PromotionConfig promotionConfig = new org.jfrog.hudson.release.promotion.PromotionConfig();
         promotionConfig.setBuildName(pipelinePromotionConfig.getBuildName());
         promotionConfig.setBuildNumber(pipelinePromotionConfig.getBuildNumber());
+        promotionConfig.setProject(pipelinePromotionConfig.getProject());
         promotionConfig.setTargetRepo(pipelinePromotionConfig.getTargetRepo());
         promotionConfig.setSourceRepo(pipelinePromotionConfig.getSourceRepo());
         promotionConfig.setStatus(pipelinePromotionConfig.getStatus());
@@ -460,6 +426,14 @@ public class Utils {
         String gitUrl = ExtractorUtils.getVcsUrl(env);
         if (isNotBlank(gitUrl)) {
             properties.put(BuildInfoFields.VCS_URL, gitUrl);
+        }
+        String gitBranch = ExtractorUtils.getVcsBranch(env);
+        if (isNotBlank(gitBranch)) {
+            properties.put(BuildInfoFields.VCS_BRANCH, gitBranch);
+        }
+        String gitMessage = ExtractorUtils.getVcsMessage(env);
+        if (isNotBlank(gitMessage)) {
+            properties.put(BuildInfoFields.VCS_MESSAGE, gitMessage);
         }
     }
 

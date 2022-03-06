@@ -1,5 +1,5 @@
 [requires]
-fmt/[>=8.0.1]
+fmt/8.1.1
 
 [generators]
 cmake_paths

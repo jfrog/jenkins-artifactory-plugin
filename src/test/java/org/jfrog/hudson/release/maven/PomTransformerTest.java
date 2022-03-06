@@ -100,6 +100,18 @@ public class PomTransformerTest {
     }
 
     @Test
+    public void noSnapshotsModule() throws Exception {
+        File pomFile = getResourceAsFile("/poms/snapshots/pom-snapshot.xml");
+        Map<ModuleName, String> modules = new HashMap<>();
+        modules.put(new ModuleName("org.jfrog.test", "one"), "2.2");
+        try {
+            new PomTransformer(new ModuleName("org.jfrog.test", "one"), modules, "", true).invoke(pomFile, null);
+        } catch (SnapshotNotAllowedException e) {
+            fail("Pom contains no module with snapshot version and should not fail");
+        }
+    }
+
+    @Test
     public void snapshotsInParent() throws Exception {
         File pomFile = getResourceAsFile("/poms/snapshots/pom-snapshot-parent.xml");
         Map<ModuleName, String> modules = new HashMap<>();

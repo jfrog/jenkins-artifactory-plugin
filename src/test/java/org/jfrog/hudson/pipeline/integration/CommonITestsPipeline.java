@@ -1,7 +1,6 @@
 package org.jfrog.hudson.pipeline.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.Sets;
 import hudson.EnvVars;
 import hudson.model.Result;
 import org.apache.commons.cli.MissingArgumentException;
@@ -35,6 +34,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -44,35 +45,9 @@ import static org.jfrog.build.extractor.buildScanTable.LicenseViolationsTable.LI
 import static org.jfrog.build.extractor.buildScanTable.SecurityViolationsTable.SECURITY_VIOLATIONS_TABLE_HEADLINE;
 import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor.FAIL_NO_OP_ERROR_MESSAGE;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertArtifactsInRepo;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertDockerModuleProperties;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertFilteredProperties;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertModuleArtifacts;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertModuleContainsArtifacts;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertModuleContainsArtifactsAndDependencies;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertModuleDependencies;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.assertNoArtifactsInRepo;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.checkArtifactoryTrigger;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.checkJenkinsJobInfo;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.cleanOldBuilds;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.cleanupBuilds;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.deleteBuild;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.getAndAssertModule;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.getBuildInfo;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.getImageId;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.getIntegrationDir;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.isExistInArtifactory;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.isExistInWorkspace;
-import static org.jfrog.hudson.pipeline.integration.ITestUtils.uploadFile;
+import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * @author yahavi
@@ -102,6 +77,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
         }
     }
+
     // Download a single artifact from different paths in Artifactory must be included only once in the build-info.
     void downloadDuplicationsTest(String buildName, String scriptName) throws Exception {
         Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
@@ -113,7 +89,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             pipelineResults = runPipeline(scriptName, false);
             for (int i = 1; i < 2; i++) {
                 for (String fileName : expectedDependencies) {
-                    assertTrue(isExistInWorkspace(slave, pipelineResults, scriptName+"-test-" + i, fileName));
+                    assertTrue(isExistInWorkspace(slave, pipelineResults, scriptName + "-test-" + i, fileName));
                 }
             }
             BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
@@ -144,7 +120,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void downloadByPatternAndBuildTest(String buildName) throws Exception {
-        Set<String> expectedDependencies = Sets.newHashSet("a.in");
+        Set<String> expectedDependencies = Collections.singleton("a.in");
         String buildNumber = BUILD_NUMBER + "-3";
         WorkflowRun pipelineResults = null;
 
@@ -210,8 +186,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
      * Verify that we don't download files with same sha and different build name and build number.
      */
     void downloadByShaAndBuildTest(String buildName) throws Exception {
-        Set<String> expectedDependencies = Sets.newHashSet("a3");
-        Set<String> unexpected = Sets.newHashSet("a4", "a5");
+        Set<String> expectedDependencies = Collections.singleton("a3");
+        Set<String> unexpected = new HashSet<>();
+        Collections.addAll(unexpected, "a4", "a5");
         WorkflowRun pipelineResults = null;
 
         try {
@@ -235,8 +212,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
      * Verify that we don't download files with same sha and build name and different build number.
      */
     void downloadByShaAndBuildNameTest(String buildName) throws Exception {
-        Set<String> expectedDependencies = Sets.newHashSet("a4");
-        Set<String> unexpected = Sets.newHashSet("a3", "a5");
+        Set<String> expectedDependencies = Collections.singleton("a4");
+        Set<String> unexpected = new HashSet<>();
+        Collections.addAll(unexpected, "a3", "a5");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline("downloadByShaAndBuildName", false);
@@ -268,6 +246,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             cleanupBuilds(pipelineResults, buildName, project, BUILD_NUMBER);
         }
     }
+
     // Upload a single artifact to different paths in Artifactory must include all of them in the build info.
     void uploadDuplicationsTest(String buildName, String project, String pipelineName) throws Exception {
         WorkflowRun pipelineResults = null;
@@ -301,24 +280,25 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void uploadWithPropsTest() throws Exception {
-        Set<String> uploadFiles = Sets.newHashSet("a.in", "b.in", "c.in");
+        Set<String> uploadFiles = new HashSet<>();
+        Collections.addAll(uploadFiles, "a.in", "b.in", "c.in");
         WorkflowRun build = runPipeline("uploadWithProps", false);
         for (String fileName : uploadFiles) {
             assertTrue(fileName + " doesn't exist locally", isExistInWorkspace(slave, build, "UploadWithProps-test", fileName));
         }
     }
 
-    void promotionTest(String buildName) throws Exception {
+    void promotionTest(String pipelineName, String buildName, String project) throws Exception {
         Set<String> expectedDependencies = getTestFilesNamesByLayer(0);
         WorkflowRun pipelineResults = null;
         Files.list(FILES_PATH).filter(Files::isRegularFile)
                 .forEach(file -> uploadFile(artifactoryClient, file, getRepoKey(TestRepository.LOCAL_REPO1)));
         try {
-            pipelineResults = runPipeline("promote", false);
+            pipelineResults = runPipeline(pipelineName, false);
             for (String fileName : expectedDependencies) {
                 assertTrue(isExistInWorkspace(slave, pipelineResults, "promotion-test", fileName));
             }
-            BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
+            BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, project);
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleDependencies(module, expectedDependencies);
             // In this tests, the expected dependencies and artifacts are equal
@@ -326,12 +306,12 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertNoArtifactsInRepo(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO1));
             assertArtifactsInRepo(artifactoryClient, getRepoKey(TestRepository.LOCAL_REPO2), expectedDependencies);
         } finally {
-            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
+            cleanupBuilds(pipelineResults, buildName, project, BUILD_NUMBER);
         }
     }
 
     void mavenTest(String buildName, boolean useWrapper) throws Exception {
-        Set<String> expectedArtifacts = Sets.newHashSet("multi-3.7-SNAPSHOT.pom");
+        Set<String> expectedArtifacts = Collections.singleton("multi-3.7-SNAPSHOT.pom");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline(useWrapper ? "mavenWrapper" : "maven", false);
@@ -352,7 +332,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void mavenJibTest(String buildName) throws Exception {
         Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS);
-        Set<String> expectedArtifacts = Sets.newHashSet("multi-3.7-SNAPSHOT.pom");
+        Set<String> expectedArtifacts = Collections.singleton("multi-3.7-SNAPSHOT.pom");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline("mavenJib", false);
@@ -400,7 +380,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void gradleCiServerTest(String buildName) throws Exception {
-        Set<String> expectedArtifacts = Sets.newHashSet(pipelineType.toString() + "-gradle-example-ci-server-1.0.jar", "ivy-1.0.xml", pipelineType.toString() + "-gradle-example-ci-server-1.0.pom");
+        Set<String> expectedArtifacts = new HashSet<>();
+        Collections.addAll(expectedArtifacts, pipelineType.toString() + "-gradle-example-ci-server-1.0.jar", "ivy-1.0.xml", pipelineType.toString() + "-gradle-example-ci-server-1.0.pom");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline("gradleCiServer", false);
@@ -421,7 +402,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void gradleCiServerPublicationTest(String buildName) throws Exception {
-        Set<String> expectedArtifacts = Sets.newHashSet(pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.jar", pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.pom");
+        Set<String> expectedArtifacts = new HashSet<>();
+        Collections.addAll(expectedArtifacts, pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.jar", pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.pom");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline("gradleCiServerPublication", false);
@@ -445,8 +427,9 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void npmTest(String pipelineName, String buildName, String moduleName) throws Exception {
-        Set<String> expectedArtifact = Sets.newHashSet("package-name1:0.0.1");
-        Set<String> expectedDependencies = Sets.newHashSet("big-integer:1.6.40", "is-number:7.0.0");
+        Set<String> expectedArtifact = Collections.singleton("package-name1:0.0.1");
+        Set<String> expectedDependencies = new HashSet<>();
+        Collections.addAll(expectedDependencies, "big-integer:1.6.40", "is-number:7.0.0");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline(pipelineName, false);
@@ -461,8 +444,10 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void goTest(String pipelineName, String buildName, String moduleName) throws Exception {
-        Set<String> expectedArtifact = Sets.newHashSet("github.com/you/hello:v1.0.0.zip", "github.com/you/hello:v1.0.0.mod", "github.com/you/hello:v1.0.0.info");
-        Set<String> expectedDependencies = Sets.newHashSet("rsc.io/sampler:v1.3.0", "golang.org/x/text:v0.0.0-20170915032832-14c0d48ead0c", "rsc.io/quote:v1.5.2");
+        Set<String> expectedArtifact = new HashSet<>();
+        Collections.addAll(expectedArtifact, "github.com/you/hello:v1.0.0.zip", "github.com/you/hello:v1.0.0.mod", "github.com/you/hello:v1.0.0.info");
+        Set<String> expectedDependencies = new HashSet<>();
+        Collections.addAll(expectedDependencies, "rsc.io/sampler:v1.3.0", "golang.org/x/text:v0.0.0-20170915032832-14c0d48ead0c", "rsc.io/quote:v1.5.2");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline(pipelineName, false);
@@ -483,7 +468,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
             Module module = getAndAssertModule(buildInfo, "DownloadOnly");
             assertTrue(module.getDependencies().size() > 0);
-            module = getAndAssertModule(buildInfo, "fmt/8.0.1");
+            module = getAndAssertModule(buildInfo, "fmt/8.1.1");
             assertTrue(module.getArtifacts().size() > 0);
         } finally {
             cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
@@ -554,7 +539,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void setPropsTest(String buildName) throws Exception {
-        Set<String> expectedDependencies = Sets.newHashSet("a.in");
+        Set<String> expectedDependencies = Collections.singleton("a.in");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline("setProps", false);
@@ -576,7 +561,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void deletePropsTest(String buildName) throws Exception {
-        Set<String> expectedDependencies = Sets.newHashSet("b.in", "c.in");
+        Set<String> expectedDependencies = new HashSet<>();
+        Collections.addAll(expectedDependencies, "b.in", "c.in");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline("deleteProps", false);

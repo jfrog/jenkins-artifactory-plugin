@@ -401,7 +401,7 @@ public class MavenReleaseWrapper extends BuildWrapper {
             if (successRun) {
                 if (!redeployPublisher.isAllowPromotionOfNonStagedBuilds()) {
                     // add a stage action
-                    run.addAction(new UnifiedPromoteBuildAction(run, redeployPublisher));
+                    run.addAction(new UnifiedPromoteBuildAction(run, redeployPublisher, ""));
                 }
             }
 

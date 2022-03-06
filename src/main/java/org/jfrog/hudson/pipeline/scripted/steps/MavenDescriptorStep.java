@@ -8,11 +8,13 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.extractor.maven.reader.ModuleName;
 import org.jfrog.build.extractor.maven.transformer.PomTransformer;
 import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
+import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.*;
@@ -61,8 +63,8 @@ public class MavenDescriptorStep extends AbstractStepImpl {
         return versionPerModule;
     }
 
-    public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Boolean> {
-    protected static final long serialVersionUID = 1L;
+    public static class Execution extends ArtifactorySynchronousStepExecution<Boolean> {
+        protected static final long serialVersionUID = 1L;
         private transient MavenDescriptorStep step;
         private String pomFile;
         private boolean failOnSnapshot;

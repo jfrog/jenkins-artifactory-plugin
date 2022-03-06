@@ -22,22 +22,18 @@ import com.google.common.collect.Maps;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
-import hudson.model.AbstractBuild;
-import hudson.model.Cause;
-import hudson.model.Computer;
-import hudson.model.Run;
-import hudson.model.TaskListener;
+import hudson.model.*;
 import hudson.slaves.SlaveComputer;
 import hudson.util.IOUtils;
 import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
+import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.ci.BuildInfoConfigProperties;
 import org.jfrog.build.extractor.ci.BuildInfoFields;
 import org.jfrog.build.extractor.ci.BuildRetention;
 import org.jfrog.build.extractor.ci.Vcs;
-import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.ClientProperties;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
@@ -56,17 +52,8 @@ import org.jfrog.hudson.util.plugins.MultiConfigurationUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
 import javax.annotation.Nullable;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 
 /**
  * @author Tomer Cohen
@@ -80,6 +67,8 @@ public class ExtractorUtils {
     public static final String EXTRACTOR_USED = "extractor.used";
     public static final String GIT_COMMIT = "GIT_COMMIT";
     public static final String GIT_URL = "GIT_URL";
+    public static final String GIT_BRANCH = "GIT_BRANCH";
+    public static final String GIT_MESSAGE = "GIT_MESSAGE";
 
     private ExtractorUtils() {
         // utility class
@@ -122,10 +111,34 @@ public class ExtractorUtils {
         return url;
     }
 
+    /**
+     * Get the git branch from the Jenkins build environment.
+     *
+     * @param env Th Jenkins build environment.
+     * @return The vcs branch for git.
+     */
+    public static String getVcsBranch(Map<String, String> env) {
+        String branch = env.get(GIT_BRANCH);
+        return branch != null ? branch : "";
+    }
+
+    /**
+     * Get the git message from the Jenkins build environment.
+     *
+     * @param env The Jenkins build environment.
+     * @return The vcs message for git.
+     */
+    public static String getVcsMessage(Map<String, String> env) {
+        String message = env.get(GIT_MESSAGE);
+        return message != null ? message : "";
+    }
+
     public static void addVcsDetailsToEnv(FilePath filePath, EnvVars env, TaskListener listener) throws IOException, InterruptedException {
         Vcs vcs = Utils.extractVcs(filePath, new JenkinsBuildInfoLog(listener));
         env.put(GIT_COMMIT, StringUtils.defaultIfEmpty(vcs.getRevision(), ""));
         env.put(GIT_URL, StringUtils.defaultIfEmpty(vcs.getUrl(), ""));
+        env.put(GIT_BRANCH, StringUtils.defaultIfEmpty(vcs.getBranch(), ""));
+        env.put(GIT_MESSAGE, StringUtils.defaultIfEmpty(vcs.getMessage(), ""));
     }
 
     /*
@@ -199,23 +212,41 @@ public class ExtractorUtils {
         return configuration;
     }
 
-    private static void setPublisherResolverInfo(Map<String, String> env, Run build, ArtifactoryClientConfiguration configuration,
+    private static void setPublisherResolverInfo(Map<String, String> env, Run<?, ?> build, ArtifactoryClientConfiguration configuration,
                                                  PublisherContext publisherContext, ResolverContext resolverContext, BuildInfo pipelineBuildInfo) throws IOException {
         String buildName = pipelineBuildInfo != null ? pipelineBuildInfo.getName() : BuildUniqueIdentifierHelper.getBuildName(build);
         configuration.info.setBuildName(buildName);
         String buildNumber = pipelineBuildInfo != null ? pipelineBuildInfo.getNumber() : BuildUniqueIdentifierHelper.getBuildNumber(build);
         configuration.info.setBuildNumber(buildNumber);
-        String project = pipelineBuildInfo != null ? pipelineBuildInfo.getProject() : null;
+        String project = getProject(publisherContext, pipelineBuildInfo);
         configuration.info.setProject(project);
 
         if (publisherContext != null) {
-            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration, buildName, buildNumber);
+            setPublisherInfo(env, build, pipelineBuildInfo, publisherContext, configuration, buildName, buildNumber, project);
             publisherContext.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
         }
 
         if (resolverContext != null) {
             setResolverInfo(configuration, build, resolverContext, env);
         }
+    }
+
+    /**
+     * In pipeline steps - get the project key from the input pipelineBuildInfo object.
+     * In UI jobs - get the project key from the publisher.
+     *
+     * @param publisherContext  - The publisher
+     * @param pipelineBuildInfo - The buildInfo pipeline object
+     * @return project key or null.
+     */
+    private static String getProject(PublisherContext publisherContext, BuildInfo pipelineBuildInfo) {
+        if (pipelineBuildInfo != null) {
+            return pipelineBuildInfo.getProject();
+        }
+        if (publisherContext != null) {
+            return publisherContext.getProject();
+        }
+        return null;
     }
 
     private static boolean shouldBypassProxy(ResolverContext resolverContext, PublisherContext publisherContext) {
@@ -280,8 +311,8 @@ public class ExtractorUtils {
     /**
      * Set all the parameters relevant for publishing artifacts and build info
      */
-    private static void setPublisherInfo(Map<String, String> env, Run build, BuildInfo pipelineBuildInfo, PublisherContext context,
-                                         ArtifactoryClientConfiguration configuration, String buildName, String buildNumber) throws IOException {
+    private static void setPublisherInfo(Map<String, String> env, Run<?, ?> build, BuildInfo pipelineBuildInfo, PublisherContext context,
+                                         ArtifactoryClientConfiguration configuration, String buildName, String buildNumber, String project) throws IOException {
         configuration.setActivateRecorder(Boolean.TRUE);
 
         if (pipelineBuildInfo == null && context.isOverrideBuildName()) {
@@ -290,6 +321,7 @@ public class ExtractorUtils {
         }
         configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_NAME, buildName);
         configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_NUMBER, buildNumber);
+        configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_PROJECT, project);
         configuration.info.setArtifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion());
 
         Date buildStartDate = build.getTimestamp().getTime();
@@ -307,6 +339,18 @@ public class ExtractorUtils {
         if (StringUtils.isNotBlank(vcsUrl)) {
             configuration.info.setVcsUrl(vcsUrl);
             configuration.publisher.addMatrixParam(BuildInfoFields.VCS_URL, vcsUrl);
+        }
+
+        String vcsBranch = getVcsBranch(env);
+        if (StringUtils.isNotBlank(vcsBranch)) {
+            configuration.info.setVcsBranch(vcsBranch);
+            configuration.publisher.addMatrixParam(BuildInfoFields.VCS_BRANCH, vcsBranch);
+        }
+
+        String vcsMessage = getVcsMessage(env);
+        if (StringUtils.isNotBlank(vcsMessage)) {
+            configuration.info.setVcsBranch(vcsMessage);
+            configuration.publisher.addMatrixParam(BuildInfoFields.VCS_MESSAGE, vcsMessage);
         }
 
         if (StringUtils.isNotBlank(context.getArtifactsPattern())) {

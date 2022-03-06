@@ -92,6 +92,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     private boolean aggregateBuildIssues;
     private String customBuildName;
     private boolean overrideBuildName;
+    private String project;
     /**
      * @deprecated: Use org.jfrog.hudson.ArtifactoryRedeployPublisher#getDeployerCredentialsConfig()()
      */
@@ -116,7 +117,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
                                         boolean aggregateBuildIssues, String aggregationBuildStatus,
                                         boolean recordAllDependencies, boolean allowPromotionOfNonStagedBuilds,
                                         String defaultPromotionTargetRepository, boolean filterExcludedArtifactsFromBuild,
-                                        String customBuildName, boolean overrideBuildName) {
+                                        String customBuildName, boolean overrideBuildName, String project) {
         this.deployerDetails = deployerDetails;
         this.deployArtifacts = deployArtifacts;
         this.artifactDeploymentPatterns = artifactDeploymentPatterns;
@@ -139,12 +140,13 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         this.defaultPromotionTargetRepository = defaultPromotionTargetRepository;
         this.customBuildName = customBuildName;
         this.overrideBuildName = overrideBuildName;
+        this.project = project;
     }
 
     /**
      * Constructor for the DeployerResolverOverriderConverterTest
      *
-     * @param details - Old server details
+     * @param details         - Old server details
      * @param deployerDetails - New deployer details
      */
     public ArtifactoryRedeployPublisher(ServerDetails details, ServerDetails deployerDetails) {
@@ -288,6 +290,10 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         return overrideBuildName;
     }
 
+    public String getProject() {
+        return project;
+    }
+
     @Override
     public Action getProjectAction(AbstractProject<?, ?> project) {
         if (getDeployerDetails() != null) {
@@ -363,9 +369,9 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
     }
 
     private void addJobActions(AbstractBuild build, String buildName) {
-        build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+        build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, project));
         if (isAllowPromotionOfNonStagedBuilds()) {
-            build.addAction(new UnifiedPromoteBuildAction(build, this));
+            build.addAction(new UnifiedPromoteBuildAction(build, this, project));
         }
     }
 
@@ -532,6 +538,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         /**
          * Returns the list of {@link JFrogPlatformInstance} configured.
          * Used by Jenkins Jelly for displaying values
+         *
          * @return can be empty but never null.
          */
         public List<JFrogPlatformInstance> getJfrogInstances() {

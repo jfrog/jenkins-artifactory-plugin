@@ -102,7 +102,7 @@ public class AbstractBuildInfoDeployer {
         if (StringUtils.isNotBlank(url)) {
             builder.vcsUrl(url);
         }
-        Vcs vcs = new Vcs(url, revision);
+        Vcs vcs = new Vcs(url, revision, ExtractorUtils.getVcsBranch(env), ExtractorUtils.getVcsMessage(env));
         if (!vcs.isEmpty()) {
             ArrayList<Vcs> vcsList = new ArrayList<>();
             vcsList.add(vcs);

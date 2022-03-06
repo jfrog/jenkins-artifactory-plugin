@@ -102,6 +102,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
     private ServerDetails details = null;
     @Deprecated
     private final String matrixParams = null;
+    private String project;
 
     @DataBoundConstructor
     public ArtifactoryMaven3Configurator(ServerDetails details, ServerDetails deployerDetails, ServerDetails resolverDetails,
@@ -114,7 +115,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                                          boolean enableIssueTrackerIntegration, boolean aggregateBuildIssues,
                                          String aggregationBuildStatus, boolean recordAllDependencies,
                                          boolean filterExcludedArtifactsFromBuild,
-                                         String customBuildName,
+                                         String customBuildName, String project,
                                          boolean overrideBuildName,
                                          String artifactoryCombinationFilter
     ) {
@@ -140,6 +141,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         this.enableResolveArtifacts = enableResolveArtifacts;
         this.customBuildName = customBuildName;
         this.overrideBuildName = overrideBuildName;
+        this.project = project;
     }
 
     /**
@@ -233,6 +235,10 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
 
     public boolean isOverrideBuildName() {
         return overrideBuildName;
+    }
+
+    public String getProject() {
+        return project;
     }
 
     public boolean isRecordAllDependencies() {
@@ -366,7 +372,8 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                 .filterExcludedArtifactsFromBuild(isFilterExcludedArtifactsFromBuild())
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .overrideBuildName(isOverrideBuildName())
-                .customBuildName(getCustomBuildName());
+                .customBuildName(getCustomBuildName())
+                .project(getProject());
 
         if (isMultiConfProject(build) && isDeployArtifacts()) {
             if (StringUtils.isBlank(getArtifactoryCombinationFilter())) {
@@ -406,8 +413,8 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
                 Result result = build.getResult();
                 if (deployBuildInfo && result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
                     String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryMaven3Configurator.this, build);
-                    build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
-                    build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryMaven3Configurator.this));
+                    build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, project));
+                    build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryMaven3Configurator.this, project));
                 }
                 return true;
             }

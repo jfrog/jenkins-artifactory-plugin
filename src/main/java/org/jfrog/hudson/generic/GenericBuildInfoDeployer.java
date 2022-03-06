@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.generic;
 
-import com.google.common.collect.Lists;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.jfrog.build.extractor.builder.ModuleBuilder;
@@ -25,6 +24,7 @@ import org.jfrog.build.extractor.ci.BuildInfo;
 import org.jfrog.build.extractor.ci.BuildRetention;
 import org.jfrog.build.extractor.ci.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
+import org.jfrog.build.extractor.ci.Module;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.retention.Utils;
 import org.jfrog.hudson.AbstractBuildInfoDeployer;
@@ -33,6 +33,7 @@ import org.jfrog.hudson.util.ExtractorUtils;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -76,9 +77,11 @@ public class GenericBuildInfoDeployer extends AbstractBuildInfoDeployer {
                                                       List<Dependency> publishedDependencies) throws IOException, NoSuchAlgorithmException {
         ModuleBuilder moduleBuilder =
                 new ModuleBuilder().id(
-                        ExtractorUtils.sanitizeBuildName(build.getParent().getDisplayName()) + ":" + build.getNumber())
+                                ExtractorUtils.sanitizeBuildName(build.getParent().getDisplayName()) + ":" + build.getNumber())
                         .artifacts(deployedArtifacts);
         moduleBuilder.dependencies(publishedDependencies);
-        buildInfo.setModules(Lists.newArrayList(moduleBuilder.build()));
+        List<Module> modules = new ArrayList<>();
+        modules.add(moduleBuilder.build());
+        buildInfo.setModules(modules);
     }
 }

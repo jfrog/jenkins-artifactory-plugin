@@ -31,17 +31,25 @@ pipelines:
             - export JFROG_CLI_BUILD_NUMBER=$run_number
             - export JFROG_CLI_BUILD_PROJECT=ecosys
 
+            # Install docker-java
+            - git clone https://github.com/docker-java/docker-java.git
+            - cd docker-java
+            - git checkout 8e77a694
+            - ./mvnw versions:set -DnewVersion=3.2.x-8e77a694
+            - ./mvnw install -DskipTests
+            - cd ..
+
             # Configure JFrog CLI
-            - curl -fL https://getcli.jfrog.io/v2-jf | sh && chmod +x jf
-            - ./jf c rm --quiet
-            - ./jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
-            - ./jf mvnc --repo-resolve-releases ecosys-jenkins-repos --repo-resolve-snapshots ecosys-releases-snapshots --repo-deploy-snapshots ecosys-oss-snapshot-local --repo-deploy-releases ecosys-oss-release-local
+            - curl -fL https://install-cli.jfrog.io | sh
+            - jf c rm --quiet
+            - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
+            - jf mvnc --repo-resolve-releases ecosys-jenkins-repos --repo-resolve-snapshots ecosys-releases-snapshots --repo-deploy-snapshots ecosys-oss-snapshot-local --repo-deploy-releases ecosys-oss-release-local
 
             # Run audit
-            # - ./jf am --project $JFROG_CLI_BUILD_PROJECT
+            - jf audit --fail=false
 
             # Delete former snapshots to make sure the release bundle will not contain the same artifacts
-            - ./jf rt del "ecosys-oss-snapshot-local/org/jenkins-ci/plugins/artifactory/*" --quiet
+            - jf rt del "ecosys-oss-snapshot-local/org/jenkins-ci/plugins/artifactory/*" --quiet
 
             # Run install and publish
             - >
@@ -49,13 +57,13 @@ pipelines:
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
-              ./jf mvn clean install -U -B javadoc:jar source:jar
-            - ./jf rt bag && ./jf rt bce
-            - ./jf rt bp
+              jf mvn clean install -U -B javadoc:jar source:jar
+            - jf rt bag && jf rt bce
+            - jf rt bp
 
             # Distribute release bundle
-            - ./jf ds rbc artifactory-jenkins-plugin-snapshot $run_number --spec=./release/specs/dev-rbc-filespec.json --sign
-            - ./jf ds rbd artifactory-jenkins-plugin-snapshot $run_number --site="releases.jfrog.io" --sync
+            - jf ds rbc artifactory-jenkins-plugin-snapshot $run_number --spec=./release/specs/dev-rbc-filespec.json --sign
+            - jf ds rbd artifactory-jenkins-plugin-snapshot $run_number --site="releases.jfrog.io" --sync
 
           onComplete:
             # Show tests in the *Tests* tab

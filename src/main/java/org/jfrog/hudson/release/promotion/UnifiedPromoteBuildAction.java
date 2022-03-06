@@ -15,7 +15,6 @@
 
 package org.jfrog.hudson.release.promotion;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.*;
@@ -37,6 +36,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +64,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         this.build = build;
     }
 
-    public UnifiedPromoteBuildAction(Run<?, ?> build, BuildInfoAwareConfigurator configurator) {
+    public UnifiedPromoteBuildAction(Run<?, ?> build, BuildInfoAwareConfigurator configurator, String project) {
         this(build);
         String buildName = BuildUniqueIdentifierHelper.
                 getBuildNameConsiderOverride(configurator, build);
@@ -72,6 +72,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
         PromotionConfig promotionConfig = new PromotionConfig();
         promotionConfig.setBuildName(buildName);
         promotionConfig.setBuildNumber(buildNumber);
+        promotionConfig.setProject(project);
         addPromotionCandidate(promotionConfig, configurator, null);
     }
 
@@ -230,7 +231,9 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
 
     @SuppressWarnings({"UnusedDeclaration"})
     public List<String> getTargetStatuses() {
-        return Lists.newArrayList(/*"Staged", */"Released", "Rolled-back");
+        List<String> targetStatuses = new ArrayList<>();
+        Collections.addAll(targetStatuses, /*"Staged", */"Released", "Rolled-back");
+        return targetStatuses;
     }
 
     /**
@@ -341,9 +344,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                     paramMap.put(key, pluginSettings.getString(key));
                 }
                 paramMap.put("ciUser", ciUser);
-                if (!paramMap.isEmpty()) {
-                    settings.setParamMap(paramMap);
-                }
+                settings.setParamMap(paramMap);
                 setPromotionPlugin(settings);
             }
         }
@@ -352,12 +353,16 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
     private List<UserPluginInfo> getPromotionsUserPluginInfo() {
         final BuildInfoAwareConfigurator configurator = getFirstConfigurator();
         if (configurator == null) {
-            return Lists.newArrayList(UserPluginInfo.NO_PLUGIN);
+            List<UserPluginInfo> infosToReturn = new ArrayList<>();
+            infosToReturn.add(UserPluginInfo.NO_PLUGIN);
+            return infosToReturn;
         }
 
         ArtifactoryServer artifactoryServer = configurator.getArtifactoryServer();
         if (artifactoryServer == null) {
-            return Lists.newArrayList(UserPluginInfo.NO_PLUGIN);
+            List<UserPluginInfo> infosToReturn = new ArrayList<>();
+            infosToReturn.add(UserPluginInfo.NO_PLUGIN);
+            return infosToReturn;
         }
         return artifactoryServer.getPromotionsUserPluginInfo((DeployerOverrider) configurator, build.getParent());
     }
@@ -409,7 +414,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
                             .copy(useCopy)
                             .failFast(failFast);
 
-                    PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), artifactoryManager, listener, buildName, buildNumber);
+                    PromotionUtils.promoteAndCheckResponse(promotionBuilder.build(), artifactoryManager, listener, buildName, buildNumber, promotionCandidate.getProject());
                 }
 
                 build.save();

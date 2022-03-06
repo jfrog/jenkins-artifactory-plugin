@@ -42,7 +42,7 @@ node("TestSlave") {
 
     rtConanRun(
         clientId: "myConanClient",
-        command: "upload fmt/8.0.1 --all -r conanTestRemote --confirm",
+        command: "upload fmt/8.1.1 --all -r conanTestRemote --confirm",
         buildName: buildName,
         buildNumber: buildNumber
     )

@@ -25,7 +25,7 @@
     </parent>
 
     <artifactId>artifactory</artifactId>
-    <version>3.14.x-SNAPSHOT</version>
+    <version>3.15.x-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>Jenkins Artifactory Plugin</name>
     <description>Integrates Artifactory to Jenkins</description>
@@ -41,8 +41,8 @@
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
         <skipITs>true</skipITs>
 
-        <buildinfo.version>2.32.4</buildinfo.version>
-        <buildinfo.gradle.version>4.25.3</buildinfo.gradle.version>
+        <buildinfo.version>2.35.x-20220306.094658-1</buildinfo.version>
+        <buildinfo.gradle.version>4.27.x-20220306.094658-1</buildinfo.gradle.version>
     </properties>
 
     <repositories>
@@ -60,6 +60,12 @@
             <id>jenkins-public</id>
             <name>jenkins-public</name>
             <url>https://repo.jenkins-ci.org/public</url>
+        </repository>
+        <repository>
+            <snapshots/>
+            <id>releases</id>
+            <name>libs-releases</name>
+            <url>https://releases.jfrog.io/artifactory/oss-releases</url>
         </repository>
         <repository>
             <snapshots/>
@@ -382,6 +388,18 @@
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-docker</artifactId>
             <version>${buildinfo.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.docker-java</groupId>
+                    <artifactId>docker-java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <!-- Warning - this is a temporary workaround supposed to be removed after the next release of docker-java -->
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>3.2.x-8e77a694</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>

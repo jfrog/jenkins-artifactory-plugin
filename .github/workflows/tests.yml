@@ -82,6 +82,16 @@ jobs:
           echo "MAVEN_HOME=$(which mvn)" >> $GITHUB_ENV
           echo "GRADLE_HOME=$(brew info gradle | grep /usr/local/Cellar/gradle | awk '{print $1}')" >> $GITHUB_ENV
 
+      # Install docker-java locally
+      - name: Install docker-java
+        run: |
+          git clone https://github.com/docker-java/docker-java.git
+          cd docker-java
+          git checkout 8e77a694
+          ./mvnw versions:set -DnewVersion="3.2.x-8e77a694" -B
+          ./mvnw install -DskipTests -B
+          cd ..
+
       - name: Run tests
         env:
           JENKINS_PLATFORM_URL: ${{ secrets.JENKINS_PLATFORM_URL }}

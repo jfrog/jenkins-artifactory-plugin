@@ -46,21 +46,27 @@ pipelines:
             - test -n "$NEXT_VERSION" -a "$NEXT_VERSION" != "0.0.0"
             - test -n "$NEXT_DEVELOPMENT_VERSION" -a "$NEXT_DEVELOPMENT_VERSION" != "0.0.0"
 
+            # Install docker-java
+            - git clone https://github.com/docker-java/docker-java.git
+            - cd docker-java
+            - git checkout 8e77a694
+            - ./mvnw versions:set -DnewVersion=3.2.x-8e77a694
+            - ./mvnw install -DskipTests
+            - cd ..
+
             # Configure JFrog CLI
-            - curl -fL https://getcli.jfrog.io/v2-jf | sh && chmod +x jf
-            - ./jf c rm --quiet
-            - ./jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
-            - ./jf mvnc --repo-resolve-releases ecosys-jenkins-repos --repo-resolve-snapshots ecosys-releases-snapshots --repo-deploy-snapshots ecosys-oss-snapshot-local --repo-deploy-releases ecosys-oss-release-local
+            - curl -fL https://install-cli.jfrog.io | sh
+            - jf c rm --quiet
+            - jf c add internal --url=$int_entplus_deployer_url --user=$int_entplus_deployer_user --password=$int_entplus_deployer_apikey
+            - jf mvnc --repo-resolve-releases ecosys-jenkins-repos --repo-resolve-snapshots ecosys-releases-snapshots --repo-deploy-snapshots ecosys-oss-snapshot-local --repo-deploy-releases ecosys-oss-release-local
 
             # Run audit
-            # - ./jf am --project $JFROG_CLI_BUILD_PROJECT
+            - jf audit --fail=false
 
             # Update version
-            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jf mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
+            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME jf mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
             - git commit -am "[artifactory-release] Release version ${NEXT_VERSION} [skipRun]" --allow-empty
             - git tag artifactory-${NEXT_VERSION}
-            - git push
-            - git push --tags
 
             # Run install and publish
             - >
@@ -68,27 +74,28 @@ pipelines:
               JFROG_CLI_BUILD_NAME=$JFROG_CLI_BUILD_NAME
               JFROG_CLI_BUILD_NUMBER=$JFROG_CLI_BUILD_NUMBER
               JFROG_CLI_BUILD_PROJECT=$JFROG_CLI_BUILD_PROJECT
-              ./jf mvn clean install -U -B
-            - ./jf rt bag && ./jf rt bce
-            - ./jf rt bp
+              jf mvn clean install -U -B
+            - jf rt bag && jf rt bce
+            - jf rt bp
 
             # Distribute release bundle
-            - ./jf ds rbc artifactory-jenkins-plugin $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
-            - ./jf ds rbd artifactory-jenkins-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
+            - jf ds rbc artifactory-jenkins-plugin $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+            - jf ds rbd artifactory-jenkins-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Upload plugin to Jenkins Artifactory server
-            - ./jf c add jenkins --url=$int_jenkins_artifactory_url --user=$int_jenkins_artifactory_user --password=$int_jenkins_artifactory_password --enc-password=false
-            - ./jf mvnc
+            - jf c add jenkins --url=$int_jenkins_artifactory_url --user=$int_jenkins_artifactory_user --password=$int_jenkins_artifactory_password --enc-password=false
+            - jf mvnc
               --server-id-resolve internal --repo-resolve-releases ecosys-jenkins-repos --repo-resolve-snapshots ecosys-releases-snapshots
               --server-id-deploy jenkins --repo-deploy-releases releases --repo-deploy-snapshots snapshots
-            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jf mvn clean install -U -B
+            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME jf mvn clean install -U -B
 
             # Update next development version
-            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME ./jf mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -B
+            - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME jf mvn versions:set -DnewVersion=$NEXT_DEVELOPMENT_VERSION -B
             - git commit -am "[artifactory-release] Next development version [skipRun]"
 
             # Push changes
             - git push
+            - git push --tags
             - git push upstream master
             - git push upstream master --tags
 

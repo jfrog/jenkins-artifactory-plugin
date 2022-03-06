@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson;
 
-import com.google.common.collect.Lists;
 import hudson.model.Item;
 import hudson.model.TaskListener;
 import hudson.util.XStream2;
@@ -232,13 +231,15 @@ public class ArtifactoryServer implements Serializable {
     }
 
     public List<UserPluginInfo> getStagingUserPluginInfo(DeployerOverrider deployerOverrider, Item item) {
-        List<UserPluginInfo> infosToReturn = Lists.newArrayList(UserPluginInfo.NO_PLUGIN);
+        List<UserPluginInfo> infosToReturn = new ArrayList<>();
+        infosToReturn.add(UserPluginInfo.NO_PLUGIN);
         gatherUserPluginInfo(infosToReturn, "staging", deployerOverrider, item);
         return infosToReturn;
     }
 
     public List<UserPluginInfo> getPromotionsUserPluginInfo(DeployerOverrider deployerOverrider, Item item) {
-        List<UserPluginInfo> infosToReturn = Lists.newArrayList(UserPluginInfo.NO_PLUGIN);
+        List<UserPluginInfo> infosToReturn = new ArrayList<>();
+        infosToReturn.add(UserPluginInfo.NO_PLUGIN);
         gatherUserPluginInfo(infosToReturn, "promotions", deployerOverrider, item);
         return infosToReturn;
     }
