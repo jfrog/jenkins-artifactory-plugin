@@ -67,7 +67,7 @@ public class CreateReleaseBundleStep extends CreateUpdateReleaseBundleStep {
     }
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
-protected static final long serialVersionUID = 1L;
+        protected static final long serialVersionUID = 1L;
         private final transient CreateReleaseBundleStep step;
 
         @Inject

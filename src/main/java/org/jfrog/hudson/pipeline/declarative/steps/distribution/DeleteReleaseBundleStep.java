@@ -64,7 +64,7 @@ public class DeleteReleaseBundleStep extends RemoteReleaseBundleStep {
     }
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
-protected static final long serialVersionUID = 1L;
+        protected static final long serialVersionUID = 1L;
         private final transient DeleteReleaseBundleStep step;
 
         @Inject

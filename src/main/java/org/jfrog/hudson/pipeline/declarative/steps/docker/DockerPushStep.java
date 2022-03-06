@@ -81,7 +81,7 @@ public class DockerPushStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
-protected static final long serialVersionUID = 1L;
+        protected static final long serialVersionUID = 1L;
         private transient final DockerPushStep step;
 
         @Inject
