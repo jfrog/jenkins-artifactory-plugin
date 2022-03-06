@@ -388,18 +388,6 @@
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-docker</artifactId>
             <version>${buildinfo.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.github.docker-java</groupId>
-                    <artifactId>docker-java</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <!-- Warning - this is a temporary workaround supposed to be removed after the next release of docker-java -->
-            <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java</artifactId>
-            <version>3.2.x-8e77a694</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
