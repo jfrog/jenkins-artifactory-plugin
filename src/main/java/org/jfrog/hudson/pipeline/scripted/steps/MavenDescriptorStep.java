@@ -143,7 +143,6 @@ public class MavenDescriptorStep extends AbstractStepImpl {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-            // Ignored
             String parentGroupId = null;
             String parentArtifactId = null;
             if (model.getParent() != null) {

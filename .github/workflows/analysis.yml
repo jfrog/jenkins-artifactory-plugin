@@ -17,4 +17,4 @@ jobs:
         run: echo "MAVEN_HOME=$(whereis mvn)" >> $GITHUB_ENV
 
       - name: Run Analysis
-        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=true "-Dfindbugs.failOnError=true"
+        run: mvn -V -B -U --no-transfer-progress clean verify
