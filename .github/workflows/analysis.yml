@@ -1,7 +1,7 @@
 name: "Static Analysis"
 on: ["push", "pull_request"]
 jobs:
-  Static-Check:
+  Static-Analysis:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Source
