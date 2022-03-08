@@ -21,7 +21,7 @@
     <parent>
         <groupId>org.jenkins-ci.plugins</groupId>
         <artifactId>plugin</artifactId>
-        <version>3.56</version>
+        <version>3.57</version>
     </parent>
 
     <artifactId>artifactory</artifactId>
@@ -41,6 +41,7 @@
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
         <skipITs>true</skipITs>
 
+        <hpi-plugin.version>3.19</hpi-plugin.version>
         <buildinfo.version>2.35.x-20220306.094658-1</buildinfo.version>
         <buildinfo.gradle.version>4.27.x-20220306.094658-1</buildinfo.gradle.version>
     </properties>
@@ -480,7 +481,7 @@
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
             <artifactId>groovy-all</artifactId>
-            <version>2.4.12</version>
+            <version>2.4.21</version>
             <scope>provided</scope>
         </dependency>
         <!--Tests-->
@@ -493,7 +494,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.3.2</version>
+            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -505,7 +506,7 @@
         <dependency>
             <groupId>org.jfrog.artifactory.client</groupId>
             <artifactId>artifactory-java-client-services</artifactId>
-            <version>2.6.2</version>
+            <version>2.11.1</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
