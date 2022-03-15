@@ -5,7 +5,6 @@ import hudson.model.Label;
 import hudson.model.Slave;
 import hudson.slaves.EnvironmentVariablesNodeProperty;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.text.StrSubstitutor;
@@ -33,7 +32,6 @@ import org.jvnet.hudson.test.JenkinsRule;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -58,6 +56,8 @@ public class PipelineTestBase {
     @ClassRule
     public static TemporaryFolder testTemporaryFolder = new TemporaryFolder();
 
+    private static final Path INTEGRATION_BASE_PATH = Paths.get(".").toAbsolutePath().normalize()
+            .resolve(Paths.get("src", "test", "resources", "integration"));
     private static final String SLAVE_LABEL = "TestSlave";
     private static final String PLATFORM_URL = System.getenv("JENKINS_PLATFORM_URL");
     private static final String ARTIFACTORY_URL = StringUtils.removeEnd(PLATFORM_URL, "/") + "/artifactory";
@@ -180,12 +180,9 @@ public class PipelineTestBase {
      */
     private static String readConfigurationWithSubstitution(String repoOrProject) {
         try {
-            String repositorySettingsPath = Paths.get("integration", "settings", repoOrProject + ".json").toString();
-            InputStream inputStream = classLoader.getResourceAsStream(repositorySettingsPath);
-            if (inputStream == null) {
-                throw new IOException(repositorySettingsPath + " not found");
-            }
-            String repositorySettings = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+            String repositorySettings = FileUtils.readFileToString(INTEGRATION_BASE_PATH
+                    .resolve("settings")
+                    .resolve(repoOrProject + ".json").toFile(), StandardCharsets.UTF_8);
             return pipelineSubstitution.replace(repositorySettings);
         } catch (Exception e) {
             fail(ExceptionUtils.getRootCauseMessage(e));
@@ -302,7 +299,7 @@ public class PipelineTestBase {
             throw new Exception("Slave workspace not found");
         }
         slaveWs.mkdirs();
-        project.setDefinition(new CpsFlowDefinition(readPipeline(name)));
+        project.setDefinition(new CpsFlowDefinition(readPipeline(name), false));
         return jenkins.buildAndAssertSuccess(project);
     }
 
@@ -313,12 +310,10 @@ public class PipelineTestBase {
      * @return pipeline as a string
      */
     private String readPipeline(String name) throws IOException {
-        String pipelinePath = Paths.get("integration", "pipelines", pipelineType.toString(), name + ".pipeline").toString();
-        InputStream inputStream = classLoader.getResourceAsStream(pipelinePath);
-        if (inputStream == null) {
-            throw new IOException(pipelinePath + " not found");
-        }
-        String pipeline = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
+        String pipeline = FileUtils.readFileToString(INTEGRATION_BASE_PATH
+                .resolve("pipelines")
+                .resolve(pipelineType.toString())
+                .resolve(name + ".pipeline").toFile(), StandardCharsets.UTF_8);
         return pipelineSubstitution.replace(pipeline);
     }
 
