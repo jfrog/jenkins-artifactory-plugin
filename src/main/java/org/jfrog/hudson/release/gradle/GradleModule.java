@@ -23,6 +23,7 @@ import java.io.Serializable;
  * @author Tomer Cohen
  */
 public class GradleModule implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String moduleName;
     private final String moduleVersion;

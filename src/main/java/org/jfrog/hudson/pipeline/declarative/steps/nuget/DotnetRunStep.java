@@ -10,7 +10,7 @@ public class DotnetRunStep extends NugetRunStepBase {
     @DataBoundConstructor
     public DotnetRunStep() {
         super();
-        this.nugetBuild.SetUseDotnetCli(true);
+        this.nugetBuild.setUseDotnetCli(true);
     }
 
     public String getResolverStepName() {

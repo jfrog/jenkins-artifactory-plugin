@@ -162,7 +162,7 @@ public class ArtifactoryPipelineGlobal implements Serializable {
     public NugetBuild newDotnetBuild() {
         NugetBuild dotnetCliBuild = (NugetBuild) cpsScript.invokeMethod("newNugetBuild", new LinkedHashMap<>());
         dotnetCliBuild.setCpsScript(cpsScript);
-        dotnetCliBuild.SetUseDotnetCli(true);
+        dotnetCliBuild.setUseDotnetCli(true);
         return dotnetCliBuild;
     }
 

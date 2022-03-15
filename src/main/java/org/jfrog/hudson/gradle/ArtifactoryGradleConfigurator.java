@@ -52,10 +52,7 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Gradle-Artifactory plugin configuration, allows to add the server details, deployment username/password, as well as
@@ -525,7 +522,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                             try {
                                 ActionableHelper.deleteFilePath(build.getWorkspace(), initScriptPath);
                             } catch (IOException e) {
-                                log.println(e.getStackTrace());
+                                log.println(Arrays.toString(e.getStackTrace()));
                             }
                         }
                     };
@@ -533,13 +530,13 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 if (result != null && result.isBetterOrEqualTo(Result.SUCCESS)) {
                     if (isDeployBuildInfo()) {
                         String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGradleConfigurator.this, build);
-                        build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
+                        build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, ""));
                         ArtifactoryGradleConfigurator configurator =
                                 ActionableHelper.getBuildWrapper(build.getProject(),
                                         ArtifactoryGradleConfigurator.class);
                         if (configurator != null) {
                             if (isAllowPromotionOfNonStagedBuilds()) {
-                                build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryGradleConfigurator.this));
+                                build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryGradleConfigurator.this, ""));
                             }
                         }
                     }
@@ -603,8 +600,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private Gradle getLastGradleBuild(AbstractProject project) {
         if (project instanceof Project) {
             List<Gradle> gradles = ActionableHelper.getBuilder((Project) project, Gradle.class);
-           if (gradles != null && !gradles.isEmpty()) {
-                return gradles.get(gradles.size()-1);
+            if (gradles != null && !gradles.isEmpty()) {
+                return gradles.get(gradles.size() - 1);
             }
         }
         return null;
@@ -730,7 +727,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
             if (!wrapper.isAllowPromotionOfNonStagedBuilds()) {
                 if (successRun) {
                     // add a stage action
-                    run.addAction(new UnifiedPromoteBuildAction(run, wrapper));
+                    run.addAction(new UnifiedPromoteBuildAction(run, wrapper, ""));
                 }
             }
 
@@ -739,7 +736,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
             } catch (Exception e) {
                 run.setResult(Result.FAILURE);
                 listener.error("[RELEASE] Failed on build completion");
-                e.printStackTrace(listener.getLogger());
+                listener.getLogger().println(e);
             }
 
             // once the build is completed reset the version maps. Since the GradleReleaseAction is saved

@@ -84,7 +84,7 @@ public class PipInstallStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
-
+        protected static final long serialVersionUID = 1L;
         private transient final PipInstallStep step;
 
         @Inject

@@ -8,18 +8,17 @@ import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.jenkinsci.plugins.workflow.steps.*;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
+import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
+import org.jenkinsci.plugins.workflow.steps.StepContext;
 import org.jfrog.build.extractor.maven.reader.ModuleName;
 import org.jfrog.build.extractor.maven.transformer.PomTransformer;
 import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousStepExecution;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +64,7 @@ public class MavenDescriptorStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Boolean> {
-
+        protected static final long serialVersionUID = 1L;
         private transient MavenDescriptorStep step;
         private String pomFile;
         private boolean failOnSnapshot;
@@ -140,21 +139,11 @@ public class MavenDescriptorStep extends AbstractStepImpl {
         private void findPomModules(String filePath, String fileName, Map<ModuleName, String> result) {
             Model model;
             String pomPath = filePath + fileName;
-            BufferedReader in = null;
-            try {
-                in = new BufferedReader(new FileReader(pomPath));
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(pomFile), StandardCharsets.UTF_8.name()))) {
                 MavenXpp3Reader reader = new MavenXpp3Reader();
                 model = reader.read(in);
             } catch (Exception e) {
                 throw new RuntimeException(e);
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (Exception e) {
-                        // Ignored
-                    }
-                }
             }
             String parentGroupId = null;
             String parentArtifactId = null;

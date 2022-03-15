@@ -401,7 +401,7 @@ public class MavenReleaseWrapper extends BuildWrapper {
             if (successRun) {
                 if (!redeployPublisher.isAllowPromotionOfNonStagedBuilds()) {
                     // add a stage action
-                    run.addAction(new UnifiedPromoteBuildAction(run, redeployPublisher));
+                    run.addAction(new UnifiedPromoteBuildAction(run, redeployPublisher, ""));
                 }
             }
 
@@ -411,7 +411,7 @@ public class MavenReleaseWrapper extends BuildWrapper {
             } catch (Exception e) {
                 run.setResult(Result.FAILURE);
                 listener.error("[RELEASE] Failed on build completion");
-                e.printStackTrace(listener.getLogger());
+                listener.getLogger().println(e);
             }
 
             // remove the release action from the build. the stage action is the point of interaction for successful builds

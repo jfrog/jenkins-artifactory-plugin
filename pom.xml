@@ -37,12 +37,12 @@
         <java.level>8</java.level>
         <!-- TODO: enforcer is full of upper bound dependency issues, including real ones -->
         <enforcer.skip>true</enforcer.skip>
-        <findbugs.failOnError>false</findbugs.failOnError>
+        <findbugs.failOnError>true</findbugs.failOnError>
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
         <skipITs>true</skipITs>
 
-        <buildinfo.version>2.34.0</buildinfo.version>
-        <buildinfo.gradle.version>4.27.0</buildinfo.gradle.version>
+        <buildinfo.version>2.35.x-20220306.094658-1</buildinfo.version>
+        <buildinfo.gradle.version>4.27.x-20220306.094658-1</buildinfo.gradle.version>
     </properties>
 
     <repositories>
@@ -388,18 +388,6 @@
             <groupId>org.jfrog.buildinfo</groupId>
             <artifactId>build-info-extractor-docker</artifactId>
             <version>${buildinfo.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.github.docker-java</groupId>
-                    <artifactId>docker-java</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <!-- Warning - this is a temporary workaround supposed to be removed after the next release of docker-java -->
-            <groupId>com.github.docker-java</groupId>
-            <artifactId>docker-java</artifactId>
-            <version>3.2.x-8e77a694</version>
         </dependency>
         <dependency>
             <groupId>org.jfrog.buildinfo</groupId>
@@ -532,6 +520,12 @@
             <version>5.10.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.spotbugs</groupId>
+            <artifactId>spotbugs</artifactId>
+            <version>4.5.3</version>
+            <scope>test</scope>
+        </dependency>
         <!--/Tests-->
     </dependencies>
 
@@ -635,6 +629,21 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.5.3.0</version>
+                <configuration>
+                    <excludeFilterFile>spotbugs-security-exclude.xml</excludeFilterFile>
+                    <plugins>
+                        <plugin>
+                            <groupId>com.h3xstream.findsecbugs</groupId>
+                            <artifactId>findsecbugs-plugin</artifactId>
+                            <version>1.10.1</version>
+                        </plugin>
+                    </plugins>
+                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>

@@ -6,9 +6,8 @@ import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -24,23 +23,13 @@ public class MavenModulesExtractor extends MasterToSlaveFileCallable<List<String
     }
 
     private MavenProject getMavenProject(String pomFile) throws IOException {
-        FileReader reader = null;
-        try {
+        try (InputStreamReader reader = new InputStreamReader(new FileInputStream(pomFile), StandardCharsets.UTF_8.name())) {
             MavenXpp3Reader mavenReader = new MavenXpp3Reader();
-            reader = new FileReader(pomFile);
             Model model = mavenReader.read(reader);
             model.setPomFile(new File(pomFile));
             return new MavenProject(model);
         } catch (Exception ex) {
             throw new IOException(ex);
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception e) {
-                    // Ignored
-                }
-            }
         }
     }
 }

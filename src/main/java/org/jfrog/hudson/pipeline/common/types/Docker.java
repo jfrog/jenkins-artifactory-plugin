@@ -17,6 +17,8 @@ import static org.jfrog.hudson.pipeline.common.Utils.appendBuildInfo;
  * Created by romang on 7/28/16.
  */
 public class Docker implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private transient CpsScript cpsScript;
     private String host;
     private String javaArgs;
@@ -27,8 +29,7 @@ public class Docker implements Serializable {
     public Docker() {
     }
 
-    public Docker(CpsScript script, String host, String javaArgs) {
-        this.cpsScript = script;
+    public Docker(String host, String javaArgs) {
         this.host = host;
         this.javaArgs = javaArgs;
     }

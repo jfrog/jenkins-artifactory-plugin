@@ -30,7 +30,7 @@ public class CollectEnvStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
-
+        protected static final long serialVersionUID = 1L;
         private transient CollectEnvStep step;
 
         @Inject

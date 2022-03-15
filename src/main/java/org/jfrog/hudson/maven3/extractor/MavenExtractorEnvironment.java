@@ -40,11 +40,7 @@ import org.jfrog.hudson.ServerDetails;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.maven3.ArtifactoryMaven3NativeConfigurator;
 import org.jfrog.hudson.release.ReleaseAction;
-import org.jfrog.hudson.util.CredentialManager;
-import org.jfrog.hudson.util.ExtractorUtils;
-import org.jfrog.hudson.util.MavenVersionHelper;
-import org.jfrog.hudson.util.PluginDependencyHelper;
-import org.jfrog.hudson.util.ResolverContext;
+import org.jfrog.hudson.util.*;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 import org.jfrog.hudson.util.publisher.PublisherFlexible;
 
@@ -108,7 +104,8 @@ public class MavenExtractorEnvironment extends Environment {
                 return;
             }
         } catch (Exception e) {
-            e.printStackTrace(buildListener.error("Unable to determine Maven version"));
+            buildListener.error("Unable to determine Maven version");
+            buildListener.getLogger().println(e);
             return;
         }
 
@@ -174,7 +171,7 @@ public class MavenExtractorEnvironment extends Environment {
     }
 
     private boolean isMavenVersionValid() throws Exception {
-            return MavenVersionHelper.isAtLeastResolutionCapableVersion(build, envVars, buildListener);
+        return MavenVersionHelper.isAtLeastResolutionCapableVersion(build, envVars, buildListener);
     }
 
     /**
@@ -214,6 +211,7 @@ public class MavenExtractorEnvironment extends Environment {
                 .overrideBuildName(publisher.isOverrideBuildName())
                 .customBuildName(publisher.getCustomBuildName())
                 .connectionRetry(publisher.getArtifactoryServer().getConnectionRetry())
+                .project(publisher.getProject())
                 .build();
 
         return context;

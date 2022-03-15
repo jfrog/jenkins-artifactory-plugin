@@ -6,6 +6,7 @@ import java.io.Serializable;
  * @author Noam Y. Tenne
  */
 public class VersionedModule implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private final String moduleName;
     private final String releaseVersion;

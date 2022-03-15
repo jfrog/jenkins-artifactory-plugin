@@ -33,6 +33,8 @@ import java.util.Base64;
  * @author Noam Y. Tenne
  */
 public class Credentials implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     public static final Credentials EMPTY_CREDENTIALS = new Credentials(StringUtils.EMPTY, StringUtils.EMPTY, StringUtils.EMPTY);
     private final Secret username;
     private final Secret password;

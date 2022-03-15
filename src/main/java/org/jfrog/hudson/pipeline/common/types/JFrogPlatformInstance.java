@@ -10,6 +10,8 @@ import java.io.Serializable;
  * Represents an instance of JFrog Platform from pipeline script.
  */
 public class JFrogPlatformInstance implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final ArtifactoryServer artifactory;
     private final DistributionServer distribution;
     private String id;

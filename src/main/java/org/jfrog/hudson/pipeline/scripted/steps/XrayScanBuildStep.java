@@ -34,7 +34,7 @@ public class XrayScanBuildStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<XrayScanResult> {
-
+        protected static final long serialVersionUID = 1L;
         private transient XrayScanBuildStep step;
 
         @Inject

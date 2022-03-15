@@ -21,6 +21,8 @@ import java.util.Properties;
  * Created by romang on 6/22/16.
  */
 public class Env implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private Map<String, String> envVars = new HashMap<>();
     private Map<String, String> sysVars = new HashMap<>();
     private EnvFilter filter = new EnvFilter();

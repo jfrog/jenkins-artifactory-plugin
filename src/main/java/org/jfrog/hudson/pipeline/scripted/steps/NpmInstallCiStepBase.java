@@ -39,7 +39,7 @@ abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
     public abstract String getUsageReportFeatureName();
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<BuildInfo> {
-
+    protected static final long serialVersionUID = 1L;
         private transient NpmInstallCiStepBase step;
 
         @Inject

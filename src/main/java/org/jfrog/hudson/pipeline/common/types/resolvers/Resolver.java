@@ -42,11 +42,11 @@ public abstract class Resolver implements ResolverOverrider, Serializable {
 
     @JsonIgnore
     public CredentialsConfig getResolverCredentialsConfig() {
-        try {
-            return getArtifactoryServer().getDeployerCredentialsConfig();
-        } catch (NullPointerException e) {
+        org.jfrog.hudson.ArtifactoryServer server = getArtifactoryServer();
+        if (server == null) {
             throw new IllegalStateException("Artifactory server is missing.");
         }
+        return server.getResolverCredentialsConfig();
     }
 
     @JsonIgnore

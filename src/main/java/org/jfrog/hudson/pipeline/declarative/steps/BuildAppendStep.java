@@ -44,8 +44,13 @@ public class BuildAppendStep extends AbstractStepImpl {
         this.buildNumber = buildNumber;
     }
 
-    public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
+    @DataBoundSetter
+    public void setProject(String project) {
+        this.project = project;
+    }
 
+    public static class Execution extends ArtifactorySynchronousStepExecution<Void> {
+        protected static final long serialVersionUID = 1L;
         private final transient BuildAppendStep step;
 
         @Inject

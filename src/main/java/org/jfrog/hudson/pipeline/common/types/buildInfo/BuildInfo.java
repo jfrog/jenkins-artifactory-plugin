@@ -383,8 +383,8 @@ public class BuildInfo implements Serializable {
             File deployableArtifactsFile = new File(deployableArtifactsPath);
             File backwardCompatibleDeployableArtifactsFile = new File(backwardCompatibleDeployableArtifactsPath);
             Map<String, List<DeployableArtifactDetail>> deployableArtifactsByModule = DeployableArtifactsUtils.loadDeployableArtifactsFromFile(deployableArtifactsFile, backwardCompatibleDeployableArtifactsFile);
-            deployableArtifactsFile.delete();
-            backwardCompatibleDeployableArtifactsFile.delete();
+            deleteFile(deployableArtifactsFile, deployableArtifactsPath);
+            deleteFile(backwardCompatibleDeployableArtifactsFile, backwardCompatibleDeployableArtifactsPath);
             deployableArtifactsByModule.forEach((module, deployableArtifacts) -> {
                 List<DeployDetails> moduleDeployDetails = new ArrayList<>();
                 for (DeployableArtifactDetail artifact : deployableArtifacts) {
@@ -400,6 +400,12 @@ public class BuildInfo implements Serializable {
                 results.put(module, moduleDeployDetails);
             });
             return results;
+        }
+
+        private void deleteFile(File file, String filePath) {
+            if (file.exists() && !file.delete()) {
+                listener.getLogger().println("failed deleting file at path: " + filePath);
+            }
         }
 
         private ArrayListMultimap<String, String> getDeployableArtifactPropertiesMap(DeployableArtifactDetail artifact) {

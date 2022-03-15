@@ -37,7 +37,7 @@ public class NugetBuild extends PackageManagerBuild {
         cpsScript.invokeMethod("artifactoryNugetRun", stepVariables);
     }
 
-    public void SetUseDotnetCli(boolean useDotnetCli) {
+    public void setUseDotnetCli(boolean useDotnetCli) {
         this.useDotnetCli = useDotnetCli;
     }
 

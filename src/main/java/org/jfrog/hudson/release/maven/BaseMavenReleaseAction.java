@@ -243,7 +243,7 @@ public abstract class BaseMavenReleaseAction extends ReleaseAction<MavenModuleSe
             return getDefaultGlobalReleaseVersion();
         } else {
             if (!defaultModules.isEmpty()) {
-                defaultModules.values().iterator().next().getReleaseVersion();
+                return defaultModules.values().iterator().next().getReleaseVersion();
             }
         }
         return "";

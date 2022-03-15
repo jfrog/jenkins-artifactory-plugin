@@ -1,0 +1,24 @@
+<FindBugsFilter>
+    <Match>
+        <Bug pattern="SF_SWITCH_NO_DEFAULT" />
+    </Match>
+    <Match>
+        <!-- Excluding due to a lot of false positives - might be fixed by https://github.com/spotbugs/spotbugs/issues/456 -->
+        <Bug pattern="NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE" />
+    </Match>
+    <Match>
+        <Bug pattern="PATH_TRAVERSAL_IN" />
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP" />
+    </Match>
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+    <Match>
+        <Bug pattern="OBJECT_DESERIALIZATION" />
+    </Match>
+    <Match>
+        <Bug pattern="REQUESTDISPATCHER_FILE_DISCLOSURE" />
+    </Match>
+</FindBugsFilter>

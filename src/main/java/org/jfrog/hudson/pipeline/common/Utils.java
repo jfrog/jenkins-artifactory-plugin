@@ -229,6 +229,9 @@ public class Utils {
                 return new org.jfrog.build.extractor.ci.BuildInfo();
             }
             return mapper.readValue(buildInfoFileContent, org.jfrog.build.extractor.ci.BuildInfo.class);
+        } catch (RuntimeException e) {
+            listener.error("Couldn't read generated build info at : " + jsonBuildPath);
+            throw e;
         } catch (Exception e) {
             listener.error("Couldn't read generated build info at : " + jsonBuildPath);
             throw new Run.RunnerAbortedException();

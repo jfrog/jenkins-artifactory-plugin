@@ -77,7 +77,7 @@ public class GenericBuildInfoDeployer extends AbstractBuildInfoDeployer {
                                                       List<Dependency> publishedDependencies) throws IOException, NoSuchAlgorithmException {
         ModuleBuilder moduleBuilder =
                 new ModuleBuilder().id(
-                        ExtractorUtils.sanitizeBuildName(build.getParent().getDisplayName()) + ":" + build.getNumber())
+                                ExtractorUtils.sanitizeBuildName(build.getParent().getDisplayName()) + ":" + build.getNumber())
                         .artifacts(deployedArtifacts);
         moduleBuilder.dependencies(publishedDependencies);
         List<Module> modules = new ArrayList<>();

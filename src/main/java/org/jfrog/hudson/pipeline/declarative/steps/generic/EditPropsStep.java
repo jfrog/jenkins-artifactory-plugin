@@ -51,7 +51,7 @@ public class EditPropsStep extends AbstractStepImpl {
     }
 
     public static abstract class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Void> {
-
+        protected static final long serialVersionUID = 1L;
         protected transient EditPropsStep step;
         protected ArtifactoryServer artifactoryServer;
         protected String spec;

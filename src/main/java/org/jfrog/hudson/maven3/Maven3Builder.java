@@ -16,6 +16,7 @@
 
 package org.jfrog.hudson.maven3;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.*;
 import hudson.model.*;
 import hudson.tasks.BuildStepDescriptor;
@@ -388,6 +389,7 @@ public class Maven3Builder extends Builder {
         }
 
         @Override
+        @SuppressFBWarnings(value = "NP_PARAMETER_MUST_BE_NONNULL_BUT_MARKED_AS_NULLABLE")
         public Maven3Builder newInstance(StaplerRequest request, JSONObject formData) throws FormException {
             return (Maven3Builder) request.bindJSON(clazz, formData);
         }

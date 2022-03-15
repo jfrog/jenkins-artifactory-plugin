@@ -34,7 +34,7 @@ public class PromoteBuildStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Boolean> {
-
+    protected static final long serialVersionUID = 1L;
         private transient PromoteBuildStep step;
 
         @Inject

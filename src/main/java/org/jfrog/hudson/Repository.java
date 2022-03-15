@@ -1,5 +1,7 @@
 package org.jfrog.hudson;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * @author Aviad Shikloshi
  */
@@ -20,6 +22,7 @@ public class Repository implements Comparable<Repository> {
         return value;
     }
 
+    @SuppressFBWarnings(value = "EQ_COMPARETO_USE_OBJECT_EQUALS")
     public int compareTo(Repository r) {
         return this.value.compareTo(r.getValue());
     }

@@ -43,7 +43,7 @@ public class AddInteractivePromotionStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<Boolean> {
-
+    protected static final long serialVersionUID = 1L;
         private transient AddInteractivePromotionStep step;
 
         @Inject

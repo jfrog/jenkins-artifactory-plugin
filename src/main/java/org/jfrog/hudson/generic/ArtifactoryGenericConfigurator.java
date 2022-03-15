@@ -4,43 +4,21 @@ import hudson.Extension;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.matrix.MatrixConfiguration;
-import hudson.model.AbstractBuild;
-import hudson.model.AbstractProject;
-import hudson.model.Action;
-import hudson.model.BuildListener;
-import hudson.model.Item;
-import hudson.model.Result;
+import hudson.model.*;
 import hudson.tasks.BuildWrapper;
 import hudson.util.ListBoxModel;
 import hudson.util.XStream2;
 import jenkins.model.Jenkins;
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.extractor.ci.Artifact;
-import org.jfrog.build.extractor.ci.Dependency;
 import org.jfrog.build.api.dependency.BuildDependency;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.extractor.ci.Artifact;
+import org.jfrog.build.extractor.ci.Dependency;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
-import org.jfrog.hudson.AbstractBuildWrapperDescriptor;
-import org.jfrog.hudson.ArtifactoryServer;
-import org.jfrog.hudson.BuildInfoAwareConfigurator;
-import org.jfrog.hudson.BuildInfoResultAction;
-import org.jfrog.hudson.CredentialsConfig;
-import org.jfrog.hudson.DeployerOverrider;
-import org.jfrog.hudson.MultiConfigurationAware;
-import org.jfrog.hudson.Repository;
-import org.jfrog.hudson.ResolverOverrider;
-import org.jfrog.hudson.ServerDetails;
-import org.jfrog.hudson.SpecConfiguration;
+import org.jfrog.hudson.*;
 import org.jfrog.hudson.action.ActionableHelper;
 import org.jfrog.hudson.release.promotion.UnifiedPromoteBuildAction;
-import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
-import org.jfrog.hudson.util.CredentialManager;
-import org.jfrog.hudson.util.Credentials;
-import org.jfrog.hudson.util.IncludesExcludes;
-import org.jfrog.hudson.util.JenkinsBuildInfoLog;
-import org.jfrog.hudson.util.RefreshServerResponse;
-import org.jfrog.hudson.util.RepositoriesUtils;
-import org.jfrog.hudson.util.SpecUtils;
+import org.jfrog.hudson.util.*;
 import org.jfrog.hudson.util.converters.GenericDeployerResolverOverriderConverter;
 import org.jfrog.hudson.util.plugins.MultiConfigurationUtils;
 import org.jfrog.hudson.util.plugins.PluginsUtils;
@@ -53,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
@@ -445,14 +424,14 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                                     listener, deployedArtifacts, buildDependencies, publishedDependencies).deploy();
                             String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryGenericConfigurator.this, build);
                             // add the result action (prefer always the same index)
-                            build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
-                            build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryGenericConfigurator.this));
+                            build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, ""));
+                            build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryGenericConfigurator.this, ""));
                         }
                     }
 
                     return true;
                 } catch (Exception e) {
-                    e.printStackTrace(listener.error(e.getMessage()));
+                    listener.getLogger().println(e);
                 }
 
                 // failed

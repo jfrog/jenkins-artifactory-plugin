@@ -48,7 +48,7 @@ public class AddRemoteStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousStepExecution<Boolean> {
-
+        protected static final long serialVersionUID = 1L;
         private transient AddRemoteStep step;
 
         @Inject

@@ -14,15 +14,14 @@ import hudson.security.ACL;
 import hudson.util.ListBoxModel;
 import org.acegisecurity.Authentication;
 import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import org.jfrog.hudson.ArtifactoryBuilder;
 import org.jfrog.hudson.util.Credentials;
 
-import java.io.IOException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -125,12 +124,10 @@ public class PluginsUtils {
      *
      * @param jiraBaseUrl is the Jira URL as it was configured in the Jenkins global configuration
      * @return Jira version
-     * @throws IOException
      */
     public static String getJiraVersion(URL jiraBaseUrl) {
         HttpResponse response = null;
-        HttpClient client = new DefaultHttpClient();
-        try {
+        try (CloseableHttpClient client = HttpClients.createSystem()) {
             URL requestUrl = new URL(jiraBaseUrl + JIRA_REST_SERVERINFO_ENDPOINT);
             response = client.execute(new HttpGet(requestUrl.toURI()));
             lazyInitMapper();

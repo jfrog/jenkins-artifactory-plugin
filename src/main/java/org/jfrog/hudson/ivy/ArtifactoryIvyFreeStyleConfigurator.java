@@ -354,8 +354,8 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                 if (!finalPublisherContext.isSkipBuildInfoDeploy() && (result == null ||
                         result.isBetterOrEqualTo(Result.SUCCESS))) {
                     String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(ArtifactoryIvyFreeStyleConfigurator.this, build);
-                    build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName));
-                    build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryIvyFreeStyleConfigurator.this));
+                    build.addAction(new BuildInfoResultAction(getArtifactoryUrl(), build, buildName, ""));
+                    build.addAction(new UnifiedPromoteBuildAction(build, ArtifactoryIvyFreeStyleConfigurator.this, ""));
                 }
 
                 // Aborted action by the user:
@@ -397,8 +397,8 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
     private Ant getLastAntBuild(AbstractProject project) {
         if (project instanceof Project) {
             List<Ant> ants = ActionableHelper.getBuilder((Project) project, Ant.class);
-          if (ants != null && !ants.isEmpty()) {
-                return ants.get(ants.size()-1);
+            if (ants != null && !ants.isEmpty()) {
+                return ants.get(ants.size() - 1);
             }
         }
         return null;
