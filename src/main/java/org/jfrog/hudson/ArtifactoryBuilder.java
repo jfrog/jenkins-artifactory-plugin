@@ -98,7 +98,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
             Jenkins jenkins = Jenkins.getInstanceOrNull();
             if (jenkins != null && jenkins.hasPermission(Jenkins.ADMINISTER)) {
-                return PluginsUtils.fillPluginCredentials(project, ACL.SYSTEM);
+                return PluginsUtils.fillPluginCredentials(project);
             }
             return new StandardListBoxModel();
         }

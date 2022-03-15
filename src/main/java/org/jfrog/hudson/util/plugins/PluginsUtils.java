@@ -34,32 +34,28 @@ public class PluginsUtils {
 
     private static ObjectMapper mapper;
 
+    /**
+     * Populate credentials list from the Jenkins Credentials plugin. In use in UI jobs only.
+     *
+     * @param project - Jenkins project
+     * @return credentials list
+     */
     public static ListBoxModel fillPluginCredentials(Item project) {
         if (project == null || !project.hasPermission(Item.CONFIGURE)) {
             return new StandardListBoxModel();
         }
-        return fillPluginCredentials(project, ACL.SYSTEM);
-    }
-
-    public static ListBoxModel fillPluginCredentials(Item project, Authentication authentication) {
         List<DomainRequirement> domainRequirements = Collections.emptyList();
         return new StandardListBoxModel()
                 .includeEmptyValue()
-                .includeMatchingAs(
-                        authentication,
-                        project,
-                        StandardCredentials.class,
-                        domainRequirements,
+                // Add project scoped credentials:
+                .includeMatchingAs(ACL.SYSTEM, project, StandardCredentials.class, domainRequirements,
                         CredentialsMatchers.anyOf(
                                 CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class),
                                 CredentialsMatchers.instanceOf(StringCredentials.class),
                                 CredentialsMatchers.instanceOf(StandardCertificateCredentials.class)
-                        )
-                ).includeMatchingAs(
-                        authentication,
-                        Jenkins.get(),
-                        StandardCredentials.class,
-                        domainRequirements,
+                        ))
+                // Add Jenkins system scoped credentials
+                .includeMatchingAs(ACL.SYSTEM, Jenkins.get(), StandardCredentials.class, domainRequirements,
                         CredentialsMatchers.anyOf(
                                 CredentialsMatchers.instanceOf(StandardUsernamePasswordCredentials.class),
                                 CredentialsMatchers.instanceOf(StringCredentials.class),
