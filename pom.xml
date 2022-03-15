@@ -41,7 +41,6 @@
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
         <skipITs>true</skipITs>
 
-        <hpi-plugin.version>3.19</hpi-plugin.version>
         <buildinfo.version>2.35.x-20220306.094658-1</buildinfo.version>
         <buildinfo.gradle.version>4.27.x-20220306.094658-1</buildinfo.gradle.version>
     </properties>
