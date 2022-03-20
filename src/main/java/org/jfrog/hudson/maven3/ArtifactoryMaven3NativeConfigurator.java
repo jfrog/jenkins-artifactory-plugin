@@ -184,7 +184,7 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
         @SuppressWarnings("unused")
         @RequirePOST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
-            return PluginsUtils.fillPluginCredentials(project);
+            return PluginsUtils.fillPluginProjectCredentials(project);
         }
 
         @Override

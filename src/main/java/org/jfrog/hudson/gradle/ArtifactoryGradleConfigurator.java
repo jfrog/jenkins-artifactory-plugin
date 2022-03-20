@@ -690,7 +690,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         @SuppressWarnings("unused")
         @RequirePOST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
-            return PluginsUtils.fillPluginCredentials(project);
+            return PluginsUtils.fillPluginProjectCredentials(project);
         }
     }
 

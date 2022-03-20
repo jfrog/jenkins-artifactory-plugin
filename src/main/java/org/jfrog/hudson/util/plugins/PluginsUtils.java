@@ -35,15 +35,25 @@ public class PluginsUtils {
     private static ObjectMapper mapper;
 
     /**
-     * Populate credentials list from the Jenkins Credentials plugin. In use in UI jobs only.
+     * Fill credentials related to a Jenkins job.
+     *
+     * @param project - The jenkins project
+     * @return credentials list
+     */
+    public static ListBoxModel fillPluginProjectCredentials(Item project) {
+        if (project == null || !project.hasPermission(Item.CONFIGURE)) {
+            return new StandardListBoxModel();
+        }
+        return fillPluginCredentials(project);
+    }
+
+    /**
+     * Populate credentials list from the Jenkins Credentials plugin. In use in UI jobs and in the Global configuration.
      *
      * @param project - Jenkins project
      * @return credentials list
      */
     public static ListBoxModel fillPluginCredentials(Item project) {
-        if (project == null || !project.hasPermission(Item.CONFIGURE)) {
-            return new StandardListBoxModel();
-        }
         List<DomainRequirement> domainRequirements = Collections.emptyList();
         return new StandardListBoxModel()
                 .includeEmptyValue()

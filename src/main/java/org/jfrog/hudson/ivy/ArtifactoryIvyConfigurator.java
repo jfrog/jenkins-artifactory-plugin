@@ -362,7 +362,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
         @SuppressWarnings("unused")
         @RequirePOST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
-            return PluginsUtils.fillPluginCredentials(project);
+            return PluginsUtils.fillPluginProjectCredentials(project);
         }
 
         @Override

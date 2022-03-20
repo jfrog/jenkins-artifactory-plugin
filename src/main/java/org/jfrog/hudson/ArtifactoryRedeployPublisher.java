@@ -486,7 +486,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
         @RequirePOST
         public ListBoxModel doFillCredentialsIdItems(@AncestorInPath Item project) {
             this.item = project;
-            return PluginsUtils.fillPluginCredentials(project);
+            return PluginsUtils.fillPluginProjectCredentials(project);
         }
 
         @Override
