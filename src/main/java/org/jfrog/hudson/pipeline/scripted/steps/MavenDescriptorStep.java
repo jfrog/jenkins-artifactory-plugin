@@ -139,7 +139,7 @@ public class MavenDescriptorStep extends AbstractStepImpl {
         private void findPomModules(String filePath, String fileName, Map<ModuleName, String> result) {
             Model model;
             String pomPath = filePath + fileName;
-            try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(pomFile), StandardCharsets.UTF_8.name()))) {
+            try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(pomPath), StandardCharsets.UTF_8.name()))) {
                 MavenXpp3Reader reader = new MavenXpp3Reader();
                 model = reader.read(in);
             } catch (Exception e) {
