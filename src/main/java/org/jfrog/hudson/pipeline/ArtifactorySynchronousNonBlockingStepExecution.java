@@ -45,11 +45,12 @@ public abstract class ArtifactorySynchronousNonBlockingStepExecution<T> extends 
     @Override
     protected T run() throws Exception {
         try {
+            if (ws != null) {
+                ws.mkdirs();
+            }
             ArtifactoryServer server = getUsageReportServer();
             if (server != null) {
-                new Thread(() -> {
-                    server.reportUsage(getUsageReportFeatureName(), build, new JenkinsBuildInfoLog(listener));
-                }).start();
+                new Thread(() -> server.reportUsage(getUsageReportFeatureName(), build, new JenkinsBuildInfoLog(listener))).start();
             }
             return runStep();
         } finally {
