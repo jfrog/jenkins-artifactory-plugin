@@ -37,11 +37,7 @@ import org.jfrog.hudson.util.converters.ArtifactoryServerConverter;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -371,7 +367,7 @@ public class ArtifactoryServer implements Serializable {
             Credentials credentials = config.provideCredentials(build.getParent());
             String[] featureIdArray = new String[]{stepName};
             UsageReporter usageReporter = new UsageReporter("jenkins-artifactory-plugin/" + ActionableHelper.getArtifactoryPluginVersion(), featureIdArray);
-            usageReporter.reportUsage(this.getArtifactoryUrl(), credentials.getUsername(), credentials.getPassword(), "", Utils.getProxyConfiguration(this), logger);
+            usageReporter.reportUsage(this.getArtifactoryUrl(), credentials.getUsername(), credentials.getPassword(), credentials.getAccessToken(), Utils.getProxyConfiguration(this), logger);
             logger.debug("Usage info sent successfully.");
         } catch (Exception ex) {
             logger.error("Failed sending usage report to Artifactory: " + ex);
