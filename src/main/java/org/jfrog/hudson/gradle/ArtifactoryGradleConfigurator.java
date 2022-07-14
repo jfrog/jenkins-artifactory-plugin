@@ -595,7 +595,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 .filterExcludedArtifactsFromBuild(isFilterExcludedArtifactsFromBuild())
                 .artifactoryPluginVersion(ActionableHelper.getArtifactoryPluginVersion())
                 .overrideBuildName(isOverrideBuildName())
-                .customBuildName(getCustomBuildName());
+                .customBuildName(getCustomBuildName())
+                .project(getProject());
     }
 
     public boolean isRelease(AbstractBuild build) {

@@ -177,6 +177,14 @@
                                 <label class="attach-previous">${%Async}</label>
                             </f:entry>
                         </f:optionalBlock>
+                        <f:optionalBlock>
+                            <r:blockWrapper style="width:100%">
+                                <f:entry title="Project" field="project"
+                                         help="/plugin/artifactory/help/common/help-project.html">
+                                    <f:textbox value="${instance.project}"/>
+                                </f:entry>
+                            </r:blockWrapper>
+                        </f:optionalBlock>
                     </f:optionalBlock>
                 </r:blockWrapper>
             </f:block>
