@@ -55,6 +55,7 @@ public class GenericBuildInfoDeployer extends AbstractBuildInfoDeployer {
         this.configurator = configurator;
         this.build = build;
         this.buildInfo = createBuildInfo("Generic", "");
+        this.buildInfo.setProject(configurator.getProject());
         createDeployDetailsAndAddToBuildInfo(deployedArtifacts, publishedDependencies);
     }
 

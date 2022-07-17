@@ -94,7 +94,6 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
     private String artifactoryCombinationFilter;
     private String customBuildName;
     private boolean overrideBuildName;
-
     private String project;
     /**
      * @deprecated: Use org.jfrog.hudson.gradle.ArtifactoryGradleConfigurator#getDeployerCredentialsConfig()
@@ -407,13 +406,13 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         if (gradleBuild != null) {
             // The ConcurrentBuildSetupSync helper class is used to make sure that the code
             // inside its setUp() method is invoked by only one job in this build
-            // (matrix project builds include more that one job) and that all other jobs
-            // wait till the seUup() method finishes.
+            // (matrix project builds include more than one job) and that all other jobs
+            // wait till the setUp() method finishes.
             new ConcurrentJobsHelper.ConcurrentBuildSetupSync(build, totalBuilds) {
                 @Override
                 public void setUp() {
                     // Obtain the current build and use it to store the configured switches and tasks.
-                    // We store them because we override them during the build and we'll need
+                    // We store them because we override them during the build, and we'll need
                     // their original values at the tear down stage so that they can be restored.
                     ConcurrentJobsHelper.ConcurrentBuild concurrentBuild = ConcurrentJobsHelper.getConcurrentBuild(build);
 
@@ -512,12 +511,12 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                 if (gradleBuild != null) {
                     // The ConcurrentBuildTearDownSync helper class is used to make sure that the code
                     // inside its tearDown() method is invoked by only one job in this build
-                    // (matrix project builds include more that one job) and that this
+                    // (matrix project builds include more than one job) and that this
                     // job is the last one running.
                     new ConcurrentJobsHelper.ConcurrentBuildTearDownSync(build, result) {
                         @Override
                         public void tearDown() {
-                            // Restore the original switches and tasks of this build (we overrided their
+                            // Restore the original switches and tasks of this build (we override their
                             // values in the setUp stage):
                             ConcurrentJobsHelper.ConcurrentBuild concurrentBuild = ConcurrentJobsHelper.getConcurrentBuild(build);
                             String switches = concurrentBuild.getParam("switches");

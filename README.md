@@ -23,7 +23,7 @@ JFrog welcomes community contribution through pull requests.
 
 ### Important:
 
-The plugin code is stored in two github repositories:
+The plugin code is stored in two GitHub repositories:
 https://github.com/jfrog/jenkins-artifactory-plugin and
 https://github.com/jenkinsci/artifactory-plugin
 
