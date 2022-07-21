@@ -100,6 +100,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
     @Deprecated
     private final String matrixParams = null;
 
+    // JFrog project key
     private String project;
 
     @DataBoundConstructor
