@@ -413,7 +413,7 @@ public class Utils {
     public static void addParentBuildProps(ArrayListMultimap<String, String> properties, Run build) {
         String buildName = ActionableHelper.getUpstreamProject(build);
         if (StringUtils.isBlank(buildName)) {
-        return;
+            return;
         }
         properties.put(BuildInfoFields.BUILD_PARENT_NAME, ExtractorUtils.sanitizeBuildName(buildName));
         Integer buildNumber = ActionableHelper.getUpstreamBuild(build);

@@ -372,7 +372,7 @@ public class ExtractorUtils {
             configuration.info.setParentBuildName(parentProject);
             configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_PARENT_NAME, parentProject);
             Integer upstreamBuild = ActionableHelper.getUpstreamBuild(build);
-            if(upstreamBuild != null ){
+            if (upstreamBuild != null) {
                 String parentBuildNumber = upstreamBuild + "";
                 configuration.info.setParentBuildNumber(parentBuildNumber);
                 configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_PARENT_NUMBER, parentBuildNumber);
