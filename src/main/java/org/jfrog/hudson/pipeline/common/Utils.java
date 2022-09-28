@@ -411,10 +411,14 @@ public class Utils {
     }
 
     public static void addParentBuildProps(ArrayListMultimap<String, String> properties, Run build) {
-        Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
-        if (parent != null) {
-            properties.put(BuildInfoFields.BUILD_PARENT_NAME, ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()));
-            properties.put(BuildInfoFields.BUILD_PARENT_NUMBER, parent.getUpstreamBuild() + "");
+        String buildName = ActionableHelper.getUpstreamProject(build);
+        if (StringUtils.isBlank(buildName)) {
+        return;
+        }
+        properties.put(BuildInfoFields.BUILD_PARENT_NAME, ExtractorUtils.sanitizeBuildName(buildName));
+        Integer buildNumber = ActionableHelper.getUpstreamBuild(build);
+        if (buildNumber != null) {
+            properties.put(BuildInfoFields.BUILD_PARENT_NUMBER, buildNumber+ "");
         }
     }
 

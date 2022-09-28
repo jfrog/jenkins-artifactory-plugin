@@ -3,6 +3,7 @@ package org.jfrog.hudson.util;
 import hudson.matrix.Combination;
 import hudson.matrix.MatrixRun;
 import hudson.model.*;
+import org.apache.commons.lang3.StringUtils;
 import org.jfrog.hudson.ArtifactoryRedeployPublisher;
 import org.jfrog.hudson.BuildInfoAwareConfigurator;
 import org.jfrog.hudson.action.ActionableHelper;
@@ -48,20 +49,23 @@ public class BuildUniqueIdentifierHelper {
     }
 
     private static AbstractBuild<?, ?> getUpstreamBuild(AbstractBuild<?, ?> build) {
-        AbstractBuild<?, ?> upstreamBuild;
-        Cause.UpstreamCause cause = ActionableHelper.getUpstreamCause(build);
-        if (cause == null) {
+        String project = ActionableHelper.getUpstreamProject(build);
+        if (StringUtils.isBlank(project)) {
             return null;
         }
-        AbstractProject<?, ?> upstreamProject = getProject(cause.getUpstreamProject());
+        AbstractProject<?, ?> upstreamProject = getProject(project);
         if (upstreamProject == null) {
-            debuggingLogger.fine("No project found answering for the name: " + cause.getUpstreamProject());
+            debuggingLogger.fine("No project found answering for the name: " + project);
             return null;
         }
-        upstreamBuild = upstreamProject.getBuildByNumber(cause.getUpstreamBuild());
+        Integer buildNumber = ActionableHelper.getUpstreamBuild(build);
+        if (buildNumber == null) {
+            return null;
+        }
+        AbstractBuild<?, ?> upstreamBuild = upstreamProject.getBuildByNumber(buildNumber);
         if (upstreamBuild == null) {
             debuggingLogger.fine(
-                    "No build with name: " + upstreamProject.getName() + " and number: " + cause.getUpstreamBuild());
+                    "No build with name: " + upstreamProject.getName() + " and number: " + buildNumber);
         }
         return upstreamBuild;
     }

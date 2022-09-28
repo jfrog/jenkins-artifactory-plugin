@@ -180,10 +180,13 @@ public class ArtifactsDeployer {
             builder.addProperty(BuildInfoFields.BUILD_ROOT, identifier);
         }
 
-        Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(mavenModuleSetBuild);
-        if (parent != null) {
-            builder.addProperty(BuildInfoFields.BUILD_PARENT_NAME, ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject()))
-                    .addProperty(BuildInfoFields.BUILD_PARENT_NUMBER, parent.getUpstreamBuild() + "");
+        String upstreamProject = ActionableHelper.getUpstreamProject(mavenModuleSetBuild);
+        if (StringUtils.isNotBlank(upstreamProject)) {
+            builder.addProperty(BuildInfoFields.BUILD_PARENT_NAME, ExtractorUtils.sanitizeBuildName(upstreamProject));
+            Integer upstreamBuild = ActionableHelper.getUpstreamBuild(mavenModuleSetBuild);
+            if (upstreamBuild != null) {
+                builder.addProperty(BuildInfoFields.BUILD_PARENT_NUMBER, upstreamBuild + "");
+            }
         }
         String revision = ExtractorUtils.getVcsRevision(env);
         if (StringUtils.isNotBlank(revision)) {

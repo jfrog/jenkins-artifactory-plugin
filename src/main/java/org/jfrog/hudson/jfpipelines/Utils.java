@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import static org.jfrog.hudson.action.ActionableHelper.getUserCausePrincipal;
 
 public class Utils {
     /**
@@ -137,7 +137,6 @@ public class Utils {
      */
     @SuppressFBWarnings(value = "SE_BAD_FIELD")
     public static Map<String, String> createJobInfo(Run<?, ?> build) {
-        String user = Objects.requireNonNull(build.getCause(Cause.UserIdCause.class)).getUserId();
         return new HashMap<String, String>() {{
             put("job-name", build.getParent().getName());
             put("job-number", String.valueOf(build.getNumber()));
@@ -146,7 +145,8 @@ public class Utils {
                 put("duration", String.valueOf(build.getDuration()));
             }
             put("build-url", build.getParent().getAbsoluteUrl() + build.getNumber());
-            if (user != null) {
+            String user = getUserCausePrincipal(build, null);
+            if (StringUtils.isNotBlank(user)) {
                 put("user", user);
             }
         }};

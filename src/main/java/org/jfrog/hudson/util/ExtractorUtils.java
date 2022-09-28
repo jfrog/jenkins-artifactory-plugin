@@ -366,14 +366,17 @@ public class ExtractorUtils {
         }
 
         String userName = null;
-        Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
-        if (parent != null) {
-            String parentProject = sanitizeBuildName(parent.getUpstreamProject());
+        String upstreamProject = ActionableHelper.getUpstreamProject(build);
+        if (StringUtils.isNotBlank(project)) {
+            String parentProject = sanitizeBuildName(upstreamProject);
             configuration.info.setParentBuildName(parentProject);
             configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_PARENT_NAME, parentProject);
-            String parentBuildNumber = parent.getUpstreamBuild() + "";
-            configuration.info.setParentBuildNumber(parentBuildNumber);
-            configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_PARENT_NUMBER, parentBuildNumber);
+            Integer upstreamBuild = ActionableHelper.getUpstreamBuild(build);
+            if(upstreamBuild != null ){
+                String parentBuildNumber = upstreamBuild + "";
+                configuration.info.setParentBuildNumber(parentBuildNumber);
+                configuration.publisher.addMatrixParam(BuildInfoFields.BUILD_PARENT_NUMBER, parentBuildNumber);
+            }
             userName = "auto";
         }
 

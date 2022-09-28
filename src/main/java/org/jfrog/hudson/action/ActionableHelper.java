@@ -145,16 +145,30 @@ public abstract class ActionableHelper implements Serializable {
         return result;
     }
 
-    public static Cause.UpstreamCause getUpstreamCause(Run build) {
-        CauseAction action = ActionableHelper.getLatestAction(build, CauseAction.class);
-        if (action != null) {
-            for (Cause cause : action.getCauses()) {
+
+    /**
+     * During pipeline run, jenkins tried to serialize the pipeline state, therefore, Cause.UserIdCause should not be assigned to a local variable.
+     * In order to get Cause.UserIdCause properties, use the getter below.
+     * @param build
+     * @return
+     */
+    private static Cause.UpstreamCause getUpstreamCause(Run build) {
+        if (ActionableHelper.getLatestAction(build, CauseAction.class) != null) {
+            for (Cause cause : ActionableHelper.getLatestAction(build, CauseAction.class).getCauses()) {
                 if (cause instanceof Cause.UpstreamCause) {
                     return (Cause.UpstreamCause) cause;
                 }
             }
         }
         return null;
+    }
+
+    public static String getUpstreamProject(Run build) {
+        return ActionableHelper.getUpstreamCause(build) != null ? ActionableHelper.getUpstreamCause(build).getUpstreamProject() : null;
+    }
+
+    public static Integer getUpstreamBuild(Run build) {
+        return ActionableHelper.getUpstreamCause(build) != null ? ActionableHelper.getUpstreamCause(build).getUpstreamBuild() : null;
     }
 
     /**
@@ -172,10 +186,7 @@ public abstract class ActionableHelper implements Serializable {
      */
     public static String getUserCausePrincipal(Run build, String defaultPrincipal) {
         String principal = getUserCause(build);
-        if (principal == null || StringUtils.isAllEmpty(principal)) {
-           return defaultPrincipal;
-        }
-        return principal;
+        return StringUtils.isBlank(principal) ? defaultPrincipal : principal;
     }
 
     private static String getUserCause(Run build) {

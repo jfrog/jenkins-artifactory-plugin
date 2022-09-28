@@ -82,13 +82,13 @@ public class AbstractBuildInfoDeployer {
         if (userCause != null) {
             builder.principal(userCause);
         }
-
-        Cause.UpstreamCause parent = ActionableHelper.getUpstreamCause(build);
-        if (parent != null) {
-            String parentProject = ExtractorUtils.sanitizeBuildName(parent.getUpstreamProject());
-            int parentNumber = parent.getUpstreamBuild();
-            builder.parentName(parentProject);
-            builder.parentNumber(parentNumber + "");
+        String project = ActionableHelper.getUpstreamProject(build);
+        if (StringUtils.isNotBlank(project)) {
+            builder.parentName(project);
+            Integer parentNumber = ActionableHelper.getUpstreamBuild(build);
+            if (parentNumber != null){
+                builder.parentNumber(parentNumber + "");
+            }
             if (StringUtils.isBlank(userCause)) {
                 builder.principal("auto");
             }
@@ -131,11 +131,6 @@ public class AbstractBuildInfoDeployer {
         }
 
         BuildInfo buildInfo = builder.build();
-        // for backwards compatibility for Artifactory 2.2.3
-        if (parent != null) {
-            buildInfo.setParentName(parent.getUpstreamProject());
-        }
-
         return buildInfo;
     }
 
