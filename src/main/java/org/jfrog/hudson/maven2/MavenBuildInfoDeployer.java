@@ -45,6 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Builds the build info. This class is used only when the Maven 3 extractor is not active.
@@ -72,7 +73,7 @@ public class MavenBuildInfoDeployer extends AbstractBuildInfoDeployer {
 
     private void gatherModuleAndDependencyInfo(MavenModuleSetBuild mavenModulesBuild) {
         Map<MavenModule, MavenBuild> mavenBuildMap = mavenModulesBuild.getModuleLastBuilds();
-        List<Module> modules = new ArrayList<>();
+        List<Module> modules = new CopyOnWriteArrayList<>();
         for (Map.Entry<MavenModule, MavenBuild> moduleBuild : mavenBuildMap.entrySet()) {
             MavenModule mavenModule = moduleBuild.getKey();
             MavenBuild mavenBuild = moduleBuild.getValue();

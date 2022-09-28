@@ -59,7 +59,7 @@ public class BuildInfo implements Serializable {
     private BuildRetention retention;
     // The candidates artifacts to be deployed in the 'deployArtifacts' step, sorted by module name.
     private Map<String, List<DeployDetails>> deployableArtifactsByModule = new ConcurrentHashMap<>();
-    private List<Vcs> vcs = new ArrayList<>();
+    private List<Vcs> vcs = new CopyOnWriteArrayList<>();
     private List<Module> modules = new CopyOnWriteArrayList<>();
     private Env env = new Env();
     private Issues issues = new Issues();

@@ -49,7 +49,7 @@ public class BuildInfoDeployer extends AbstractBuildInfoDeployer {
             buildInfo.setStartedDate(deployedBuildInfo.getStartDate());
         }
 
-        buildInfo.setModules(new CopyOnWriteArrayList<Module>(deployedBuildInfo.getModules()));
+        buildInfo.setModules(deployedBuildInfo.getModules());
 
         if (StringUtils.isNotEmpty(deployedBuildInfo.getName())) {
             buildInfo.setName(deployedBuildInfo.getName());
