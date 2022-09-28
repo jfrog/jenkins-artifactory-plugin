@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class Utils {
     /**
@@ -136,7 +137,7 @@ public class Utils {
      */
     @SuppressFBWarnings(value = "SE_BAD_FIELD")
     public static Map<String, String> createJobInfo(Run<?, ?> build) {
-        Cause.UserIdCause cause = build.getCause(Cause.UserIdCause.class);
+        String user = Objects.requireNonNull(build.getCause(Cause.UserIdCause.class)).getUserId();
         return new HashMap<String, String>() {{
             put("job-name", build.getParent().getName());
             put("job-number", String.valueOf(build.getNumber()));
@@ -145,8 +146,8 @@ public class Utils {
                 put("duration", String.valueOf(build.getDuration()));
             }
             put("build-url", build.getParent().getAbsoluteUrl() + build.getNumber());
-            if (cause != null) {
-                put("user", cause.getUserId());
+            if (user != null) {
+                put("user", user);
             }
         }};
     }

@@ -171,20 +171,18 @@ public abstract class ActionableHelper implements Serializable {
      * @return The user id caused triggered the build of default principal if not found
      */
     public static String getUserCausePrincipal(Run build, String defaultPrincipal) {
-        Cause.UserIdCause userCause = getUserCause(build);
-        String principal = defaultPrincipal;
-        if (userCause != null && userCause.getUserId() != null) {
-            principal = userCause.getUserId();
+        String principal = getUserCause(build);
+        if (principal == null || StringUtils.isAllEmpty(principal)) {
+           return defaultPrincipal;
         }
         return principal;
     }
 
-    private static Cause.UserIdCause getUserCause(Run build) {
-        CauseAction action = ActionableHelper.getLatestAction(build, CauseAction.class);
-        if (action != null) {
-            for (Cause cause : action.getCauses()) {
+    private static String getUserCause(Run build) {
+        if (ActionableHelper.getLatestAction(build, CauseAction.class) != null) {
+            for (Cause cause : ActionableHelper.getLatestAction(build, CauseAction.class).getCauses()) {
                 if (cause instanceof Cause.UserIdCause) {
-                    return (Cause.UserIdCause) cause;
+                    return ((Cause.UserIdCause) cause).getUserId();
                 }
             }
         }
