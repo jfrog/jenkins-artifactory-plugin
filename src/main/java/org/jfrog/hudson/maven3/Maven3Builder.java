@@ -161,13 +161,13 @@ public class Maven3Builder extends Builder {
         //Starting from Maven 3.3.3
         args.addKeyValuePair("-D", "maven.multiModuleProjectDirectory", getMavenProjectPath(build, ws), false);
 
-        addMavenOpts(args, build);
+        String rootPom = getRootPom();
+        addMavenOpts(args, build, ws);
 
         // classworlds launcher main class
         args.add(CLASSWORLDS_LAUNCHER);
 
         // pom file to build
-        String rootPom = getRootPom();
         if (isNotBlank(rootPom)) {
             args.add("-f", rootPom);
         }
@@ -206,12 +206,33 @@ public class Maven3Builder extends Builder {
         args.addKeyValuePair("-D", "classworlds.conf", classworldsConfPath, false);
     }
 
-    private void addMavenOpts(ArgumentListBuilder args, Run<?, ?> build) {
-        if (isNotBlank(getMavenOpts())) {
-            String mavenOpts = getMavenOpts();
+    /**
+     * Add Maven options to the arguments list from the user input or from ${MAVEN_PROJECTBASEDIR}/.mvn/jvm.config.
+     *
+     * @param args  - The arguments list
+     * @param build - The build
+     * @param ws    - Job's workspace
+     * @throws IOException          in case or any unexpected error when locating the jvm.config file
+     * @throws InterruptedException in case or any unexpected error when locating the jvm.config file
+     */
+    private void addMavenOpts(ArgumentListBuilder args, Run<?, ?> build, FilePath ws) throws IOException, InterruptedException {
+        // Add Maven options from user input
+        String mavenOpts = getMavenOpts();
+
+        // Add Maven options from .mvn/jvm.config
+        FilePath dotMvn = ws.child(rootPom).sibling(".mvn");
+        if (dotMvn != null) {
+            FilePath jvmConfig = dotMvn.child("jvm.config");
+            if (jvmConfig.exists()) {
+                mavenOpts = String.join(" ", mavenOpts, jvmConfig.readToString());
+            }
+        }
+
+        // Add accumulated Maven options to arguments list
+        if (isNotBlank(mavenOpts)) {
             if (build instanceof AbstractBuild) {
                 // If we aren't in pipeline job we, might need to evaluate the variable real value.
-                mavenOpts = Util.replaceMacro(getMavenOpts(), ((AbstractBuild) build).getBuildVariables());
+                mavenOpts = Util.replaceMacro(mavenOpts, ((AbstractBuild<?, ?>) build).getBuildVariables());
             }
             // HAP-314 - We need to separate the args, same as jenkins maven plugin does
             args.addTokenized(mavenOpts);
