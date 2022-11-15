@@ -35,11 +35,8 @@ import org.kohsuke.stapler.interceptor.RequirePOST;
 
 import javax.servlet.ServletException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.jfrog.hudson.util.SerializationUtils.createMapper;
 
@@ -50,7 +47,7 @@ import static org.jfrog.hudson.util.SerializationUtils.createMapper;
  */
 public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeAction {
     private final Run<?, ?> build;
-    private final Map<String, PromotionInfo> promotionCandidates = new HashMap<>();
+    private final Map<String, PromotionInfo> promotionCandidates = new ConcurrentHashMap<>();
     private String targetStatus;
     private String targetRepositoryKey;
     private String sourceRepositoryKey;
