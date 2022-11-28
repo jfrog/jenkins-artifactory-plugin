@@ -559,6 +559,12 @@
             <artifactId>mockserver-netty</artifactId>
             <version>5.14.0</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-handler</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.github.spotbugs</groupId>
