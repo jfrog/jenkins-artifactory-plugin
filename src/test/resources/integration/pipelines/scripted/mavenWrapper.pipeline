@@ -12,6 +12,7 @@ node("TestSlave")  {
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.env.capture = true
     buildInfo.env.filter.addExclude("DONT_COLLECT")
+    buildInfo.env.filter.addExclude("excluded.property.in.pom")
     buildInfo.name = "scripted:mavenWrapper test"
     buildInfo.number = ${BUILD_NUMBER}
 
