@@ -354,9 +354,14 @@ public class BuildInfo implements Serializable {
     }
 
     public void filterVariables() {
+        // Filter env variables.
         IncludeExcludePatterns pattern = this.getEnv().filter();
+        // Filter module properties.
         for (Module module : modules) {
-            module.getProperties().entrySet().removeIf(key -> PatternMatcher.pathConflicts(key.getKey().toString(), pattern));
+            Properties properties = module.getProperties();
+            if (properties != null) {
+                properties.entrySet().removeIf(key -> PatternMatcher.pathConflicts(key.getKey().toString(), pattern));
+            }
         }
     }
 
