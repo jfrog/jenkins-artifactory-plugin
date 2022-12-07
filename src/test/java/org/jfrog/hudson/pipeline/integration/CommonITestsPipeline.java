@@ -321,6 +321,8 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
             Module module = getAndAssertModule(buildInfo, "org.jfrog.test:multi:3.7-SNAPSHOT");
             assertModuleArtifacts(module, expectedArtifacts);
+            String[] moduleExcludedProp = {"excluded.property.in.pom"};
+            assertFilteredProperties(module.getProperties(), "included.property.in.pom", moduleExcludedProp);
             assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
             assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi1:3.7-SNAPSHOT");
             assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.test:multi2:3.7-SNAPSHOT");

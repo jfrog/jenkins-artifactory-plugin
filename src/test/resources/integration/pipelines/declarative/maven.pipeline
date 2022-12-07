@@ -45,7 +45,7 @@ node("TestSlave") {
                 buildName: buildName,
                 buildNumber: buildNumber,
                 captureEnv: true,
-                excludeEnvPatterns: ["DONT_COLLECT"]
+                excludeEnvPatterns: ["DONT_COLLECT","excluded.property.in.pom"]
         )
     }
 

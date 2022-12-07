@@ -17,6 +17,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <excluded.property.in.pom>should-ignore</excluded.property.in.pom>
+        <included.property.in.pom>should-collect</included.property.in.pom>
     </properties>
 
     <dependencies>

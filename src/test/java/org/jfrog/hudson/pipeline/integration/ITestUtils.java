@@ -243,15 +243,26 @@ class ITestUtils {
      * @param buildInfo - Build-info object
      */
     static void assertFilteredProperties(BuildInfo buildInfo) {
-        Properties properties = buildInfo.getProperties();
+        String[] excludedProps = {"password", "psw", "secret", "key", "token", "DONT_COLLECT"};
+        assertFilteredProperties(buildInfo.getProperties(), "buildInfo.env.COLLECT", excludedProps);
+    }
+
+    /**
+     * Assert that properties were included/excluded as expected.
+     *
+     * @param properties    - Properties object
+     * @param includedProp  - expected included prop
+     * @param excludedProps - expected excluded props
+     */
+    static void assertFilteredProperties(Properties properties, String includedProp, String[] excludedProps) {
         assertNotNull(properties);
         String[] unfiltered = properties.keySet().stream()
                 .map(Object::toString)
                 .map(String::toLowerCase)
-                .filter(key -> StringUtils.containsAny(key, "password", "psw", "secret", "key", "token", "DONT_COLLECT"))
+                .filter(key -> StringUtils.containsAny(key, excludedProps))
                 .toArray(String[]::new);
-        assertTrue("The following environment variables should have been filtered: " + Arrays.toString(unfiltered), ArrayUtils.isEmpty(unfiltered));
-        assertTrue(properties.containsKey("buildInfo.env.COLLECT"));
+        assertTrue("The following properties should have been filtered: " + Arrays.toString(unfiltered), ArrayUtils.isEmpty(unfiltered));
+        assertTrue(properties.containsKey(includedProp));
     }
 
     /**

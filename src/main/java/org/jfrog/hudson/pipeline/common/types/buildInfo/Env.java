@@ -67,12 +67,15 @@ public class Env implements Serializable {
     }
 
     /**
-     * Filter environment variable before publish the build info
+     * Filter environment variables before publishing the build info.
+     *
+     * @return the include/exclude pattern
      */
-    public void filter() {
+    public IncludeExcludePatterns filter() {
         IncludeExcludePatterns pattern = filter.getPatternFilter();
         this.envVars.entrySet().removeIf(key -> PatternMatcher.pathConflicts(key.getKey(), pattern));
         this.sysVars.entrySet().removeIf(key -> PatternMatcher.pathConflicts(key.getKey(), pattern));
+        return pattern;
     }
 
     /**
