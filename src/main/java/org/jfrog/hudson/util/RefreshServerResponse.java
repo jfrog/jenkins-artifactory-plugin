@@ -2,7 +2,7 @@ package org.jfrog.hudson.util;
 
 import org.jfrog.hudson.PluginSettings;
 import org.jfrog.hudson.Repository;
-import org.jfrog.hudson.VirtualRepository;
+import org.jfrog.hudson.ResolutionRepository;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import java.util.List;
  */
 public class RefreshServerResponse {
     private List<Repository> repositories;
-    private List<VirtualRepository> virtualRepositories;
+    private List<ResolutionRepository> resolutionRepositories;
     private List<PluginSettings> userPlugins;
     private String responseMessage;
     private boolean success;
@@ -24,12 +24,12 @@ public class RefreshServerResponse {
         this.repositories = repositories;
     }
 
-    public List<VirtualRepository> getVirtualRepositories() {
-        return virtualRepositories;
+    public List<ResolutionRepository> getResolutionRepositories() {
+        return resolutionRepositories;
     }
 
-    public void setVirtualRepositories(List<VirtualRepository> virtualRepositories) {
-        this.virtualRepositories = virtualRepositories;
+    public void setResolutionRepositories(List<ResolutionRepository> resolutionRepositories) {
+        this.resolutionRepositories = resolutionRepositories;
     }
 
     public List<PluginSettings> getUserPlugins() {

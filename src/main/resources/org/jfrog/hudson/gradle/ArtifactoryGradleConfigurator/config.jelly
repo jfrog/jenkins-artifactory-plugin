@@ -84,7 +84,7 @@
                             <r:dynamicRepos id="gradleResolutionRepositoryKeys-${s.artifactoryUrl}-${uniqueId}"
                                             title="Resolution repository"
                                             field="resolveReleaseRepository"
-                                            repositories="${instance.virtualRepositories}"
+                                            repositories="${instance.resolutionRepositories}"
                                             repositoryConf="${instance.resolverDetails.resolveReleaseRepository}"/>
 
                             <script>

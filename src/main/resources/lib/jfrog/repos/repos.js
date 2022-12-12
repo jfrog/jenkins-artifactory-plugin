@@ -119,8 +119,8 @@ function artifactoryMaven3NativeConfigurator(spinner, uniqueId, artifactoryUrl, 
         removeElements(selectRelease);
         removeElements(selectSnapshot);
 
-        fillVirtualReposSelect(selectRelease, response.virtualRepositories);
-        fillVirtualReposSelect(selectSnapshot, response.virtualRepositories);
+        fillResolutionReposSelect(selectRelease, response.resolutionRepositories);
+        fillResolutionReposSelect(selectSnapshot, response.resolutionRepositories);
 
         setSelectValue(selectRelease, oldReleaseValue);
         setSelectValue(selectSnapshot, oldSnapshotValue);
@@ -227,7 +227,7 @@ function artifactoryGradleConfigurationResolve(spinner, uniqueId, artifactoryUrl
         let oldResolutionValue = selectResolution.value;
         let oldSelectResolution = selectResolution.cloneNode(true);
         removeElements(selectResolution);
-        fillVirtualReposSelect(selectResolution, response.virtualRepositories);
+        fillResolutionReposSelect(selectResolution, response.resolutionRepositories);
         setSelectValue(selectResolution, oldResolutionValue);
         let oldValueExistsInNewList = compareSelectTags(selectResolution, oldSelectResolution);
         if (!oldValueExistsInNewList) {
@@ -326,7 +326,7 @@ function fillSelect(select, list) {
     }
 }
 
-function fillVirtualReposSelect(select, list) {
+function fillResolutionReposSelect(select, list) {
     let txtId = "txt_" + select.id;
     let txtElement = document.getElementById(txtId);
     // noinspection EqualityComparisonWithCoercionJS

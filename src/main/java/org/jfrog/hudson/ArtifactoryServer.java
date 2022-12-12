@@ -40,6 +40,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static org.jfrog.hudson.JFrogPlatformInstance.DEFAULT_CONNECTION_TIMEOUT;
 import static org.jfrog.hudson.JFrogPlatformInstance.DEFAULT_DEPLOYMENT_THREADS_NUMBER;
@@ -70,7 +71,7 @@ public class ArtifactoryServer implements Serializable {
      */
     private transient volatile List<String> repositories;
 
-    private transient volatile List<VirtualRepository> virtualRepositories;
+    private transient volatile List<ResolutionRepository> resolutionRepositories;
 
     /**
      * @deprecated: Use org.jfrog.hudson.ArtifactoryServer#getDeployerCredentials()()
@@ -147,9 +148,10 @@ public class ArtifactoryServer implements Serializable {
         return deploymentThreads == null ? DEFAULT_DEPLOYMENT_THREADS_NUMBER : deploymentThreads;
     }
 
-    public List<String> getLocalRepositoryKeys(Credentials credentials) throws IOException {
-        try (ArtifactoryManager artifactoryManager = createArtifactoryManager(credentials, createProxyConfiguration())) {
-            repositories = artifactoryManager.getLocalRepositoriesKeys();
+    public List<String> getLocalRepositoryKeys(CredentialsConfig credentialsConfig, Item item) throws IOException {
+        try {
+            List<Repository> deploymentRepos = RepositoriesUtils.getDeploymentRepositories(url, credentialsConfig, this, item);
+            repositories = deploymentRepos.stream().map(Repository::getValue).collect(Collectors.toList());
         } catch (IOException e) {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.WARNING, "Could not obtain local repositories list from '" + url + "'", e);
@@ -164,21 +166,21 @@ public class ArtifactoryServer implements Serializable {
 
     public List<String> getReleaseRepositoryKeysFirst(DeployerOverrider deployerOverrider, Item item) throws IOException {
         CredentialsConfig credentialsConfig = CredentialManager.getPreferredDeployer(deployerOverrider, this);
-        List<String> repositoryKeys = getLocalRepositoryKeys(credentialsConfig.provideCredentials(item));
+        List<String> repositoryKeys = getLocalRepositoryKeys(credentialsConfig, item);
         if (repositoryKeys == null || repositoryKeys.isEmpty()) {
             return new ArrayList<>();
         }
-        Collections.sort(repositoryKeys, new RepositoryComparator());
+        repositoryKeys.sort(new RepositoryComparator());
         return repositoryKeys;
     }
 
     public List<String> getSnapshotRepositoryKeysFirst(DeployerOverrider deployerOverrider, Item item) throws IOException {
         CredentialsConfig credentialsConfig = CredentialManager.getPreferredDeployer(deployerOverrider, this);
-        List<String> repositoryKeys = getLocalRepositoryKeys(credentialsConfig.provideCredentials(item));
+        List<String> repositoryKeys = getLocalRepositoryKeys(credentialsConfig, item);
         if (repositoryKeys == null || repositoryKeys.isEmpty()) {
             return new ArrayList<>();
         }
-        Collections.sort(repositoryKeys, Collections.reverseOrder(new RepositoryComparator()));
+        repositoryKeys.sort(Collections.reverseOrder(new RepositoryComparator()));
         return repositoryKeys;
     }
 
@@ -191,11 +193,11 @@ public class ArtifactoryServer implements Serializable {
         }
     }
 
-    public List<VirtualRepository> getVirtualRepositoryKeys(ResolverOverrider resolverOverrider, Item item) {
+    public List<ResolutionRepository> getVirtualRepositoryKeys(ResolverOverrider resolverOverrider, Item item) {
         CredentialsConfig preferredResolver = CredentialManager.getPreferredResolver(resolverOverrider, this);
         try (ArtifactoryManager artifactoryManager = createArtifactoryManager(preferredResolver.provideCredentials(item),
                 createProxyConfiguration())) {
-            virtualRepositories = RepositoriesUtils.generateVirtualRepos(artifactoryManager);
+            resolutionRepositories = RepositoriesUtils.generateResolutionRepos(artifactoryManager);
         } catch (IOException e) {
             if (log.isLoggable(Level.FINE)) {
                 log.log(Level.WARNING, "Could not obtain virtual repositories list from '" + url + "'", e);
@@ -206,7 +208,7 @@ public class ArtifactoryServer implements Serializable {
             return new ArrayList<>();
         }
 
-        return virtualRepositories;
+        return resolutionRepositories;
     }
 
     public boolean isArtifactoryPro(DeployerOverrider deployerOverrider, Item item) {

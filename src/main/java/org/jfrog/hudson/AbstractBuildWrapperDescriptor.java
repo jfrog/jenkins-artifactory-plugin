@@ -16,11 +16,7 @@ import org.kohsuke.stapler.StaplerRequest;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author yahavi
@@ -63,6 +59,7 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
     /**
      * Returns the list of {@link JFrogPlatformInstance} configured.
      * Used by Jenkins Jelly for displaying values.
+     *
      * @return can be empty but never null.
      */
     public List<JFrogPlatformInstance> getJfrogInstances() {
@@ -97,8 +94,8 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
         CredentialsConfig credentialsConfig = new CredentialsConfig(username, password, credentialsId, overrideCredentials);
         ArtifactoryServer artifactoryServer = RepositoriesUtils.getArtifactoryServer(url);
         try {
-            List<VirtualRepository> virtualRepositories = refreshVirtualRepositories(artifactoryServer, credentialsConfig);
-            response.setVirtualRepositories(virtualRepositories);
+            List<ResolutionRepository> resolutionRepositories = refreshResolutionRepositories(artifactoryServer, credentialsConfig);
+            response.setResolutionRepositories(resolutionRepositories);
             response.setSuccess(true);
         } catch (Exception e) {
             response.setResponseMessage(e.getMessage());
@@ -168,20 +165,20 @@ public abstract class AbstractBuildWrapperDescriptor extends BuildWrapperDescrip
         return list;
     }
 
-    private List<VirtualRepository> refreshVirtualRepositories(ArtifactoryServer artifactoryServer,
-                                                               CredentialsConfig credentialsConfig) throws IOException {
-        List<VirtualRepository> virtualRepositories = RepositoriesUtils.getVirtualRepositoryKeys(artifactoryServer.getArtifactoryUrl(),
+    private List<ResolutionRepository> refreshResolutionRepositories(ArtifactoryServer artifactoryServer,
+                                                                     CredentialsConfig credentialsConfig) throws IOException {
+        List<ResolutionRepository> resolutionRepositories = RepositoriesUtils.getResolutionRepositoryKeys(artifactoryServer.getArtifactoryUrl(),
                 credentialsConfig, artifactoryServer, item);
-        Collections.sort(virtualRepositories);
-        return virtualRepositories;
+        Collections.sort(resolutionRepositories);
+        return resolutionRepositories;
     }
 
     private List<Repository> refreshRepositories(ArtifactoryServer artifactoryServer, CredentialsConfig credentialsConfig)
             throws IOException {
-        List<String> releaseRepositoryKeysFirst = RepositoriesUtils.getLocalRepositories(artifactoryServer.getArtifactoryUrl(),
+        List<Repository> releaseRepositoryKeysFirst = RepositoriesUtils.getDeploymentRepositories(artifactoryServer.getArtifactoryUrl(),
                 credentialsConfig, artifactoryServer, item);
         Collections.sort(releaseRepositoryKeysFirst);
-        return RepositoriesUtils.createRepositoriesList(releaseRepositoryKeysFirst);
+        return releaseRepositoryKeysFirst;
     }
 
     public boolean isMultiConfProject() {

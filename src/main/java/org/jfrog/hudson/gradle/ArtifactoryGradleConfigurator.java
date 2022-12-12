@@ -637,8 +637,8 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
         return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeployReleaseRepository().getKeyFromSelect());
     }
 
-    public List<VirtualRepository> getVirtualRepositories() {
-        return RepositoriesUtils.collectVirtualRepositories(null, resolverDetails.getResolveSnapshotRepository().getKeyFromSelect());
+    public List<ResolutionRepository> getResolutionRepositories() {
+        return RepositoriesUtils.collectResolutionRepositories(null, resolverDetails.getResolveSnapshotRepository().getKeyFromSelect());
     }
 
     public boolean isOverridingDefaultResolver() {

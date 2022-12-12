@@ -5,11 +5,11 @@ package org.jfrog.hudson;
  *
  * @author Tomer Cohen
  */
-public class VirtualRepository extends Repository {
+public class ResolutionRepository extends Repository {
 
     private final String displayName;
 
-    public VirtualRepository(String displayName, String value) {
+    public ResolutionRepository(String displayName, String value) {
         super(value);
         this.displayName = displayName;
     }

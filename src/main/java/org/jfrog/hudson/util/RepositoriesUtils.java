@@ -38,9 +38,9 @@ public abstract class RepositoriesUtils {
         return server.getSnapshotRepositoryKeysFirst(deployer, null);
     }
 
-    public static List<VirtualRepository> getVirtualRepositoryKeys(ResolverOverrider resolverOverrider,
-                                                                   DeployerOverrider deployerOverrider,
-                                                                   ArtifactoryServer server) {
+    public static List<ResolutionRepository> getResolutionRepositoryKeys(ResolverOverrider resolverOverrider,
+                                                                         DeployerOverrider deployerOverrider,
+                                                                         ArtifactoryServer server) {
         if (server == null) {
             return new ArrayList<>();
         }
@@ -48,72 +48,73 @@ public abstract class RepositoriesUtils {
         return server.getVirtualRepositoryKeys(resolverOverrider, null);
     }
 
-    public static List<VirtualRepository> generateVirtualRepos(ArtifactoryManager artifactoryManager) throws IOException {
-        List<VirtualRepository> virtualRepositories;
-
-        List<String> keys = artifactoryManager.getVirtualRepositoriesKeys();
-        if (keys == null) {
-            return new ArrayList<>();
+    public static List<ResolutionRepository> generateResolutionRepos(ArtifactoryManager artifactoryManager) throws IOException {
+        List<String> resolutionRepoKeys = artifactoryManager.getRemoteRepositoriesKeys();
+        if (resolutionRepoKeys == null) {
+            resolutionRepoKeys = new ArrayList<>();
         }
-        virtualRepositories = keys.stream().map(from -> new VirtualRepository(from, from)).collect(Collectors.toList());
 
-        return virtualRepositories;
+        List<String> virtualRepoKeys = artifactoryManager.getVirtualRepositoriesKeys();
+        if (virtualRepoKeys != null) {
+            resolutionRepoKeys.addAll(virtualRepoKeys);
+        }
+
+        return resolutionRepoKeys.stream().map(repoKey -> new ResolutionRepository(repoKey, repoKey)).collect(Collectors.toList());
     }
 
-    public static List<VirtualRepository> getVirtualRepositoryKeys(String url, CredentialsConfig credentialsConfig,
-                                                                   ArtifactoryServer artifactoryServer, Item item)
+    public static List<Repository> generateDeploymentRepos(ArtifactoryManager artifactoryManager) throws IOException {
+        List<String> deploymentRepoKeys = artifactoryManager.getLocalRepositoriesKeys();
+        if (deploymentRepoKeys == null) {
+            deploymentRepoKeys = new ArrayList<>();
+        }
+
+        List<String> virtualRepoKeys = artifactoryManager.getVirtualRepositoriesKeys();
+        if (virtualRepoKeys != null) {
+            deploymentRepoKeys.addAll(virtualRepoKeys);
+        }
+        List<String> federatedRepoKeys = artifactoryManager.getFederatedRepositoriesKeys();
+        if (federatedRepoKeys != null) {
+            deploymentRepoKeys.addAll(federatedRepoKeys);
+        }
+
+        return deploymentRepoKeys.stream().map(Repository::new).collect(Collectors.toList());
+    }
+
+    public static List<ResolutionRepository> getResolutionRepositoryKeys(String url, CredentialsConfig credentialsConfig,
+                                                                         ArtifactoryServer artifactoryServer, Item item)
             throws IOException {
-        List<VirtualRepository> virtualRepositories;
         CredentialsConfig preferredResolver = CredentialManager.getPreferredResolver(credentialsConfig, artifactoryServer);
         Credentials resolverCredentials = preferredResolver.provideCredentials(item);
 
-        ArtifactoryManager artifactoryManager;
-        if (StringUtils.isNotBlank(resolverCredentials.getUsername()) || StringUtils.isNotBlank(resolverCredentials.getAccessToken())) {
-            artifactoryManager = new ArtifactoryManager(url, resolverCredentials.getUsername(), resolverCredentials.getPassword(),
-                    resolverCredentials.getAccessToken(), new NullLog());
-        } else {
-            artifactoryManager = new ArtifactoryManager(url, new NullLog());
-        }
-        try {
-            artifactoryManager.setConnectionTimeout(artifactoryServer.getTimeout());
-            setRetryParams(artifactoryServer, artifactoryManager);
-
-            if (Jenkins.get().proxy != null && !artifactoryServer.isBypassProxy()) {
-                artifactoryManager.setProxyConfiguration(createProxyConfiguration());
-            }
-
-            virtualRepositories = RepositoriesUtils.generateVirtualRepos(artifactoryManager);
-            return virtualRepositories;
-        } finally {
-            artifactoryManager.close();
+        try (ArtifactoryManager artifactoryManager = createArtifactoryManager(url, resolverCredentials, artifactoryServer)) {
+            return RepositoriesUtils.generateResolutionRepos(artifactoryManager);
         }
     }
 
-    public static List<String> getLocalRepositories(String url, CredentialsConfig credentialsConfig,
-                                                    ArtifactoryServer artifactoryServer, Item item) throws IOException {
-        List<String> localRepository;
+    public static List<Repository> getDeploymentRepositories(String url, CredentialsConfig credentialsConfig,
+                                                             ArtifactoryServer artifactoryServer, Item item) throws IOException {
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(credentialsConfig, artifactoryServer);
         Credentials deployerCredentials = preferredDeployer.provideCredentials(item);
 
+        try (ArtifactoryManager artifactoryManager = createArtifactoryManager(url, deployerCredentials, artifactoryServer)) {
+            return generateDeploymentRepos(artifactoryManager);
+        }
+    }
+
+    private static ArtifactoryManager createArtifactoryManager(String url, Credentials credentials, ArtifactoryServer artifactoryServer) {
         ArtifactoryManager artifactoryManager;
-        if (StringUtils.isNotBlank(deployerCredentials.getUsername()) || StringUtils.isNotBlank(deployerCredentials.getAccessToken())) {
-            artifactoryManager = new ArtifactoryManager(url, deployerCredentials.getUsername(), deployerCredentials.getPassword(),
-                    deployerCredentials.getAccessToken(), new NullLog());
+        if (StringUtils.isNotBlank(credentials.getUsername()) || StringUtils.isNotBlank(credentials.getAccessToken())) {
+            artifactoryManager = new ArtifactoryManager(url, credentials.getUsername(), credentials.getPassword(),
+                    credentials.getAccessToken(), new NullLog());
         } else {
             artifactoryManager = new ArtifactoryManager(url, new NullLog());
         }
-        try {
-            artifactoryManager.setConnectionTimeout(artifactoryServer.getTimeout());
-            setRetryParams(artifactoryServer, artifactoryManager);
-            if (Jenkins.get().proxy != null && !artifactoryServer.isBypassProxy()) {
-                artifactoryManager.setProxyConfiguration(createProxyConfiguration());
-            }
-
-            localRepository = artifactoryManager.getLocalRepositoriesKeys();
-            return localRepository;
-        } finally {
-            artifactoryManager.close();
+        artifactoryManager.setConnectionTimeout(artifactoryServer.getTimeout());
+        setRetryParams(artifactoryServer, artifactoryManager);
+        if (Jenkins.get().proxy != null && !artifactoryServer.isBypassProxy()) {
+            artifactoryManager.setProxyConfiguration(createProxyConfiguration());
         }
+        return artifactoryManager;
     }
 
     /**
@@ -168,18 +169,17 @@ public abstract class RepositoriesUtils {
         return repositories;
     }
 
-    public static List<VirtualRepository> collectVirtualRepositories(List<VirtualRepository> repositories, String repoKey) {
+    public static List<ResolutionRepository> collectResolutionRepositories(List<ResolutionRepository> repositories, String repoKey) {
         if (repositories == null) {
             repositories = new ArrayList<>();
         }
         if (StringUtils.isNotBlank(repoKey)) {
-            for (VirtualRepository vr : repositories) {
-                if (repoKey.equals(vr.getDisplayName())) {
+            for (ResolutionRepository repository : repositories) {
+                if (repoKey.equals(repository.getDisplayName())) {
                     return repositories;
                 }
             }
-            VirtualRepository vr = new VirtualRepository(repoKey, repoKey);
-            repositories.add(vr);
+            repositories.add(new ResolutionRepository(repoKey, repoKey));
         }
         return repositories;
     }

@@ -327,12 +327,12 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         return RepositoriesUtils.collectRepositories(getDeployerDetails().getDeploySnapshotRepository().getKeyFromSelect());
     }
 
-    public List<VirtualRepository> getResolveReleaseRepositoryList() {
-        return RepositoriesUtils.collectVirtualRepositories(null, resolverDetails.getResolveReleaseRepository().getKeyFromSelect());
+    public List<ResolutionRepository> getResolveReleaseRepositoryList() {
+        return RepositoriesUtils.collectResolutionRepositories(null, resolverDetails.getResolveReleaseRepository().getKeyFromSelect());
     }
 
-    public List<VirtualRepository> getResolveSnapshotRepositoryList() {
-        return RepositoriesUtils.collectVirtualRepositories(null, resolverDetails.getResolveSnapshotRepository().getKeyFromSelect());
+    public List<ResolutionRepository> getResolveSnapshotRepositoryList() {
+        return RepositoriesUtils.collectResolutionRepositories(null, resolverDetails.getResolveSnapshotRepository().getKeyFromSelect());
     }
 
 

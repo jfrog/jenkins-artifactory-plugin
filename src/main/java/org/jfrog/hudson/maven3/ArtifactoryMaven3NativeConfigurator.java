@@ -139,15 +139,15 @@ public class ArtifactoryMaven3NativeConfigurator extends BuildWrapper implements
         return null;
     }
 
-    public List<VirtualRepository> getVirtualRepositoryList() {
+    public List<ResolutionRepository> getVirtualRepositoryList() {
         String releaseRepoKey = getDeployerDetails().getResolveReleaseRepository().getKeyFromSelect();
         String snapshotRepoKey = getDeployerDetails().getResolveSnapshotRepository().getKeyFromSelect();
 
         // Add the releases repo to the repositories list, in case it is not there:
-        List<VirtualRepository> repos = RepositoriesUtils.collectVirtualRepositories(null, releaseRepoKey);
+        List<ResolutionRepository> repos = RepositoriesUtils.collectResolutionRepositories(null, releaseRepoKey);
 
         // Add the snapshots repo to the repositories list, in case it is not there:
-        return RepositoriesUtils.collectVirtualRepositories(repos, snapshotRepoKey);
+        return RepositoriesUtils.collectResolutionRepositories(repos, snapshotRepoKey);
     }
 
     @Override

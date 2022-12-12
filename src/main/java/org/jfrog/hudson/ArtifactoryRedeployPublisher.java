@@ -446,11 +446,10 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
         private List<Repository> refreshRepositories(ArtifactoryServer artifactoryServer, CredentialsConfig credentialsConfig)
                 throws IOException {
-            List<String> repositoriesKeys = RepositoriesUtils.getLocalRepositories(artifactoryServer.getArtifactoryUrl(),
+            List<Repository> repositoriesKeys = RepositoriesUtils.getDeploymentRepositories(artifactoryServer.getArtifactoryUrl(),
                     credentialsConfig, artifactoryServer, item);
-            List<Repository> releaseRepositories = RepositoriesUtils.createRepositoriesList(repositoriesKeys);
-            Collections.sort(releaseRepositories);
-            return releaseRepositories;
+            Collections.sort(repositoriesKeys);
+            return repositoriesKeys;
         }
 
         private List<PluginSettings> refreshUserPlugins(ArtifactoryServer artifactoryServer, final CredentialsConfig credentialsConfig) {
