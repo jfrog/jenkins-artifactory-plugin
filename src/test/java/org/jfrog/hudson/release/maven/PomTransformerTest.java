@@ -17,7 +17,7 @@
 package org.jfrog.hudson.release.maven;
 
 import hudson.maven.ModuleName;
-import org.jdom.input.SAXBuilder;
+import org.jdom2.input.SAXBuilder;
 import org.jfrog.build.extractor.maven.transformer.SnapshotNotAllowedException;
 import org.junit.Test;
 
