@@ -11,11 +11,7 @@ import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.hudson.pipeline.common.Utils;
 
 import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Created by romang on 6/22/16.
@@ -73,9 +69,47 @@ public class Env implements Serializable {
      */
     public IncludeExcludePatterns filter() {
         IncludeExcludePatterns pattern = filter.getPatternFilter();
-        this.envVars.entrySet().removeIf(key -> PatternMatcher.pathConflicts(key.getKey(), pattern));
-        this.sysVars.entrySet().removeIf(key -> PatternMatcher.pathConflicts(key.getKey(), pattern));
+        filterVars(this.envVars, pattern);
+        filterVars(this.sysVars, pattern);
         return pattern;
+    }
+
+    /**
+     * Filter environment/system variables if their key matches the include/exclude pattern filters, or if their value contains a suspected secret.
+     *
+     * @param vars    map of environment/system variables
+     * @param pattern include/exclude patterns
+     */
+    private void filterVars(Map<String, String> vars, IncludeExcludePatterns pattern) {
+        vars.entrySet().removeIf(key -> PatternMatcher.pathConflicts(key.getKey(), pattern));
+        vars.entrySet().removeIf(key -> containsSuspectedSecrets(key.getValue()));
+    }
+
+    /**
+     * Checks whether the value of a variable contains at least one suspected secret.
+     * A suspected secret can be an API-Key, access token or reference token.
+     *
+     * @param value - string to search in
+     * @return whether a secret is suspected
+     */
+    private boolean containsSuspectedSecrets(String value) {
+        return containsSuspectedSecret(value, "AKCp8", 73) ||
+                containsSuspectedSecret(value, "cmVmdGtuOjAxOj", 64) ||
+                containsSuspectedSecret(value, "eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJ", 0);
+    }
+
+    /**
+     * Checks whether the value of a variable contains a suspected secret.
+     * Done by searching for a known constant prefix of the secret and verifying the length of the substring is sufficient to include the expected length of the secret.
+     *
+     * @param variableValue       - string to search in
+     * @param secretPrefix        - secret constant prefix
+     * @param secretMinimalLength - secret minimal expected length
+     * @return whether a secret is suspected
+     */
+    private boolean containsSuspectedSecret(String variableValue, String secretPrefix, int secretMinimalLength) {
+        int secretIndex = variableValue.indexOf(secretPrefix);
+        return secretIndex > -1 && variableValue.substring(secretIndex).length() >= secretMinimalLength;
     }
 
     /**

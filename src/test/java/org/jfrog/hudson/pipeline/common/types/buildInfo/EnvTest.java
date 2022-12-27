@@ -26,7 +26,12 @@ public class EnvTest {
             put("secret1", "secret");
             put("tOkEn", "token");
             put("psww", "psw");
-            put("1key", "key");
+
+            put("access-with-user", "user:eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJdfghdfjghdfkghdfkgjdhfgfdjgkhdfkgjdhfkgjdfhkfdjghdkghdfj");
+            put("access-without", "eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJd8gu398rjnfj3nfb83bjjfdbdfbjdklbjdljdfbld");
+            put("api", "admin:AKCp81234567890aaaaaaabbbbbbbbbbbbcccccccccddddddddddddddqwesdfsdfdsfsdfs");
+            put("reference-with-user", "admin:cmVmdGtuOjAxOj3mvm3mvkf4rg94j94vfkjgij30kgkg4dfb84jb84b4kfnb4lk4");
+            put("reference-without", "cmVmdGtuOjAxOj3mvm3mvkf4rg94j94vfkjgij30kgkg4dfb84jb84b4kfnb4lk4");
 
             put("vision", "vision");
             put("wanda", "wanda");
@@ -57,6 +62,12 @@ public class EnvTest {
         assertNotIncluded(env, "tOkEn");
         assertNotIncluded(env, "psww");
         assertNotIncluded(env, "1key");
+
+        assertNotIncluded(env, "access-with-user");
+        assertNotIncluded(env, "access-without");
+        assertNotIncluded(env, "api");
+        assertNotIncluded(env, "reference-with-user");
+        assertNotIncluded(env, "reference-without");
     }
 
     @Test
