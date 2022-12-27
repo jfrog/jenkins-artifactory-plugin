@@ -3,6 +3,7 @@ package org.jfrog.hudson.pipeline.common.types.buildInfo;
 import hudson.EnvVars;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.extractor.ci.BuildInfoProperties;
@@ -24,6 +25,13 @@ public class Env implements Serializable {
     private EnvFilter filter = new EnvFilter();
     private boolean capture = false; //By default don't collect
     private transient CpsScript cpsScript;
+
+    private static final String apiKeySecretPrefix = "AKCp8";
+    private static final int apiKeySecretMinimalLength = 73;
+    private static final String referenceTokenSecretPrefix = "cmVmdGtuOjAxOj";
+    private static final int referenceTokenSecretMinimalLength = 64;
+    private static final String accessTokenSecretPrefix = "eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJ";
+    private static final int accessTokenSecretMinimalLength = 0;
 
     public Env() {
     }
@@ -93,9 +101,12 @@ public class Env implements Serializable {
      * @return whether a secret is suspected
      */
     private boolean containsSuspectedSecrets(String value) {
-        return containsSuspectedSecret(value, "AKCp8", 73) ||
-                containsSuspectedSecret(value, "cmVmdGtuOjAxOj", 64) ||
-                containsSuspectedSecret(value, "eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJ", 0);
+        if (StringUtils.isBlank(value)) {
+            return false;
+        }
+        return containsSuspectedSecret(value, apiKeySecretPrefix, apiKeySecretMinimalLength) ||
+                containsSuspectedSecret(value, referenceTokenSecretPrefix, referenceTokenSecretMinimalLength) ||
+                containsSuspectedSecret(value, accessTokenSecretPrefix, accessTokenSecretMinimalLength);
     }
 
     /**

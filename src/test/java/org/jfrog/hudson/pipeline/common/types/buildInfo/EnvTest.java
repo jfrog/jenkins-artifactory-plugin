@@ -26,6 +26,7 @@ public class EnvTest {
             put("secret1", "secret");
             put("tOkEn", "token");
             put("psww", "psw");
+            put("1key", "key");
 
             put("access-with-user", "user:eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJdfghdfjghdfkghdfkgjdhfgfdjgkhdfkgjdhfkgjdfhkfdjghdkghdfj");
             put("access-without", "eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJd8gu398rjnfj3nfb83bjjfdbdfbjdklbjdljdfbld");
