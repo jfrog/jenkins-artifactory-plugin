@@ -22,17 +22,6 @@ import static org.jfrog.hudson.action.ActionableHelper.getUserCausePrincipal;
 
 public class Utils {
     /**
-     * Get 'workspace' dir for the input project.
-     *
-     * @param project - The project
-     * @return the 'workspace' dir.
-     */
-    public static FilePath getWorkspace(Job<?, ?> project) {
-        FilePath projectJob = new FilePath(project.getRootDir());
-        return projectJob.getParent().sibling("workspace").child(project.getName());
-    }
-
-    /**
      * Get JFrog Pipelines server from the global configuration or null if not defined.
      *
      * @return configured JFrog Pipelines server.
