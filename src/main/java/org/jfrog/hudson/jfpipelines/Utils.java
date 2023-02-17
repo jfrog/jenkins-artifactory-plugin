@@ -100,7 +100,7 @@ public class Utils {
      * @return JFrog Pipelines job info
      */
     public static JFrogPipelinesJobInfo getPipelinesJobInfo(Run<?, ?> build) throws IOException, InterruptedException {
-        BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(getWorkspace(build.getParent()), String.valueOf(build.getNumber()), JfPipelinesStep.STEP_NAME, "0");
+        BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(build.getWorkspace(), String.valueOf(build.getNumber()), JfPipelinesStep.STEP_NAME, "0");
         if (buildDataFile == null) {
             return null;
         }
