@@ -137,8 +137,23 @@ public class ExtractorUtils {
         Vcs vcs = Utils.extractVcs(filePath, new JenkinsBuildInfoLog(listener));
         env.put(GIT_COMMIT, StringUtils.defaultIfEmpty(vcs.getRevision(), ""));
         env.put(GIT_URL, StringUtils.defaultIfEmpty(vcs.getUrl(), ""));
-        env.put(GIT_BRANCH, StringUtils.defaultIfEmpty(vcs.getBranch(), ""));
-        env.put(GIT_MESSAGE, StringUtils.defaultIfEmpty(vcs.getMessage(), ""));
+        // Encoding to make sure value will be treated as a single property and contain all special chars
+        env.put(GIT_BRANCH, escapeProperty(StringUtils.defaultIfEmpty(vcs.getBranch(), "")));
+        env.put(GIT_MESSAGE, escapeProperty(StringUtils.defaultIfEmpty(vcs.getMessage(), "")));
+    }
+
+    private final static Set<Character> escapeChars = new HashSet<>(Arrays.asList('|',',',';','='));
+
+    public static String escapeProperty(String property) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < property.length(); i++) {
+            char c = property.charAt(i);
+            if (escapeChars.contains(c)) {
+                builder.append("\\");
+            }
+            builder.append(c);
+        }
+        return builder.toString();
     }
 
     /*
