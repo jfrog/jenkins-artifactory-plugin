@@ -65,7 +65,7 @@ jobs:
         run: source venv/bin/activate
 
       - name: Install Conan
-        run: pip install conan -q
+        run: pip install "conan<2" -q
 
       - name: Configure Linux runner
         if: ${{ runner.os == 'Linux' }}
