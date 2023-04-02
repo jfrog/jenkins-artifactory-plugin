@@ -146,10 +146,17 @@ public class ExtractorUtils {
 
     public static String escapeProperty(String property) {
         StringBuilder builder = new StringBuilder();
+        boolean escaped = false;
         for (int i = 0; i < property.length(); i++) {
             char c = property.charAt(i);
-            if (escapeChars.contains(c)) {
+            if (c == '\\') {
+                // Next char already escaped
+                escaped = true;
+            } else if (escapeChars.contains(c) && !escaped) {
+                // Special char but not escaped
                 builder.append("\\");
+            } else {
+                escaped = false;
             }
             builder.append(c);
         }
