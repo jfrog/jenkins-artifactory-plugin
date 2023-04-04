@@ -687,7 +687,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
                 assertNotNull(pipelineResults);
                 logs = pipelineResults.getLog();
             }
-            assertEquals(printTable, logs.contains("To review the Xray scan results, see the Xray Violations tab in the UI."));
+            assertEquals(!printTable, logs.contains("\"summary\" : {"));
             cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
         }
     }
