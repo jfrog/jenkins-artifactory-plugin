@@ -41,8 +41,8 @@
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
         <skipITs>true</skipITs>
 
-        <buildinfo.version>2.39.0</buildinfo.version>
-        <buildinfo.gradle.version>4.31.0</buildinfo.gradle.version>
+        <buildinfo.version>2.39.8</buildinfo.version>
+        <buildinfo.gradle.version>4.31.8</buildinfo.gradle.version>
     </properties>
 
     <repositories>
