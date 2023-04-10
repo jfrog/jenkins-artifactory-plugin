@@ -70,6 +70,8 @@ public class ExtractorUtils {
     public static final String GIT_BRANCH = "GIT_BRANCH";
     public static final String GIT_MESSAGE = "GIT_MESSAGE";
 
+    private final static Set<Character> PROPERTIES_SPECIAL_CHARS = new HashSet<>(Arrays.asList('|', ',', ';', '='));
+
     private ExtractorUtils() {
         // utility class
         throw new IllegalAccessError();
@@ -142,17 +144,22 @@ public class ExtractorUtils {
         env.put(GIT_MESSAGE, escapeProperty(StringUtils.defaultIfEmpty(vcs.getMessage(), "")));
     }
 
-    private final static Set<Character> escapeChars = new HashSet<>(Arrays.asList('|',',',';','='));
-
+    /**
+     * Escape a given property value.
+     * Check that all the special characters are escaped or escape them
+     * Base on Artifactory setProperties API describes.
+     *
+     * @param property - a given single property to escape
+     * @return the escaped property
+     */
     public static String escapeProperty(String property) {
         StringBuilder builder = new StringBuilder();
         boolean escaped = false;
-        for (int i = 0; i < property.length(); i++) {
-            char c = property.charAt(i);
+        for (char c : property.toCharArray()) {
             if (c == '\\') {
                 // Next char already escaped
                 escaped = true;
-            } else if (escapeChars.contains(c) && !escaped) {
+            } else if (PROPERTIES_SPECIAL_CHARS.contains(c) && !escaped) {
                 // Special char but not escaped
                 builder.append("\\");
             } else {

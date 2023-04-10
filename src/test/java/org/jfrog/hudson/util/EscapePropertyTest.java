@@ -16,13 +16,13 @@ public class EscapePropertyTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"test","test"},
-                {"test | test","test \\| test"},
-                {"test \\| test","test \\| test"},
-                {"test \\ test","test \\ test"},
-                {"test \\\\ test","test \\\\ test"},
-                {"id | tests = test1,test2;","id \\| tests \\= test1\\,test2\\;"},
-                {"id \\| tests = test1,test2\\;","id \\| tests \\= test1\\,test2\\;"},
+                {"test", "test"},
+                {"test | test", "test \\| test"},
+                {"test \\| test", "test \\| test"},
+                {"test \\ test", "test \\ test"},
+                {"test \\\\ test", "test \\\\ test"},
+                {"id | tests = test1,test2;", "id \\| tests \\= test1\\,test2\\;"},
+                {"id \\| tests = test1,test2\\;", "id \\| tests \\= test1\\,test2\\;"},
         });
     }
 
