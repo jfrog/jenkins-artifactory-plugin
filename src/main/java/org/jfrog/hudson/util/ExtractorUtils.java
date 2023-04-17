@@ -70,7 +70,7 @@ public class ExtractorUtils {
     public static final String GIT_BRANCH = "GIT_BRANCH";
     public static final String GIT_MESSAGE = "GIT_MESSAGE";
 
-    private final static Set<Character> PROPERTIES_SPECIAL_CHARS = new HashSet<>(Arrays.asList('|', ',', ';', '='));
+    private final static Set<Character> PROPERTIES_SPECIAL_CHARS = new HashSet<>(Arrays.asList('|', ',', ';', '=', '/', '?', '#', '[', ']', '@', '!', '$', '&', '\'', '(', ')', '*', '+', '%', '"'));
 
     private ExtractorUtils() {
         // utility class
@@ -159,8 +159,8 @@ public class ExtractorUtils {
             if (c == '\\') {
                 // Next char already escaped
                 escaped = true;
-            } else if (PROPERTIES_SPECIAL_CHARS.contains(c) && !escaped) {
-                // Special char but not escaped
+            } else if ((c > 127 || PROPERTIES_SPECIAL_CHARS.contains(c)) && !escaped) {
+                // Handle unescaped non-ascii or special char
                 builder.append("\\");
             } else {
                 escaped = false;
