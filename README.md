@@ -2,6 +2,7 @@
 
 <div align="center">
 
+
 # Jenkins Artifactory Plugin
 
 ![JFrog Plugin Installs](https://img.shields.io/jenkins/plugin/i/artifactory?label=Plugin%20installs%20plugin&logo=Jenkins&logoColor=white&color=blue&style=for-the-badge)
