@@ -7,7 +7,7 @@ import hudson.slaves.EnvironmentVariablesNodeProperty;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.text.StrSubstitutor;
+import org.apache.commons.text.StringSubstitutor;
 import org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition;
 import org.jenkinsci.plugins.workflow.job.WorkflowJob;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
@@ -68,12 +68,12 @@ public class PipelineTestBase {
     static final String JENKINS_XRAY_TEST_ENABLE = System.getenv("JENKINS_XRAY_TEST_ENABLE");
     static final String JENKINS_DOCKER_TEST_DISABLE = System.getenv("JENKINS_DOCKER_TEST_DISABLE");
     static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
-    public static final String BUILD_NUMBER = String.valueOf(System.currentTimeMillis());
+    public static String buildNumber = String.valueOf(System.currentTimeMillis());
     public static final String PROJECT_KEY = "j" + StringUtils.right(String.valueOf(System.currentTimeMillis()), 5);
     public static final String PROJECT_CONFIGURATION_FILE_NAME = "jenkins-artifactory-tests-project-conf";
 
     private static long currentTime;
-    private static StrSubstitutor pipelineSubstitution;
+    private static StringSubstitutor pipelineSubstitution;
     static ArtifactoryManager artifactoryManager;
     static DistributionManager distributionManager;
     static AccessManager accessManager;
@@ -103,6 +103,7 @@ public class PipelineTestBase {
 
     @Before
     public void beforeTest() throws IOException {
+        updateUniqueBuildNumber();
         log.info("Running test: " + pipelineType + " / " + testName.getMethodName());
         FileUtils.cleanDirectory(testTemporaryFolder.getRoot().getAbsoluteFile());
     }
@@ -238,7 +239,7 @@ public class PipelineTestBase {
      * loading them.
      */
     private static void createPipelineSubstitution() {
-        pipelineSubstitution = new StrSubstitutor(new HashMap<String, String>() {{
+        pipelineSubstitution = new StringSubstitutor(new HashMap<String, String>() {{
             put("FILES_DIR", fixWindowsPath(FILES_PATH + File.separator + "*"));
             put("FILES_DIR_1", fixWindowsPath(FILES_PATH + File.separator + "1" + File.separator + "*"));
             put("MAVEN_PROJECT_PATH", getProjectPath("maven-example"));
@@ -266,9 +267,14 @@ public class PipelineTestBase {
             put("PIP_VIRTUAL", getRepoKey(TestRepository.PIP_VIRTUAL));
             put("CONAN_LOCAL", getRepoKey(TestRepository.CONAN_LOCAL));
             put("NUGET_REMOTE", getRepoKey(TestRepository.NUGET_REMOTE));
-            put("BUILD_NUMBER", BUILD_NUMBER);
+            put("BUILD_NUMBER", buildNumber);
             put("PROJECT_KEY", PROJECT_KEY);
         }});
+    }
+
+    private static void updateUniqueBuildNumber() {
+        buildNumber = String.valueOf(System.currentTimeMillis());
+        createPipelineSubstitution();
     }
 
     /**
