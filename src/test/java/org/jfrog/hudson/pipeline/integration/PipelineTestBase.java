@@ -68,7 +68,7 @@ public class PipelineTestBase {
     static final String JENKINS_XRAY_TEST_ENABLE = System.getenv("JENKINS_XRAY_TEST_ENABLE");
     static final String JENKINS_DOCKER_TEST_DISABLE = System.getenv("JENKINS_DOCKER_TEST_DISABLE");
     static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
-    public static String buildNumber = String.valueOf(System.currentTimeMillis());
+    public static String buildNumber;
     public static final String PROJECT_KEY = "j" + StringUtils.right(String.valueOf(System.currentTimeMillis()), 5);
     public static final String PROJECT_CONFIGURATION_FILE_NAME = "jenkins-artifactory-tests-project-conf";
 
@@ -95,7 +95,6 @@ public class PipelineTestBase {
         createClients();
         setGlobalConfiguration();
         cleanUpArtifactory(artifactoryClient);
-        createPipelineSubstitution();
         // Create repositories
         Arrays.stream(TestRepository.values()).forEach(PipelineTestBase::createRepo);
         createProject();
