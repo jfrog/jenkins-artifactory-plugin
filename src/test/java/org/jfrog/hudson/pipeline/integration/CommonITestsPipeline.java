@@ -122,7 +122,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void downloadByPatternAndBuildTest(String buildName) throws Exception {
         Set<String> expectedDependencies = Collections.singleton("a.in");
-        String buildNumber = this.BUILD_NUMBER + "-3";
+        String buildNumber = BUILD_NUMBER + "-3";
         WorkflowRun pipelineResults = null;
 
         Set<String> unexpected = getTestFilesNamesByLayer(0);
@@ -138,7 +138,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
             Module module = getAndAssertModule(buildInfo, buildName);
             assertModuleDependencies(module, expectedDependencies);
         } finally {
-            cleanupBuilds(pipelineResults, buildName, null, this.BUILD_NUMBER + "-1", this.BUILD_NUMBER + "-2", this.BUILD_NUMBER + "-3");
+            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER + "-1", BUILD_NUMBER + "-2", BUILD_NUMBER + "-3");
         }
     }
 
