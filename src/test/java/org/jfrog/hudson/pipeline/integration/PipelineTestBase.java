@@ -151,7 +151,7 @@ public class PipelineTestBase {
      * @return repository key of the temporary test repository
      */
     static String getRepoKey(TestRepository repository) {
-        return String.format("%s-%s-%d", repository.getRepoName(), System.getProperty("os.name"), currentTime);
+        return String.format("%s-%s-%d", repository.getRepoName(), System.getProperty("os.name").split("\\s")[0], currentTime);
     }
 
     /**
