@@ -69,9 +69,9 @@ public class PipelineTestBase {
     static final String JENKINS_DOCKER_TEST_DISABLE = System.getenv("JENKINS_DOCKER_TEST_DISABLE");
     static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
     public static final String BUILD_NUMBER = String.valueOf(System.currentTimeMillis());
-    public static final String PROJECT_KEY = "j" + StringUtils.right(String.valueOf(System.currentTimeMillis()), 5);
+    private static final String OS_IDENTIFIER = System.getProperty("os.name").split("\\s")[0];
+    public static final String PROJECT_KEY = "j" + OS_IDENTIFIER + StringUtils.right(String.valueOf(System.currentTimeMillis()), 5);
     public static final String PROJECT_CONFIGURATION_FILE_NAME = "jenkins-artifactory-tests-project-conf";
-
     private static long currentTime;
     private static StringSubstitutor pipelineSubstitution;
     static ArtifactoryManager artifactoryManager;
@@ -151,7 +151,7 @@ public class PipelineTestBase {
      * @return repository key of the temporary test repository
      */
     static String getRepoKey(TestRepository repository) {
-        return String.format("%s-%s-%d", repository.getRepoName(), System.getProperty("os.name").split("\\s")[0], currentTime);
+        return String.format("%s-%s-%d", repository.getRepoName(), OS_IDENTIFIER, currentTime);
     }
 
     /**
