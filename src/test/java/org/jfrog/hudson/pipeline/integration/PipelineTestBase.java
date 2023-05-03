@@ -96,6 +96,7 @@ public class PipelineTestBase {
         setGlobalConfiguration();
         cleanUpArtifactory(artifactoryClient);
         // Create repositories
+        updateUniqueBuildNumber();
         Arrays.stream(TestRepository.values()).forEach(PipelineTestBase::createRepo);
         createProject();
     }
