@@ -14,7 +14,7 @@ node("TestSlave") {
         )
 
         def buildName = "declarative:collectIssues test"
-        def buildNumber = "${BUILD_NUMBER}"
+       buildNumber = "${BUILD_NUMBER}"
 
         stage "Build Info"
         rtBuildInfo (

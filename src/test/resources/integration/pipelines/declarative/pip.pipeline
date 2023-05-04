@@ -9,7 +9,7 @@ env.COLLECT='BAR'
 node("TestSlave") {
     def serverId = "Artifactory-1"
     def buildName = "declarative:pip test"
-    def buildNumber = "${BUILD_NUMBER}"
+   buildNumber = "${BUILD_NUMBER}"
 
     stage "Configure Artifactory"
     rtServer(
