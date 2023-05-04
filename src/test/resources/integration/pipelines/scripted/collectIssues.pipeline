@@ -9,7 +9,7 @@ node("TestSlave") {
             // Create build info
             def buildInfo = Artifactory.newBuildInfo()
             buildInfo.name = "scripted:collectIssues test"
-            buildInfo.number = ${BUILD_NUMBER}
+            buildInfo.number = "${BUILD_NUMBER}"
 
         // Collect issues
         stage "Collect Issues"

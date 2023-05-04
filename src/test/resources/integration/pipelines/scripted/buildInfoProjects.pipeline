@@ -7,7 +7,7 @@ node("TestSlave") {
     stage "Create 1st Build Info Without Project"
     def buildInfo1 = Artifactory.newBuildInfo()
     buildInfo1.name = "scripted:buildInfoProjects-1"
-    buildInfo1.number = ${BUILD_NUMBER}
+    buildInfo1.number = "${BUILD_NUMBER}"
 
     stage "Publish 1st Build Info"
     rtServer.publishBuildInfo buildInfo1

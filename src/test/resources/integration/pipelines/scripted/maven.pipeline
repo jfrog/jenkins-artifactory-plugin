@@ -14,7 +14,7 @@ node("TestSlave")  {
     buildInfo.env.filter.addExclude("DONT_COLLECT")
     buildInfo.env.filter.addExclude("excluded.property.in.pom")
     buildInfo.name = "scripted:maven test"
-    buildInfo.number = ${BUILD_NUMBER}
+    buildInfo.number = "${BUILD_NUMBER}"
 
     stage "Configure Maven build"
     def rtMaven = Artifactory.newMavenBuild()

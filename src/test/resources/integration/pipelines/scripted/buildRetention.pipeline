@@ -7,7 +7,7 @@ node("TestSlave") {
     stage "Create 1st Build Info"
     def buildInfo1 = Artifactory.newBuildInfo()
     buildInfo1.name = "scripted:buildRetention"
-    buildInfo1.number = ${BUILD_NUMBER}
+    buildInfo1.number = "${BUILD_NUMBER}"
 
     stage "Publish 1st Build Info"
     rtServer.publishBuildInfo buildInfo1
@@ -24,7 +24,7 @@ node("TestSlave") {
     def buildInfo3 = Artifactory.newBuildInfo()
     buildInfo3.name = "scripted:buildRetention"
     buildInfo3.number = "${BUILD_NUMBER}-3"
-    buildInfo3.retention maxBuilds: 1, doNotDiscardBuilds: [${BUILD_NUMBER}], deleteBuildArtifacts: true
+    buildInfo3.retention maxBuilds: 1, doNotDiscardBuilds: ["${BUILD_NUMBER}"], deleteBuildArtifacts: true
 
     stage "Publish 3nd Build Info"
     rtServer.publishBuildInfo buildInfo3

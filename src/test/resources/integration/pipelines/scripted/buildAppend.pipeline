@@ -7,7 +7,7 @@ node("TestSlave") {
     stage "Create 1st Build Info"
     def buildInfo1 = Artifactory.newBuildInfo()
     buildInfo1.name = "scripted:buildAppend test-1"
-    buildInfo1.number = ${BUILD_NUMBER}
+    buildInfo1.number = "${BUILD_NUMBER}"
 
     stage "Publish 1st Build Info"
     rtServer.publishBuildInfo buildInfo1
