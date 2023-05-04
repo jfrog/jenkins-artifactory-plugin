@@ -2,7 +2,7 @@ package integration.pipelines.declarative
 
 node("TestSlave") {
     def buildName = "declarative:dockerPull test"
-   buildNumber = "${BUILD_NUMBER}"
+    def buildNumber = "${BUILD_NUMBER}"
     def host = "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}"
     def serverId = "Artifactory-1"
     def domainName = "${env.JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN}"
