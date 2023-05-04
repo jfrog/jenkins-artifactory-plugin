@@ -12,7 +12,7 @@ node("TestSlave") {
     )
 
     def buildName = "declarative:downloadByShaAndBuild test"
-    def buildNumber = "${BUILD_NUMBER}-1"
+   buildNumber = "${BUILD_NUMBER}-1"
 
     stage "Upload"
     rtUpload(
