@@ -68,8 +68,8 @@ public class PipelineTestBase {
     static final String JENKINS_XRAY_TEST_ENABLE = System.getenv("JENKINS_XRAY_TEST_ENABLE");
     static final String JENKINS_DOCKER_TEST_DISABLE = System.getenv("JENKINS_DOCKER_TEST_DISABLE");
     static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
-    public static final String BUILD_NUMBER = String.valueOf(System.currentTimeMillis());
     private static final String OS_IDENTIFIER = StringUtils.left(System.getProperty("os.name"),3).toLowerCase();
+    public static final String BUILD_NUMBER = OS_IDENTIFIER + System.currentTimeMillis();
     public static final String PROJECT_KEY = "j" + OS_IDENTIFIER + StringUtils.right(String.valueOf(System.currentTimeMillis()), 5);
     public static final String PROJECT_CONFIGURATION_FILE_NAME = "jenkins-artifactory-tests-project-conf";
     private static long currentTime;
