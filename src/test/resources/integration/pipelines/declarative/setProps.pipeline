@@ -3,7 +3,7 @@ package integration.pipelines.declarative
 node("TestSlave") {
     def serverId = "Artifactory-1"
     def buildName = "declarative:setProps test"
-   buildNumber = "${BUILD_NUMBER}"
+    def buildNumber = "${BUILD_NUMBER}"
 
     stage "Configuration"
     rtServer(

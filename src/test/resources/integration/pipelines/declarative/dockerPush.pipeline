@@ -4,7 +4,7 @@ env.DONT_COLLECT='FOO'
 env.COLLECT='BAR'
 node("TestSlave") {
     def buildName = "declarative:dockerPush test"
-   buildNumber = "${BUILD_NUMBER}"
+    def buildNumber = "${BUILD_NUMBER}"
     def host = "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}"
     def serverId = "Artifactory-1"
     def domainName = "${env.JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN}"

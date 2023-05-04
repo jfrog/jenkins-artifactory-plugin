@@ -3,7 +3,7 @@ package integration.pipelines.declarative
 node("TestSlave") {
     def serverId = "PLATFORM"
     def buildName = "declarative:project upload test"
-   buildNumber = "${BUILD_NUMBER}"
+    def buildNumber = "${BUILD_NUMBER}"
 
     stage "Configuration"
 

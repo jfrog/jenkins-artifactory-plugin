@@ -7,7 +7,7 @@ import java.nio.file.Paths
 node("TestSlave") {
     def serverId = "Artifactory-1"
     def buildName = "declarative:xrayScanFailBuildFalse test"
-   buildNumber = "${BUILD_NUMBER}"
+    def buildNumber = "${BUILD_NUMBER}"
 
     stage "Configure Artifactory"
     rtServer(
