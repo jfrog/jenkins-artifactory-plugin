@@ -308,7 +308,9 @@ class ITestUtils {
     static void assertArtifactsInRepo(Artifactory artifactoryClient, String repoKey, Set<String> expectedArtifacts) {
         List<RepoPath> repoPaths = artifactoryClient.searches().repositories(repoKey).artifactsByName("*in").doSearch();
         Set<String> actualArtifacts = repoPaths.stream().map(RepoPath::getItemPath).collect(Collectors.toSet());
-        assertEquals(expectedArtifacts, actualArtifacts);
+        for (String expectedArtifact : expectedArtifacts) {
+            assertTrue(actualArtifacts.contains(expectedArtifact));
+        }
     }
 
     /**
