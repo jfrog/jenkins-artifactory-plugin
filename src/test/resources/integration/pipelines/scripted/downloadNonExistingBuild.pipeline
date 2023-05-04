@@ -7,7 +7,7 @@ node("TestSlave") {
     // First upload files and publish build
     def buildInfo = Artifactory.newBuildInfo()
     buildInfo.name = "scripted:downloadNonExistingBuild test"
-    buildInfo.number = ${BUILD_NUMBER}
+    buildInfo.number = "${BUILD_NUMBER}"
 
     stage "Upload"
     def uploadSpec = """{

@@ -13,7 +13,7 @@ node("TestSlave") {
     buildInfo.env.capture = true
     buildInfo.env.filter.addExclude("DONT_COLLECT")
     buildInfo.name = "scripted:nuget test"
-    buildInfo.number = ${BUILD_NUMBER}
+    buildInfo.number = "${BUILD_NUMBER}"
 
     stage "Configure NuGet build"
     def rtNuget = Artifactory.newNugetBuild()

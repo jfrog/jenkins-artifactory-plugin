@@ -14,7 +14,7 @@ node("TestSlave") {
     buildInfo.env.capture = true
     buildInfo.env.filter.addExclude("DONT_COLLECT")
     buildInfo.name = "scripted:dockerPush test"
-    buildInfo.number = ${BUILD_NUMBER}
+    buildInfo.number = "${BUILD_NUMBER}"
 
     stage "dockerPush"
     def rtDocker = Artifactory.docker (rtServer, "${env.JENKINS_ARTIFACTORY_DOCKER_HOST}")
