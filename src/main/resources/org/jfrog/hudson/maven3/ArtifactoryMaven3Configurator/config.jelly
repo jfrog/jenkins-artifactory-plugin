@@ -14,6 +14,7 @@
   ~ limitations under the License.
   -->
 
+ <?jelly escape-by-default='true'?>
 <j:jelly xmlns:j="jelly:core"
          xmlns:f="/lib/form"
          xmlns:r="/lib/jfrog"
