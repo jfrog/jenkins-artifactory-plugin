@@ -337,7 +337,6 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void mavenJibTest(String buildName) throws Exception {
-        Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS);
         Set<String> expectedArtifacts = Collections.singleton("multi-3.7-SNAPSHOT.pom");
         WorkflowRun pipelineResults = null;
         try {
@@ -591,7 +590,6 @@ public class CommonITestsPipeline extends PipelineTestBase {
     }
 
     void dockerPushTest(String buildName) throws Exception {
-        Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS || Boolean.parseBoolean(JENKINS_DOCKER_TEST_DISABLE));
         WorkflowRun pipelineResults = null;
 
         try {
@@ -631,7 +629,6 @@ public class CommonITestsPipeline extends PipelineTestBase {
     void dockerPullTest(String buildName) throws Exception {
         WorkflowRun pipelineResults = null;
         try {
-            Assume.assumeFalse("Skipping Docker tests", SystemUtils.IS_OS_WINDOWS || Boolean.parseBoolean(JENKINS_DOCKER_TEST_DISABLE));
             // Assert 'JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN' environment variable exist
             String domainName = System.getenv("JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN");
             if (StringUtils.isBlank(domainName)) {

@@ -90,12 +90,7 @@ public class DeclarativeITest extends CommonITestsPipeline {
     public void mavenWrapperTest() throws Exception {
         super.mavenTest("declarative:mavenWrapper test", true);
     }
-
-    @Test
-    public void mavenJibTest() throws Exception {
-        super.mavenJibTest("declarative:mavenJib test");
-    }
-
+    
     @Test
     public void gradleTest() throws Exception {
         super.gradleTest("declarative:gradle test");
@@ -164,16 +159,6 @@ public class DeclarativeITest extends CommonITestsPipeline {
     @Test
     public void deletePropsTest() throws Exception {
         super.deletePropsTest("declarative:deleteProps test");
-    }
-
-    @Test
-    public void dockerPushTest() throws Exception {
-        super.dockerPushTest("declarative:dockerPush test");
-    }
-
-    @Test
-    public void dockerPullTest() throws Exception {
-        super.dockerPullTest("declarative:dockerPull test");
     }
 
     @Test

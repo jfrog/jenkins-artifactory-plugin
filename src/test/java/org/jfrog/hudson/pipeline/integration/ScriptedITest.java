@@ -112,11 +112,6 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
-    public void mavenJibTest() throws Exception {
-        super.mavenJibTest("scripted:mavenJib test");
-    }
-
-    @Test
     public void gradleTest() throws Exception {
         super.gradleTest("scripted:gradle test");
     }
@@ -184,16 +179,6 @@ public class ScriptedITest extends CommonITestsPipeline {
     @Test
     public void deletePropsTest() throws Exception {
         super.deletePropsTest("scripted:deleteProps test");
-    }
-
-    @Test
-    public void dockerPushTest() throws Exception {
-        super.dockerPushTest("scripted:dockerPush test");
-    }
-
-    @Test
-    public void dockerPullTest() throws Exception {
-        super.dockerPullTest("scripted:dockerPull test");
     }
 
     @Test
