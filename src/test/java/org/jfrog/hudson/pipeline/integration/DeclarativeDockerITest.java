@@ -4,7 +4,7 @@ import org.junit.Test;
 
 public class DeclarativeDockerITest extends CommonITestsPipeline {
 
-    DeclarativeDockerITest() {
+    public DeclarativeDockerITest() {
         super(PipelineType.DECLARATIVE);
     }
 

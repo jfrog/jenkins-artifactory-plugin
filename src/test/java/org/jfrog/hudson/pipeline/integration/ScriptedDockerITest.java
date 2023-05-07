@@ -4,7 +4,7 @@ import org.junit.Test;
 
 public class ScriptedDockerITest extends CommonITestsPipeline {
 
-    ScriptedDockerITest() {
+    public ScriptedDockerITest() {
         super(PipelineType.SCRIPTED);
     }
 
