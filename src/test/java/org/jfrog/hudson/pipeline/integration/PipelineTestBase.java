@@ -66,7 +66,6 @@ public class PipelineTestBase {
     private static final String ARTIFACTORY_USERNAME = System.getenv("JENKINS_PLATFORM_USERNAME");
     private static final String ACCESS_TOKEN = System.getenv("JENKINS_PLATFORM_ADMIN_TOKEN");
     static final String JENKINS_XRAY_TEST_ENABLE = System.getenv("JENKINS_XRAY_TEST_ENABLE");
-    static final String JENKINS_DOCKER_TEST_DISABLE = System.getenv("JENKINS_DOCKER_TEST_DISABLE");
     static final Path FILES_PATH = getIntegrationDir().resolve("files").toAbsolutePath();
     private static final String OS_IDENTIFIER = StringUtils.left(System.getProperty("os.name"),3).toLowerCase();
     public static final String BUILD_NUMBER = OS_IDENTIFIER + System.currentTimeMillis();

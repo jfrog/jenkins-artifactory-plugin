@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   Artifactory-Jenkins-Plugin-Tests:
-    if: (contains(github.event.pull_request.labels.*.name, 'safe to test') || github.event_name == 'push') && github.repository_owner != 'jenkinsci' && !${JENKINS_DOCKER_TEST_DISABLE}
+    if: (contains(github.event.pull_request.labels.*.name, 'safe to test') || github.event_name == 'push') && github.repository_owner != 'jenkinsci'
     name: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -46,7 +46,6 @@ jobs:
       - name: Configure MacOS runner
         if: ${{ runner.os == 'macOS' }}
         run: |
-          echo "JENKINS_DOCKER_TEST_DISABLE=true" >> $GITHUB_ENV
           echo "MAVEN_HOME=$(which mvn)" >> $GITHUB_ENV
           echo "GRADLE_HOME=$(brew info gradle | grep /usr/local/Cellar/gradle | awk '{print $1}')" >> $GITHUB_ENV
 

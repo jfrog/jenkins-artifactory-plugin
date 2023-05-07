@@ -78,7 +78,6 @@ jobs:
       - name: Configure MacOS runner
         if: ${{ runner.os == 'macOS' }}
         run: |
-          echo "JENKINS_DOCKER_TEST_DISABLE=true" >> $GITHUB_ENV
           echo "MAVEN_HOME=$(which mvn)" >> $GITHUB_ENV
           echo "GRADLE_HOME=$(brew info gradle | grep /usr/local/Cellar/gradle | awk '{print $1}')" >> $GITHUB_ENV
 
