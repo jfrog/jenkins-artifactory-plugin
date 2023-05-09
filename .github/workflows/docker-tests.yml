@@ -7,7 +7,7 @@ on:
 # Ensures that only the latest commit is running for each PR at a time.
 # Ignores this rule for push events.
 concurrency:
-  group: ${{ github.event.pull_request.number || github.sha }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -16,10 +16,11 @@ jobs:
     name: ${{ matrix.os }}
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
-        max-parallel: 1
         os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    environment: jenkins
     env:
       GRADLE_OPTS: -Dorg.gradle.daemon=false
     steps:
