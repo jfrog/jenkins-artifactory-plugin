@@ -1,10 +1,7 @@
 name: "Frogbot Scan and Fix"
 on:
-  push:
-    branches:
-      - "master"
   schedule:
-    # The job will run once a day at 00:00 GMT.
+    # The repository will be scanned once a day at 00:00 GMT.
     - cron: "0 0 * * *"
 permissions:
   contents: write
@@ -13,20 +10,26 @@ permissions:
 jobs:
   create-fix-pull-requests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # The repository scanning will be triggered periodically on the following branches.
+        branch: [ "master" ]
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ matrix.branch }}
 
       # Install prerequisites
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: "8"
-          distribution: "temurin"
+          java-version: "11"
+          distribution: "adopt"
 
       - uses: jfrog/frogbot@v2
         env:
           # [Mandatory]
-          # JFrog platform URL (This functionality requires version 3.29.0 or above of Xray)
+          # JFrog platform URL
           JF_URL: ${{ secrets.FROGBOT_URL }}
 
           # [Mandatory if JF_USER and JF_PASSWORD are not provided]
