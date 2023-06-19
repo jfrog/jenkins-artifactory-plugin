@@ -54,8 +54,8 @@ pipelines:
             - jf rt bp
 
             # Distribute release bundle
-            - jf ds rbc artifactory-jenkins-plugin-snapshot $run_number --spec=./release/specs/dev-rbc-filespec.json --sign
-            - jf ds rbd artifactory-jenkins-plugin-snapshot $run_number --site="releases.jfrog.io" --sync
+            - jf ds rbc ecosystem-artifactory-jenkins-plugin-snapshot $run_number --spec=./release/specs/dev-rbc-filespec.json --sign
+            - jf ds rbd ecosystem-artifactory-jenkins-plugin-snapshot $run_number --site="releases.jfrog.io" --sync
 
           onComplete:
             # Show tests in the *Tests* tab

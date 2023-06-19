@@ -70,6 +70,8 @@ public class ExtractorUtils {
     public static final String GIT_BRANCH = "GIT_BRANCH";
     public static final String GIT_MESSAGE = "GIT_MESSAGE";
 
+    private final static Set<Character> PROPERTIES_SPECIAL_CHARS = new HashSet<>(Arrays.asList('|', ',', ';', '=', '/', '?', '#', '[', ']', '@', '!', '$', '&', '\'', '(', ')', '*', '+', '%', '"'));
+
     private ExtractorUtils() {
         // utility class
         throw new IllegalAccessError();
@@ -137,8 +139,35 @@ public class ExtractorUtils {
         Vcs vcs = Utils.extractVcs(filePath, new JenkinsBuildInfoLog(listener));
         env.put(GIT_COMMIT, StringUtils.defaultIfEmpty(vcs.getRevision(), ""));
         env.put(GIT_URL, StringUtils.defaultIfEmpty(vcs.getUrl(), ""));
-        env.put(GIT_BRANCH, StringUtils.defaultIfEmpty(vcs.getBranch(), ""));
-        env.put(GIT_MESSAGE, StringUtils.defaultIfEmpty(vcs.getMessage(), ""));
+        // Encoding to make sure value will be treated as a single property and contain all special chars
+        env.put(GIT_BRANCH, escapeProperty(StringUtils.defaultIfEmpty(vcs.getBranch(), "")));
+        env.put(GIT_MESSAGE, escapeProperty(StringUtils.defaultIfEmpty(vcs.getMessage(), "")));
+    }
+
+    /**
+     * Escape a given property value.
+     * Check that all the special characters are escaped or escape them
+     * Base on Artifactory setProperties API describes.
+     *
+     * @param property - a given single property to escape
+     * @return the escaped property
+     */
+    public static String escapeProperty(String property) {
+        StringBuilder builder = new StringBuilder();
+        boolean escaped = false;
+        for (char c : property.toCharArray()) {
+            if (c == '\\') {
+                // Next char already escaped
+                escaped = true;
+            } else if ((c > 127 || PROPERTIES_SPECIAL_CHARS.contains(c)) && !escaped) {
+                // Handle unescaped non-ascii or special char
+                builder.append("\\");
+            } else {
+                escaped = false;
+            }
+            builder.append(c);
+        }
+        return builder.toString();
     }
 
     /*

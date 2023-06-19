@@ -71,8 +71,8 @@ pipelines:
             - jf rt bp
 
             # Distribute release bundle
-            - jf ds rbc artifactory-jenkins-plugin $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
-            - jf ds rbd artifactory-jenkins-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
+            - jf ds rbc ecosystem-artifactory-jenkins-plugin $NEXT_VERSION --spec=./release/specs/prod-rbc-filespec.json --spec-vars="version=$NEXT_VERSION" --sign
+            - jf ds rbd ecosystem-artifactory-jenkins-plugin $NEXT_VERSION --site="releases.jfrog.io" --sync
 
             # Upload plugin to Jenkins Artifactory server
             - jf c add jenkins --url=$int_jenkins_artifactory_url --user=$int_jenkins_artifactory_user --password=$int_jenkins_artifactory_password --enc-password=false

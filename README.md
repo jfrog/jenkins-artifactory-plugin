@@ -6,8 +6,9 @@
 
 ![JFrog Plugin Installs](https://img.shields.io/jenkins/plugin/i/artifactory?label=Plugin%20installs%20plugin&logo=Jenkins&logoColor=white&color=blue&style=for-the-badge)
 
+[![Scanned by Frogbot](https://raw.github.com/jfrog/frogbot/master/images/frogbot-badge.svg)](https://github.com/jfrog/frogbot#readme)
 [![Tests](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml) [![Static Analysis](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/analysis.yml/badge.svg?branch=master)](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/analysis.yml)
-[![](https://img.shields.io/badge/Docs-%F0%9F%93%96-blue)](https://www.jfrog.com/confluence/display/JFROG/Jenkins+Artifactory+Plug-in)
+[![](https://img.shields.io/badge/Docs-%F0%9F%93%96-blue)](https://jfrog.com/help/r/jfrog-integrations-documentation/jenkins-artifactory-plug-in)
 
 </div>
 
@@ -15,7 +16,8 @@
 
 The plugin integrates Jenkins and Artifactory to publish, resolve, promote and release traceable build artifacts. For
 more information, including the release notes, please visit
-the [JFrog Artifactory Plugin documentation](https://www.jfrog.com/confluence/display/RTF/Jenkins+Artifactory+Plug-in)
+the [JFrog Artifactory Plugin documentation](https://jfrog.com/help/r/jfrog-integrations-documentation/jenkins-artifactory-plug-in).
+The release notes for versions 3.18.1 and above are available [here](https://github.com/jfrog/jenkins-artifactory-plugin/releases).
 
 ## How to Contribute
 
