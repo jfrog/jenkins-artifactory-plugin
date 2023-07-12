@@ -33,7 +33,7 @@
 
     <properties>
         <!-- Minimal version required by Pipeline dependencies in 2.14.0 -->
-        <jenkins.version>2.235.5</jenkins.version>
+        <jenkins.version>2.263.1</jenkins.version>
         <java.level>8</java.level>
         <!-- TODO: enforcer is full of upper bound dependency issues, including real ones -->
         <enforcer.skip>true</enforcer.skip>
@@ -455,6 +455,11 @@
             <groupId>org.apache.ivy</groupId>
             <artifactId>ivy</artifactId>
             <version>2.5.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jenkins.plugins</groupId>
+            <artifactId>jersey2-api</artifactId>
+            <version>2.35-8</version>
         </dependency>
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
