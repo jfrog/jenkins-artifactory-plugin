@@ -369,7 +369,7 @@ public class ArtifactoryServer implements Serializable {
             Credentials credentials = config.provideCredentials(build.getParent());
             String[] featureIdArray = new String[]{stepName};
             UsageReporter usageReporter = new UsageReporter("jenkins-artifactory-plugin/" + ActionableHelper.getArtifactoryPluginVersion(), featureIdArray);
-            usageReporter.reportUsage(this.getArtifactoryUrl(), credentials.getUsername(), credentials.getPassword(), credentials.getAccessToken(), Utils.getProxyConfiguration(this), logger);
+            usageReporter.reportUsage(this.getArtifactoryUrl(), credentials.getUsername(), credentials.getPassword(), credentials.getAccessToken(), Utils.getProxyConfiguration(this), null, logger);
             logger.debug("Usage info sent successfully.");
         } catch (Exception ex) {
             logger.error("Failed sending usage report to Artifactory: " + ex);
