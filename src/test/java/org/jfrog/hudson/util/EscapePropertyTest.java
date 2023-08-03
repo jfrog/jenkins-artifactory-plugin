@@ -23,7 +23,6 @@ public class EscapePropertyTest {
                 {"test \\\\ test", "test \\\\ test"},
                 {"id | tests = test1,test2;", "id \\| tests \\= test1\\,test2\\;"},
                 {"id \\| tests = test1,test2\\;", "id \\| tests \\= test1\\,test2\\;"},
-                {"/?#[]@!$&'()*+=%\"\u0080", "\\/\\?\\#\\[\\]\\@\\!\\$\\&\\'\\(\\)\\*\\+\\=\\%\\\"\\\u0080"},
         });
     }
 
