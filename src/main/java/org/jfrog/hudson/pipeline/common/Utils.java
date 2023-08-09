@@ -273,8 +273,13 @@ public class Utils {
      * @param listener - Task listener
      * @param ws       - The workspace
      */
-    public static void launch(String taskName, Launcher launcher, ArgumentListBuilder args, EnvVars env, TaskListener listener, FilePath ws) {
+    public static void launch(String taskName, Launcher nodeLauncher, ArgumentListBuilder args, EnvVars env, TaskListener listener, FilePath ws) {
         try {
+
+            Node node = ActionableHelper.getNode(nodeLauncher);
+
+            Launcher launcher = node.createLauncher(listener);
+            
             int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(ws).join();
             if (exitValue != 0) {
                 throw new RuntimeException(taskName + " build failed with exit code " + exitValue);
