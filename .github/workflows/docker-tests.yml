@@ -18,7 +18,7 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, windows-2019]
     runs-on: ${{ matrix.os }}
     environment: jenkins
     env:
@@ -39,16 +39,6 @@ jobs:
         with:
           java-version: "8"
           distribution: "temurin"
-
-      - name: Configure Linux runner
-        if: ${{ runner.os == 'Linux' }}
-        run: echo "MAVEN_HOME=$(whereis mvn)" >> $GITHUB_ENV
-
-      - name: Configure MacOS runner
-        if: ${{ runner.os == 'macOS' }}
-        run: |
-          echo "MAVEN_HOME=$(which mvn)" >> $GITHUB_ENV
-          echo "GRADLE_HOME=$(brew info gradle | grep /usr/local/Cellar/gradle | awk '{print $1}')" >> $GITHUB_ENV
 
       - name: Run Docker tests
         env:
