@@ -7,7 +7,7 @@ on:
 # Ensures that only the latest commit is running for each PR at a time.
 # Ignores this rule for push events.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  group: ${{ github.event.pull_request.number || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -18,9 +18,8 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        os: [ubuntu-latest, windows-2019]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
-    environment: jenkins
     env:
       GRADLE_OPTS: -Dorg.gradle.daemon=false
     steps:
@@ -39,6 +38,10 @@ jobs:
         with:
           java-version: "8"
           distribution: "temurin"
+
+      - name: Configure Linux runner
+        if: ${{ runner.os == 'Linux' }}
+        run: echo "MAVEN_HOME=$(whereis mvn)" >> $GITHUB_ENV
 
       - name: Run Docker tests
         env:

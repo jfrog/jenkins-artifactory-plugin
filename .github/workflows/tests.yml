@@ -81,14 +81,17 @@ jobs:
         run: |
           echo "MAVEN_HOME=$(which mvn)" >> $GITHUB_ENV
           echo "GRADLE_HOME=$(brew info gradle | grep /usr/local/Cellar/gradle | awk '{print $1}')" >> $GITHUB_ENV
-
+          
+      - name: Setup Artifactory
+        run: |
+          go install github.com/jfrog/jfrog-testing-infra/local-rt-setup@latest
+          ~/go/bin/local-rt-setup
+        env:
+          RTLIC: ${{secrets.RTLIC}}
+          GOPROXY: direct
+          
       - name: Run tests
         env:
-          JENKINS_PLATFORM_URL: ${{ secrets.PLATFORM_URL }}
-          JENKINS_PLATFORM_USERNAME: ${{ secrets.PLATFORM_USER }}
-          JENKINS_PLATFORM_ADMIN_TOKEN: ${{ secrets.PLATFORM_ADMIN_TOKEN }}
-          JENKINS_ARTIFACTORY_DOCKER_PULL_DOMAIN: ${{ secrets.CONTAINER_REGISTRY }}/docker-remote
-          JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN: ${{ secrets.CONTAINER_REGISTRY }}/docker-local
-          JENKINS_ARTIFACTORY_DOCKER_PULL_REPO: docker-remote
-          JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO: docker-local
-        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=false -Dtest=!**/*DockerITest.java "-Dfindbugs.failOnError=false"
+          JENKINS_PLATFORM_ADMIN_TOKEN: ${JFROG_TESTS_LOCAL_ACCESS_TOKEN}
+
+        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=false -Dtest="!**/*DockerITest.java" "-Dfindbugs.failOnError=false"
