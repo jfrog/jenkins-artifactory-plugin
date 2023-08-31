@@ -127,11 +127,6 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
-    public void gradleCiServerPublicationTest() throws Exception {
-        super.gradleCiServerPublicationTest("scripted:gradle-ci-publication test");
-    }
-
-    @Test
     public void npmInstallTest() throws Exception {
         super.npmTest("npmInstall", "scripted:npm install test", "package-name1:0.0.1");
     }

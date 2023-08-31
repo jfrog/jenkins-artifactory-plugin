@@ -107,11 +107,6 @@ public class DeclarativeITest extends CommonITestsPipeline {
     }
 
     @Test
-    public void gradleCiServerPublicationTest() throws Exception {
-        super.gradleCiServerPublicationTest("declarative:gradle-ci-publication test");
-    }
-
-    @Test
     public void npmInstallTest() throws Exception {
         super.npmTest("npmInstall", "declarative:npm install test", "package-name1:0.0.1");
     }

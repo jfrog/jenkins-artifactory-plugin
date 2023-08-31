@@ -245,7 +245,6 @@ public class PipelineTestBase {
             put("MAVEN_JIB_PROJECT_PATH", getProjectPath("maven-jib-example"));
             put("GRADLE_PROJECT_PATH", getProjectPath("gradle-example"));
             put("GRADLE_CI_PROJECT_PATH", getProjectPath("gradle-example-ci"));
-            put("GRADLE_CI_PUBLICATION_PROJECT_PATH", getProjectPath("gradle-example-ci-publications"));
             put("NPM_PROJECT_PATH", getProjectPath("npm-example"));
             put("GO_PROJECT_PATH", getProjectPath("go-example"));
             put("PIP_PROJECT_PATH", getProjectPath("pip-example"));

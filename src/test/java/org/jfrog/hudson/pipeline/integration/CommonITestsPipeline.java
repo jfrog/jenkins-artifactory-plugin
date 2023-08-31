@@ -41,8 +41,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.Matchers.isOneOf;
-import static org.jfrog.build.extractor.buildScanTable.LicenseViolationsTable.LICENSE_VIOLATIONS_TABLE_HEADLINE;
-import static org.jfrog.build.extractor.buildScanTable.SecurityViolationsTable.SECURITY_VIOLATIONS_TABLE_HEADLINE;
 import static org.jfrog.hudson.TestUtils.getAndAssertChild;
 import static org.jfrog.hudson.pipeline.common.executors.GenericDownloadExecutor.FAIL_NO_OP_ERROR_MESSAGE;
 import static org.jfrog.hudson.pipeline.integration.ITestUtils.*;
@@ -383,7 +381,7 @@ public class CommonITestsPipeline extends PipelineTestBase {
 
     void gradleCiServerTest(String buildName) throws Exception {
         Set<String> expectedArtifacts = new HashSet<>();
-        Collections.addAll(expectedArtifacts, pipelineType.toString() + "-gradle-example-ci-server-1.0.jar", "ivy-1.0.xml", pipelineType.toString() + "-gradle-example-ci-server-1.0.pom");
+        Collections.addAll(expectedArtifacts, pipelineType.toString() + "-gradle-example-ci-server-1.0.jar", pipelineType.toString() + "-gradle-example-ci-server-1.0.pom");
         WorkflowRun pipelineResults = null;
         try {
             pipelineResults = runPipeline("gradleCiServer", false);
@@ -391,28 +389,6 @@ public class CommonITestsPipeline extends PipelineTestBase {
             assertEquals(5, buildInfo.getModules().size());
 
             Module module = getAndAssertModule(buildInfo, "org.jfrog.example.gradle:" + pipelineType.toString() + "-gradle-example-ci-server:1.0");
-            assertModuleArtifacts(module, expectedArtifacts);
-            assertTrue(CollectionUtils.isEmpty(module.getDependencies()));
-
-            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:services:1.0");
-            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:api:1.0");
-            assertModuleContainsArtifacts(buildInfo, "org.jfrog.example.gradle:shared:1.0");
-            assertModuleContainsArtifactsAndDependencies(buildInfo, "org.jfrog.example.gradle:webservice:1.0");
-        } finally {
-            cleanupBuilds(pipelineResults, buildName, null, BUILD_NUMBER);
-        }
-    }
-
-    void gradleCiServerPublicationTest(String buildName) throws Exception {
-        Set<String> expectedArtifacts = new HashSet<>();
-        Collections.addAll(expectedArtifacts, pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.jar", pipelineType.toString() + "-gradle-example-ci-server-publication-1.0.pom");
-        WorkflowRun pipelineResults = null;
-        try {
-            pipelineResults = runPipeline("gradleCiServerPublication", false);
-            BuildInfo buildInfo = artifactoryManager.getBuildInfo(buildName, BUILD_NUMBER, null);
-            assertEquals(5, buildInfo.getModules().size());
-
-            Module module = getAndAssertModule(buildInfo, "org.jfrog.example.gradle:" + pipelineType.toString() + "-gradle-example-ci-server-publication:1.0");
             // Gradle 6 and above produce an extra artifact of type "module".
             // In order to allow the test to run on Gradle 6 and above, we remove it.
             module.setArtifacts(module.getArtifacts().stream().filter(art -> !art.getType().equalsIgnoreCase("module")).collect(Collectors.toList()));

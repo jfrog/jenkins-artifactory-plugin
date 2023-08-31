@@ -23,6 +23,7 @@ node("TestSlave") {
             serverId: serverId,
             releaseRepo: "${LOCAL_REPO1}",
             snapshotRepo: "${LOCAL_REPO1}",
+            publications: ["nonDefaultPublication"]
     )
 
     rtGradleResolver(
@@ -39,11 +40,9 @@ node("TestSlave") {
             buildName: buildName,
             buildNumber: buildNumber,
             rootDir: 'declarative-gradle-example-ci-server',
-            buildFile: 'build.gradle',
             tasks: 'clean artifactoryPublish',
             deployerId: "GRADLE_DEPLOYER",
-            resolverId: "GRADLE_RESOLVER",
-            useWrapper: true
+            resolverId: "GRADLE_RESOLVER"
     )
 
     stage "Publish build info"

@@ -49,7 +49,6 @@ node("TestSlave") {
             buildNumber: buildNumber,
             usesPlugin: true,
             rootDir: 'declarative-gradle-example',
-            buildFile: 'build.gradle',
             tasks: 'clean artifactoryPublish',
             deployerId: "GRADLE_DEPLOYER",
             resolverId: "GRADLE_RESOLVER",
