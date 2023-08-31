@@ -43,4 +43,15 @@ public class ScriptedDockerITest extends CommonITestsPipeline {
         super.xrayScanTest("scripted:xrayScanFailBuildFalse test", false, true);
     }
 
+
+    @Test
+    public void rbCreateUpdateSign() throws Exception {
+        super.rbCreateUpdateSign("scripted:createUpdateSign");
+    }
+
+    @Test
+    public void rbCreateDistDel() throws Exception {
+        super.rbCreateDistDel("scripted:createDistributeDelete");
+    }
+
 }

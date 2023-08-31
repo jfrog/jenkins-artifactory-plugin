@@ -207,16 +207,6 @@ public class ScriptedITest extends CommonITestsPipeline {
     }
 
     @Test
-    public void rbCreateUpdateSign() throws Exception {
-        super.rbCreateUpdateSign("scripted:createUpdateSign");
-    }
-
-    @Test
-    public void rbCreateDistDel() throws Exception {
-        super.rbCreateDistDel("scripted:createDistributeDelete");
-    }
-
-    @Test
     public void buildInfoProjects() throws Exception {
         super.buildInfoProjects("scripted:buildInfoProjects");
     }

@@ -43,4 +43,14 @@ public class DeclarativeDockerITest extends CommonITestsPipeline {
         super.xrayScanTest("declarative:xrayScanFailBuildFalse test", false, true);
     }
 
+    @Test
+    public void rbCreateUpdateSign() throws Exception {
+        super.rbCreateUpdateSign("declarative:createUpdateSign");
+    }
+
+    @Test
+    public void rbCreateDistDel() throws Exception {
+        super.rbCreateDistDel("declarative:createDistributeDelete");
+    }
+
 }

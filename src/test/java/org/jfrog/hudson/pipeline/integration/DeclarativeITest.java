@@ -182,16 +182,6 @@ public class DeclarativeITest extends CommonITestsPipeline {
     }
 
     @Test
-    public void rbCreateUpdateSign() throws Exception {
-        super.rbCreateUpdateSign("declarative:createUpdateSign");
-    }
-
-    @Test
-    public void rbCreateDistDel() throws Exception {
-        super.rbCreateDistDel("declarative:createDistributeDelete");
-    }
-
-    @Test
     public void buildInfoProjects() throws Exception {
         super.buildInfoProjects("declarative:buildInfoProjects");
     }
