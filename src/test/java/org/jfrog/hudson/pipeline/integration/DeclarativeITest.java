@@ -122,16 +122,6 @@ public class DeclarativeITest extends CommonITestsPipeline {
     }
 
     @Test
-    public void goTest() throws Exception {
-        super.goTest("go", "declarative:go test", "github.com/you/hello");
-    }
-
-    @Test
-    public void goCustomModuleNameTest() throws Exception {
-        super.goTest("goCustomModuleName", "declarative:goCustomModuleName test", "my-Go-module");
-    }
-
-    @Test
     public void conanTest() throws Exception {
         super.conanTest("conan", "declarative:conan test");
     }
@@ -159,16 +149,6 @@ public class DeclarativeITest extends CommonITestsPipeline {
     @Test
     public void deletePropsTest() throws Exception {
         super.deletePropsTest("declarative:deleteProps test");
-    }
-
-    @Test
-    public void xrayScanFailTrueTest() throws Exception {
-        super.xrayScanTest("declarative:xrayScanFailBuildTrue test", true, false);
-    }
-
-    @Test
-    public void xrayScanFailFalseTest() throws Exception {
-        super.xrayScanTest("declarative:xrayScanFailBuildFalse test", false, true);
     }
 
     @Test

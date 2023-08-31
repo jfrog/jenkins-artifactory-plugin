@@ -23,4 +23,24 @@ public class ScriptedDockerITest extends CommonITestsPipeline {
         super.dockerPullTest("scripted:dockerPull test");
     }
 
+    @Test
+    public void goTest() throws Exception {
+        super.goTest("go", "scripted:go test", "github.com/you/hello");
+    }
+
+    @Test
+    public void goCustomModuleNameTest() throws Exception {
+        super.goTest("goCustomModuleName", "scripted:goCustomModuleName test", "my-Go-module");
+    }
+
+    @Test
+    public void xrayScanFailTrueTest() throws Exception {
+        super.xrayScanTest("scripted:xrayScanFailBuildTrue test", true, false);
+    }
+
+    @Test
+    public void xrayScanFailFalseTest() throws Exception {
+        super.xrayScanTest("scripted:xrayScanFailBuildFalse test", false, true);
+    }
+
 }
