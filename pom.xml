@@ -43,6 +43,9 @@
 
         <buildinfo.version>2.41.4</buildinfo.version>
         <buildinfo.gradle.version>4.33.4</buildinfo.gradle.version>
+        <!-- integration tests params> -->
+        <runSuite>**/*ITest.java</runSuite>
+        <excludeSuite>**/*DockerITest.java</excludeSuite>
     </properties>
 
     <repositories>
@@ -614,8 +617,11 @@
                         <maven.surefire.debug>true</maven.surefire.debug>
                     </systemPropertyVariables>
                     <includes>
-                        <include>**/*ITest.java</include>
+                        <include>${runSuite}</include>
                     </includes>
+                     <excludes>
+                        <exclude>${excludeSuite}</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>

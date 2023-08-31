@@ -52,4 +52,4 @@ jobs:
           JENKINS_ARTIFACTORY_DOCKER_PUSH_DOMAIN: ${{ secrets.CONTAINER_REGISTRY }}/docker-local
           JENKINS_ARTIFACTORY_DOCKER_PULL_REPO: docker-remote
           JENKINS_ARTIFACTORY_DOCKER_PUSH_REPO: docker-local
-        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=false -Dtest=**/*DockerITest.java "-Dfindbugs.failOnError=false"
+        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=false -DexcludeSuite="" -DrunSuite="**/*DockerITest.java" "-Dfindbugs.failOnError=false"
