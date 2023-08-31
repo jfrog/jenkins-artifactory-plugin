@@ -20,6 +20,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
+    environment: jenkins
     env:
       GRADLE_OPTS: -Dorg.gradle.daemon=false
     steps:
