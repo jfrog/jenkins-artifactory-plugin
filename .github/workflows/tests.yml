@@ -93,5 +93,6 @@ jobs:
       - name: Run tests
         env:
           JENKINS_PLATFORM_ADMIN_TOKEN: ${JFROG_TESTS_LOCAL_ACCESS_TOKEN}
+          JENKINS_PLATFORM_URL: "http://localhost:8081/"
 
         run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=false "-Dfindbugs.failOnError=false" "-Dtest=`!**/*DockerITest.java`"
