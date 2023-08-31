@@ -92,7 +92,7 @@ jobs:
           
       - name: Run tests
         env:
-          JENKINS_PLATFORM_ADMIN_TOKEN: ${JFROG_TESTS_LOCAL_ACCESS_TOKEN}
+          JENKINS_PLATFORM_ADMIN_TOKEN: ${{env.JFROG_TESTS_LOCAL_ACCESS_TOKEN}}
           JENKINS_PLATFORM_URL: "http://localhost:8081/"
           JENKINS_PLATFORM_USERNAME: "admin"
 
