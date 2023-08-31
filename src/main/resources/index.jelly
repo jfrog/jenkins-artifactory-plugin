@@ -3,6 +3,7 @@
 
   Since we don't really have anything dynamic here, let's just use static HTML. 
 -->
+<?jelly escape-by-default='true'?>
 <div>
     This plugin allows your build jobs to deploy artifacts and resolve dependencies to and from Artifactory, and then have them linked to the build job that created them. The plugin includes a vast collection of features, including a rich pipeline API library and release management for Maven and Gradle builds with Staging and Promotion.
 </div>

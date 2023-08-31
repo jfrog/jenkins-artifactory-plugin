@@ -94,4 +94,4 @@ jobs:
         env:
           JENKINS_PLATFORM_ADMIN_TOKEN: ${JFROG_TESTS_LOCAL_ACCESS_TOKEN}
 
-        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=false -Dtest="!**/*DockerITest.java" "-Dfindbugs.failOnError=false"
+        run: mvn -V -B -U --no-transfer-progress clean verify -DskipITs=false "-Dfindbugs.failOnError=false" "-Dtest=`!**/*DockerITest.java`"
