@@ -267,7 +267,7 @@ public class Utils {
      * Launch a process. Throw a RuntimeException in case of an error.
      *
      * @param taskName - The task name - Maven, Gradle, npm, etc.
-     * @param launcher - The launcher
+     * @param nodeLauncher - The default launcher from the node
      * @param args     - The arguments
      * @param env      - Task environment
      * @param listener - Task listener
@@ -277,7 +277,7 @@ public class Utils {
         try {
 
             Node node = ActionableHelper.getNode(nodeLauncher);
-
+            //creating default remote laucher irrespective of any type of node. Using the default launcher from the node is causing intermittent hangs depends on the node type and the plugin using to launch that node.
             Launcher launcher = node.createLauncher(listener);
             
             int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(ws).join();
