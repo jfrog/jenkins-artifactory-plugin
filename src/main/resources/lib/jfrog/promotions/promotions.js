@@ -8,7 +8,7 @@ function loadBuild(buildData) {
 
     spinner = document.getElementById("spinnerDiv");
     spinner.style.display = "block";
-    target = spinner.next();
+    target = spinner.nextElementSibling;
     target.innerHTML = "";
 
     var buildId = document.getElementById("buildId").value;
