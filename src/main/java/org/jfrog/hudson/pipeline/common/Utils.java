@@ -266,20 +266,15 @@ public class Utils {
     /**
      * Launch a process. Throw a RuntimeException in case of an error.
      *
-     * @param taskName     - The task name - Maven, Gradle, npm, etc.
-     * @param nodeLauncher - The default launcher from the node
-     * @param args         - The arguments
-     * @param env          - Task environment
-     * @param listener     - Task listener
-     * @param ws           - The workspace
+     * @param taskName - The task name - Maven, Gradle, npm, etc.
+     * @param launcher - The launcher
+     * @param args     - The arguments
+     * @param env      - Task environment
+     * @param listener - Task listener
+     * @param ws       - The workspace
      */
-    public static void launch(String taskName, Launcher nodeLauncher, ArgumentListBuilder args, EnvVars env, TaskListener listener, FilePath ws) {
+    public static void launch(String taskName, Launcher launcher, ArgumentListBuilder args, EnvVars env, TaskListener listener, FilePath ws) {
         try {
-            // Creating default remote launcher irrespective of any type of node.
-            // Using the default launcher from the node is causing intermittent hangs, depending on the node type and the plugin using to launch that node.
-            Node node = ActionableHelper.getNode(nodeLauncher);
-            Launcher launcher = node.createLauncher(listener);
-
             int exitValue = launcher.launch().cmds(args).envs(env).stdout(listener).stderr(listener.getLogger()).pwd(ws).join();
             if (exitValue != 0) {
                 throw new RuntimeException(taskName + " build failed with exit code " + exitValue);
@@ -423,7 +418,7 @@ public class Utils {
         properties.put(BuildInfoFields.BUILD_PARENT_NAME, ExtractorUtils.sanitizeBuildName(buildName));
         Integer buildNumber = ActionableHelper.getUpstreamBuild(build);
         if (buildNumber != null) {
-            properties.put(BuildInfoFields.BUILD_PARENT_NUMBER, buildNumber + "");
+            properties.put(BuildInfoFields.BUILD_PARENT_NUMBER, buildNumber+ "");
         }
     }
 
