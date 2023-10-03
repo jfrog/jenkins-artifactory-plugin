@@ -27,7 +27,7 @@ node("TestSlave") {
     rtGradleResolver(
             id: "GRADLE_RESOLVER",
             serverId: serverId,
-            repo: "${JCENTER_REMOTE_REPO}",
+            repo: "${MAVEN_REMOTE_REPO}",
     )
 
     stage "Copy project example"

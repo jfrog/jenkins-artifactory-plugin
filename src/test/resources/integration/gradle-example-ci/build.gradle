@@ -17,7 +17,7 @@
 buildscript {
   repositories {
     mavenLocal()
-    jcenter()
+    mavenCentral()
   }
 }
 

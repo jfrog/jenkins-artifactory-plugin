@@ -256,7 +256,7 @@ public class PipelineTestBase {
             put("TEST_TEMP_FOLDER", fixWindowsPath(testTemporaryFolder.getRoot().getAbsolutePath()));
             put("LOCAL_REPO1", getRepoKey(TestRepository.LOCAL_REPO1));
             put("LOCAL_REPO2", getRepoKey(TestRepository.LOCAL_REPO2));
-            put("JCENTER_REMOTE_REPO", getRepoKey(TestRepository.JCENTER_REMOTE_REPO));
+            put("MAVEN_REMOTE_REPO", getRepoKey(TestRepository.MAVEN_REMOTE_REPO));
             put("NPM_LOCAL", getRepoKey(TestRepository.NPM_LOCAL));
             put("NPM_REMOTE", getRepoKey(TestRepository.NPM_REMOTE));
             put("GO_LOCAL", getRepoKey(TestRepository.GO_LOCAL));

@@ -14,7 +14,7 @@ node("TestSlave") {
     stage "Configure Gradle build"
     def rtGradle = Artifactory.newGradleBuild()
     rtGradle.deployer repo: "${LOCAL_REPO1}", server: rtServer
-    rtGradle.resolver repo: "${JCENTER_REMOTE_REPO}", server: rtServer
+    rtGradle.resolver repo: "${MAVEN_REMOTE_REPO}", server: rtServer
     rtGradle.usesPlugin = true
     rtGradle.useWrapper = true
 
