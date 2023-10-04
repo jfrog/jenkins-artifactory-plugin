@@ -20,7 +20,7 @@ node("TestSlave")  {
     def rtMaven = Artifactory.newMavenBuild()
     rtMaven.useWrapper = true
     rtMaven.deployer releaseRepo: "${LOCAL_REPO1}", snapshotRepo: "${LOCAL_REPO1}", server: rtServer
-    rtMaven.resolver releaseRepo: "${JCENTER_REMOTE_REPO}", snapshotRepo: "${JCENTER_REMOTE_REPO}", server: rtServer
+    rtMaven.resolver releaseRepo: "${MAVEN_REMOTE_REPO}", snapshotRepo: "${MAVEN_REMOTE_REPO}", server: rtServer
 
     stage "Copy project example"
     FileUtils.copyDirectory(Paths.get("${MAVEN_PROJECT_PATH}").toFile(), Paths.get(pwd(), "scripted-maven-example").toFile())

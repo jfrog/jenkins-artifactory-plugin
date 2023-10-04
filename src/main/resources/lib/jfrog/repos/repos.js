@@ -7,26 +7,26 @@ function repos(button, jsFunction, uniqueId, artifactoryUrl, credentialsInput, b
 
     // Start spinner
     button = button._button;
-    let spinner = $(button).up("DIV").next();
+    let spinner = button.closest("DIV").nextElementSibling;
     spinner.style.display = "block";
-    let target = spinner.next();
+    let target = spinner.nextElementSibling;
     target.innerHTML = "";
-    let warning = target.next();
+    let warning = target.nextElementSibling;
     warning.innerHTML = "";
 
-    let legacyInput = $('legacy' + credentialsInput);
+    let legacyInput = document.getElementById('legacy' + credentialsInput);
     if (legacyInput) {
-        overrideCredentials = legacyInput.down('input[type=checkbox]').checked;
-        username = legacyInput.down('input[name=_.username]').value;
-        password = legacyInput.down('input[name=_.password]').value;
+        overrideCredentials = legacyInput.querySelector('input[type=checkbox]').checked;
+        username = legacyInput.querySelector('input[name="_.username"]').value;
+        password = legacyInput.querySelector('input[name="_.password"]').value;
     }
-    let credentialsPluginInput = $(credentialsInput);
+    let credentialsPluginInput = document.getElementById(credentialsInput);
     if (credentialsPluginInput) {
-        credentialsId = $(credentialsInput).down('select').value;
+        credentialsId = credentialsPluginInput.querySelector('select').value;
     }
 
     if (jsFunction) {
-        jsFunctionsMap[jsFunction](spinner, uniqueId, $(artifactoryUrl).value, credentialsId, username, password, overrideCredentials, bind);
+        jsFunctionsMap[jsFunction](spinner, uniqueId, document.getElementById(artifactoryUrl).value, credentialsId, username, password, overrideCredentials, bind);
     }
 }
 
@@ -47,8 +47,8 @@ let jsFunctionsMap = {
 function artifactoryIvyFreeStyleConfigurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
     bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
-        let target = spinner.next();
-        let warning = target.next();
+        let target = spinner.nextElementSibling;
+        let warning = target.nextElementSibling;
 
         let response = t.responseObject();
         if (!response.success) {
@@ -73,8 +73,8 @@ function artifactoryIvyFreeStyleConfigurator(spinner, uniqueId, artifactoryUrl, 
 function artifactoryGenericConfigurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
     bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
-        let target = spinner.next();
-        let warning = target.next();
+        let target = spinner.nextElementSibling;
+        let warning = target.nextElementSibling;
 
         let response = t.responseObject();
         if (!response.success) {
@@ -99,8 +99,8 @@ function artifactoryGenericConfigurator(spinner, uniqueId, artifactoryUrl, crede
 function artifactoryMaven3NativeConfigurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
     bind.refreshResolversFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
-        let target = spinner.next();
-        let warning = target.next();
+        let target = spinner.nextElementSibling;
+        let warning = target.nextElementSibling;
 
         let response = t.responseObject();
         if (!response.success) {
@@ -136,8 +136,8 @@ function artifactoryMaven3NativeConfigurator(spinner, uniqueId, artifactoryUrl, 
 function artifactoryMaven3Configurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
     bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
-        let target = spinner.next();
-        let warning = target.next();
+        let target = spinner.nextElementSibling;
+        let warning = target.nextElementSibling;
 
         let response = t.responseObject();
         if (!response.success) {
@@ -174,8 +174,8 @@ function artifactoryMaven3Configurator(spinner, uniqueId, artifactoryUrl, creden
 function artifactoryGradleConfigurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
     bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
-        let target = spinner.next();
-        let warning = target.next();
+        let target = spinner.nextElementSibling;
+        let warning = target.nextElementSibling;
 
         let response = t.responseObject();
         if (!response.success) {
@@ -215,8 +215,8 @@ function artifactoryGradleConfigurator(spinner, uniqueId, artifactoryUrl, creden
 function artifactoryGradleConfigurationResolve(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
     bind.refreshResolversFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
-        let target = spinner.next();
-        let warning = target.next();
+        let target = spinner.nextElementSibling;
+        let warning = target.nextElementSibling;
 
         let response = t.responseObject();
         if (!response.success) {
@@ -240,8 +240,8 @@ function artifactoryGradleConfigurationResolve(spinner, uniqueId, artifactoryUrl
 function artifactoryRedeployPublisher(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
     bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
-        let target = spinner.next();
-        let warning = target.next();
+        let target = spinner.nextElementSibling;
+        let warning = target.nextElementSibling;
 
         let response = t.responseObject();
         if (!response.success) {
@@ -286,8 +286,8 @@ function artifactoryRedeployPublisher(spinner, uniqueId, artifactoryUrl, credent
 function artifactoryIvyConfigurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
     bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
-        let target = spinner.next();
-        let warning = target.next();
+        let target = spinner.nextElementSibling;
+        let warning = target.nextElementSibling;
 
         let response = t.responseObject();
         if (!response.success) {
@@ -385,14 +385,14 @@ function setStagingParamsSelectedValue(select, uniqueId) {
 function displaySuccessMessage(spinner, target) {
     spinner.style.display = "none";
     target.innerHTML = "Items refreshed successfully";
-    target.removeClassName('error');
+    target.classList.remove('error');
     target.style.color = "green";
 }
 
 function displayErrorResponse(spinner, target, message) {
     spinner.style.display = "none";
     target.innerHTML = message;
-    target.addClassName('error');
+    target.classList.add('error');
     target.style.color = "red";
 }
 

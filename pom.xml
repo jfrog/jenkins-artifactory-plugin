@@ -92,8 +92,8 @@
     </organization>
 
     <issueManagement>
-        <system>jira</system>
-        <url>https://www.jfrog.com/jira/browse/HAP</url>
+        <system>GitHub Issues</system>
+        <url>https://github.com/jfrog/jenkins-artifactory-plugin/issues</url>
     </issueManagement>
 
     <licenses>

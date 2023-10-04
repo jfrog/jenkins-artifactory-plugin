@@ -6,7 +6,7 @@ package org.jfrog.hudson.pipeline.integration;
 enum TestRepository {
     LOCAL_REPO1("jenkins-artifactory-tests-local-1", RepoType.LOCAL),
     LOCAL_REPO2("jenkins-artifactory-tests-local-2", RepoType.LOCAL),
-    JCENTER_REMOTE_REPO("jenkins-artifactory-tests-jcenter", RepoType.REMOTE),
+    MAVEN_REMOTE_REPO("jenkins-artifactory-tests-maven-remote", RepoType.REMOTE),
     NPM_LOCAL("jenkins-artifactory-tests-npm-local", RepoType.LOCAL),
     NPM_REMOTE("jenkins-artifactory-tests-npm-remote", RepoType.REMOTE),
     GO_LOCAL("jenkins-artifactory-tests-go-local", RepoType.LOCAL),

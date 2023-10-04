@@ -30,8 +30,8 @@ node("TestSlave") {
     rtMavenResolver(
             id: "MAVEN_RESOLVER",
             serverId: serverId,
-            releaseRepo: "${JCENTER_REMOTE_REPO}",
-            snapshotRepo: "${JCENTER_REMOTE_REPO}"
+            releaseRepo: "${MAVEN_REMOTE_REPO}",
+            snapshotRepo: "${MAVEN_REMOTE_REPO}"
     )
 
     stage "Copy project example"
