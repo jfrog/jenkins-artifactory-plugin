@@ -369,9 +369,7 @@ class ITestUtils {
     static void deleteBuild(Artifactory artifactoryClient, String buildName) throws IOException {
         artifactoryClient.restCall(new ArtifactoryRequestImpl()
                 .method(ArtifactoryRequest.Method.DELETE)
-                .apiUrl("api/build/" + encodeBuildName(buildName))
-                .addQueryParam("deleteAll", "1")
-                .addQueryParam("artifacts", "1"));
+                .apiUrl("api/build/" + encodeBuildName(buildName)));
     }
 
     /**
