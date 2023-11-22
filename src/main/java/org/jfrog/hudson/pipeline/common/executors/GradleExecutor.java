@@ -69,7 +69,7 @@ public class GradleExecutor implements Executor {
         ExtractorUtils.addVcsDetailsToEnv(new FilePath(ws, rootDir), extendedEnv, listener);
         tempDir = ExtractorUtils.createAndGetTempDir(ws);
         EnvExtractor envExtractor = new MavenGradleEnvExtractor(build,
-                buildInfo, deployer, gradleBuild.getResolver(), listener, launcher, tempDir, extendedEnv);
+                buildInfo, deployer, gradleBuild.getResolver(), listener, launcher, tempDir, extendedEnv, this.gradleBuild.isUsesPlugin());
         envExtractor.execute();
         ArgumentListBuilder args = getGradleExecutor();
         Utils.launch("Gradle", launcher, args, extendedEnv, listener, ws);

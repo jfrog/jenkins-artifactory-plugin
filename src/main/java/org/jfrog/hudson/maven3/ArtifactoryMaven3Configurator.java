@@ -402,7 +402,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
             @Override
             public void buildEnvVars(Map<String, String> env) {
                 try {
-                    ExtractorUtils.addBuilderInfoArguments(env, build, listener, publisherContext, resolverContext, build.getWorkspace(), launcher);
+                    ExtractorUtils.addBuilderInfoArguments(env, build, listener, publisherContext, resolverContext, build.getWorkspace(), launcher, false);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

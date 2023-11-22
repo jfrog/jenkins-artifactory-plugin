@@ -138,7 +138,7 @@ public class MavenExtractorEnvironment extends Environment {
                 }
 
                 ArtifactoryClientConfiguration configuration = ExtractorUtils.addBuilderInfoArguments(
-                        env, build, buildListener, publisherContext, resolverContext, build.getWorkspace(), launcher);
+                        env, build, buildListener, publisherContext, resolverContext, build.getWorkspace(), launcher, false);
                 propertiesFilePath = configuration.getPropertiesFile();
             } catch (Exception e) {
                 throw new RuntimeException(e);

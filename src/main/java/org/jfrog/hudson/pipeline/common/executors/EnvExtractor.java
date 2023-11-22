@@ -35,6 +35,7 @@ public abstract class EnvExtractor implements Executor {
     private Launcher launcher;
     private FilePath tempDir;
     private EnvVars env;
+    protected boolean skipEncryption;
 
     public EnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher, FilePath tempDir, EnvVars env) {
         this.build = build;
@@ -87,7 +88,7 @@ public abstract class EnvExtractor implements Executor {
     }
 
     public void persistConfiguration(ArtifactoryClientConfiguration configuration) throws IOException, InterruptedException {
-        ExtractorUtils.persistConfiguration(configuration, env, tempDir, launcher);
+        ExtractorUtils.persistConfiguration(configuration, env, tempDir, launcher, skipEncryption);
         String propertiesFilePath = configuration.getPropertiesFile();
         env.put(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFilePath);
     }

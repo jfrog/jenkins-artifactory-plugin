@@ -492,7 +492,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
 
                 try {
                     ExtractorUtils.addBuilderInfoArguments(env, build, listener,
-                            finalPublisherBuilder.build(), resolverContext, build.getWorkspace(), launcher);
+                            finalPublisherBuilder.build(), resolverContext, build.getWorkspace(), launcher, useArtifactoryGradlePlugin);
                 } catch (Exception e) {
                     log.println(e.getMessage());
                     throw new RuntimeException(e);

@@ -321,7 +321,7 @@ public class ArtifactoryIvyFreeStyleConfigurator extends BuildWrapper implements
                 try {
                     String actualDependencyDirPath = actualDependencyDirPath(build, launcher);
                     env.put("ARTIFACTORY_CACHE_LIBS", actualDependencyDirPath);
-                    ExtractorUtils.addBuilderInfoArguments(env, build, listener, finalPublisherContext, null, build.getWorkspace(), launcher);
+                    ExtractorUtils.addBuilderInfoArguments(env, build, listener, finalPublisherContext, null, build.getWorkspace(), launcher, false);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

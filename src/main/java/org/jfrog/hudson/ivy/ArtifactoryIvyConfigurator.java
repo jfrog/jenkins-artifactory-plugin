@@ -303,7 +303,7 @@ public class ArtifactoryIvyConfigurator extends AntIvyBuildWrapper implements De
             @Override
             public void buildEnvVars(Map<String, String> env) {
                 try {
-                    ExtractorUtils.addBuilderInfoArguments(env, build, listener, context, null, build.getWorkspace(), launcher);
+                    ExtractorUtils.addBuilderInfoArguments(env, build, listener, context, null, build.getWorkspace(), launcher, false);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
