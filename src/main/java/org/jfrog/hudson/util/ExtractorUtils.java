@@ -40,6 +40,7 @@ import org.jfrog.build.extractor.ci.Vcs;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryClientConfiguration;
 import org.jfrog.build.extractor.clientConfiguration.ClientProperties;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
+import org.jfrog.build.extractor.clientConfiguration.util.encryption.EncryptionKeyPair;
 import org.jfrog.build.extractor.clientConfiguration.util.spec.SpecsHelper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
@@ -598,8 +599,9 @@ public class ExtractorUtils {
             if (skipEncryption) {
                 configuration.persistToPropertiesFile();
             } else {
-                byte[] key = configuration.persistToEncryptedPropertiesFile(outputStream);
-                env.put(BuildInfoConfigProperties.PROP_PROPS_FILE_KEY, Base64.getEncoder().encodeToString((key)));
+                EncryptionKeyPair keyPair = configuration.persistToEncryptedPropertiesFile(outputStream);
+                env.put(BuildInfoConfigProperties.PROP_PROPS_FILE_KEY, keyPair.getStringSecretKey());
+                env.put(BuildInfoConfigProperties.PROP_PROPS_FILE_KEY_IV, keyPair.getStringIv());
             }
         } catch (IOException | InterruptedException e) {
             throw new RuntimeException(e);
