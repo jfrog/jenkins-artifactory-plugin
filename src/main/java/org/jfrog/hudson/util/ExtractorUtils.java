@@ -56,15 +56,20 @@ import org.jfrog.hudson.util.plugins.MultiConfigurationUtils;
 import org.jfrog.hudson.util.publisher.PublisherContext;
 
 import javax.annotation.Nullable;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -603,7 +608,8 @@ public class ExtractorUtils {
                 env.put(BuildInfoConfigProperties.PROP_PROPS_FILE_KEY, keyPair.getStringSecretKey());
                 env.put(BuildInfoConfigProperties.PROP_PROPS_FILE_KEY_IV, keyPair.getStringIv());
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | InvalidAlgorithmParameterException | NoSuchPaddingException |
+                 IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
             throw new RuntimeException(e);
         } finally {
             if (outputStream != null) {
