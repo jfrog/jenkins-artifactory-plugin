@@ -42,7 +42,7 @@
         <skipITs>true</skipITs>
 
         <buildinfo.version>2.41.11</buildinfo.version>
-        <buildinfo.gradle.version>5.1.12</buildinfo.gradle.version>
+        <buildinfo.gradle.version>5.1.13</buildinfo.gradle.version>
     </properties>
 
     <repositories>
