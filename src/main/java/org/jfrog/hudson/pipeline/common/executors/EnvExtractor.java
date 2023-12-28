@@ -38,6 +38,10 @@ public abstract class EnvExtractor implements Executor {
     protected boolean skipEncryption;
 
     public EnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher, FilePath tempDir, EnvVars env) {
+        this(build, buildInfo, publisher, resolver, buildListener, launcher, tempDir, env, false);
+    }
+
+    public EnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher, FilePath tempDir, EnvVars env, boolean skipEncryption) {
         this.build = build;
         this.buildInfo = buildInfo;
         this.buildListener = buildListener;
@@ -46,6 +50,7 @@ public abstract class EnvExtractor implements Executor {
         this.launcher = launcher;
         this.tempDir = tempDir;
         this.env = env;
+        this.skipEncryption = skipEncryption;
     }
 
     protected abstract void addExtraConfiguration(ArtifactoryClientConfiguration configuration);

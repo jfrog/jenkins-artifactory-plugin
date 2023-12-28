@@ -16,8 +16,7 @@ import org.jfrog.hudson.pipeline.common.types.resolvers.Resolver;
 public class MavenGradleEnvExtractor extends EnvExtractor {
 
     public MavenGradleEnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher, FilePath tempDir, EnvVars env, boolean skipEncryption) {
-        super(build, buildInfo, publisher, resolver, buildListener, launcher, tempDir, env);
-        this.skipEncryption = skipEncryption;
+        super(build, buildInfo, publisher, resolver, buildListener, launcher, tempDir, env, skipEncryption);
     }
 
     @Override

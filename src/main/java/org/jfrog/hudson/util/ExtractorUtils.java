@@ -594,13 +594,9 @@ public class ExtractorUtils {
 
     private static void savePropertiesToFile(ArtifactoryClientConfiguration configuration, FilePath propertiesFile,
                                              Map<String, String> env, hudson.Launcher launcher, boolean skipEncryption) {
-        OutputStream outputStream = null;
-        try {
-            if (isSlaveEnvironment(launcher)) {
-                outputStream = Files.newOutputStream(new File(configuration.getPropertiesFile()).getCanonicalFile().toPath());
-            } else {
-                outputStream = propertiesFile.write();
-            }
+        try (OutputStream outputStream = isSlaveEnvironment(launcher) ?
+                Files.newOutputStream(new File(configuration.getPropertiesFile()).getCanonicalFile().toPath()) :
+                propertiesFile.write()) {
             if (skipEncryption) {
                 configuration.persistToPropertiesFile();
             } else {
@@ -611,10 +607,6 @@ public class ExtractorUtils {
         } catch (IOException | InterruptedException | InvalidAlgorithmParameterException | NoSuchPaddingException |
                  IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
             throw new RuntimeException(e);
-        } finally {
-            if (outputStream != null) {
-                IOUtils.closeQuietly(outputStream);
-            }
         }
     }
 
