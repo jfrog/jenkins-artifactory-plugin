@@ -35,7 +35,7 @@ public abstract class EnvExtractor implements Executor {
     private Launcher launcher;
     private FilePath tempDir;
     private EnvVars env;
-    protected boolean skipEncryption;
+    private final boolean skipEncryption;
 
     public EnvExtractor(Run build, BuildInfo buildInfo, Deployer publisher, Resolver resolver, TaskListener buildListener, Launcher launcher, FilePath tempDir, EnvVars env) {
         this(build, buildInfo, publisher, resolver, buildListener, launcher, tempDir, env, false);
