@@ -59,23 +59,14 @@ import javax.annotation.Nullable;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.file.Files;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+
+import static org.jfrog.build.api.BuildInfoConfigProperties.*;
 
 /**
  * @author Tomer Cohen
@@ -586,7 +577,7 @@ public class ExtractorUtils {
     private static void setPersistConfigurationEnv(ArtifactoryClientConfiguration configuration, FilePath propertiesFile,
                                                    Map<String, String> env) {
         configuration.setPropertiesFile(propertiesFile.getRemote());
-        env.put("BUILDINFO_PROPFILE", propertiesFile.getRemote());
+        env.put(ENV_BUILDINFO_PROPFILE, propertiesFile.getRemote());
         env.put(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFile.getRemote());
         // Jenkins prefixes env variables with 'env' but we need it clean.
         System.setProperty(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFile.getRemote());
@@ -601,8 +592,8 @@ public class ExtractorUtils {
                 configuration.persistToPropertiesFile();
             } else {
                 EncryptionKeyPair keyPair = configuration.persistToEncryptedPropertiesFile(outputStream);
-                env.put(BuildInfoConfigProperties.PROP_PROPS_FILE_KEY, keyPair.getStringSecretKey());
-                env.put(BuildInfoConfigProperties.PROP_PROPS_FILE_KEY_IV, keyPair.getStringIv());
+                env.put(ENV_PROPERTIES_FILE_KEY, keyPair.getStringSecretKey());
+                env.put(ENV_PROPERTIES_FILE_KEY_IV, keyPair.getStringIv());
             }
         } catch (IOException | InterruptedException | InvalidAlgorithmParameterException | NoSuchPaddingException |
                  IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
