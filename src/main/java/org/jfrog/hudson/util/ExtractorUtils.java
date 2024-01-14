@@ -23,10 +23,8 @@ import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
 import hudson.model.AbstractBuild;
-import hudson.model.Computer;
 import hudson.model.Run;
 import hudson.model.TaskListener;
-import hudson.slaves.SlaveComputer;
 import hudson.util.IOUtils;
 import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
@@ -60,7 +58,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import java.io.*;
-import java.nio.file.Files;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -225,7 +222,7 @@ public class ExtractorUtils {
         // Create tempdir for properties file
         FilePath tempDir = createAndGetTempDir(ws);
 
-        persistConfiguration(configuration, env, tempDir, launcher, skipEncryption);
+        persistConfiguration(configuration, env, tempDir, skipEncryption);
         return configuration;
     }
 
@@ -562,10 +559,10 @@ public class ExtractorUtils {
     }
 
     public static void persistConfiguration(ArtifactoryClientConfiguration configuration, Map<String, String> env, FilePath ws,
-                                            hudson.Launcher launcher, boolean skipEncryption) throws IOException, InterruptedException {
+                                            boolean skipEncryption) throws IOException, InterruptedException {
         FilePath propertiesFile = createPropertiesFile(ws);
         setPersistConfigurationEnv(configuration, propertiesFile, env);
-        savePropertiesToFile(configuration, propertiesFile, env, launcher, skipEncryption);
+        savePropertiesToFile(configuration, propertiesFile, env, skipEncryption);
     }
 
     private static FilePath createPropertiesFile(FilePath ws) throws IOException, InterruptedException {
@@ -584,10 +581,8 @@ public class ExtractorUtils {
     }
 
     private static void savePropertiesToFile(ArtifactoryClientConfiguration configuration, FilePath propertiesFile,
-                                             Map<String, String> env, hudson.Launcher launcher, boolean skipEncryption) {
-        try (OutputStream outputStream = isSlaveEnvironment(launcher) ?
-                Files.newOutputStream(new File(configuration.getPropertiesFile()).getCanonicalFile().toPath()) :
-                propertiesFile.write()) {
+                                             Map<String, String> env, boolean skipEncryption) {
+        try (OutputStream outputStream = propertiesFile.write()) {
             if (skipEncryption) {
                 configuration.persistToPropertiesFile();
             } else {
@@ -598,19 +593,6 @@ public class ExtractorUtils {
         } catch (IOException | InterruptedException | InvalidAlgorithmParameterException | NoSuchPaddingException |
                  IllegalBlockSizeException | NoSuchAlgorithmException | BadPaddingException | InvalidKeyException e) {
             throw new RuntimeException(e);
-        }
-    }
-
-    private static boolean isSlaveEnvironment(hudson.Launcher launcher) {
-        return (getComputer(launcher) instanceof SlaveComputer);
-    }
-
-    private static Computer getComputer(hudson.Launcher launcher) {
-        Computer computer = Computer.currentComputer();
-        if (computer != null) {
-            return computer;
-        } else {
-            return Utils.getCurrentComputer(launcher);
         }
     }
 

@@ -93,7 +93,7 @@ public abstract class EnvExtractor implements Executor {
     }
 
     public void persistConfiguration(ArtifactoryClientConfiguration configuration) throws IOException, InterruptedException {
-        ExtractorUtils.persistConfiguration(configuration, env, tempDir, launcher, skipEncryption);
+        ExtractorUtils.persistConfiguration(configuration, env, tempDir, skipEncryption);
         String propertiesFilePath = configuration.getPropertiesFile();
         env.put(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFilePath);
     }
