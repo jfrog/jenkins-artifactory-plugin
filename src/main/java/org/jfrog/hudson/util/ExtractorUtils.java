@@ -584,7 +584,7 @@ public class ExtractorUtils {
                                              Map<String, String> env, boolean skipEncryption) {
         try (OutputStream outputStream = propertiesFile.write()) {
             if (skipEncryption) {
-                configuration.persistToPropertiesFile();
+                configuration.persistToPropertiesFile(outputStream);
             } else {
                 EncryptionKeyPair keyPair = configuration.persistToEncryptedPropertiesFile(outputStream);
                 env.put(ENV_PROPERTIES_FILE_KEY, keyPair.getStringSecretKey());
