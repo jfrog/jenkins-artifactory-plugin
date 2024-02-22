@@ -52,6 +52,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.jfrog.build.api.BuildInfoConfigProperties.ENV_PROPERTIES_FILE_KEY;
+import static org.jfrog.build.api.BuildInfoConfigProperties.ENV_PROPERTIES_FILE_KEY_IV;
+
 /**
  * Class for setting up the {@link Environment} for a {@link MavenModuleSet} project. Responsible for adding the new
  * maven opts with the location of the plugin.
@@ -67,6 +70,8 @@ public class MavenExtractorEnvironment extends Environment {
     private final EnvVars envVars;
     private String propertiesFilePath;
     private final hudson.Launcher launcher;
+    private String propertiesFileKeyIv;
+    private String propertiesFileKey;
 
     // the build env vars method may be called again from another setUp of a wrapper so we need this flag to
     // attempt only once certain operations (like copying file or changing maven opts).
@@ -140,6 +145,8 @@ public class MavenExtractorEnvironment extends Environment {
                 ArtifactoryClientConfiguration configuration = ExtractorUtils.addBuilderInfoArguments(
                         env, build, buildListener, publisherContext, resolverContext, build.getWorkspace(), launcher, false);
                 propertiesFilePath = configuration.getPropertiesFile();
+                propertiesFileKey = env.get(ENV_PROPERTIES_FILE_KEY);
+                propertiesFileKeyIv = env.get(ENV_PROPERTIES_FILE_KEY_IV);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -148,7 +155,17 @@ public class MavenExtractorEnvironment extends Environment {
         if (resolver != null) {
             env.put(BuildInfoConfigProperties.PROP_ARTIFACTORY_RESOLUTION_ENABLED, Boolean.TRUE.toString());
         }
+
+        /*
+            This function is triggered several times - for ArtifactoryMaven3Native, ArtifactoryRedeployPublisher, and additional instances.
+            However, the addBuilderInfoArguments is executed only once.
+            The subsequent lines incorporate the necessary environment variables into the invocations after the initial one.
+        */
         env.put(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFilePath);
+        if (StringUtils.isNoneBlank(propertiesFileKey, propertiesFileKeyIv)) {
+            env.put(ENV_PROPERTIES_FILE_KEY, propertiesFileKey);
+            env.put(ENV_PROPERTIES_FILE_KEY_IV, propertiesFileKeyIv);
+        }
     }
 
     private boolean isCheckoutPerformed(Map<String, String> env) {
