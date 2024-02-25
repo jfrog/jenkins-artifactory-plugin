@@ -155,17 +155,7 @@ public class MavenExtractorEnvironment extends Environment {
         if (resolver != null) {
             env.put(BuildInfoConfigProperties.PROP_ARTIFACTORY_RESOLUTION_ENABLED, Boolean.TRUE.toString());
         }
-
-        /*
-            This function is triggered several times - for ArtifactoryMaven3Native, ArtifactoryRedeployPublisher, and additional instances.
-            However, the addBuilderInfoArguments is executed only once.
-            The subsequent lines incorporate the necessary environment variables into the invocations after the initial one.
-        */
-        env.put(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFilePath);
-        if (StringUtils.isNoneBlank(propertiesFileKey, propertiesFileKeyIv)) {
-            env.put(ENV_PROPERTIES_FILE_KEY, propertiesFileKey);
-            env.put(ENV_PROPERTIES_FILE_KEY_IV, propertiesFileKeyIv);
-        }
+        addPropertiesFileEnv(env);
     }
 
     private boolean isCheckoutPerformed(Map<String, String> env) {
@@ -232,6 +222,21 @@ public class MavenExtractorEnvironment extends Environment {
                 .build();
 
         return context;
+    }
+
+    /**
+     * buildEnvVars gets triggered multiple times - for ArtifactoryMaven3Native, ArtifactoryRedeployPublisher, and other instances.
+     * Yet, for efficiency, we initialize the build info arguments just once.
+     * Subsequently, the function integrates the required environment variables into subsequent invocations.
+     *
+     * @param env - The job's environment variables
+     */
+    private void addPropertiesFileEnv(Map<String, String> env) {
+        env.put(BuildInfoConfigProperties.PROP_PROPS_FILE, propertiesFilePath);
+        if (StringUtils.isNoneBlank(propertiesFileKey, propertiesFileKeyIv)) {
+            env.put(ENV_PROPERTIES_FILE_KEY, propertiesFileKey);
+            env.put(ENV_PROPERTIES_FILE_KEY_IV, propertiesFileKeyIv);
+        }
     }
 
     @Extension
