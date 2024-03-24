@@ -28,8 +28,10 @@ public class Env implements Serializable {
 
     private static final String apiKeySecretPrefix = "AKCp8";
     private static final int apiKeySecretMinimalLength = 73;
+    // jfrog-ignore
     private static final String referenceTokenSecretPrefix = "cmVmdGtuOjAxOj";
     private static final int referenceTokenSecretMinimalLength = 64;
+    // jfrog-ignore
     private static final String accessTokenSecretPrefix = "eyJ2ZXIiOiIyIiwidHlwIjoiSldUIiwiYWxnIjoiUlMyNTYiLCJraWQiOiJ";
     private static final int accessTokenSecretMinimalLength = 0;
 
