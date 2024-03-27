@@ -600,7 +600,7 @@
         <!--/Tests-->
     </dependencies>
 
-    <!-- TODO: can be removed when upgraded in org.mock-server.mockserver-netty -->
+    <!-- TODO: Remove this section when transitive dependencies are upgraded in our direct dependency org.mock-server.mockserver-netty -->
     <dependencyManagement>
         <dependencies>
             <dependency>
