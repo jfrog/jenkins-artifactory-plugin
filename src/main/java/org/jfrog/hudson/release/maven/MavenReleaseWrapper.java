@@ -66,7 +66,7 @@ public class MavenReleaseWrapper extends BuildWrapper {
     private boolean useReleaseBranch;
 
     private List<String> mavenModules = new ArrayList<String>();
-    private final String POM_NAME = "pom.xml";
+    private static final String POM_NAME = "pom.xml";
 
     @DataBoundConstructor
     public MavenReleaseWrapper(String releaseBranchPrefix, String tagPrefix, String targetRemoteName, String alternativeGoals,
