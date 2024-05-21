@@ -32,8 +32,6 @@
     <url>https://github.com/jenkinsci/artifactory-plugin</url>
 
     <properties>
-        <!-- TODO XXX Fix the failing test and re-enable this! -->
-        <maven-hpi-plugin.disabledTestInjection>true</maven-hpi-plugin.disabledTestInjection>
         <jenkins.version>2.426.3</jenkins.version>
         <findbugs.failOnError>true</findbugs.failOnError>
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
