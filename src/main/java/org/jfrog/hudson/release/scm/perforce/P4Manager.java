@@ -4,12 +4,16 @@ import com.perforce.p4java.client.IClient;
 import com.perforce.p4java.server.IOptionsServer;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
+import hudson.model.Item;
 import hudson.model.TaskListener;
+import hudson.scm.SCM;
+
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.p4.PerforceScm;
 import org.jenkinsci.plugins.p4.client.ClientHelper;
 import org.jenkinsci.plugins.p4.client.ConnectionFactory;
 import org.jenkinsci.plugins.p4.client.ConnectionHelper;
+import org.jenkinsci.plugins.p4.workspace.Workspace;
 import org.jfrog.build.vcs.perforce.PerforceClient;
 
 import java.nio.charset.StandardCharsets;
@@ -36,12 +40,12 @@ public class P4Manager extends AbstractPerforceManager<PerforceScm> {
         PerforceScm perforceScm = getJenkinsScm();
         String credentials = perforceScm.getCredential();
 
-        ConnectionHelper connection = new ConnectionHelper(credentials, buildListener);
-        IOptionsServer server = ConnectionFactory.getConnection();
         try {
-            String clientString = getClientString();
-            if (connection.isClient(clientString)) {
-                ClientHelper perforceClient = new ClientHelper(credentials, buildListener, clientString, StandardCharsets.UTF_8.toString());
+            ConnectionHelper connection = new ConnectionHelper(build, credentials, buildListener);
+            IOptionsServer server = ConnectionFactory.getConnection();
+            Workspace clientString = getClientWorkspace();
+            if (connection.isClient(clientString.getName())) {
+                ClientHelper perforceClient = new ClientHelper((Item)this.build.getProject(), credentials, buildListener, clientString);
                 IClient client = perforceClient.getClient();
                 try {
                     this.perforce = new PerforceClient(server, client);
@@ -64,14 +68,13 @@ public class P4Manager extends AbstractPerforceManager<PerforceScm> {
         return this.perforce;
     }
 
-    private String getClientString() {
-        String client = StringUtils.EMPTY;
-        try {
-            EnvVars envVars = build.getEnvironment(buildListener);
-            client = envVars.get("P4_CLIENT");
-        } catch (Exception e) {
-            logger.log(Level.FINE, "P4: Unable to read P4_CLIENT");
+    private Workspace getClientWorkspace() {
+        SCM scm = this.build.getProject().getScm();
+        if (scm instanceof PerforceScm) {
+            PerforceScm p4scm = (PerforceScm)scm;
+            return p4scm.getWorkspace();
         }
-        return client;
+        logger.log(Level.FINE, "Unable to determine P4 workspace");
+        return null;
     }
 }
