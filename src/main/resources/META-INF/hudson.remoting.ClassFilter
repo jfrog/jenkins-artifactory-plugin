@@ -23,6 +23,9 @@ org.jfrog.build.extractor.ci.Vcs
 org.jfrog.build.extractor.dependency.pattern.BuildDependencyPattern
 org.jfrog.build.extractor.dependency.pattern.DependencyPattern
 org.jfrog.build.api.dependency.BuildDependency
+org.jfrog.build.api.multiMap.ListMultimap
+org.jfrog.build.api.multiMap.Multimap
+org.jfrog.build.api.multiMap.SetMultimap
 org.jfrog.build.extractor.dependency.BuildPatternArtifacts
 org.jfrog.build.extractor.dependency.BuildPatternArtifactsRequest
 org.jfrog.build.extractor.dependency.DownloadableArtifact
@@ -43,6 +46,3 @@ org.jfrog.build.extractor.util.NullLog
 org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns
 org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails
 
-com.google.common.collect.ArrayListMultimap
-com.google.common.collect.AbstractListMultimap
-com.google.common.collect.AbstractMapBasedMultimap

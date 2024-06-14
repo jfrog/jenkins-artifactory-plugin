@@ -1,7 +1,6 @@
 package org.jfrog.hudson.pipeline.common.types.buildInfo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ArrayListMultimap;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.model.Run;
@@ -12,15 +11,13 @@ import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
+import org.jfrog.build.api.multiMap.ListMultimap;
+import org.jfrog.build.api.multiMap.Multimap;
+import org.jfrog.build.api.multiMap.SetMultimap;
+import org.jfrog.build.client.DeployableArtifactDetail;
 import org.jfrog.build.extractor.builder.BuildInfoBuilder;
 import org.jfrog.build.extractor.builder.ModuleBuilder;
-import org.jfrog.build.extractor.ci.Artifact;
-import org.jfrog.build.extractor.ci.BaseBuildFileBean;
-import org.jfrog.build.extractor.ci.BuildInfoProperties;
-import org.jfrog.build.extractor.ci.Dependency;
-import org.jfrog.build.extractor.ci.Module;
-import org.jfrog.build.extractor.ci.Vcs;
-import org.jfrog.build.client.DeployableArtifactDetail;
+import org.jfrog.build.extractor.ci.*;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
@@ -33,16 +30,7 @@ import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Properties;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -377,7 +365,7 @@ public class BuildInfo implements Serializable {
         @Deprecated
         private String backwardCompatibleDeployableArtifactsPath;
         private TaskListener listener;
-        private ArrayListMultimap<String, String> propertiesMap;
+        private Multimap<String, String> propertiesMap;
         private final DeployDetails.PackageType packageType;
 
         DeployPathsAndPropsCallable(String deployableArtifactsPath, String backwardCompatibleDeployableArtifactsPath, TaskListener listener, BuildInfo buildInfo, DeployDetails.PackageType packageType) {
@@ -418,8 +406,8 @@ public class BuildInfo implements Serializable {
             }
         }
 
-        private ArrayListMultimap<String, String> getDeployableArtifactPropertiesMap(DeployableArtifactDetail artifact) {
-            ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+        private Multimap<String, String> getDeployableArtifactPropertiesMap(DeployableArtifactDetail artifact) {
+            Multimap<String, String> properties = new SetMultimap<>();
             if (MapUtils.isEmpty(artifact.getProperties())) {
                 // For backward computability, returns the necessary build info props if no props exists
                 // in DeployableArtifactDetail
@@ -433,8 +421,8 @@ public class BuildInfo implements Serializable {
             return properties;
         }
 
-        private ArrayListMultimap<String, String> getBuildPropertiesMap(BuildInfo buildInfo) {
-            ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+        private Multimap<String, String> getBuildPropertiesMap(BuildInfo buildInfo) {
+            Multimap<String, String> properties = new ListMultimap<>();
             properties.put("build.name", buildInfo.getName());
             properties.put("build.number", buildInfo.getNumber());
             properties.put("build.timestamp", buildInfo.getStartDate().getTime() + "");

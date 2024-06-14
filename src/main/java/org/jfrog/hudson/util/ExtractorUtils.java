@@ -16,7 +16,6 @@
 
 package org.jfrog.hudson.util;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import hudson.EnvVars;
@@ -30,6 +29,8 @@ import jenkins.model.Jenkins;
 import jenkins.security.MasterToSlaveCallable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
+import org.jfrog.build.api.multiMap.ListMultimap;
+import org.jfrog.build.api.multiMap.Multimap;
 import org.jfrog.build.api.util.NullLog;
 import org.jfrog.build.extractor.ci.BuildInfoConfigProperties;
 import org.jfrog.build.extractor.ci.BuildInfoFields;
@@ -600,7 +601,7 @@ public class ExtractorUtils {
                                                 ArtifactoryClientConfiguration.PublisherHandler publisher,
                                                 Map<String, String> env) {
         String deploymentProperties = Util.replaceMacro(context.getDeploymentProperties(), env);
-        ArrayListMultimap<String, String> params = ArrayListMultimap.create();
+        Multimap<String, String> params = new ListMultimap<>();
         SpecsHelper.fillPropertiesMap(deploymentProperties, params);
         publisher.addMatrixParams(params);
     }

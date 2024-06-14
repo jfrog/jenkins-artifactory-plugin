@@ -1,7 +1,6 @@
 package org.jfrog.hudson.pipeline.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ArrayListMultimap;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
@@ -27,6 +26,8 @@ import org.jenkinsci.plugins.workflow.graph.FlowGraphWalker;
 import org.jenkinsci.plugins.workflow.graph.FlowNode;
 import org.jenkinsci.plugins.workflow.job.WorkflowRun;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.build.api.multiMap.Multimap;
+import org.jfrog.build.api.multiMap.SetMultimap;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.ci.BuildInfoFields;
@@ -390,8 +391,8 @@ public class Utils {
         return ProxyUtils.createProxyConfiguration();
     }
 
-    public static ArrayListMultimap<String, String> getPropertiesMap(BuildInfo buildInfo, Run build, StepContext context) throws IOException, InterruptedException {
-        ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+    public static Multimap<String, String> getPropertiesMap(BuildInfo buildInfo, Run build, StepContext context) throws IOException, InterruptedException {
+        Multimap<String, String> properties = new SetMultimap<>();
 
         if (buildInfo.getName() != null) {
             properties.put(BuildInfoFields.BUILD_NAME, buildInfo.getName());
@@ -410,7 +411,7 @@ public class Utils {
         return properties;
     }
 
-    public static void addParentBuildProps(ArrayListMultimap<String, String> properties, Run build) {
+    public static void addParentBuildProps(Multimap<String, String> properties, Run build) {
         String buildName = ActionableHelper.getUpstreamProject(build);
         if (StringUtils.isBlank(buildName)) {
             return;
@@ -418,11 +419,11 @@ public class Utils {
         properties.put(BuildInfoFields.BUILD_PARENT_NAME, ExtractorUtils.sanitizeBuildName(buildName));
         Integer buildNumber = ActionableHelper.getUpstreamBuild(build);
         if (buildNumber != null) {
-            properties.put(BuildInfoFields.BUILD_PARENT_NUMBER, buildNumber+ "");
+            properties.put(BuildInfoFields.BUILD_PARENT_NUMBER, buildNumber + "");
         }
     }
 
-    public static void addVcsDetailsToProps(EnvVars env, ArrayListMultimap<String, String> properties) {
+    public static void addVcsDetailsToProps(EnvVars env, Multimap<String, String> properties) {
         String revision = ExtractorUtils.getVcsRevision(env);
         if (isNotBlank(revision)) {
             properties.put(BuildInfoFields.VCS_REVISION, revision);
@@ -439,10 +440,6 @@ public class Utils {
         if (isNotBlank(gitMessage)) {
             properties.put(BuildInfoFields.VCS_MESSAGE, gitMessage);
         }
-    }
-
-    public static String replaceTildeWithUserHome(String path) {
-        return path.replaceFirst("^~", System.getProperty("user.home"));
     }
 
     /**

@@ -1,8 +1,9 @@
 package org.jfrog.hudson.pipeline.common.types;
 
-import com.google.common.collect.ArrayListMultimap;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
+import org.jfrog.build.api.multiMap.ListMultimap;
+import org.jfrog.build.api.multiMap.Multimap;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 
 import java.io.Serializable;
@@ -23,7 +24,7 @@ public class Docker implements Serializable {
     private String host;
     private String javaArgs;
     // Properties to attach to the deployed docker layers.
-    private ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+    private Multimap<String, String> properties = new ListMultimap<>();
     private ArtifactoryServer server;
 
     public Docker() {

@@ -1,12 +1,12 @@
 package org.jfrog.hudson.pipeline.common.executors;
 
-import com.google.common.collect.ArrayListMultimap;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.Run;
 import hudson.model.TaskListener;
 import org.apache.commons.lang3.StringUtils;
+import org.jfrog.build.api.multiMap.Multimap;
 import org.jfrog.hudson.pipeline.common.types.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.common.types.buildInfo.BuildInfo;
 import org.jfrog.hudson.pipeline.common.types.deployers.CommonDeployer;
@@ -18,9 +18,9 @@ public class DockerPushExecutor extends BuildInfoProcessRunner {
     private String imageTag;
     private String targetRepo;
     private String host;
-    private ArrayListMultimap<String, String> properties;
+    private Multimap<String, String> properties;
 
-    public DockerPushExecutor(ArtifactoryServer pipelineServer, BuildInfo buildInfo, Run build, String imageTag, String targetRepo, String host, String javaArgs, Launcher launcher, ArrayListMultimap<String, String> properties, TaskListener listener, FilePath ws, EnvVars envVars) {
+    public DockerPushExecutor(ArtifactoryServer pipelineServer, BuildInfo buildInfo, Run build, String imageTag, String targetRepo, String host, String javaArgs, Launcher launcher, Multimap<String, String> properties, TaskListener listener, FilePath ws, EnvVars envVars) {
         super(buildInfo, launcher, javaArgs, ws, "", "", envVars, listener, build);
         this.server = pipelineServer;
         this.imageTag = imageTag;

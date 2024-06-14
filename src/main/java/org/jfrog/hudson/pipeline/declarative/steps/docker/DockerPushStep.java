@@ -1,11 +1,12 @@
 package org.jfrog.hudson.pipeline.declarative.steps.docker;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.build.api.multiMap.ListMultimap;
+import org.jfrog.build.api.multiMap.Multimap;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
@@ -25,7 +26,7 @@ import java.io.IOException;
 @SuppressWarnings("unused")
 public class DockerPushStep extends AbstractStepImpl {
     static final String STEP_NAME = "rtDockerPush";
-    private final ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+    private final Multimap<String, String> properties = new ListMultimap<>();
     private final String serverId;
     private final String image;
     private final String targetRepo;

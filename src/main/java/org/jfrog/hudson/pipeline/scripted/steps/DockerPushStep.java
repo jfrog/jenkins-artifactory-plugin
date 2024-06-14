@@ -1,12 +1,12 @@
 package org.jfrog.hudson.pipeline.scripted.steps;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.inject.Inject;
 import hudson.Extension;
 import org.apache.commons.cli.MissingArgumentException;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepDescriptorImpl;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jenkinsci.plugins.workflow.steps.StepContext;
+import org.jfrog.build.api.multiMap.Multimap;
 import org.jfrog.hudson.pipeline.ArtifactorySynchronousNonBlockingStepExecution;
 import org.jfrog.hudson.pipeline.common.Utils;
 import org.jfrog.hudson.pipeline.common.executors.DockerPushExecutor;
@@ -26,11 +26,11 @@ public class DockerPushStep extends AbstractStepImpl {
     private String targetRepo;
     private String javaArgs;
     // Properties to attach to the deployed docker layers.
-    private ArrayListMultimap<String, String> properties;
+    private Multimap<String, String> properties;
 
     @DataBoundConstructor
     public DockerPushStep(String image, String host, String targetRepo,
-                          BuildInfo buildInfo, ArrayListMultimap<String, String> properties, ArtifactoryServer server, String javaArgs) {
+                          BuildInfo buildInfo, Multimap<String, String> properties, ArtifactoryServer server, String javaArgs) {
 
         this.image = image;
         this.host = host;
@@ -49,7 +49,7 @@ public class DockerPushStep extends AbstractStepImpl {
         return image;
     }
 
-    public ArrayListMultimap<String, String> getProperties() {
+    public Multimap<String, String> getProperties() {
         return properties;
     }
 
@@ -66,7 +66,7 @@ public class DockerPushStep extends AbstractStepImpl {
     }
 
     public static class Execution extends ArtifactorySynchronousNonBlockingStepExecution<BuildInfo> {
-    protected static final long serialVersionUID = 1L;
+        protected static final long serialVersionUID = 1L;
         private transient DockerPushStep step;
 
         @Inject

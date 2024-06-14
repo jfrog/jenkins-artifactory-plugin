@@ -16,8 +16,6 @@
 
 package org.jfrog.hudson.util;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
@@ -25,6 +23,8 @@ import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jfrog.build.api.multiMap.ListMultimap;
+import org.jfrog.build.api.multiMap.Multimap;
 import org.jfrog.hudson.release.gradle.GradleModule;
 
 import java.io.File;
@@ -56,7 +56,7 @@ public class PropertyUtils {
      * @param gradlePropPath The path of the gradle.properties file
      * @param propKeys       The property keys that should be taken into account when reading the properties file.
      * @return A map of {@link GradleModule}s that were assembled from the properties file, with the version as its
-     *         value.
+     * value.
      * @throws IOException In case an error occurs while reading the properties file, this exception is thrown.
      */
     public static Map<String, String> getModulesPropertiesFromPropFile(FilePath gradlePropPath, String[] propKeys)
@@ -104,7 +104,7 @@ public class PropertyUtils {
     }
 
     public static Multimap<String, String> getDeploymentPropertiesMap(String propertiesStr, EnvVars env) {
-        Multimap<String, String> properties = ArrayListMultimap.create();
+        Multimap<String, String> properties = new ListMultimap<>();
         String[] deploymentProperties = StringUtils.split(propertiesStr, ";");
         if (deploymentProperties == null) {
             return properties;

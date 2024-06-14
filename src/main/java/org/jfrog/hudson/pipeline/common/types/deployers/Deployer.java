@@ -1,7 +1,6 @@
 package org.jfrog.hudson.pipeline.common.types.deployers;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.collect.ArrayListMultimap;
 import hudson.FilePath;
 import hudson.model.Run;
 import hudson.model.TaskListener;
@@ -10,12 +9,14 @@ import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FilenameUtils;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
-import org.jfrog.build.extractor.ci.Artifact;
-import org.jfrog.build.extractor.ci.Module;
+import org.jfrog.build.api.multiMap.ListMultimap;
+import org.jfrog.build.api.multiMap.Multimap;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
 import org.jfrog.build.extractor.ModuleParallelDeployHelper;
+import org.jfrog.build.extractor.ci.Artifact;
+import org.jfrog.build.extractor.ci.Module;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
@@ -39,13 +40,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.jfrog.build.extractor.ModuleParallelDeployHelper.DEFAULT_DEPLOYMENT_THREADS;
 import static org.jfrog.hudson.pipeline.common.types.deployers.GradleDeployer.addDeployedGradleArtifactsToAction;
@@ -57,7 +52,7 @@ import static org.jfrog.hudson.pipeline.common.types.deployers.MavenDeployer.add
 public abstract class Deployer implements DeployerOverrider, Serializable {
     private boolean deployArtifacts = true;
     private boolean includeEnvVars;
-    private ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+    private Multimap<String, String> properties = new ListMultimap<>();
     private Filter artifactDeploymentPatterns = new Filter();
     private String customBuildName = "";
     private int threads = DEFAULT_DEPLOYMENT_THREADS;
@@ -118,11 +113,11 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         return this;
     }
 
-    public ArrayListMultimap<String, String> getProperties() {
+    public Multimap<String, String> getProperties() {
         return this.properties;
     }
 
-    public void setProperties(ArrayListMultimap<String, String> properties) {
+    public void setProperties(Multimap<String, String> properties) {
         this.properties = properties;
     }
 

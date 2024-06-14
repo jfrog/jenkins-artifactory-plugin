@@ -1,8 +1,5 @@
 package org.jfrog.hudson.generic;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import hudson.EnvVars;
 import hudson.FilePath;
 import hudson.Util;
@@ -13,12 +10,15 @@ import hudson.remoting.VirtualChannel;
 import jenkins.MasterToSlaveFileCallable;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jfrog.build.extractor.builder.ArtifactBuilder;
-import org.jfrog.build.extractor.ci.Artifact;
-import org.jfrog.build.extractor.ci.BuildInfoFields;
+import org.jfrog.build.api.multiMap.ListMultimap;
+import org.jfrog.build.api.multiMap.Multimap;
+import org.jfrog.build.api.multiMap.SetMultimap;
 import org.jfrog.build.api.util.FileChecksumCalculator;
 import org.jfrog.build.api.util.Log;
 import org.jfrog.build.client.ProxyConfiguration;
+import org.jfrog.build.extractor.builder.ArtifactBuilder;
+import org.jfrog.build.extractor.ci.Artifact;
+import org.jfrog.build.extractor.ci.BuildInfoFields;
 import org.jfrog.build.extractor.clientConfiguration.ArtifactoryManagerBuilder;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;
 import org.jfrog.build.extractor.clientConfiguration.deploy.DeployDetails;
@@ -28,21 +28,12 @@ import org.jfrog.build.extractor.clientConfiguration.util.spec.UploadSpecHelper;
 import org.jfrog.hudson.ArtifactoryServer;
 import org.jfrog.hudson.CredentialsConfig;
 import org.jfrog.hudson.pipeline.common.Utils;
-import org.jfrog.hudson.util.BuildUniqueIdentifierHelper;
-import org.jfrog.hudson.util.Credentials;
-import org.jfrog.hudson.util.JenkinsBuildInfoLog;
-import org.jfrog.hudson.util.PropertyUtils;
-import org.jfrog.hudson.util.SpecUtils;
+import org.jfrog.hudson.util.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
@@ -79,7 +70,7 @@ public class GenericArtifactsDeployer {
     public void deploy()
             throws IOException, InterruptedException {
         FilePath workingDir = build.getExecutor().getCurrentWorkspace();
-        ArrayListMultimap<String, String> propertiesToAdd = getBuildPropertiesMap();
+        Multimap<String, String> propertiesToAdd = getBuildPropertiesMap();
         ArtifactoryServer artifactoryServer = configurator.getArtifactoryServer();
 
         if (configurator.isUseSpecs()) {
@@ -102,8 +93,8 @@ public class GenericArtifactsDeployer {
         }
     }
 
-    private ArrayListMultimap<String, String> getBuildPropertiesMap() {
-        ArrayListMultimap<String, String> properties = ArrayListMultimap.create();
+    private Multimap<String, String> getBuildPropertiesMap() {
+        Multimap<String, String> properties = new ListMultimap<>();
         String buildName = BuildUniqueIdentifierHelper.getBuildNameConsiderOverride(configurator, build);
         properties.put(BuildInfoFields.BUILD_NAME, buildName);
         properties.put(BuildInfoFields.BUILD_NUMBER, BuildUniqueIdentifierHelper.getBuildNumber(build));
@@ -115,13 +106,12 @@ public class GenericArtifactsDeployer {
     }
 
     public static class FilesDeployerCallable extends MasterToSlaveFileCallable<List<Artifact>> {
-
         private String repositoryKey;
         private TaskListener listener;
         private Multimap<String, String> patternPairs;
         private ArtifactoryServer server;
         private Credentials credentials;
-        private ArrayListMultimap<String, String> buildProperties;
+        private Multimap<String, String> buildProperties;
         private ProxyConfiguration proxyConfiguration;
         private PatternType patternType = PatternType.ANT;
         private String spec;
@@ -130,7 +120,7 @@ public class GenericArtifactsDeployer {
         // Generic deploy by pattern pairs
         public FilesDeployerCallable(TaskListener listener, Multimap<String, String> patternPairs,
                                      ArtifactoryServer server, Credentials credentials, String repositoryKey,
-                                     ArrayListMultimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration) {
+                                     Multimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration) {
             this.listener = listener;
             this.patternPairs = patternPairs;
             this.server = server;
@@ -143,7 +133,7 @@ public class GenericArtifactsDeployer {
         // Generic deploy by spec
         public FilesDeployerCallable(TaskListener listener, String spec,
                                      ArtifactoryServer server, Credentials credentials,
-                                     ArrayListMultimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration, int threads) {
+                                     Multimap<String, String> buildProperties, ProxyConfiguration proxyConfiguration, int threads) {
             this.listener = listener;
             this.spec = spec;
             this.server = server;
@@ -200,7 +190,7 @@ public class GenericArtifactsDeployer {
         }
 
         private Multimap<String, File> buildTargetPathToFiles(File workspace) throws IOException {
-            Multimap<String, File> result = HashMultimap.create();
+            Multimap<String, File> result = new SetMultimap<>();
             if (patternPairs == null) {
                 return result;
             }
@@ -209,14 +199,9 @@ public class GenericArtifactsDeployer {
                 String targetPath = entry.getValue();
                 Multimap<String, File> publishingData =
                         PublishedItemsHelper.buildPublishingData(workspace, pattern, targetPath);
-
-                if (publishingData != null) {
-                    listener.getLogger().println(
-                            "For pattern: " + pattern + " " + publishingData.size() + " artifacts were found");
-                    result.putAll(publishingData);
-                } else {
-                    listener.getLogger().println("For pattern: " + pattern + " no artifacts were found");
-                }
+                listener.getLogger().println(
+                        "For pattern: " + pattern + " " + publishingData.size() + " artifacts were found");
+                result.putAll(publishingData);
             }
 
             return result;
