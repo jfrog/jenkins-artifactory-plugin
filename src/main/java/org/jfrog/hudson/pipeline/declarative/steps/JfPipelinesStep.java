@@ -121,7 +121,7 @@ public class JfPipelinesStep extends AbstractStepImpl {
         private void saveJobInfo(JFrogPipelinesJobInfo jobInfo, JenkinsBuildInfoLog logger) throws Exception {
             BuildDataFile buildDataFile = new BuildDataFile(JfPipelinesStep.STEP_NAME, "0");
             buildDataFile.putPOJO(jobInfo);
-            DeclarativePipelineUtils.writeBuildDataFile(getWorkspace(build.getParent()), String.valueOf(build.getNumber()), buildDataFile, logger);
+            DeclarativePipelineUtils.writeBuildDataFile(build.getWorkspace(), String.valueOf(build.getNumber()), buildDataFile, logger);
         }
     }
 

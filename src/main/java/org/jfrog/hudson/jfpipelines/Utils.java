@@ -22,17 +22,6 @@ import static org.jfrog.hudson.action.ActionableHelper.getUserCausePrincipal;
 
 public class Utils {
     /**
-     * Get 'workspace' dir for the input project.
-     *
-     * @param project - The project
-     * @return the 'workspace' dir.
-     */
-    public static FilePath getWorkspace(Job<?, ?> project) {
-        FilePath projectJob = new FilePath(project.getRootDir());
-        return projectJob.getParent().sibling("workspace").child(project.getName());
-    }
-
-    /**
      * Get JFrog Pipelines server from the global configuration or null if not defined.
      *
      * @return configured JFrog Pipelines server.
@@ -100,7 +89,7 @@ public class Utils {
      * @return JFrog Pipelines job info
      */
     public static JFrogPipelinesJobInfo getPipelinesJobInfo(Run<?, ?> build) throws IOException, InterruptedException {
-        BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(getWorkspace(build.getParent()), String.valueOf(build.getNumber()), JfPipelinesStep.STEP_NAME, "0");
+        BuildDataFile buildDataFile = DeclarativePipelineUtils.readBuildDataFile(build.getWorkspace(), String.valueOf(build.getNumber()), JfPipelinesStep.STEP_NAME, "0");
         if (buildDataFile == null) {
             return null;
         }
