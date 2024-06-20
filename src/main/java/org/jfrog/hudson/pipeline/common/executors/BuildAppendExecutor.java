@@ -58,7 +58,7 @@ public class BuildAppendExecutor implements Executor {
         // Prepare Artifactory server
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
         CredentialsConfig credentialsConfig = server.getResolverCredentialsConfig();
-        Credentials credentials = credentialsConfig.provideCredentials(build.getParent());
+        Credentials credentials = credentialsConfig.provideCredentials(build);
 
         // Calculate build timestamp
         long timestamp = getBuildTimestamp(server, credentials);

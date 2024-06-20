@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import hudson.model.Hudson;
 import hudson.model.Item;
 import hudson.model.Queue;
+import hudson.model.Run;
 import hudson.model.queue.Tasks;
 import hudson.security.ACL;
 import hudson.util.ListBoxModel;
@@ -87,11 +88,26 @@ public class PluginsUtils {
         return Credentials.EMPTY_CREDENTIALS;
     }
 
+    public static Credentials usernamePasswordCredentialsLookup(String credentialsId, Run run) {
+        UsernamePasswordCredentials usernamePasswordCredentials = CredentialsProvider.findCredentialById(
+                credentialsId, StandardUsernamePasswordCredentials.class, run);
+
+        if (usernamePasswordCredentials != null) {
+            return new Credentials(usernamePasswordCredentials.getUsername(),
+                    usernamePasswordCredentials.getPassword().getPlainText());
+        }
+        return Credentials.EMPTY_CREDENTIALS;
+    }
+
     public static StringCredentials accessTokenCredentialsLookup(String credentialsId, Item item) {
         return CredentialsMatchers.firstOrNull(
                 lookupCredentials(StringCredentials.class, item),
                 CredentialsMatchers.withId(credentialsId)
         );
+    }
+
+    public static StringCredentials accessTokenCredentialsLookup(String credentialsId, Run run) {
+        return CredentialsProvider.findCredentialById(credentialsId, StringCredentials.class, run);
     }
 
     /**

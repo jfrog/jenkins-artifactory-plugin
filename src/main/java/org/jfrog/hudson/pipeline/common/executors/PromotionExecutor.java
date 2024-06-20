@@ -39,7 +39,7 @@ public class PromotionExecutor implements Executor {
     public void execute() throws IOException {
         ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(server);
         CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, server);
-        ArtifactoryManager artifactoryManager = server.createArtifactoryManager(deployerConfig.provideCredentials(build.getParent()),
+        ArtifactoryManager artifactoryManager = server.createArtifactoryManager(deployerConfig.provideCredentials(build),
                 ProxyUtils.createProxyConfiguration());
 
         PromotionBuilder promotionBuilder = new PromotionBuilder()

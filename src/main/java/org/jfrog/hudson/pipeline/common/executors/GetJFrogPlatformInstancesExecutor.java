@@ -47,8 +47,8 @@ public class GetJFrogPlatformInstancesExecutor implements Executor {
             throw new ServerNotFoundException("Duplicate configured JFrog instance ID: " + jfrogInstancesID);
         }
         JFrogPlatformInstance jfrogPlatformInstance = jfrogInstancesFound.get(0);
-        DistributionServer distributionServer = new DistributionServer(jfrogPlatformInstance, build.getParent());
-        ArtifactoryServer artifactoryServer = new ArtifactoryServer(jfrogPlatformInstance.getArtifactory(), build.getParent());
+        DistributionServer distributionServer = new DistributionServer(jfrogPlatformInstance, build);
+        ArtifactoryServer artifactoryServer = new ArtifactoryServer(jfrogPlatformInstance.getArtifactory(), build);
         this.jfrogPlatformInstance = new org.jfrog.hudson.pipeline.common.types.JFrogPlatformInstance(artifactoryServer, distributionServer, jfrogPlatformInstance.getUrl(), jfrogPlatformInstance.getId());
         artifactoryServer.setPlatformUrl(this.jfrogPlatformInstance.getUrl());
     }

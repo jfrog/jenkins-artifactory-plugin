@@ -391,7 +391,7 @@ public class ArtifactoryMaven3Configurator extends BuildWrapper implements Deplo
         if (isEnableResolveArtifacts()) {
             CredentialsConfig credentialResolver = CredentialManager.getPreferredResolver(
                     ArtifactoryMaven3Configurator.this, getArtifactoryServer());
-            resolver = new ResolverContext(getArtifactoryServer(), getResolverDetails(), credentialResolver.provideCredentials(build.getProject()),
+            resolver = new ResolverContext(getArtifactoryServer(), getResolverDetails(), credentialResolver.provideCredentials(build),
                     ArtifactoryMaven3Configurator.this);
         }
         final ResolverContext resolverContext = resolver;

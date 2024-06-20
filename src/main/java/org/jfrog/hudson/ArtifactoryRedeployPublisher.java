@@ -349,7 +349,7 @@ public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOv
 
         ArtifactoryServer server = getArtifactoryServer();
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(this, server);
-        try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(preferredDeployer.provideCredentials(((MavenModuleSetBuild) build).getProject()), ProxyUtils.createProxyConfiguration())) {
+        try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(preferredDeployer.provideCredentials(build), ProxyUtils.createProxyConfiguration())) {
             server.setLog(listener, artifactoryManager);
             if (deployArtifacts) {
                 new ArtifactsDeployer(this, artifactoryManager, mavenBuild, listener).deploy();

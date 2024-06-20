@@ -361,7 +361,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
             infosToReturn.add(UserPluginInfo.NO_PLUGIN);
             return infosToReturn;
         }
-        return artifactoryServer.getPromotionsUserPluginInfo((DeployerOverrider) configurator, build.getParent());
+        return artifactoryServer.getPromotionsUserPluginInfo((DeployerOverrider) configurator, build);
     }
 
     @Override
@@ -396,7 +396,7 @@ public class UnifiedPromoteBuildAction extends TaskAction implements BuildBadgeA
             ArtifactoryServer server = promotionCandidate.getConfigurator().getArtifactoryServer();
             String buildName = promotionCandidate.getBuildName();
             String buildNumber = promotionCandidate.getBuildNumber();
-            try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(deployerConfig.provideCredentials(build.getParent()),
+            try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(deployerConfig.provideCredentials(build),
                     ProxyUtils.createProxyConfiguration())) {
                 if ((promotionPlugin != null) && !UserPluginInfo.NO_PLUGIN_KEY.equals(promotionPlugin.getPluginName())) {
                     handlePluginPromotion(listener, artifactoryManager, buildName, buildNumber);

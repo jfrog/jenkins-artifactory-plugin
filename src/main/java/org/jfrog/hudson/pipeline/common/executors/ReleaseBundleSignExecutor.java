@@ -23,7 +23,7 @@ public class ReleaseBundleSignExecutor implements Executor {
 
     public ReleaseBundleSignExecutor(DistributionServer server, String name, String version, String gpgPassphrase,
                                      String storingRepo, TaskListener listener, Run<?, ?> build, FilePath ws) {
-        this.distributionManagerBuilder = server.createDistributionManagerBuilder(new JenkinsBuildInfoLog(listener), build.getParent());
+        this.distributionManagerBuilder = server.createDistributionManagerBuilder(new JenkinsBuildInfoLog(listener), build);
         this.version = version;
         this.name = name;
         this.gpgPassphrase = gpgPassphrase;

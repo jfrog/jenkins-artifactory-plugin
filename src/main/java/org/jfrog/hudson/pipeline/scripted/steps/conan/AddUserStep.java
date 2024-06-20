@@ -56,8 +56,8 @@ public class AddUserStep extends AbstractStepImpl {
             org.jfrog.hudson.ArtifactoryServer artifactoryServer = Utils.prepareArtifactoryServer(null, step.getServer());
             ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(artifactoryServer);
             CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, artifactoryServer);
-            String username = deployerConfig.provideCredentials(build.getParent()).getUsername();
-            String password = deployerConfig.provideCredentials(build.getParent()).getPassword();
+            String username = deployerConfig.provideCredentials(build).getUsername();
+            String password = deployerConfig.provideCredentials(build).getPassword();
             String serverName = step.getServerName();
             ConanExecutor executor = new ConanExecutor(step.getConanHome(), ws, launcher, listener, env, build);
             executor.execUserAdd(username, password, serverName);

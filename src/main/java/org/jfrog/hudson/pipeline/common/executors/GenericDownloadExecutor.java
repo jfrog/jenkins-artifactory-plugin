@@ -47,7 +47,7 @@ public class GenericDownloadExecutor implements Executor {
 
     public void execute() throws IOException, InterruptedException {
         CredentialsConfig preferredResolver = server.getDeployerCredentialsConfig();
-        Credentials resolverCredentials = preferredResolver.provideCredentials(build.getParent());
+        Credentials resolverCredentials = preferredResolver.provideCredentials(build);
         List<Dependency> resolvedDependencies =
                 ws.act(new FilesResolverCallable(new JenkinsBuildInfoLog(listener),
                         resolverCredentials, server.getArtifactoryUrl(), spec, Utils.getProxyConfiguration(server)));

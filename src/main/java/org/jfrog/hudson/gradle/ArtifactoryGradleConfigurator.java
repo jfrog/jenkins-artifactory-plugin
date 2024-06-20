@@ -487,7 +487,7 @@ public class ArtifactoryGradleConfigurator extends BuildWrapper implements Deplo
                     CredentialsConfig resolverCredentials = CredentialManager.getPreferredResolver(
                             ArtifactoryGradleConfigurator.this, getArtifactoryServer());
                     resolverContext = new ResolverContext(getArtifactoryResolverServer(), resolverServerDetails,
-                            resolverCredentials.provideCredentials(build.getProject()), ArtifactoryGradleConfigurator.this);
+                            resolverCredentials.provideCredentials(build), ArtifactoryGradleConfigurator.this);
                 }
 
                 try {

@@ -76,7 +76,7 @@ public class GenericArtifactsDeployer {
         if (configurator.isUseSpecs()) {
             String spec = SpecUtils.getSpecStringFromSpecConf(configurator.getUploadSpec(), env, workingDir, listener.getLogger());
             artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, spec, artifactoryServer,
-                    credentialsConfig.provideCredentials(build.getParent()), propertiesToAdd,
+                    credentialsConfig.provideCredentials(build), propertiesToAdd,
                     createProxyConfiguration(), artifactoryServer.getDeploymentThreads()));
         } else {
             String deployPattern = Util.replaceMacro(configurator.getDeployPattern(), env);
@@ -88,7 +88,7 @@ public class GenericArtifactsDeployer {
             }
             String repositoryKey = Util.replaceMacro(configurator.getRepositoryKey(), env);
             artifactsToDeploy = workingDir.act(new FilesDeployerCallable(listener, pairs, artifactoryServer,
-                    credentialsConfig.provideCredentials(build.getParent()), repositoryKey, propertiesToAdd,
+                    credentialsConfig.provideCredentials(build), repositoryKey, propertiesToAdd,
                     createProxyConfiguration()));
         }
     }

@@ -48,7 +48,7 @@ public class GenericUploadExecutor implements Executor {
     }
 
     public void execute() throws IOException, InterruptedException {
-        Credentials credentials = server.getDeployerCredentialsConfig().provideCredentials(build.getParent());
+        Credentials credentials = server.getDeployerCredentialsConfig().provideCredentials(build);
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(server);
 
         buildInfo.appendVcs(Utils.extractVcs(ws, new JenkinsBuildInfoLog(listener)));

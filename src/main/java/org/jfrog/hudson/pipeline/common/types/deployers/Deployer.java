@@ -204,7 +204,7 @@ public abstract class Deployer implements DeployerOverrider, Serializable {
         String agentName = Utils.getAgentName(ws);
         if (buildInfo.getAgentName().equals(agentName)) {
             org.jfrog.hudson.ArtifactoryServer artifactoryServer = Utils.prepareArtifactoryServer(null, server);
-            Credentials credentials = getDeployerCredentialsConfig().provideCredentials(build.getParent());
+            Credentials credentials = getDeployerCredentialsConfig().provideCredentials(build);
             if (credentials == Credentials.EMPTY_CREDENTIALS) {
                 throw new RuntimeException(String.format(
                         "No matching credentials was found in Jenkins for the supplied credentialsId: '%s' ",

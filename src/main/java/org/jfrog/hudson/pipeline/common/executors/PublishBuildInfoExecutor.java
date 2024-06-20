@@ -41,7 +41,7 @@ public class PublishBuildInfoExecutor implements Executor {
 
     private ArtifactoryManager createArtifactoryManager(org.jfrog.hudson.ArtifactoryServer server, Run build, TaskListener listener) {
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(new ArtifactoryConfigurator(server), server);
-        return server.createArtifactoryManager(preferredDeployer.provideCredentials(build.getParent()),
+        return server.createArtifactoryManager(preferredDeployer.provideCredentials(build),
                 ProxyUtils.createProxyConfiguration(), new JenkinsBuildInfoLog(listener));
     }
 }

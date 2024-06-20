@@ -1,5 +1,6 @@
 package org.jfrog.hudson.jfpipelines;
 
+import hudson.model.Item;
 import hudson.model.Queue;
 import hudson.model.Result;
 import hudson.model.Run;
@@ -91,7 +92,7 @@ public class JFrogPipelinesServer implements Serializable {
     }
 
     private JFrogPipelinesHttpClient createHttpClient(Log logger) {
-        JFrogPipelinesHttpClient client = new JFrogPipelinesHttpClient(integrationUrl, credentialsConfig.provideCredentials(null).getAccessToken(), logger);
+        JFrogPipelinesHttpClient client = new JFrogPipelinesHttpClient(integrationUrl, credentialsConfig.provideCredentials((Item) null).getAccessToken(), logger);
         client.setConnectionRetries(getConnectionRetries());
         client.setConnectionTimeout(getTimeout());
         if (!isBypassProxy()) {

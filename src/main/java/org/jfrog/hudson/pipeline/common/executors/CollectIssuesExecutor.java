@@ -57,7 +57,7 @@ public class CollectIssuesExecutor implements Executor {
     private ArtifactoryManagerBuilder getArtifactoryManagerBuilder(ArtifactoryServer pipelineServer, Run build, TaskListener listener) {
         org.jfrog.hudson.ArtifactoryServer server = Utils.prepareArtifactoryServer(null, pipelineServer);
         CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(new ArtifactoryConfigurator(server), server);
-        return server.createArtifactoryManagerBuilder(preferredDeployer.provideCredentials(build.getParent()),
+        return server.createArtifactoryManagerBuilder(preferredDeployer.provideCredentials(build),
                 ProxyUtils.createProxyConfiguration(), new JenkinsBuildInfoLog(listener));
     }
 

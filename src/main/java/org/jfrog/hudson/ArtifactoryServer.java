@@ -17,6 +17,7 @@
 package org.jfrog.hudson;
 
 import hudson.model.Item;
+import hudson.model.Run;
 import hudson.model.TaskListener;
 import hudson.util.XStream2;
 import org.apache.commons.lang3.StringUtils;
@@ -193,9 +194,9 @@ public class ArtifactoryServer implements Serializable {
         }
     }
 
-    public List<ResolutionRepository> getVirtualRepositoryKeys(ResolverOverrider resolverOverrider, Item item) {
+    public List<ResolutionRepository> getVirtualRepositoryKeys(ResolverOverrider resolverOverrider, Run run) {
         CredentialsConfig preferredResolver = CredentialManager.getPreferredResolver(resolverOverrider, this);
-        try (ArtifactoryManager artifactoryManager = createArtifactoryManager(preferredResolver.provideCredentials(item),
+        try (ArtifactoryManager artifactoryManager = createArtifactoryManager(preferredResolver.provideCredentials(run),
                 createProxyConfiguration())) {
             resolutionRepositories = RepositoriesUtils.generateResolutionRepos(artifactoryManager);
         } catch (IOException e) {
@@ -231,14 +232,16 @@ public class ArtifactoryServer implements Serializable {
     public List<UserPluginInfo> getStagingUserPluginInfo(DeployerOverrider deployerOverrider, Item item) {
         List<UserPluginInfo> infosToReturn = new ArrayList<>();
         infosToReturn.add(UserPluginInfo.NO_PLUGIN);
-        gatherUserPluginInfo(infosToReturn, "staging", deployerOverrider, item);
+        gatherUserPluginInfo(infosToReturn, "staging", deployerOverrider,
+                CredentialManager.getPreferredResolver((ResolverOverrider) deployerOverrider, this).provideCredentials(item));
         return infosToReturn;
     }
 
-    public List<UserPluginInfo> getPromotionsUserPluginInfo(DeployerOverrider deployerOverrider, Item item) {
+    public List<UserPluginInfo> getPromotionsUserPluginInfo(DeployerOverrider deployerOverrider, Run run) {
         List<UserPluginInfo> infosToReturn = new ArrayList<>();
         infosToReturn.add(UserPluginInfo.NO_PLUGIN);
-        gatherUserPluginInfo(infosToReturn, "promotions", deployerOverrider, item);
+        gatherUserPluginInfo(infosToReturn, "promotions", deployerOverrider,
+                CredentialManager.getPreferredResolver((ResolverOverrider) deployerOverrider, this).provideCredentials(run));
         return infosToReturn;
     }
 
@@ -307,10 +310,8 @@ public class ArtifactoryServer implements Serializable {
         return CredentialsConfig.EMPTY_CREDENTIALS_CONFIG;
     }
 
-    private void gatherUserPluginInfo(List<UserPluginInfo> infosToReturn, String pluginKey, DeployerOverrider deployerOverrider, Item item) {
-        CredentialsConfig credentialsConfig = CredentialManager.getPreferredDeployer(deployerOverrider, this);
-        try (ArtifactoryManager artifactoryManager = createArtifactoryManager(credentialsConfig.provideCredentials(item),
-                createProxyConfiguration())) {
+    private void gatherUserPluginInfo(List<UserPluginInfo> infosToReturn, String pluginKey, DeployerOverrider deployerOverrider, Credentials credentials) {
+        try (ArtifactoryManager artifactoryManager = createArtifactoryManager(credentials, createProxyConfiguration())) {
             Map<String, List<Map>> userPluginInfo = artifactoryManager.getUserPluginInfo();
             if (userPluginInfo != null && userPluginInfo.containsKey(pluginKey)) {
                 List<Map> stagingUserPluginInfo = userPluginInfo.get(pluginKey);
@@ -366,7 +367,7 @@ public class ArtifactoryServer implements Serializable {
             if (config == null) {
                 config = this.getResolverCredentialsConfig();
             }
-            Credentials credentials = config.provideCredentials(build.getParent());
+            Credentials credentials = config.provideCredentials(build);
             String[] featureIdArray = new String[]{stepName};
             UsageReporter usageReporter = new UsageReporter("jenkins-artifactory-plugin/" + ActionableHelper.getArtifactoryPluginVersion(), featureIdArray);
             usageReporter.reportUsage(this.getArtifactoryUrl(), credentials.getUsername(), credentials.getPassword(), credentials.getAccessToken(), Utils.getProxyConfiguration(this), null, logger);
