@@ -46,7 +46,7 @@ let jsFunctionsMap = {
 
 function artifactoryIvyFreeStyleConfigurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
-    bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
+    bind.refreshFromArtifactory(artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
         let target = spinner.nextElementSibling;
         let warning = target.nextElementSibling;
 
@@ -72,7 +72,7 @@ function artifactoryIvyFreeStyleConfigurator(spinner, uniqueId, artifactoryUrl, 
 
 function artifactoryGenericConfigurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
-    bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
+    bind.refreshFromArtifactory(artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
         let target = spinner.nextElementSibling;
         let warning = target.nextElementSibling;
 
@@ -98,7 +98,7 @@ function artifactoryGenericConfigurator(spinner, uniqueId, artifactoryUrl, crede
 
 function artifactoryMaven3NativeConfigurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
-    bind.refreshResolversFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
+    bind.refreshResolversFromArtifactory(artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
         let target = spinner.nextElementSibling;
         let warning = target.nextElementSibling;
 
@@ -135,7 +135,7 @@ function artifactoryMaven3NativeConfigurator(spinner, uniqueId, artifactoryUrl, 
 
 function artifactoryMaven3Configurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
-    bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
+    bind.refreshFromArtifactory(artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
         let target = spinner.nextElementSibling;
         let warning = target.nextElementSibling;
 
@@ -173,7 +173,7 @@ function artifactoryMaven3Configurator(spinner, uniqueId, artifactoryUrl, creden
 
 function artifactoryGradleConfigurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
-    bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
+    bind.refreshFromArtifactory(artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
         let target = spinner.nextElementSibling;
         let warning = target.nextElementSibling;
 
@@ -214,7 +214,7 @@ function artifactoryGradleConfigurator(spinner, uniqueId, artifactoryUrl, creden
 
 function artifactoryGradleConfigurationResolve(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
-    bind.refreshResolversFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
+    bind.refreshResolversFromArtifactory(artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
         let target = spinner.nextElementSibling;
         let warning = target.nextElementSibling;
 
@@ -239,7 +239,7 @@ function artifactoryGradleConfigurationResolve(spinner, uniqueId, artifactoryUrl
 
 function artifactoryRedeployPublisher(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
-    bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
+    bind.refreshFromArtifactory(artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
         let target = spinner.nextElementSibling;
         let warning = target.nextElementSibling;
 
@@ -285,7 +285,7 @@ function artifactoryRedeployPublisher(spinner, uniqueId, artifactoryUrl, credent
 
 function artifactoryIvyConfigurator(spinner, uniqueId, artifactoryUrl, credentialsId, username, password, overrideCredentials, bind) {
     // noinspection JSUnresolvedFunction
-    bind.refreshFromArtifactory(spinner, artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
+    bind.refreshFromArtifactory(artifactoryUrl, credentialsId, username, password, overrideCredentials, function (t) {
         let target = spinner.nextElementSibling;
         let warning = target.nextElementSibling;
 
