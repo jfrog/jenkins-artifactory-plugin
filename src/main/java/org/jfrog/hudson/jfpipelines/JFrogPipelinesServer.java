@@ -163,7 +163,7 @@ public class JFrogPipelinesServer implements Serializable {
         } catch (IOException | InterruptedException e) {
             logger.error(FAILURE_PREFIX + ExceptionUtils.getRootCauseMessage(e), e);
         } finally {
-            DeclarativePipelineUtils.deleteBuildDataDir(getWorkspace(build.getParent()), String.valueOf(build.getNumber()), logger);
+            DeclarativePipelineUtils.deleteBuildDataDir(build.getWorkspace(), String.valueOf(build.getNumber()), logger);
         }
     }
 
