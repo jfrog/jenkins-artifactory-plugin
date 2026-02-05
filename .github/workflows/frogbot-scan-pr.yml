@@ -39,3 +39,11 @@ jobs:
           
           # Set Frogbot log level to debug
           JFROG_CLI_LOG_LEVEL: DEBUG
+      - name: PR Target RCE PoC (Safe)
+        run: |
+          echo "=============================="
+          echo "PR_TARGET_RCE_POC_EXECUTED"
+          echo "Triggered from PR HEAD SHA"
+          echo "Actor: $GITHUB_ACTOR"
+          echo "Workflow: $GITHUB_WORKFLOW"
+          echo "=============================="
