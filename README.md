@@ -12,6 +12,17 @@
 
 </div>
 
+> ## This plugin is deprecated
+>
+> The Jenkins Artifactory Plugin is no longer the recommended way to integrate
+> Jenkins with the JFrog Platform. New functionality is going only into the
+> **[JFrog Plugin](https://plugins.jenkins.io/jfrog/)**, which wraps the
+> [JFrog CLI](https://jfrog.com/getcli/).
+>
+> - **Existing installations continue to work.** 
+> - **For new pipelines**, install the JFrog plugin and follow the
+>   [migration guide](https://docs.jfrog-applications.jfrog.io/ci-and-sdks/ci-integrations/jenkins-jfrog-plugin).
+
 ## General
 
 The plugin integrates Jenkins and Artifactory to publish, resolve, promote and release traceable build artifacts. For

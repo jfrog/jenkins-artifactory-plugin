@@ -7,6 +7,10 @@ import org.jenkinsci.plugins.workflow.cps.GlobalVariable;
 
 import javax.annotation.Nonnull;
 
+/**
+ * @deprecated The Jenkins Artifactory Plugin.
+ */
+@Deprecated
 @Extension
 public class JFrogDSL extends GlobalVariable {
     @Nonnull
