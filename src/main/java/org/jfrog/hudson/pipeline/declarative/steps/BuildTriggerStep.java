@@ -18,6 +18,7 @@ import java.io.IOException;
  * @author yahavi
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class BuildTriggerStep extends AbstractStepImpl {
     public static final String STEP_NAME = "rtBuildTrigger";
     private final String serverId;

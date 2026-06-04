@@ -26,6 +26,7 @@ import java.io.IOException;
 /**
  * Created by Bar Belity on 08/07/2020.
  */
+@Deprecated
 public class PipInstallStep extends AbstractStepImpl {
     static final String STEP_NAME = "rtPipInstall";
     private final PipBuild pipBuild;

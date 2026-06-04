@@ -17,6 +17,7 @@ import java.io.IOException;
  * Created by yahavi on 13/03/2017.
  */
 
+@Deprecated
 public class AddInteractivePromotionStep extends AbstractStepImpl {
     static final String STEP_NAME = "addInteractivePromotion";
     private ArtifactoryServer server;

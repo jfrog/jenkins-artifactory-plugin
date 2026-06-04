@@ -30,6 +30,7 @@ import static org.jfrog.hudson.util.SerializationUtils.createMapper;
  * Run Maven-Artifactory task.
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class MavenStep extends AbstractStepImpl {
     static final String STEP_NAME = "rtMavenRun";
     private final MavenBuild mavenBuild;

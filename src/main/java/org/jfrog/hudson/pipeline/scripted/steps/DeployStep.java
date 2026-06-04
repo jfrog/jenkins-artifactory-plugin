@@ -16,6 +16,7 @@ import java.io.IOException;
 /**
  * Created by yahavi on 11/05/2017.
  */
+@Deprecated
 public class DeployStep extends AbstractStepImpl {
     static final String STEP_NAME = "deployArtifacts";
     private Deployer deployer;

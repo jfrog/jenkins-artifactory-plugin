@@ -14,6 +14,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class XrayScanBuildStep extends AbstractStepImpl {
     static final String STEP_NAME = "xrayScanBuild";
     private ArtifactoryServer server;

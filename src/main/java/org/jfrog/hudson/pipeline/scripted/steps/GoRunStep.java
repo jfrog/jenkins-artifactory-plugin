@@ -16,6 +16,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class GoRunStep extends AbstractStepImpl {
     static final String  STEP_NAME = "artifactoryGoRun";
     private BuildInfo buildInfo;

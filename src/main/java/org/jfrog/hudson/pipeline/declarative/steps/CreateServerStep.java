@@ -21,6 +21,7 @@ import java.io.IOException;
 import static org.apache.commons.lang3.StringUtils.*;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class CreateServerStep extends AbstractStepImpl {
     public static final String STEP_NAME = "rtServer";
     private final String id;

@@ -13,6 +13,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
+@Deprecated
 public class SignReleaseBundleStep extends AbstractStepImpl {
     static final String STEP_NAME = "signReleaseBundle";
 

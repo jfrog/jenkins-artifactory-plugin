@@ -19,6 +19,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.io.IOException;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class PublishBuildInfoStep extends AbstractStepImpl {
     public static final String STEP_NAME = "rtPublishBuildInfo";
     private final String serverId;

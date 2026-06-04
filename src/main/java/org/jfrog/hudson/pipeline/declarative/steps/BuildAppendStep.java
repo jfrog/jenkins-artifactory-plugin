@@ -18,6 +18,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 import java.io.IOException;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class BuildAppendStep extends AbstractStepImpl {
     public static final String STEP_NAME = "rtBuildAppend";
     private final String appendBuildNumber;

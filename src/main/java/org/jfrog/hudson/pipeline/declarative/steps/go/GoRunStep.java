@@ -28,6 +28,7 @@ import java.io.IOException;
  * Run go-run task.
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class GoRunStep extends AbstractStepImpl {
     static final String STEP_NAME = "rtGoRun";
     private final GoBuild goBuild;

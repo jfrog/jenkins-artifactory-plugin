@@ -9,6 +9,7 @@ import org.jenkinsci.plugins.workflow.steps.SynchronousStepExecution;
 import org.jfrog.hudson.pipeline.common.types.builds.NugetBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+@Deprecated
 public class CreateNugetBuildStep extends AbstractStepImpl {
 
     @DataBoundConstructor

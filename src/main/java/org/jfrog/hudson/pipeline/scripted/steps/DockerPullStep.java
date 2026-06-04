@@ -20,6 +20,7 @@ import java.io.IOException;
 /**
  * Created by romang on 5/2/16.
  */
+@Deprecated
 public class DockerPullStep extends AbstractStepImpl {
     static final String STEP_NAME = "dockerPullStep";
     private final String image;

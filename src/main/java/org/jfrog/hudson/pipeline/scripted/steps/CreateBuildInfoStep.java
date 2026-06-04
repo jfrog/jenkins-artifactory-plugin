@@ -13,6 +13,7 @@ import java.io.IOException;
 /**
  * Created by romang on 5/2/16.
  */
+@Deprecated
 public class CreateBuildInfoStep extends AbstractStepImpl {
     static final String STEP_NAME = "newBuildInfo";
     @DataBoundConstructor

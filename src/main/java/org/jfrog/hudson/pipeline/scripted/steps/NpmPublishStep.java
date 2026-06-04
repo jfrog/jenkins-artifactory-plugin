@@ -18,6 +18,7 @@ import java.io.IOException;
  * Created by Yahav Itzhak on 25 Nov 2018.
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class NpmPublishStep extends AbstractStepImpl {
     static final String STEP_NAME = "artifactoryNpmPublish";
     private BuildInfo buildInfo;

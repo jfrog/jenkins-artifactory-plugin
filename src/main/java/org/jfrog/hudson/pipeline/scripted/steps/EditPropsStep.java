@@ -14,6 +14,7 @@ import java.io.IOException;
 
 import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesActionType;
 
+@Deprecated
 public class EditPropsStep extends AbstractStepImpl {
     static final String STEP_NAME = "artifactoryEditProps";
     private ArtifactoryServer server;

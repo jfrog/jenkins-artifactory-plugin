@@ -12,7 +12,7 @@
                 Please migrate to the
                 <a href="https://plugins.jenkins.io/jfrog/" target="_blank">JFrog plugin</a>,
                 which wraps the JFrog CLI and receives all new features.
-                Existing pipelines continue to work; security.
+                Existing pipelines continue to work.
                 See the
                 <a href="https://docs.jfrog-applications.jfrog.io/ci-and-sdks/ci-integrations/jenkins-jfrog-plugin" target="_blank">migration guide</a>.
             </div>

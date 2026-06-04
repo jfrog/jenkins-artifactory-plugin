@@ -24,6 +24,7 @@ import java.io.IOException;
 /**
  * Created by Bar Belity on 19/11/2020.
  */
+@Deprecated
 abstract public class NpmInstallCiStepBase extends AbstractStepImpl {
 
     private final NpmBuild npmBuild;

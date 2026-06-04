@@ -18,6 +18,7 @@ import java.io.IOException;
  * Created by yahavi on 12/04/2017.
  */
 
+@Deprecated
 public class DistributeBuildStep extends AbstractStepImpl {
     static final String STEP_NAME = "artifactoryDistributeBuild";
     private ArtifactoryServer server;
