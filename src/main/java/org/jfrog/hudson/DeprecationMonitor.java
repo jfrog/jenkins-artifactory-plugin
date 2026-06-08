@@ -21,6 +21,6 @@ public class DeprecationMonitor extends AdministrativeMonitor {
 
     @Override
     public String getDisplayName() {
-        return "Artifactory Plugin Deprecated";
+        return "Jenkins Artifactory Plugin is deprecated";
     }
 }

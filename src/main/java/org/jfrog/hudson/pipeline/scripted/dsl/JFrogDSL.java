@@ -8,7 +8,7 @@ import org.jenkinsci.plugins.workflow.cps.GlobalVariable;
 import javax.annotation.Nonnull;
 
 /**
- * @deprecated The Jenkins Artifactory Plugin.
+ * @deprecated Use the <a href="https://plugins.jenkins.io/jfrog/">JFrog Plugin</a> instead
  */
 @Deprecated
 @Extension

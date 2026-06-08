@@ -8,7 +8,7 @@
 
         <f:entry>
             <div style="padding:10px;border:1px solid #c00;background:#fff5f5;color:#900;">
-                <strong>This plugin (Artifactory) is deprecated.</strong>
+                <strong>The Jenkins Artifactory Plugin is deprecated.</strong>
                 Please migrate to the
                 <a href="https://plugins.jenkins.io/jfrog/" target="_blank">JFrog plugin</a>,
                 which wraps the JFrog CLI and receives all new features.
