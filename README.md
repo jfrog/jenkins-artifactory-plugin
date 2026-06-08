@@ -1,10 +1,4 @@
-[![](readme_image.png)](#readme)
-
-<div align="center">
-
-# Jenkins Artifactory Plugin
-
-> ## This plugin is deprecated
+> # Jenkins Artifactory Plugin plugin is deprecated
 >
 > The Jenkins Artifactory Plugin is no longer the recommended way to integrate
 > Jenkins with the JFrog Platform. New functionality is going only into the
@@ -16,6 +10,12 @@
 >
 > - **For new pipelines**, install the JFrog plugin and follow the
 >   [migration guide](https://docs.jfrog-applications.jfrog.io/ci-and-sdks/ci-integrations/jenkins-jfrog-plugin).
+
+[![](readme_image.png)](#readme)
+
+<div align="center">
+
+# Jenkins Artifactory Plugin
 
 ![JFrog Plugin Installs](https://img.shields.io/jenkins/plugin/i/artifactory?label=Plugin%20installs%20plugin&logo=Jenkins&logoColor=white&color=blue&style=for-the-badge)
 
