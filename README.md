@@ -17,6 +17,14 @@
 > - **For new pipelines**, install the JFrog plugin and follow the
 >   [migration guide](https://docs.jfrog-applications.jfrog.io/ci-and-sdks/ci-integrations/jenkins-jfrog-plugin).
 
+![JFrog Plugin Installs](https://img.shields.io/jenkins/plugin/i/artifactory?label=Plugin%20installs%20plugin&logo=Jenkins&logoColor=white&color=blue&style=for-the-badge)
+
+[![Scanned by Frogbot](https://raw.github.com/jfrog/frogbot/master/images/frogbot-badge.svg)](https://github.com/jfrog/frogbot#readme)
+[![Tests](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/tests.yml) [![Static Analysis](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/analysis.yml/badge.svg?branch=master)](https://github.com/jfrog/jenkins-artifactory-plugin/actions/workflows/analysis.yml)
+[![](https://img.shields.io/badge/Docs-%F0%9F%93%96-blue)](https://jfrog.com/help/r/jfrog-integrations-documentation/jenkins-artifactory-plug-in)
+
+</div>
+
 ## General
 
 The plugin integrates Jenkins and Artifactory to publish, resolve, promote and release traceable build artifacts. For
