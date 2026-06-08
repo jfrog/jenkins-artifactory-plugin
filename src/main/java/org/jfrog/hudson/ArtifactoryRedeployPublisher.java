@@ -55,8 +55,10 @@ import java.util.*;
  * is fully succeeded.
  *
  * @author Yossi Shaul
+ * @deprecated The Jenkins Artifactory Plugin is deprecated.
  */
 
+@Deprecated
 public class ArtifactoryRedeployPublisher extends Recorder implements DeployerOverrider, BuildInfoAwareConfigurator {
     /**
      * Deploy even if the build is unstable (failed tests)

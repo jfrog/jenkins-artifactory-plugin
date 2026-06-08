@@ -17,6 +17,7 @@ import java.io.IOException;
  * Base class for Gradle deployer and resolver.
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class MavenDeployerResolver extends AbstractStepImpl {
     BuildDataFile buildDataFile;
 

@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import static org.jfrog.hudson.jfpipelines.Utils.*;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class JfPipelinesStep extends AbstractStepImpl {
     public static final String STEP_NAME = "jfPipelines";
     public static final List<String> ACCEPTABLE_RESULTS;

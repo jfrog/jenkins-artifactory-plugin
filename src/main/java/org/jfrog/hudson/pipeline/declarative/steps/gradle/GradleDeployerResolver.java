@@ -19,6 +19,7 @@ import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUti
  * Base class for Gradle deployer and resolver.
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class GradleDeployerResolver extends AbstractStepImpl {
 
     BuildDataFile buildDataFile;

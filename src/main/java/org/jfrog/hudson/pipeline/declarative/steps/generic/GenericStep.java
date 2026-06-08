@@ -19,6 +19,7 @@ import java.io.IOException;
  * Allows to use input spec from string parameter or from file.
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class GenericStep extends AbstractStepImpl {
 
     protected String serverId;

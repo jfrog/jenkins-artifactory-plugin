@@ -23,6 +23,7 @@ import java.util.List;
  * Create build info.
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class BuildInfoStep extends AbstractStepImpl {
     public static final String STEP_NAME = "rtBuildInfo";
     private final BuildInfo buildInfo;

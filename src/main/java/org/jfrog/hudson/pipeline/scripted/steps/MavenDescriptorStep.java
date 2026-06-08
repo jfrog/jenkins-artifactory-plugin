@@ -25,6 +25,7 @@ import java.util.Map;
 /**
  * Created by tamirh on 20/11/2016.
  */
+@Deprecated
 public class MavenDescriptorStep extends AbstractStepImpl {
     static final String STEP_NAME = "MavenDescriptorStep";
     private String pomFile = "pom.xml";

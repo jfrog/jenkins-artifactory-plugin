@@ -17,6 +17,7 @@ import java.io.IOException;
  * @author yahavi
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class BuildTriggerStep extends AbstractStepImpl {
     static final String STEP_NAME = "artifactoryBuildTrigger";
     private final ArtifactoryServer server;

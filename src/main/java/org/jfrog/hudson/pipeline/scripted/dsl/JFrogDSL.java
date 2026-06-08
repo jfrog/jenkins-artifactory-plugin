@@ -7,6 +7,10 @@ import org.jenkinsci.plugins.workflow.cps.GlobalVariable;
 
 import javax.annotation.Nonnull;
 
+/**
+ * @deprecated Use the <a href="https://plugins.jenkins.io/jfrog/">JFrog Plugin</a> instead
+ */
+@Deprecated
 @Extension
 public class JFrogDSL extends GlobalVariable {
     @Nonnull

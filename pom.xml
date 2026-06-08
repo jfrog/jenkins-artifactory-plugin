@@ -28,7 +28,7 @@
     <version>4.0.x-SNAPSHOT</version>
     <packaging>hpi</packaging>
     <name>Jenkins Artifactory Plugin</name>
-    <description>Integrates Artifactory to Jenkins</description>
+    <description>[Deprecated] - Integrates Artifactory to Jenkins.</description>
     <url>https://github.com/jenkinsci/artifactory-plugin</url>
 
     <properties>

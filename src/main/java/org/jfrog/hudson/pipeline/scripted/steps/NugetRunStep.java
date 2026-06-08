@@ -15,6 +15,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 
+@Deprecated
 public class NugetRunStep extends AbstractStepImpl {
     static final String STEP_NAME = "artifactoryNugetRun";
     private BuildInfo buildInfo;

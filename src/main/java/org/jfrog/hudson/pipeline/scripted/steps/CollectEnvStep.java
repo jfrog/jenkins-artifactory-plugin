@@ -16,6 +16,7 @@ import java.io.IOException;
 /**
  * Created by romang on 5/2/16.
  */
+@Deprecated
 public class CollectEnvStep extends AbstractStepImpl {
     static final String STEP_NAME = "collectEnv";
     private Env env;

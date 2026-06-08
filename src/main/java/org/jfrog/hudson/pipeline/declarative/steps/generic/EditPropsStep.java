@@ -17,6 +17,7 @@ import java.io.IOException;
 import static org.jfrog.build.extractor.clientConfiguration.util.EditPropertiesHelper.EditPropertiesActionType;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class EditPropsStep extends AbstractStepImpl {
     private final EditPropertiesActionType editType;
     protected String serverId;

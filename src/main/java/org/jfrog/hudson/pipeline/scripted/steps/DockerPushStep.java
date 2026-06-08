@@ -17,6 +17,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import java.io.IOException;
 
 @SuppressWarnings("unused")
+@Deprecated
 public class DockerPushStep extends AbstractStepImpl {
     static final String STEP_NAME = "dockerPushStep";
     private final String image;

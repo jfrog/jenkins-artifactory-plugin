@@ -24,6 +24,7 @@ import java.io.IOException;
  */
 
 @SuppressWarnings("unused")
+@Deprecated
 public class DockerPushStep extends AbstractStepImpl {
     static final String STEP_NAME = "rtDockerPush";
     private final Multimap<String, String> properties = new ListMultimap<>();

@@ -10,6 +10,7 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 
+@Deprecated
 public class AddRemoteStep extends AbstractStepImpl {
     static final String STEP_NAME = "conanAddRemote";
     private String serverUrl;

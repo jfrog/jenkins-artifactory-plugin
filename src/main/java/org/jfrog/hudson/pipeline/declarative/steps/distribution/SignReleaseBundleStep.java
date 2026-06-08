@@ -18,6 +18,7 @@ import java.io.IOException;
 /**
  * @author yahavi
  **/
+@Deprecated
 public class SignReleaseBundleStep extends AbstractStepImpl {
     public static final String STEP_NAME = "dsSignReleaseBundle";
     private final String serverId;

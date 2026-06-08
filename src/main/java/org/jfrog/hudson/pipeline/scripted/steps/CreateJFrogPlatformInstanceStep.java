@@ -19,6 +19,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 /**
  * Created by romang on 4/21/16.
  */
+@Deprecated
 public class CreateJFrogPlatformInstanceStep extends AbstractStepImpl {
     private final String distributionUrl;
     private final String artifactoryUrl;

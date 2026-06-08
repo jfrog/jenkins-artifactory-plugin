@@ -17,6 +17,7 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 
+@Deprecated
 public class DockerPullStep extends AbstractStepImpl {
     static final String STEP_NAME = "rtDockerPull";
     private final String serverId;

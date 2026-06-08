@@ -6,6 +6,7 @@ import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.types.builds.NpmBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+@Deprecated
 public class CreateNpmBuildStep extends AbstractStepImpl {
 
     @DataBoundConstructor

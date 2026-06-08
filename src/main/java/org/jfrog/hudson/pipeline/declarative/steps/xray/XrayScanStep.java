@@ -23,6 +23,7 @@ import java.io.IOException;
  * @author Alexei Vainshtein
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class XrayScanStep extends AbstractStepImpl {
 
     public static final String STEP_NAME = "xrayScan";

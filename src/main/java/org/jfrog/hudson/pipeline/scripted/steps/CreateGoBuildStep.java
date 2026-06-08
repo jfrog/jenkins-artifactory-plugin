@@ -6,6 +6,7 @@ import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.types.builds.GoBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
+@Deprecated
 public class CreateGoBuildStep extends AbstractStepImpl {
 
     @DataBoundConstructor

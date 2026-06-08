@@ -32,6 +32,7 @@ import static org.jfrog.hudson.util.SerializationUtils.createMapper;
  * Run Gradle-Artifactory task.
  */
 @SuppressWarnings("unused")
+@Deprecated
 public class GradleStep extends AbstractStepImpl {
     static final String STEP_NAME = "rtGradleRun";
     private final GradleBuild gradleBuild;
