@@ -1,4 +1,4 @@
-> # Jenkins Artifactory Plugin plugin is deprecated
+> # ⚠️ Jenkins Artifactory Plugin plugin is deprecated
 >
 > The Jenkins Artifactory Plugin is no longer the recommended way to integrate
 > Jenkins with the JFrog Platform. New functionality is going only into the
