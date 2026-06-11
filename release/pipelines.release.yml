@@ -4,10 +4,9 @@ pipelines:
       runtime:
         type: image
         image:
-          auto:
-            language: java
-            versions:
-              - "8.0.0"
+          custom:
+            name: releases-docker.jfrog.io/jfrog/pipelines-u18java
+            tag: "8.0.0"
       environmentVariables:
         readOnly:
           NEXT_VERSION: 0.0.0
