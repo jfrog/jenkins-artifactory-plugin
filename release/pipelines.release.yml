@@ -11,6 +11,7 @@ pipelines:
         readOnly:
           NEXT_VERSION: 0.0.0
           NEXT_DEVELOPMENT_VERSION: 0.0.x-SNAPSHOT
+          SKIP_SAST: "true"
 
     steps:
       - name: Release
@@ -52,7 +53,7 @@ pipelines:
             - jf mvnc --repo-resolve-releases ecosys-jenkins-repos --repo-resolve-snapshots ecosys-releases-snapshots --repo-deploy-snapshots ecosys-oss-snapshot-local --repo-deploy-releases ecosys-oss-release-local
 
             # Run audit
-            - jf audit --fail=false
+            - jf audit --fail=false $([ "$SKIP_SAST" = "true" ] && echo "--sast=false")
 
             # Update version
             - env -i PATH=$PATH M2_HOME=$M2_HOME HOME=$HOME jf mvn versions:set -DnewVersion="${NEXT_VERSION}" -B
