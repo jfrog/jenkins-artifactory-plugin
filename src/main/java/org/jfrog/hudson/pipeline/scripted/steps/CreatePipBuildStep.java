@@ -12,7 +12,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 /**
  * Created by Bar Belity on 12/07/2020.
  */
-@Deprecated
 public class CreatePipBuildStep extends AbstractStepImpl {
 
     @DataBoundConstructor

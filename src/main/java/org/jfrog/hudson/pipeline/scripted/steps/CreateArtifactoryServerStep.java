@@ -11,7 +11,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 /**
  * Created by romang on 4/21/16.
  */
-@Deprecated
 public class CreateArtifactoryServerStep extends AbstractStepImpl {
     private String url;
     private String username;

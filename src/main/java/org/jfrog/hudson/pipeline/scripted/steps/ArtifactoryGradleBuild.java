@@ -17,7 +17,6 @@ import java.io.IOException;
 /**
  * Created by Tamirh on 04/08/2016.
  */
-@Deprecated
 public class ArtifactoryGradleBuild extends AbstractStepImpl {
     static final String STEP_NAME = "ArtifactoryGradleBuild";
     private GradleBuild gradleBuild;

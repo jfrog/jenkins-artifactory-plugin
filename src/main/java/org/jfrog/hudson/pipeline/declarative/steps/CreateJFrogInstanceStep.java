@@ -22,7 +22,6 @@ import static org.apache.commons.lang3.StringUtils.isAllBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @SuppressWarnings("unused")
-@Deprecated
 public class CreateJFrogInstanceStep extends AbstractStepImpl {
     public static final String STEP_NAME = "jfrogInstance";
     private final String id;

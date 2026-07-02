@@ -16,7 +16,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
-@Deprecated
 public class CreateDockerBuildStep extends AbstractStepImpl {
     static final String STEP_NAME = "createDockerBuildStep";
     private final ArtifactoryServer server;

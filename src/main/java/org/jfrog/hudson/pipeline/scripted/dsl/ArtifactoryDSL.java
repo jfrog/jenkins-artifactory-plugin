@@ -9,10 +9,7 @@ import javax.annotation.Nonnull;
 
 /**
  * Created by Tamirh on 17/05/2016.
- *
- * @deprecated The Jenkins Artifactory Plugin
  */
-@Deprecated
 @Extension
 public class ArtifactoryDSL extends GlobalVariable {
     @Nonnull

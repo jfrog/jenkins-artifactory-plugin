@@ -61,9 +61,7 @@ import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
 
 /**
  * @author Yossi Shaul
- * @deprecated The Jenkins Artifactory Plugin is deprecated.
  */
-@Deprecated
 public class ArtifactoryBuilder extends GlobalConfiguration {
 
     /**

@@ -50,9 +50,7 @@ import static org.jfrog.hudson.util.ProxyUtils.createProxyConfiguration;
  * Represents an instance of jenkins artifactory configuration page.
  *
  * @author Yossi Shaul
- * @deprecated The Jenkins Artifactory Plugin is deprecated.
  */
-@Deprecated
 public class ArtifactoryServer implements Serializable {
     private static final long serialVersionUID = 1L;
 

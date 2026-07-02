@@ -22,7 +22,6 @@ import java.io.IOException;
 /**
  * @author yahavi
  **/
-@Deprecated
 public class CreateDockerBuild extends AbstractStepImpl {
     static final String STEP_NAME = "rtCreateDockerBuild";
     private final String sourceRepo;

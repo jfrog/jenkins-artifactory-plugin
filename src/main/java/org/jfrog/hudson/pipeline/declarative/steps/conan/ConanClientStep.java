@@ -19,7 +19,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 
-@Deprecated
 public class ConanClientStep extends AbstractStepImpl {
     static final String STEP_NAME = "rtConanClient";
     private final BuildDataFile buildDataFile;

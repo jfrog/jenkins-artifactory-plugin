@@ -20,7 +20,6 @@ import org.kohsuke.stapler.DataBoundSetter;
 
 import java.io.IOException;
 
-@Deprecated
 abstract public class NugetRunStepBase extends AbstractStepImpl {
     protected NugetBuild nugetBuild;
     private String customBuildNumber;

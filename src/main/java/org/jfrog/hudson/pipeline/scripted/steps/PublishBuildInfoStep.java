@@ -12,7 +12,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 
-@Deprecated
 public class PublishBuildInfoStep extends AbstractStepImpl {
     static final String STEP_NAME = "publishBuildInfo";
     private BuildInfo buildInfo;

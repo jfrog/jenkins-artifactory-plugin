@@ -17,7 +17,6 @@ import java.io.IOException;
 /**
  * Created by Tamirh on 04/08/2016.
  */
-@Deprecated
 public class ArtifactoryMavenBuild extends AbstractStepImpl {
     static final String STEP_NAME = "artifactoryMavenBuild";
     private MavenBuild mavenBuild;

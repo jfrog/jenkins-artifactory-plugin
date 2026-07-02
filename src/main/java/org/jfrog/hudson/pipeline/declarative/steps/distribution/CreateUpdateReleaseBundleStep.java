@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 /**
  * @author yahavi
  **/
-@Deprecated
 public abstract class CreateUpdateReleaseBundleStep extends AbstractStepImpl {
     final String serverId;
     final String version;

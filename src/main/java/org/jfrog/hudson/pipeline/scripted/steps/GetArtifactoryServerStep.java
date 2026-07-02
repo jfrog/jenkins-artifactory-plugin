@@ -16,7 +16,6 @@ import java.io.IOException;
 /**
  * Created by romang on 4/21/16.
  */
-@Deprecated
 public class GetArtifactoryServerStep extends AbstractStepImpl {
     static final String STEP_NAME = "getArtifactoryServer";
     private final String artifactoryServerID;
