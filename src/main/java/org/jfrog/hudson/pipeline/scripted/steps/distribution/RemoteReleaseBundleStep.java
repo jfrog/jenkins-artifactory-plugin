@@ -5,7 +5,6 @@ import org.jfrog.hudson.pipeline.common.types.DistributionServer;
 
 import java.util.List;
 
-@Deprecated
 public abstract class RemoteReleaseBundleStep extends AbstractStepImpl {
     final DistributionServer server;
     final List<String> countryCodes;

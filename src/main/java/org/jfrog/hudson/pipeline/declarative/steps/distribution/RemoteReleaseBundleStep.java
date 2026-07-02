@@ -7,7 +7,6 @@ import java.util.List;
 /**
  * @author yahavi
  **/
-@Deprecated
 public abstract class RemoteReleaseBundleStep extends AbstractStepImpl {
     final String serverId;
     final String version;

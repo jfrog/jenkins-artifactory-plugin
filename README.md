@@ -1,12 +1,3 @@
-> # ⚠️ Jenkins Artifactory Plugin is deprecated
->
-> The Jenkins Artifactory Plugin is no longer the recommended way to integrate
-> Jenkins with the JFrog Platform. New functionality is going only into the
-> **[JFrog Plugin](https://plugins.jenkins.io/jfrog/)**, which wraps the
-> [JFrog CLI](https://jfrog.com/getcli/).
->
-> **This deprecation does not impact already installed versions** — existing
-> installations will continue to work as before.
 [![](readme_image.png)](#readme)
 
 <div align="center">

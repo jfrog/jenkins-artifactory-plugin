@@ -32,7 +32,6 @@ import java.io.IOException;
  * @author yahavi
  */
 @SuppressWarnings("unused")
-@Deprecated
 public class NpmPublishStep extends AbstractStepImpl {
     static final String STEP_NAME = "rtNpmPublish";
 

@@ -20,7 +20,6 @@ import static org.jfrog.hudson.pipeline.declarative.utils.DeclarativePipelineUti
  *
  * @author yahavi
  */
-@Deprecated
 public class DeployerResolverBase extends AbstractStepImpl {
 
     protected BuildDataFile buildDataFile;

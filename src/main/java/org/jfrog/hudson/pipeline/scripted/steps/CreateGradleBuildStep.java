@@ -6,7 +6,6 @@ import org.jenkinsci.plugins.workflow.steps.*;
 import org.jfrog.hudson.pipeline.common.types.builds.GradleBuild;
 import org.kohsuke.stapler.DataBoundConstructor;
 
-@Deprecated
 public class CreateGradleBuildStep extends AbstractStepImpl {
 
     @DataBoundConstructor

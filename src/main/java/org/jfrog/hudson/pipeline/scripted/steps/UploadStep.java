@@ -13,7 +13,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 
-@Deprecated
 public class UploadStep extends AbstractStepImpl {
     static final String STEP_NAME = "artifactoryUpload";
     private BuildInfo buildInfo;

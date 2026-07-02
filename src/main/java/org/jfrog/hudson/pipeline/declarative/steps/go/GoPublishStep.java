@@ -28,7 +28,6 @@ import java.io.IOException;
  * Run go-publish task.
  */
 @SuppressWarnings("unused")
-@Deprecated
 public class GoPublishStep extends AbstractStepImpl {
     static final String STEP_NAME = "rtGoPublish";
     private final GoBuild goBuild;

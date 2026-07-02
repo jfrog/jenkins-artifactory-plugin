@@ -15,7 +15,6 @@ import org.kohsuke.stapler.DataBoundConstructor;
 import javax.annotation.Nonnull;
 import java.io.IOException;
 
-@Deprecated
 public class GetJFrogPlatformInstanceStep extends AbstractStepImpl {
     static final String STEP_NAME = "getJFrogPlatformInstance";
     private final String instanceId;

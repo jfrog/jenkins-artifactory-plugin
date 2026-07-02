@@ -3,7 +3,6 @@ package org.jfrog.hudson.pipeline.scripted.steps.distribution;
 import org.jenkinsci.plugins.workflow.steps.AbstractStepImpl;
 import org.jfrog.hudson.pipeline.common.types.DistributionServer;
 
-@Deprecated
 public abstract class CreateUpdateReleaseBundleStep extends AbstractStepImpl {
     final DistributionServer server;
     final String releaseNotesSyntax;

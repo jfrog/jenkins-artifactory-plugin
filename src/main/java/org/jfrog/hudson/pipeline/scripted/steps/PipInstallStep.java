@@ -18,7 +18,6 @@ import java.io.IOException;
 /**
  * Created by Bar Belity on 07/07/2020.
  */
-@Deprecated
 public class PipInstallStep extends AbstractStepImpl {
     static final String STEP_NAME = "artifactoryPipRun";
     private BuildInfo buildInfo;

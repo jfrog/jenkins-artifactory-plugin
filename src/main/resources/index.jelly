@@ -1,16 +1,8 @@
 <!--
   This view is used to render the plugin list page.
 
-  Since we don't really have anything dynamic here, let's just use static HTML.
+  Since we don't really have anything dynamic here, let's just use static HTML. 
 -->
 <div>
-    <div style="padding:10px;margin-bottom:10px;border:1px solid #c00;background:#fff5f5;color:#900;">
-        <strong>This plugin is deprecated.</strong>
-        It is no longer the recommended way to integrate Jenkins with the JFrog Platform.
-        Please install the <a href="https://plugins.jenkins.io/jfrog/">JFrog plugin</a>,
-        which wraps the JFrog CLI and receives all new features.
-        Existing installations of this plugin continue to work.
-        See the <a href="https://docs.jfrog-applications.jfrog.io/ci-and-sdks/ci-integrations/jenkins-jfrog-plugin">migration guide</a>.
-    </div>
     This plugin allows your build jobs to deploy artifacts and resolve dependencies to and from Artifactory, and then have them linked to the build job that created them. The plugin includes a vast collection of features, including a rich pipeline API library and release management for Maven and Gradle builds with Staging and Promotion.
 </div>

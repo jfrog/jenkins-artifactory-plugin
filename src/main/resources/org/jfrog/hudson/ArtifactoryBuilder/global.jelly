@@ -6,18 +6,6 @@
     <st:adjunct includes="lib.jfrog.repos.credentials"/>
     <f:section title="JFrog">
 
-        <f:entry>
-            <div style="padding:10px;border:1px solid #c00;background:#fff5f5;color:#900;">
-                <strong>The Jenkins Artifactory Plugin is deprecated.</strong>
-                Please migrate to the
-                <a href="https://plugins.jenkins.io/jfrog/" target="_blank">JFrog plugin</a>,
-                which wraps the JFrog CLI and receives all new features.
-                Existing pipelines continue to work.
-                See the
-                <a href="https://docs.jfrog-applications.jfrog.io/ci-and-sdks/ci-integrations/jenkins-jfrog-plugin" target="_blank">migration guide</a>.
-            </div>
-        </f:entry>
-
         <f:entry
                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-useCredentialsPlugin.html">
             <f:checkbox id="useCredentialsPlugin"
