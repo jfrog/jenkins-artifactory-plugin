@@ -24,6 +24,7 @@ import hudson.Util;
 import hudson.matrix.MatrixConfiguration;
 import hudson.matrix.MatrixProject;
 import hudson.model.*;
+import static hudson.model.Descriptor.FormException;
 import hudson.tasks.BuildWrapper;
 import jenkins.model.Jenkins;
 import net.sf.json.JSONObject;
@@ -653,7 +654,11 @@ public abstract class ReleaseAction<P extends AbstractProject & BuildableItem,
 
     public StandardCredentials getGitCredentials() {
         if (overrideCredentials) {
-            return new UsernamePasswordCredentialsImpl(null, null, "release staging Git credentials", username, password);
+            try {
+                return new UsernamePasswordCredentialsImpl(null, null, "release staging Git credentials", username, password);
+            } catch(FormException e) {
+                return null;
+            }
         }
         return null;
     }

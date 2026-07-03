@@ -18,6 +18,7 @@ import org.jfrog.build.client.DeployableArtifactDetail;
 import org.jfrog.build.extractor.builder.BuildInfoBuilder;
 import org.jfrog.build.extractor.builder.ModuleBuilder;
 import org.jfrog.build.extractor.ci.*;
+import org.jfrog.build.extractor.ci.Module;
 import org.jfrog.build.extractor.clientConfiguration.IncludeExcludePatterns;
 import org.jfrog.build.extractor.clientConfiguration.PatternMatcher;
 import org.jfrog.build.extractor.clientConfiguration.client.artifactory.ArtifactoryManager;

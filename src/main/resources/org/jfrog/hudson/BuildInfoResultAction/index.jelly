@@ -1,3 +1,4 @@
+<?jelly escape-by-default='true'?>
 <!-- displays a form to choose the next release and development version and re-schedules a build -->
 <!--suppress XmlUnusedNamespaceDeclaration -->
 <?jelly escape-by-default='true'?>
