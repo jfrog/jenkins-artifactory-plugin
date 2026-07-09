@@ -1,6 +1,7 @@
 package org.jfrog.hudson;
 
 import hudson.model.Item;
+import hudson.model.Run;
 import hudson.util.Secret;
 import hudson.util.XStream2;
 import org.apache.commons.lang3.StringUtils;
@@ -91,6 +92,16 @@ public class CredentialsConfig implements Serializable {
     private String provideUsername(Item item) {
         return isUsingCredentialsPlugin() ? PluginsUtils.usernamePasswordCredentialsLookup(credentialsId, item).getUsername() : Secret.toString(username);
     }
+
+    /**
+     * Not like getUsername this will return the username of the current Credentials mode of the system (legacy/credentials plugin) in the context of a Run
+     *
+     * @return the username that should be applied in this configuration
+     */
+    private String provideUsername(Run run) {
+        return isUsingCredentialsPlugin() ? PluginsUtils.usernamePasswordCredentialsLookup(credentialsId, run).getUsername() : Secret.toString(username);
+    }
+
     /**
      * Not like getPassword this will return the password of the current Credentials mode of the system (legacy/credentials plugin)
      *
@@ -100,9 +111,28 @@ public class CredentialsConfig implements Serializable {
         return isUsingCredentialsPlugin() ? PluginsUtils.usernamePasswordCredentialsLookup(credentialsId, item).getPassword() : Secret.toString(password);
     }
 
-    public String provideAccessToken(Item item) {
+    /**
+     * Not like getPassword this will return the password of the current Credentials mode of the system (legacy/credentials plugin) in the context of a Run
+     *
+     * @return the password that should be applied in this configuration
+     */
+    private String providePassword(Run run) {
+        return isUsingCredentialsPlugin() ? PluginsUtils.usernamePasswordCredentialsLookup(credentialsId, run).getPassword() : Secret.toString(password);
+    }
+
+    private String provideAccessToken(Item item) {
         if (isUsingCredentialsPlugin()) {
             StringCredentials accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(credentialsId, item);
+            if (accessTokenCredentials != null) {
+                return accessTokenCredentials.getSecret().getPlainText();
+            }
+        }
+        return StringUtils.EMPTY;
+    }
+
+    private String provideAccessToken(Run run) {
+        if (isUsingCredentialsPlugin()) {
+            StringCredentials accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(credentialsId, run);
             if (accessTokenCredentials != null) {
                 return accessTokenCredentials.getSecret().getPlainText();
             }
@@ -117,6 +147,15 @@ public class CredentialsConfig implements Serializable {
         }
 
         return new Credentials(provideUsername(item), providePassword(item));
+    }
+
+    public Credentials provideCredentials(Run run) {
+        String accessToken = provideAccessToken(run);
+        if (StringUtils.isNotEmpty(accessToken)) {
+            return new Credentials(accessToken);
+        }
+
+        return new Credentials(provideUsername(run), providePassword(run));
     }
 
     // NOTE: These getters are not part of the API, but used by Jenkins Jelly for displaying values on user interface

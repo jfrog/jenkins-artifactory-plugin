@@ -29,7 +29,7 @@ public class ReleaseBundleUpdateExecutor implements Executor {
     public ReleaseBundleUpdateExecutor(DistributionServer server, String name, String version, String spec, String storingRepo,
                                        boolean signImmediately, boolean dryRun, String gpgPassphrase, String releaseNotesPath,
                                        String releaseNotesSyntax, String description, TaskListener listener, Run<?, ?> build, FilePath ws, EnvVars env) throws IOException {
-        this.distributionManagerBuilder = server.createDistributionManagerBuilder(new JenkinsBuildInfoLog(listener), build.getParent());
+        this.distributionManagerBuilder = server.createDistributionManagerBuilder(new JenkinsBuildInfoLog(listener), build);
         this.request = createRequest(Util.replaceMacro(spec, env), description, storingRepo, signImmediately, dryRun, releaseNotesPath, releaseNotesSyntax);
         this.ws = ws;
         this.gpgPassphrase = gpgPassphrase;

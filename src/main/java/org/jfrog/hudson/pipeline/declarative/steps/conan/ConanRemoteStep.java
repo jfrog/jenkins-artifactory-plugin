@@ -90,8 +90,8 @@ public class ConanRemoteStep extends AbstractStepImpl {
             org.jfrog.hudson.ArtifactoryServer artifactoryServer = Utils.prepareArtifactoryServer(null, server);
             ArtifactoryConfigurator configurator = new ArtifactoryConfigurator(artifactoryServer);
             CredentialsConfig deployerConfig = CredentialManager.getPreferredDeployer(configurator, artifactoryServer);
-            String username = deployerConfig.provideCredentials(build.getParent()).getUsername();
-            String password = deployerConfig.provideCredentials(build.getParent()).getPassword();
+            String username = deployerConfig.provideCredentials(build).getUsername();
+            String password = deployerConfig.provideCredentials(build).getPassword();
             conanExecutor.execUserAdd(username, password, step.getName());
             return null;
         }

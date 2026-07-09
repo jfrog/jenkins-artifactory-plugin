@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.common.types;
 
 import hudson.model.Item;
+import hudson.model.Run;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.build.api.util.Log;
@@ -78,13 +79,13 @@ public class DistributionServer implements Serializable {
         this.usesCredentialsId = true;
     }
 
-    public DistributionServer(org.jfrog.hudson.JFrogPlatformInstance jfrogPlatformInstance, Item parent) {
+    public DistributionServer(org.jfrog.hudson.JFrogPlatformInstance jfrogPlatformInstance, Run run) {
         id = jfrogPlatformInstance.getId();
         url = jfrogPlatformInstance.getDistributionUrl();
         if (PluginsUtils.isCredentialsPluginEnabled()) {
             credentialsId = jfrogPlatformInstance.getDeployerCredentialsConfig().getCredentialsId();
         } else {
-            Credentials serverCredentials = jfrogPlatformInstance.getDeployerCredentialsConfig().provideCredentials(parent);
+            Credentials serverCredentials = jfrogPlatformInstance.getDeployerCredentialsConfig().provideCredentials(run);
             username = serverCredentials.getUsername();
             password = serverCredentials.getPassword();
         }
@@ -141,8 +142,8 @@ public class DistributionServer implements Serializable {
         return credentialsConfig;
     }
 
-    public DistributionManagerBuilder createDistributionManagerBuilder(Log log, Item parent) {
-        Credentials credentials = createCredentialsConfig().provideCredentials(parent);
+    public DistributionManagerBuilder createDistributionManagerBuilder(Log log, Run run) {
+        Credentials credentials = createCredentialsConfig().provideCredentials(run);
         DistributionManagerBuilder builder = new DistributionManagerBuilder()
                 .setServerUrl(url)
                 .setUsername(credentials.getUsername())

@@ -32,7 +32,7 @@ public class ReleaseBundleDeleteExecutor implements Executor {
     public ReleaseBundleDeleteExecutor(DistributionServer server, String name, String version, boolean dryRun, boolean sync,
                                        boolean deleteFromDist, String distRules, List<String> countryCodes, String siteName,
                                        String cityName, TaskListener listener, Run<?, ?> build, FilePath ws) throws IOException {
-        this.distributionManagerBuilder = server.createDistributionManagerBuilder(new JenkinsBuildInfoLog(listener), build.getParent());
+        this.distributionManagerBuilder = server.createDistributionManagerBuilder(new JenkinsBuildInfoLog(listener), build);
         this.request = createRequest(distRules, countryCodes, siteName, cityName, dryRun, deleteFromDist);
         this.ws = ws;
         this.name = name;

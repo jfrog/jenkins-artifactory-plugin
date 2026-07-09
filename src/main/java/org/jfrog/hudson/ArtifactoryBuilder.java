@@ -158,12 +158,12 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
             String username = StringUtils.EMPTY;
             String password = StringUtils.EMPTY;
 
-            StringCredentials accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(deployerCredentialsId, null);
+            StringCredentials accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(deployerCredentialsId, (Item) null);
             if (accessTokenCredentials != null) {
                 accessToken = accessTokenCredentials.getSecret().getPlainText();
             } else {
                 if (useCredentialsPlugin) {
-                    Credentials credentials = PluginsUtils.usernamePasswordCredentialsLookup(deployerCredentialsId, null);
+                    Credentials credentials = PluginsUtils.usernamePasswordCredentialsLookup(deployerCredentialsId, (Item) null);
                     username = credentials.getUsername();
                     password = credentials.getPassword();
                 } else {
@@ -236,7 +236,7 @@ public class ArtifactoryBuilder extends GlobalConfiguration {
                 return FormValidation.error("Connection Retries can not be less then 0");
             }
 
-            StringCredentials accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(credentialsId, null);
+            StringCredentials accessTokenCredentials = PluginsUtils.accessTokenCredentialsLookup(credentialsId, (Item) null);
             if (accessTokenCredentials == null) {
                 return FormValidation.error("Please set credentials with access token as 'Secret text'");
             }

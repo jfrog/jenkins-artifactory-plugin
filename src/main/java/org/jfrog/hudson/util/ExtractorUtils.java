@@ -319,7 +319,7 @@ public class ExtractorUtils {
         replaceRepositoryInputForValues(configuration, build, inputDownloadReleaseKey, inputDownloadSnapshotKey, env);
         CredentialsConfig preferredResolver = CredentialManager.getPreferredResolver(context.getResolverOverrider(),
                 context.getServer());
-        Credentials resolverCredentials = preferredResolver.provideCredentials(build.getParent());
+        Credentials resolverCredentials = preferredResolver.provideCredentials(build);
         if (StringUtils.isNotEmpty(resolverCredentials.getAccessToken())) {
             resolverCredentials = resolverCredentials.convertAccessTokenToUsernamePassword();
         }
@@ -428,7 +428,7 @@ public class ExtractorUtils {
         ArtifactoryServer artifactoryServer = context.getArtifactoryServer();
         if (artifactoryServer != null) {
             CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(context.getDeployerOverrider(), artifactoryServer);
-            Credentials deployerCredentials = preferredDeployer.provideCredentials(build.getParent());
+            Credentials deployerCredentials = preferredDeployer.provideCredentials(build);
             if (StringUtils.isNotEmpty(deployerCredentials.getAccessToken())) {
                 deployerCredentials = deployerCredentials.convertAccessTokenToUsernamePassword();
             }

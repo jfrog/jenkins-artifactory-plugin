@@ -39,7 +39,7 @@ public class XrayExecutor implements Executor {
     @Override
     public void execute() throws Exception {
         Log log = new JenkinsBuildInfoLog(listener);
-        Credentials credentials = server.createCredentialsConfig().provideCredentials(build.getParent());
+        Credentials credentials = server.createCredentialsConfig().provideCredentials(build);
         ArtifactoryManager artifactoryManager = new ArtifactoryManager(server.getUrl(), credentials.getUsername(),
                 credentials.getPassword(), credentials.getAccessToken(), log);
         ProxyConfiguration proxyConfiguration = Utils.getProxyConfiguration(Utils.prepareArtifactoryServer(null, server));

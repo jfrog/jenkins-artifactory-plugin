@@ -375,7 +375,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
         ArtifactoryServer resolverServer = getArtifactoryResolverServer();
         CredentialsConfig preferredResolver = CredentialManager.getPreferredResolver(ArtifactoryGenericConfigurator.this,
                 resolverServer);
-        Credentials resolverCredentials = preferredResolver.provideCredentials(build.getProject());
+        Credentials resolverCredentials = preferredResolver.provideCredentials(build);
         ProxyConfiguration proxyConfiguration = null;
         if (Jenkins.get().proxy != null && !resolverServer.isBypassProxy()) {
             proxyConfiguration = createProxyConfiguration();
@@ -409,7 +409,7 @@ public class ArtifactoryGenericConfigurator extends BuildWrapper implements Depl
                 ArtifactoryServer server = getArtifactoryServer();
                 CredentialsConfig preferredDeployer = CredentialManager.getPreferredDeployer(ArtifactoryGenericConfigurator.this, server);
 
-                try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(preferredDeployer.provideCredentials(build.getProject()), createProxyConfiguration())) {
+                try (ArtifactoryManager artifactoryManager = server.createArtifactoryManager(preferredDeployer.provideCredentials(build), createProxyConfiguration())) {
                     server.setLog(listener, artifactoryManager);
                     boolean isFiltered = false;
                     if (isMultiConfProject(build)) {

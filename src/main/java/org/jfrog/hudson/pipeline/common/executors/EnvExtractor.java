@@ -85,7 +85,7 @@ public abstract class EnvExtractor implements Executor {
             CredentialsConfig resolverCredentials = CredentialManager.getPreferredResolver(resolver,
                     resolver.getArtifactoryServer());
             resolverContext = new ResolverContext(resolver.getArtifactoryServer(), resolver.getResolverDetails(),
-                    resolverCredentials.provideCredentials(build.getParent()), resolver);
+                    resolverCredentials.provideCredentials(build), resolver);
         }
 
         return ExtractorUtils.getArtifactoryClientConfiguration(

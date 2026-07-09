@@ -1,6 +1,7 @@
 package org.jfrog.hudson.pipeline.common.types;
 
 import hudson.model.Item;
+import hudson.model.Run;
 import org.jenkinsci.plugins.scriptsecurity.sandbox.whitelists.Whitelisted;
 import org.jenkinsci.plugins.workflow.cps.CpsScript;
 import org.jfrog.hudson.CredentialsConfig;
@@ -72,14 +73,14 @@ public class ArtifactoryServer implements Serializable {
         this.usesCredentialsId = true;
     }
 
-    public ArtifactoryServer(org.jfrog.hudson.ArtifactoryServer jenkinsArtifactoryServer, Item parent) {
+    public ArtifactoryServer(org.jfrog.hudson.ArtifactoryServer jenkinsArtifactoryServer, Run run) {
         serverName = jenkinsArtifactoryServer.getServerId();
         url = jenkinsArtifactoryServer.getArtifactoryUrl();
         this.deploymentThreads = jenkinsArtifactoryServer.getDeploymentThreads();
         if (PluginsUtils.isCredentialsPluginEnabled()) {
             credentialsId = jenkinsArtifactoryServer.getResolvingCredentialsConfig().getCredentialsId();
         } else {
-            Credentials serverCredentials = jenkinsArtifactoryServer.getResolvingCredentialsConfig().provideCredentials(parent);
+            Credentials serverCredentials = jenkinsArtifactoryServer.getResolvingCredentialsConfig().provideCredentials(run);
             username = serverCredentials.getUsername();
             password = serverCredentials.getPassword();
         }
