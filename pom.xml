@@ -41,8 +41,12 @@
         <!--Skip integration tests unless explicitly requested with -DskipITs=false-->
         <skipITs>true</skipITs>
 
-        <buildinfo.version>2.41.21</buildinfo.version>
+        <buildinfo.version>2.43.6</buildinfo.version>
         <buildinfo.gradle.version>5.2.3</buildinfo.gradle.version>
+        <bouncycastle.version>1.78</bouncycastle.version>
+        <commons-compress.version>1.26.0</commons-compress.version>
+        <commons-io.version>2.18.0</commons-io.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
     </properties>
 
     <repositories>
@@ -605,18 +609,33 @@
         <!--/Tests-->
     </dependencies>
 
-    <!-- TODO: Remove this section when these transitive dependencies are upgraded in our direct dependency org.mock-server.mockserver-netty -->
+    <!-- Security: Override vulnerable transitive dependencies -->
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcprov-jdk18on</artifactId>
-                <version>1.77</version>
+                <version>${bouncycastle.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.bouncycastle</groupId>
                 <artifactId>bcpkix-jdk18on</artifactId>
-                <version>1.77</version>
+                <version>${bouncycastle.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons-compress.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
