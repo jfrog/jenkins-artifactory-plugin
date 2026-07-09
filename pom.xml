@@ -187,7 +187,7 @@
             <!-- The git plugin is set as optional due to HAP-771 -->
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>git</artifactId>
-            <version>3.3.2</version>
+            <version>4.11.5</version>
             <optional>true</optional>
             <exclusions>
                 <exclusion>
