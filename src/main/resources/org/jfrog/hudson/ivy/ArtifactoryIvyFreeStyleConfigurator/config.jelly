@@ -17,10 +17,7 @@
                                         repositoryConf="${instance.deployerDetails.deployReleaseRepository}"
                                         repositories="${instance.releaseRepositoryList}"/>
 
-                        <script>
-                            var ivyFreeDeployBind =
-                            <st:bind value="${descriptor}"/>
-                        </script>
+                        <st:bind value="${descriptor}" var="ivyFreeDeployBind"/>
                         <r:repos bind="ivyFreeDeployBind"
                                  jsFunction="artifactoryIvyFreeStyleConfigurator"
                                  repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"

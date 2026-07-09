@@ -203,3 +203,19 @@ function createInputElement(paramName, defaultValue) {
     InputContainer.appendChild(input);
     return InputContainer;
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    const promoteDataHolder = document.querySelector(".artifactory-promote-build-data");
+    const { buildsData } = promoteDataHolder.dataset;
+    const promoteInfoListSize = parseInt(promoteDataHolder.dataset.promoteInfoListSize);
+
+    var selectPlugin = document.getElementById("pluginList");
+    selectPlugin.onchange = onPluginChange;
+    if (promoteInfoListSize >= 1) {
+        loadBuild(buildsData); // Auto-load
+    }
+
+    document.querySelector("select#buildId").addEventListener("change", () => {
+        loadBuild(buildsData);
+    });
+});

@@ -95,10 +95,7 @@
                                                         repositories="${instance.releaseRepositoryList}"
                                                         helpUrl="/plugin/artifactory/help/common/help-deployRepository.html"/>
 
-                                        <script>
-                                            var genericDeployBind =
-                                            <st:bind value="${descriptor}"/>
-                                        </script>
+                                        <st:bind value="${descriptor}" var="genericDeployBind"/>
                                         <r:repos bind="genericDeployBind"
                                                  jsFunction="artifactoryGenericConfigurator"
                                                  repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"

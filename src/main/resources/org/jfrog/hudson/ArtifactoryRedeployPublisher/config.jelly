@@ -24,8 +24,8 @@
 
                     <f:entry title="${%Custom staging configuration}"
                              help="/plugin/artifactory/help/release/common/help-stagingPlugin.html">
-                        <select class="setting-input" name="userPluginKey" id="customStagingConfiguration-${s.artifactoryUrl}-${uniqueId}"
-                                onchange="setStagingParamsSelectedValue(this)">
+                        <select class="setting-input artifactory-staging-params-select" name="userPluginKey"
+                                id="customStagingConfiguration-${s.artifactoryUrl}-${uniqueId}">
                             <j:choose>
                                 <j:when test="${s.instanceId==instance.artifactoryName}">
                                     <j:choose>
@@ -56,10 +56,7 @@
                             </j:choose>
                         </div>
                     </f:entry>
-                    <script>
-                        var bindToDescriptor =
-                        <st:bind value="${descriptor}"/>
-                    </script>
+                    <st:bind value="${descriptor}" var="bindToDescriptor"/>
                     <r:repos bind="bindToDescriptor"
                              jsFunction="artifactoryRedeployPublisher"
                              repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"
@@ -263,18 +260,5 @@
     <f:block>
         <hr/>
     </f:block>
-    <script>
-        function updateViewWithCredentials() {
-            try {
-                let credentialsPluginFlag = JSON.parse(document.getElementById('useCredentialsPluginoverridingDeployerCredentials').value);
-                let legacyCredentials = document.getElementById('legacyoverridingDeployerCredentials');
-                let credentialsPlugin = document.getElementById('overridingDeployerCredentials-${uniqueId}');
-                legacyCredentials.style.display = credentialsPluginFlag ? 'none' : '';
-                credentialsPlugin.style.display = credentialsPluginFlag ? '' : 'none';
-            } catch (exception) {
-                setTimeout(updateViewWithCredentials, 0);
-            }
-        }
-        updateViewWithCredentials();
-    </script>
+    <st:adjunct includes="org.jfrog.hudson.ArtifactoryRedeployPublisher.redeploy-publisher"/>
 </j:jelly>

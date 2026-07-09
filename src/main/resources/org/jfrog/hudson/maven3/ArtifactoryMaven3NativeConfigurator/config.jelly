@@ -18,10 +18,7 @@
                                     field="resolveSnapshotRepository"
                                     repositories="${instance.virtualRepositoryList}"
                                     repositoryConf="${instance.resolverDetails.resolveSnapshotRepository}"/>
-                    <script>
-                        var maven3NativeResolveBind =
-                        <st:bind value="${descriptor}"/>
-                    </script>
+                    <st:bind value="${descriptor}" var="maven3NativeResolveBind"/>
                     <r:repos bind="maven3NativeResolveBind"
                              jsFunction="artifactoryMaven3NativeConfigurator"
                              repoUrl="artifactoryUrlResolver${s.artifactoryUrl}"

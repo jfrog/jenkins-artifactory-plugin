@@ -58,9 +58,8 @@
                         </j:forEach>
                     </select>
                     <div style="float:right; padding-top: 0.5em">
-                    <input
-                            class="yui-button validate-button" type="button" id="btn_${id}"
-                            onclick="toggleTxtAndSelect('${id}', 'mode_${id}')"/>
+                    <button class="jenkins-button validate-button artifactory-toggle-txt-and-select" type="button" id="btn_${id}"
+                            data-txt-id="${id}"/>
                     </div>
                 </j:when>
                 <j:otherwise>
@@ -71,25 +70,12 @@
                             id="select_${id}" name="keyFromSelect">
                     </select>
                     <div style="float:right; padding-top: 0.5em" >
-                    <input
-                            class="yui-button validate-button" type="button" id="btn_${id}"
-                            value="Different Value"
-                            onclick="toggleTxtAndSelect('${id}', 'mode_${id}')"/>
+                    <button class="jenkins-button validate-button artifactory-toggle-txt-and-select" type="button" id="btn_${id}"
+                            data-txt-id="${id}">Different Value</button>
                     </div>
                 </j:otherwise>
             </j:choose>
         </f:entry>
-        <j:choose>
-            <j:when test="${repositoryConf.dynamicMode}">
-                <script>
-                    initTextAndSelectOnLoad('${id}', '', 'none');
-                </script>
-            </j:when>
-            <j:otherwise>
-                <script>
-                    initTextAndSelectOnLoad('${id}', 'none', '');
-                </script>
-            </j:otherwise>
-        </j:choose>
+        <span class="artifactory-text-select-init-data-holder" data-dynamic-mode="${repositoryConf.dynamicMode}" data-label-id="${id}"/>
     </f:section>
 </j:jelly>

@@ -9,7 +9,6 @@
         <f:entry
                 help="/plugin/artifactory/help/ArtifactoryBuilder/help-useCredentialsPlugin.html">
             <f:checkbox id="useCredentialsPlugin"
-                        onclick="updateViewForCredentialsMethod(this.checked)"
                         name="useCredentialsPlugin"
                         value="${descriptor.useCredentialsPlugin}"
                         field="useCredentialsPlugin"
@@ -193,7 +192,4 @@
 
     </f:section>
     <st:adjunct includes="lib.jfrog.global.global"/>
-    <script>
-        populateDropDownList()
-    </script>
 </j:jelly>

@@ -60,4 +60,8 @@ document.addEventListener('DOMContentLoaded', function (event) {
     var useCredentialsPluginInput = document.getElementById('useCredentialsPlugin');
     useCredentialsPluginInput.checked = JSON.parse(useCredentialsPluginInput.value);
     updateViewForCredentialsMethod(useCredentialsPluginInput.checked);
+
+    useCredentialsPluginInput.addEventListener('click', (event) => {
+        updateViewForCredentialsMethod(event.target.checked);
+    });
 });

@@ -24,13 +24,9 @@
 
     <f:entry>
         <div style="float:right">
-            <input type="button" value="${%Refresh Repositories}" class="yui-button validate-button"
-                   onclick="repos(this,
-                                '${jsFunction}',
-                                '${uniqueId}',
-                                '${repoUrl}',
-                                '${credentialsDescriber}',
-                                 ${bind})"/>
+            <button type="button" class="jenkins-button validate-button artifactory-refresh-repos-button"
+                    data-js-function="${jsFunction}" data-unique-id="${uniqueId}" data-repo-url="${repoUrl}"
+                    data-credentials-describer="${credentialsDescriber}" data-stapler-proxy-name="${bind}">${%Refresh Repositories}</button>
 
         </div>
         <div style="display:none;">

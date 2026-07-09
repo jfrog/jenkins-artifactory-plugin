@@ -41,10 +41,7 @@
                                         repositories="${instance.snapshotRepositoryList}"
                                         helpUrl="/plugin/artifactory/help/common/help-deploySnapshots.html"/>
 
-                        <script>
-                            var maven3DeployBind =
-                            <st:bind value="${descriptor}"/>;
-                        </script>
+                        <st:bind value="${descriptor}" var="maven3DeployBind"/>;
                         <r:repos bind="maven3DeployBind"
                                  jsFunction="artifactoryMaven3Configurator"
                                  repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"
@@ -95,10 +92,7 @@
                                                     field="resolveSnapshotRepository"
                                                     repositoryConf="${instance.resolverDetails.resolveSnapshotRepository}"
                                                     repositories="${instance.resolveSnapshotRepositoryList}"/>
-                                    <script>
-                                        var maven3ResolveBind =
-                                        <st:bind value="${descriptor}"/>
-                                    </script>
+                                    <st:bind value="${descriptor}" var="maven3ResolveBind"/>
                                     <r:repos bind="maven3ResolveBind"
                                              jsFunction="artifactoryMaven3NativeConfigurator"
                                              repoUrl="artifactoryUrlResolve${s.artifactoryUrl}"

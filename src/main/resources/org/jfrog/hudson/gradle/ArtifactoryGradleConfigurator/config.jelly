@@ -22,9 +22,8 @@
 
                             <f:entry title="${%Custom staging configuration}"
                                      help="/plugin/artifactory/help/release/common/help-stagingPlugin.html">
-                                <select class="setting-input" name="userPluginKey"
-                                        id="gradleCustomStagingConfiguration-${s.artifactoryUrl}-${uniqueId}"
-                                        onchange="setStagingParamsSelectedValue(this)">
+                                <select class="setting-input artifactory-staging-params-select" name="userPluginKey"
+                                        id="gradleCustomStagingConfiguration-${s.artifactoryUrl}-${uniqueId}">
                                     <j:choose>
                                         <j:when test="${s.instanceId==instance.artifactoryName}">
                                             <j:choose>
@@ -52,10 +51,7 @@
                                     </j:choose>
                                 </div>
                             </f:entry>
-                            <script>
-                                var bindToDescriptor =
-                                <st:bind value="${descriptor}"/>
-                            </script>
+                            <st:bind value="${descriptor}" var="bindToDescriptor"/>
                             <r:repos bind="bindToDescriptor"
                                      jsFunction="artifactoryGradleConfigurator"
                                      repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"
@@ -87,10 +83,7 @@
                                             repositories="${instance.resolutionRepositories}"
                                             repositoryConf="${instance.resolverDetails.resolveReleaseRepository}"/>
 
-                            <script>
-                                var bindToDescriptorResolver =
-                                <st:bind value="${descriptor}"/>
-                            </script>
+                            <st:bind value="${descriptor}" var="bindToDescriptorResolver"/>
                             <r:repos bind="bindToDescriptorResolver"
                                      jsFunction="artifactoryGradleConfigurationResolve"
                                      repoUrl="artifactoryUrlResolver${s.artifactoryUrl}"

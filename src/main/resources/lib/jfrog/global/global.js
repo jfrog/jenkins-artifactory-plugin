@@ -55,3 +55,7 @@ function populateDropDownList() {
         }
     }
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+    populateDropDownList();
+});

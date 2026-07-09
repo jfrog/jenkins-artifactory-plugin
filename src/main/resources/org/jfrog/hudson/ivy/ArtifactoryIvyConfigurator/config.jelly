@@ -19,10 +19,7 @@
                                         repositories="${instance.releaseRepositoryList}"
                                         helpUrl="/plugin/artifactory/help/common/help-deployRepository.html"/>
 
-                        <script>
-                            var ivyDeployBind =
-                            <st:bind value="${descriptor}"/>
-                        </script>
+                        <st:bind value="${descriptor}" var="ivyDeployBind"/>
                         <r:repos bind="ivyDeployBind"
                                  jsFunction="artifactoryIvyConfigurator"
                                  repoUrl="artifactoryUrlDeploy${s.artifactoryUrl}"
@@ -167,12 +164,6 @@
                             </f:optionalBlock>
                         </r:blockWrapper>
                     </f:block>
-                    <script>
-                        <!-- update the visual feedback depending on the checkbox state -->
-                        function updateDeps(e) {
-                        includeEnvVars.disabled = !e.checked;
-                        }
-                    </script>
                 </f:optionalBlock>
             </r:blockWrapper>
         </f:block>
