@@ -498,7 +498,7 @@
         <dependency>
             <groupId>org.jenkins-ci.plugins</groupId>
             <artifactId>jenkins-multijob-plugin</artifactId>
-            <version>1.13</version>
+            <version>1.26</version>
             <exclusions>
                 <exclusion>
                     <artifactId>maven-plugin</artifactId>
